@@ -1,19 +1,10 @@
 "use strict";
 
-var rl = (function () {
-    var readline = require('readline');
-    var rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-    return rl;
-})();
-
 var Store = (function () {
     function Store() {
         this.tasks = [];
         this.resp = 0;
-        this.short = 0;
+        this.short = {};
         this.STATUS = [
             "todo",
             "doing",
@@ -31,6 +22,9 @@ var Store = (function () {
             },
             current: function (todo, doing, done) {
                 console.log("현재상태 :  todo:" + todo + "개, doing:" + doing + "개, done:" + done + "개");
+            },
+            short: function (short) {
+                console.log(short);
             }
         };
     }
@@ -63,8 +57,8 @@ var Store = (function () {
         }.bind(this));
         return this;
     }
-    Store.prototype.showShortTask = function (status) {
-        this.messages
+    Store.prototype.showShortTask = function () {
+        this.messages.short(this.short);
         return this;
     }
     Store.prototype.updateTask = function (id, status) {
@@ -85,9 +79,12 @@ var Store = (function () {
                     status: status,
                     runtime: Math.round((new Date() - task.time) / 1000)
                 });
+                if (Object.keys(this.short).length === 0 || this.short.runtime > task.runtime) {
+                    this.short = task;
+                }
             }
             return task;
-        })
+        }.bind(this))
         return this;
     }
     Store.prototype.start = function () {
@@ -104,11 +101,23 @@ var Store = (function () {
                 var id = array[1];
                 var status = this.STATUS.indexOf(array[2]);
                 this.updateTask(id, status).confirmTask();
+            } else if (cmd === "short") {
+                this.showShortTask();
             }
             this.start();
         }.bind(this));
         return this;
     }
+
+    var rl = (function () {
+        var readline = require('readline');
+        var rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+        return rl;
+    })();
+
     return Store;
 })();
 
