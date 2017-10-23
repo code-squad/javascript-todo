@@ -1,3 +1,5 @@
+var Task = require('./task');
+
 var model {
     nextId: 1,
     taskLis: [],
@@ -44,12 +46,7 @@ var model {
         }
     },
     add: function(content) {
-        var newTask = {
-            id: nextId++,
-            status: 'todo',
-            content: content,
-            createdAt: new Date()
-        }
+        var newTask = new Task(content);
 
         taskList.push(newTask);
 
@@ -68,17 +65,14 @@ var model {
             throw `해당하는 task가 이미 ${status}상태입니다.`;
         } else {
             //상태 변경
-            targetTask.status = status;
-
-            //작업 시작/완료시각 저장
-            if (status === 'doing') {
-                targetTask.startAt = new Date();
-            } else if (status === 'done') {
-                targetTask.doneAt = new Date();
-            }
+            targetTask.updateStatus(status);
 
             //3초 후에 결과 출력
-            setTimeout(showCurrentStatus, 3000);
+            if (status === 'done') {
+                setTimeout(showCurrentStatus, 3000);
+            } else {
+                showCurrentStatus();
+            }
         }
     }
 }
