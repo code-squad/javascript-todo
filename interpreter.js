@@ -1,7 +1,7 @@
 var model = require('./model');
+var statusConstant = require('./common').statusConstant;
 
 var interpreter = {
-    statusList: ['todo', 'doing', 'done'];
     commandList: {
         show: {
             validate: function(tokens) {
@@ -9,6 +9,7 @@ var interpreter = {
                 //parameter는 status 값 ('todo' OR 'doing' OR 'done')
 
                 var status = tokens[0];
+                var statusList = statusConstant.getList();
 
                 if (tokens.length !== 1) {
                     return false;
@@ -26,6 +27,8 @@ var interpreter = {
             validate: function(tokens) {
                 //첫 번째 parameter는 정수 (id)
                 //두 번째 parameter는 status 값 ('todo' OR 'doing' OR 'done')
+
+                var statusList = statusConstant.getList();
 
                 if (tokens.length !== 2) {
                     return false;

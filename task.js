@@ -1,3 +1,5 @@
+var statusConstant = require('./common').statusConstant;
+
 var getTimeDiff = (function() {
     var postfixes = ['년', '개월', '주', '일', '시간', '분', '초'];
     var functions = [
@@ -77,7 +79,7 @@ var getTimeDiff = (function() {
 
 function Task(content) {
     this.id = this.getNextId();
-    this.status = 'todo';
+    this.status = statusConstant.TODO;
     this.content = content;
     this.createdAt = new Date();
     this.startAt;
@@ -97,11 +99,11 @@ Task.prototype.updateStatus = function(change) {
     this.status = change;
     //작업 시작/완료시각 저장
     switch (change) {
-        case 'doing':
+        case statusConstant.DOING:
             this.startAt = new Date();
             break;
 
-        case 'done':
+        case statusConstant.DONE:
             this.doneAt = new Date();
 
             this.timeSpent = (this.startAt) ?
