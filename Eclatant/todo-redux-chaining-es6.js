@@ -7,6 +7,10 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
+function log(message) {
+  console.log(message);
+}
+
 function Task(id, things) {
   this.id = id;
   this.things = things;
@@ -33,10 +37,6 @@ function ToDoApp() {
 }
 
 class ToDoApp {
-  log(message) {
-    console.log(message);
-  }
-
   currentState() {
     const {
       state: { todo, doing, done },
