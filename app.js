@@ -3,21 +3,16 @@ var statusConstant = require('./common').statusConstant;
 
 var app = {
     taskList: [],
+    count: {
+        todo: 0,
+        doing: 0,
+        done: 0
+    },
     showCurrentStatus: function () {
-        var counts = {};
-        counts[statusConstant.TODO] = 0;
-        counts[statusConstant.DOING] = 0;
-        counts[statusConstant.DONE] = 0;
-
-        this.taskList.forEach(function(task) {
-            var status = task.status;
-            counts[status]++;
-        });
-
         console.log('현재상태 : ' +
-            statusConstant.TODO + ': ' + counts[statusConstant.TODO] + '개, ' +
-            statusConstant.DOING + ': ' + counts[statusConstant.DOING] + '개, ' +
-            statusConstant.DONE + ': ' + counts[statusConstant.DONE] + '개');
+            statusConstant.TODO + ': ' + this.count.todo + '개, ' +
+            statusConstant.DOING + ': ' + this.count.doing + '개, ' +
+            statusConstant.DONE + ': ' + this.count.done + '개');
     },
     show: function(status) {
         var tasks = this.taskList.filter(function(task) {
@@ -42,6 +37,7 @@ var app = {
         var newTask = new Task(content);
 
         this.taskList.push(newTask);
+        this.count.todo++;
 
         console.log(`id: ${newTask.id},  "${newTask.content}" 항목이 추가되었습니다.`);
         this.showCurrentStatus();
@@ -61,7 +57,10 @@ var app = {
             throw `해당하는 task가 이미 ${status}상태입니다.`;
         } else {
             //상태 변경
+            this.count[targetTask.status]--;
             targetTask.updateStatus(status);
+
+            this.count[status]++;
 
             //3초 후에 결과 출력
             if (status === statusConstant.DONE) {
