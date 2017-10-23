@@ -7,16 +7,13 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-class Task {
-  constructor(id, things) {
-    this.id = id;
-    this.state = admin.state.todo;
-    this.things = things;
-
-    this.started = null;
-    this.ended = null;
-    this.runTime = null;
-  }
+function Task(id, things) {
+  this.id = id;
+  this.things = things;
+  this.state = admin.state.todo;
+  this.started = null;
+  this.ended = null;
+  this.runTime = null;
 }
 
 class ToDoApp {
