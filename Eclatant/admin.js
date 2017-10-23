@@ -14,7 +14,7 @@ module.exports = {
   },
   messages: {
     question: "원하시는 동작을 입력해주십시오.\n",
-    retry: "잘못된 입력입니다. 다시 입력해주십시오.\n",
+    retry: "\n잘못된 입력입니다. 다시 입력해주십시오.\n",
     currentStateMessage: (todoCount, doingCount, doneCount) =>
       `현재 상태 : todo(${todoCount}), doing(${doingCount}), done(${doneCount})\n`,
     quitNotice: "어플리케이션을 종료합니다.",

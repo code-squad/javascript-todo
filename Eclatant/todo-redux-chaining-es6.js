@@ -7,7 +7,43 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
+function Task(id, things) {
+  this.id = id;
+  this.things = things;
+  this.state = admin.state.todo;
+  this.started = null;
+  this.ended = null;
+  this.runTime = null;
+}
+
+function ToDoApp() {
+  this.input = "";
+  this.action = {};
+  this.tasks = [];
+  this.record = null;
+  this.createdId = 0;
+  this.generateId = (() => {
+    let id = -1;
+
+    return () => {
+      id += 1;
+      return id;
+    };
+  })();
+}
+
 const method = {
+  consturctor: ToDoApp,
+
+  generateId: (() => {
+    let id = 0;
+
+    return () => {
+      id += 1;
+      return id;
+    };
+  })(),
+
   log(message) {
     console.log(message);
   },
@@ -54,8 +90,8 @@ const method = {
     const { shortestRecordMessgage, isComplete } = admin.messages;
 
     this.record
-      ? ToDoApp.log(shortestRecordMessgage(this.record))
-      : ToDoApp.log(isComplete);
+      ? this.log(shortestRecordMessgage(this.record))
+      : this.log(isComplete);
   },
 
   actionCreator() {
@@ -120,6 +156,8 @@ const method = {
 
         switch (state) {
           case todo:
+            target.started = null;
+            target.ended = null;
             break;
 
           case doing:
@@ -159,23 +197,23 @@ const method = {
       case add: {
         const { id, things } = tasks[createdId];
 
-        ToDoApp.log(addComplete(id, things));
+        this.log(addComplete(id, things));
 
-        ToDoApp.log(this.currentState());
+        this.log(this.currentState());
 
         break;
       }
 
       case show:
-        ToDoApp.log(this.showTasks(payload.state));
+        this.log(this.showTasks(payload.state));
         break;
 
       case update: {
         const { id, things } = tasks[payload.id];
 
-        ToDoApp.log(updateComplete(id, things));
+        this.log(updateComplete(id, things));
 
-        ToDoApp.log(this.currentState());
+        this.log(this.currentState());
 
         break;
       }
@@ -196,12 +234,12 @@ const method = {
       `${show}\\${standard}(${todo}|${doing}|${done})`
     );
     const updateCase = new RegExp(
-      `${update}\\${standard}\\d+\\${standard}(${doing}|${done})`
+      `${update}\\${standard}\\d+\\${standard}(${todo}|${doing}|${done})`
     );
 
     const isUpdateCaseCorrect =
       updateCase.test(input) &&
-      parseInt(input.split(admin.standard)[1]) < todoApp.tasks.length;
+      parseInt(input.split(admin.standard)[1]) < this.tasks.length;
 
     if (addCase.test(input)) {
       return true;
@@ -225,14 +263,13 @@ const method = {
         console.log(quitNotice);
         rl.close();
       } else if (input === shortestRecord) {
-        todoApp.shortestRecord();
+        this.shortestRecord();
 
         this.getRequest(question);
       } else if (this.validateRequest(input)) {
-        todoApp.input = input;
+        this.input = input;
 
-        todoApp
-          .actionCreator()
+        this.actionCreator()
           .reducer()
           .view();
 
@@ -244,31 +281,7 @@ const method = {
   }
 };
 
-function Task(id, things) {
-  this.id = id;
-  this.things = things;
-  this.state = admin.state.todo;
-  this.started = null;
-  this.ended = null;
-  this.runTime = null;
-}
-
-function ToDoApp() {
-  this.input = "";
-  this.action = {};
-  this.tasks = [];
-  this.record = null;
-  this.createdId = 0;
-  this.generateId = (() => {
-    let id = -1;
-
-    return () => {
-      id += 1;
-      return id;
-    };
-  })();
-}
-
+ToDoApp.prototype = method;
 const todoApp = new ToDoApp();
 
-method.getRequest(admin.messages.question);
+todoApp.getRequest(admin.messages.question);
