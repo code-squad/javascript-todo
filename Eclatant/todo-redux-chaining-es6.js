@@ -7,36 +7,11 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-function log(message) {
-  console.log(message);
-}
+const method = {
+  log(message) {
+    console.log(message);
+  },
 
-function Task(id, things) {
-  this.id = id;
-  this.things = things;
-  this.state = admin.state.todo;
-  this.started = null;
-  this.ended = null;
-  this.runTime = null;
-}
-
-function ToDoApp() {
-  this.input = "";
-  this.action = {};
-  this.tasks = [];
-  this.record = null;
-  this.createdId = 0;
-  this.generateId = (() => {
-    let id = -1;
-
-    return () => {
-      id += 1;
-      return id;
-    };
-  })();
-}
-
-class ToDoApp {
   currentState() {
     const {
       state: { todo, doing, done },
@@ -54,7 +29,7 @@ class ToDoApp {
     });
 
     return currentStateMessage(todoCount, doingCount, doneCount);
-  }
+  },
 
   showTasks(inputState) {
     const { done } = admin.state;
@@ -73,7 +48,7 @@ class ToDoApp {
     }
 
     return arr.join(", ") + "\n";
-  }
+  },
 
   shortestRecord() {
     const { shortestRecordMessgage, isComplete } = admin.messages;
@@ -81,7 +56,7 @@ class ToDoApp {
     this.record
       ? ToDoApp.log(shortestRecordMessgage(this.record))
       : ToDoApp.log(isComplete);
-  }
+  },
 
   actionCreator() {
     const { cmd: { add, show, update }, standard } = admin;
@@ -121,7 +96,7 @@ class ToDoApp {
     }
 
     return this;
-  }
+  },
 
   reducer() {
     const { cmd: { add, show, update }, state: { todo, doing, done } } = admin;
@@ -171,7 +146,7 @@ class ToDoApp {
     }
 
     return this;
-  }
+  },
 
   view() {
     const {
@@ -207,66 +182,93 @@ class ToDoApp {
     }
 
     return this;
+  },
+
+  validateRequest(input) {
+    const {
+      standard,
+      cmd: { add, show, update },
+      state: { todo, doing, done }
+    } = admin;
+
+    const addCase = new RegExp(`${add}\\${standard}.+`);
+    const showCase = new RegExp(
+      `${show}\\${standard}(${todo}|${doing}|${done})`
+    );
+    const updateCase = new RegExp(
+      `${update}\\${standard}\\d+\\${standard}(${doing}|${done})`
+    );
+
+    const isUpdateCaseCorrect =
+      updateCase.test(input) &&
+      parseInt(input.split(admin.standard)[1]) < todoApp.tasks.length;
+
+    if (addCase.test(input)) {
+      return true;
+    } else if (showCase.test(input)) {
+      return true;
+    } else if (isUpdateCaseCorrect) {
+      return true;
+    }
+
+    return false;
+  },
+
+  getRequest(query) {
+    const {
+      cmd: { shortestRecord },
+      messages: { question, retry, quitNotice }
+    } = admin;
+
+    rl.question(query, input => {
+      if (input === admin.cmd.quit) {
+        console.log(quitNotice);
+        rl.close();
+      } else if (input === shortestRecord) {
+        todoApp.shortestRecord();
+
+        this.getRequest(question);
+      } else if (this.validateRequest(input)) {
+        todoApp.input = input;
+
+        todoApp
+          .actionCreator()
+          .reducer()
+          .view();
+
+        this.getRequest(question);
+      } else {
+        this.getRequest(retry);
+      }
+    });
   }
+};
+
+function Task(id, things) {
+  this.id = id;
+  this.things = things;
+  this.state = admin.state.todo;
+  this.started = null;
+  this.ended = null;
+  this.runTime = null;
 }
 
-const validateRequest = input => {
-  const {
-    standard,
-    cmd: { add, show, update },
-    state: { todo, doing, done }
-  } = admin;
+function ToDoApp() {
+  this.input = "";
+  this.action = {};
+  this.tasks = [];
+  this.record = null;
+  this.createdId = 0;
+  this.generateId = (() => {
+    let id = -1;
 
-  const addCase = new RegExp(`${add}\\${standard}.+`);
-  const showCase = new RegExp(`${show}\\${standard}(${todo}|${doing}|${done})`);
-  const updateCase = new RegExp(
-    `${update}\\${standard}\\d+\\${standard}(${doing}|${done})`
-  );
-
-  const isUpdateCaseCorrect =
-    updateCase.test(input) &&
-    parseInt(input.split(admin.standard)[1]) < todoApp.tasks.length;
-
-  if (addCase.test(input)) {
-    return true;
-  } else if (showCase.test(input)) {
-    return true;
-  } else if (isUpdateCaseCorrect) {
-    return true;
-  }
-
-  return false;
-};
+    return () => {
+      id += 1;
+      return id;
+    };
+  })();
+}
 
 const todoApp = new ToDoApp();
 
-const getRequest = query => {
-  const {
-    cmd: { shortestRecord },
-    messages: { question, retry, quitNotice }
-  } = admin;
-
-  rl.question(query, input => {
-    if (input === admin.cmd.quit) {
-      console.log(quitNotice);
-      rl.close();
-    } else if (input === shortestRecord) {
-      todoApp.shortestRecord();
-
-      getRequest(question);
-    } else if (validateRequest(input)) {
-      todoApp.input = input;
-
-      todoApp
-        .actionCreator()
-        .reducer()
-        .view();
-
-      getRequest(question);
-    } else {
-      getRequest(retry);
-    }
-  });
-};
-
-getRequest(admin.messages.question);
+method.getRequest(admin.messages.question);
