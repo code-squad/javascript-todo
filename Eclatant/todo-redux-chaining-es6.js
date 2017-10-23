@@ -16,24 +16,24 @@ function Task(id, things) {
   this.runTime = null;
 }
 
+function ToDoApp() {
+  this.input = "";
+  this.action = {};
+  this.tasks = [];
+  this.record = null;
+  this.createdId = 0;
+  this.generateId = (() => {
+    let id = -1;
+
+    return () => {
+      id += 1;
+      return id;
+    };
+  })();
+}
+
 class ToDoApp {
-  constructor() {
-    this.input = "";
-    this.action = {};
-    this.tasks = [];
-    this.record = null;
-    this.createdId = 0;
-    this.generateId = (() => {
-      let id = -1;
-
-      return () => {
-        id += 1;
-        return id;
-      };
-    })();
-  }
-
-  static log(message) {
+  log(message) {
     console.log(message);
   }
 
