@@ -20,7 +20,12 @@ function ToDoApp() {
   this.input = "";
   this.action = {};
   this.tasks = [];
-  this.record = null;
+  this.shortestRecord = null;
+  this.state = {
+    [admin.state.todo]: 0,
+    [admin.state.doing]: 0,
+    [admin.state.done]: 0
+  };
   this.createdId = 0;
   this.generateId = (() => {
     let id = -1;
@@ -49,22 +54,10 @@ const method = {
   },
 
   currentState() {
-    const {
-      state: { todo, doing, done },
-      messages: { currentStateMessage }
-    } = admin;
+    const { messages: { currentStateMessage } } = admin;
+    const { state: { todo, doing, done } } = this;
 
-    let todoCount = 0;
-    let doingCount = 0;
-    let doneCount = 0;
-
-    this.tasks.forEach(({ state }) => {
-      if (state === todo) todoCount += 1;
-      else if (state === doing) doingCount += 1;
-      else if (state === done) doneCount += 1;
-    });
-
-    return currentStateMessage(todoCount, doingCount, doneCount);
+    return currentStateMessage(todo, doing, done);
   },
 
   showTasks(inputState) {
@@ -89,8 +82,8 @@ const method = {
   shortestRecord() {
     const { shortestRecordMessgage, isComplete } = admin.messages;
 
-    this.record
-      ? this.log(shortestRecordMessgage(this.record))
+    this.shortestRecord
+      ? this.log(shortestRecordMessgage(this.shortestRecord))
       : this.log(isComplete);
   },
 
@@ -142,6 +135,7 @@ const method = {
       case add: {
         this.createdId = this.generateId();
         this.tasks = this.tasks.concat(new Task(this.createdId, things));
+        this.state[admin.state.todo] += 1;
         break;
       }
 
@@ -151,6 +145,10 @@ const method = {
       case update: {
         const newTasks = this.tasks.slice();
         const target = newTasks[id];
+        const tempState = target.state;
+
+        this.state[tempState] -= 1;
+        this.state[state] += 1;
 
         target.state = state;
 
@@ -165,12 +163,13 @@ const method = {
             break;
 
           case done:
+            target.ended = new Date();
+
             if (target.started) {
-              target.ended = new Date();
               target.runTime = (target.ended - target.started) / 1000;
 
-              if (this.record > target.runTime || !this.record)
-                this.record = target.runTime;
+              if (this.shortestRecord > target.runTime || !this.shortestRecord)
+                this.shortestRecord = target.runTime;
             } else {
               target.started = target.ended;
               target.runTime = 0;
