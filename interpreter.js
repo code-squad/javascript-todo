@@ -1,7 +1,7 @@
 let model = require('./model');
-const status_list = ['todo', 'doing', 'done'];
+const statusList = ['todo', 'doing', 'done'];
 
-const command_list = {
+const commandList = {
     show: {
         validate: (tokens) => {
             //show 명령어 parameter 개수는 1개
@@ -13,7 +13,7 @@ const command_list = {
                 return false;
             }
 
-            return status_list.indexOf(status) > -1;
+            return statusList.indexOf(status) > -1;
         }
     },
     add: {
@@ -33,26 +33,26 @@ const command_list = {
             let id = tokens[0];
             let status = tokens[1];
 
-            return /^\+?(0|[1-9]\d*)$/.test(id) && status_list.indexOf(status) > -1;
+            return /^\+?(0|[1-9]\d*)$/.test(id) && statusList.indexOf(status) > -1;
         }
     }
 };
 
 let validate = function(tokens) {
     let command = tokens[0];
-    let is_valid_command = command_list.hasOwnProperty(command);
+    let isValidCommand = commandList.hasOwnProperty(command);
 
     tokens.shift(); //remove first element
 
-    return is_valid_command && command_list[command].validate(tokens);
+    return isValidCommand && commandList[command].validate(tokens);
 }
 
 exports.execute = function(input) {
     let tokens = input.split('$');
     let command = tokens[0];
 
-    let is_valid_input = validate(tokens);
-    if (!is_valid_input) {
+    let isValidInput = validate(tokens);
+    if (!isValidInput) {
         console.log('명령어 형식이 올바르지 않습니다.');
         return false;
     }
