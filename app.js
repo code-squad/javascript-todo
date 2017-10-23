@@ -1,23 +1,23 @@
 var Task = require('./task');
+var statusConstant = require('./common').statusConstant;
 
-var app {
+var app = {
     taskList: [],
     showCurrentStatus: function () {
-        var counts = {
-            statusConstant.TODO: 0,
-            statusConstant.DOING: 0,
-            statusConstant.DONE: 0
-        }
+        var counts = {};
+        counts[statusConstant.TODO] = 0;
+        counts[statusConstant.DOING] = 0;
+        counts[statusConstant.DONE] = 0;
 
         this.taskList.forEach(function(task) {
             var status = task.status;
             counts[status]++;
         });
 
-        console.log(`현재상태 :
-            ${statusConstant.TODO}:${counts[statusConstant.TODO]}개,
-            ${statusConstant.DOING}:${counts[statusConstant.DOING]}개,
-            ${statusConstant.DONE}:${counts[statusConstant.DONE]}개`);
+        console.log('현재상태 : ' +
+            statusConstant.TODO + ': ' + counts[statusConstant.TODO] + '개, ' +
+            statusConstant.DOING + ': ' + counts[statusConstant.DOING] + '개, ' +
+            statusConstant.DONE + ': ' + counts[statusConstant.DONE] + '개');
     },
     show: function(status) {
         var tasks = this.taskList.filter(function(task) {
@@ -46,11 +46,11 @@ var app {
         console.log(`id: ${newTask.id},  "${newTask.content}" 항목이 추가되었습니다.`);
         this.showCurrentStatus();
     },
-    update: function(id, status) {
-        targetTaskId = parseInt(targetTaskId);
+    update: function(targetId, status) {
+        targetId = parseInt(targetId);
 
         var targetIndex = this.taskList.findIndex(function(task) {
-            return task.id === targetTaskId;
+            return task.id === targetId;
         });
 
         var targetTask = (targetIndex >= 0) ? this.taskList[targetIndex] : undefined;

@@ -36,7 +36,7 @@ var interpreter = {
             }
         }
     ],
-    validate: function(tokens) {
+    validate: function(commandName, params) {
         var commandIndex = this.commandList.findIndex(function (item) {
             return item.name === commandName;
         });
