@@ -1,11 +1,11 @@
-const readline = require('readline');
-const interpreter = require('./interpreter');
+var readline = require('readline');
+var interpreter = require('./interpreter');
 
-const rl = readline.createInterface({
+var rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
-rl.on('line', (input) => {
+rl.on('line', function(input) {
     interpreter.execute(input);
 });

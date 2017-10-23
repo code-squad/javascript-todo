@@ -1,15 +1,15 @@
 nextId = 1;
 taskList = [];
 
-let showCurrentStatus = function() {
-    let counts = {
+var showCurrentStatus = function() {
+    var counts = {
         todo: 0,
         doing: 0,
         done: 0
     }
 
-    taskList.forEach((task) => {
-        let status = task.status;
+    taskList.forEach(function(task) {
+        var status = task.status;
         counts[status]++;
     });
 
@@ -17,14 +17,16 @@ let showCurrentStatus = function() {
 }
 
 exports.show = function (status) {
-    let tasks = taskList.filter((task) => task.status === status);
+    var tasks = taskList.filter(function(task) {
+        return task.status === status
+    });
 
     if (tasks.length === 0) {
         throw `${status}상태의 task가 존재하지 않습니다.`;
     } else if (status === 'done'){
         //완료 시간 계산
-        tasks.forEach((task) => {
-            let timeDiff = null;
+        tasks.forEach(function(task) {
+            var timeDiff = null;
 
             if (task.startAt === undefined) {
                 timeDiff = task.doneAt - task.createdAt;
@@ -32,16 +34,18 @@ exports.show = function (status) {
                 timeDiff = task.doneAt - task.startAt;
             }
 
-            let taskClearTime = Math.floor(timeDiff / 1000 / 60 / 60);
+            var taskClearTime = Math.floor(timeDiff / 1000 / 60 / 60);
 
             console.log(`${task.id}, ${task.content}, ${taskClearTime}시간`);
         });
     } else {
-        tasks.forEach((task) => console.log(`${task.id}, ${task.content}`));
+        tasks.forEach(function(task) {
+            console.log(`${task.id}, ${task.content}`);
+        });
     }
 };
 exports.add = function (content) {
-    let newTask = {
+    var newTask = {
         id: nextId++,
         status: 'todo',
         content: content,
@@ -56,7 +60,9 @@ exports.add = function (content) {
 
 exports.update = function (id, status) {
     id = parseInt(id);
-    let targetTask = taskList.find((task) => task.id === id);
+    var targetTask = taskList.find(function(task) {
+        return task.id === id;
+    });
 
     if (targetTask === undefined) {
         throw `id가 ${id}인 task가 존재하지 않습니다.`;
