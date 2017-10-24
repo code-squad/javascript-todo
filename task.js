@@ -1,4 +1,4 @@
-var statusConstant = require('./common').statusConstant;
+var statusConstant = require('./constants').status;
 var getTimeDiff = require('./utils').getTimeDiff;
 
 function Task(content) {

@@ -1,8 +1,11 @@
 var app = require('./app');
-var statusConstant = require('./common').statusConstant;
+
+var constants = require('./constants');
+
+var statusConstant = constants.status;
+var commandConstant = constants.command;
 
 var interpreter = {
-    commandList: ['todo', 'doing', 'done'],
     validator: {
         show: function(params) {
             var status = params[0];
@@ -16,7 +19,7 @@ var interpreter = {
         add: function(params) {
             return params.length === 1;
         },
-        update: function(parmas) {
+        update: function(params) {
             if (params.length !== 2) {
                 return false;
             }
@@ -29,8 +32,9 @@ var interpreter = {
          }
     },
     validate: function(commandName, params) {
-        var commandIndex = this.commandList.findIndex(function (item) {
-            return item.name === commandName;
+        console.log(commandConstant.getList());
+        var commandIndex = commandConstant.getList().findIndex(function (item) {
+            return item === commandName;
         });
 
         if (commandIndex === -1) {

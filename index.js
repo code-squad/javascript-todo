@@ -12,6 +12,6 @@ rl.on('line', function(input) {
         var result = interpreter.execute(input);
         app[result.commandName].apply(app, result.params);
     } catch(exception) {
-        console.log(exception);
+        console.log(exception.message);
     }
 });

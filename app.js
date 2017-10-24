@@ -1,5 +1,5 @@
 var Task = require('./task');
-var statusConstant = require('./common').statusConstant;
+var statusConstant = require('./constants').status;
 
 var app = {
     taskList: [],
