@@ -1,5 +1,6 @@
 var Task = require('./task');
-var statusConstant = require('./common').statusConstant;
+var statusConstant = require('./constants').status;
+var polyfill = require('./utils').polyfill;
 
 var app = {
     taskList: [],
@@ -20,7 +21,7 @@ var app = {
         });
 
         if (tasks.length === 0) {
-            throw `${status}상태의 task가 존재하지 않습니다.`;
+            throw new Error(`${status}상태의 task가 존재하지 않습니다.`);
         }
 
         if (status === statusConstant.DONE){
@@ -45,16 +46,16 @@ var app = {
     update: function(targetId, status) {
         targetId = parseInt(targetId);
 
-        var targetIndex = this.taskList.findIndex(function(task) {
+        var targetIndex = polyfill.findIndex(this.taskList, function(task) {
             return task.id === targetId;
         });
 
         var targetTask = (targetIndex >= 0) ? this.taskList[targetIndex] : undefined;
 
         if (targetTask === undefined) {
-            throw `id가 ${id}인 task가 존재하지 않습니다.`;
+            throw new Error(`id가 ${id}인 task가 존재하지 않습니다.`);
         } else if (targetTask.status === status) {
-            throw `해당하는 task가 이미 ${status}상태입니다.`;
+            throw new Error(`해당하는 task가 이미 ${status}상태입니다.`);
         } else {
             //상태 변경
             this.count[targetTask.status]--;

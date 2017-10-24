@@ -1,51 +1,46 @@
 var app = require('./app');
-var statusConstant = require('./common').statusConstant;
+
+var constants = require('./constants');
+var polyfill = require('./utils').polyfill;
+var statusConstant = constants.status;
+var commandConstant = constants.command;
 
 var interpreter = {
-    commandList: [
-        {
-            name: 'show',
-            validate: function (params) {
-                var status = params[0];
+    validator: {
+        show: function(params) {
+            var status = params[0];
 
-                if (params.length !== 1) {
-                    return false;
-                }
-
-                return statusConstant.getList().indexOf(status) > -1;
+            if (params.length !== 1) {
+                return false;
             }
+
+            return statusConstant.getList().indexOf(status) > -1;
         },
-        {
-            name: 'add',
-            validate: function(params) {
-                return params.length === 1;
-            }
+        add: function(params) {
+            return params.length === 1;
         },
-        {
-            name: 'update',
-            validate: function(params) {
-                if (params.length !== 2) {
-                    return false;
-                }
-
-                var id = params[0];
-                var status = params[1];
-
-                return /^\+?(0|[1-9]\d*)$/.test(id) &&
-                 statusConstant.getList().indexOf(status) > -1;
+        update: function(params) {
+            if (params.length !== 2) {
+                return false;
             }
-        }
-    ],
+
+            var id = params[0];
+            var status = params[1];
+
+            return /^\+?(0|[1-9]\d*)$/.test(id) &&
+             statusConstant.getList().indexOf(status) > -1;
+         }
+    },
     validate: function(commandName, params) {
-        var commandIndex = this.commandList.findIndex(function (item) {
-            return item.name === commandName;
+        var commandIndex = polyfill.findIndex(commandConstant.getList(), function (item) {
+            return item === commandName;
         });
 
         if (commandIndex === -1) {
             return false;
         }
 
-        return this.commandList[commandIndex].validate(params);
+        return this.validator[commandName](params);
     },
     execute: function(input) {
         var parmas = input.split('$');
@@ -53,7 +48,7 @@ var interpreter = {
 
         var isValidInput = this.validate(commandName, parmas);
         if (!isValidInput) {
-            throw '명령어 형식이 올바르지 않습니다.';
+            throw new Error('명령어 형식이 올바르지 않습니다.');
         }
 
         return {
