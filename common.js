@@ -1,4 +1,4 @@
-var Common = (function () {
+var common = (function () {
     var STATUS_CONSTANT = {
         "todo": 0,
         "doing": 1,
@@ -14,7 +14,8 @@ var Common = (function () {
                 result += ", runtime: " + runtime;
             console.log(result);
         },
-        showAll: function (todo, doing, done) {
+        showAll: function (statusCount) {
+            var [todo, doing, done] = statusCount;
             console.log("현재상태 :  todo:" + todo + "개, doing:" + doing + "개, done:" + done + "개");
         },
         showShort: function (short) {
@@ -30,4 +31,4 @@ var Common = (function () {
 
 
 
-module.exports = Common;
+module.exports = common;

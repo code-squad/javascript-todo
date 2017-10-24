@@ -15,24 +15,20 @@ var User = (function () {
         this.runtime = runtime;
     }
     User.prototype.showAllTask = function () {
-        var todo = 0;
-        var doing = 0;
-        var done = 0;
-        this.tasks.map(function (task) {
-            return task.status;
-        }).forEach(function (status) {
-            status === 0 ? todo++ : status === 1 ? doing++ : done++;
+        var statusCount = [0, 0, 0];
+        this.tasks.forEach(function ({
+            status
+        }) {
+            statusCount[status]++;
         })
-        common.messages.showAll(todo, doing, done);
+        common.messages.showAll(statusCount);
         return this;
     }
     User.prototype.addTask = function (title) {
-        this.tasks.push({
-            id: ++this.resp,
-            title: title,
-            status: 0
-        });
-        common.messages.add(this.resp, title);
+        var task = new Task(++this.resp, title, 0);
+        this.tasks.push(task);
+        common.messages.add(task.id, task.title);
+        this.showAllTask();
         return this;
     }
     User.prototype.showTasks = function (status) {
@@ -51,26 +47,18 @@ var User = (function () {
         this.tasks.filter(function (task) {
             return task.id === +id;
         }).map(function (task) {
-            if (status === 0) {
-                task = Object.assign(task, {
-                    status: status
-                });
-            } else if (status === 1) {
-                task = Object.assign(task, {
-                    status: status,
-                    time: new Date()
-                });
-            } else {
-                task = Object.assign(task, {
-                    status: status,
-                    runtime: Math.round((new Date() - task.time) / 1000)
-                });
+            task.status = status;
+            if (status === 1) {
+                task.time = new Date();
+            } else if (status === 2) {
+                task.runtime = Math.round((new Date() - task.time) / 1000);
                 if (Object.keys(this.shortTask).length === 0 || this.shortTask.runtime > task.runtime) {
                     this.shortTask = task;
                 }
             }
             return task;
-        }.bind(this))
+        }.bind(this));
+        this.showAllTask();
         return this;
     }
     return User;
