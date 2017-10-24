@@ -33,7 +33,7 @@ function printMsg() {
     }
     console.log(result);
 }
-const obj = [];
+const obj = [{ id: "ttt", state: "doing" }, { id: "test1", state: "done", start: 10, end: 60 }, { id: "test2", state: "done", start: 10, end: 15 }, { id: "test1", state: "done", start: 10, end: 30 }];
 /*
 //key:value 를 검색해서 value->value2로 수정 
 //ex)setState("state","doing","done") -> state가 doing인 객체의 state를 done으로 수정
@@ -128,6 +128,21 @@ function setState(index, value) {
     getState();
     start();
 }
+
+//state가 done인 상태의 객체를 찾아서 소요시간이 더 짧은 객체만 result에 남겨서 출력
+function getMinTask() {
+    var runtime = Date.now();
+    var result;
+    for (property in obj) {
+        if (obj[property]['state'] === "done" && obj[property]['end'] - obj[property]['start'] < runtime) {
+            runtime = obj[property]['end'] - obj[property]['start'];
+            result = obj[property];
+        }
+    }
+    console.log(result);
+}
+getMinTask();
+rl.close();
 //시작지점 종료입력이 나오기전까지 작동
 function start() {
     rl.question("\ncmd: add showing update exit\n>", function (answer) {
@@ -160,4 +175,4 @@ function start() {
         }
     });
 }
-start();
+//start();
