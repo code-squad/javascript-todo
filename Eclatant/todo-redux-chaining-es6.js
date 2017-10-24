@@ -79,7 +79,7 @@ const toDoAppMethod = {
     return arr.join(", ") + "\n";
   },
 
-  shortestRecord() {
+  getShortestRecord() {
     const { shortestRecordMessgage, isComplete } = admin.messages;
 
     this.shortestRecord
@@ -264,7 +264,7 @@ const toDoAppMethod = {
         console.log(quitNotice);
         rl.close();
       } else if (input === shortestRecord) {
-        this.shortestRecord().getRequest(question);
+        this.getShortestRecord().getRequest(question);
       } else if (this.validateRequest(input)) {
         this.input = input;
 
