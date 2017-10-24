@@ -27,8 +27,14 @@ const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
+
+//이어붙여서 출력
 function printMsg() {
-    for (var i = 0; i < arguments.length; i++) console.log(arguments[i]);
+    var result = [];
+    for (var i = 0; i < arguments.length; i++) {
+        result += arguments[i];
+    }
+    console.log(result);
 }
 const obj = [
     {
@@ -62,45 +68,66 @@ const obj = [
 function getState() {
     var flag = { todo: 0, doing: 0, done: 0 };
     for (property in obj) {
-        //console.log(Object.keys(obj[property]));//id task state
         flag[obj[property]['state']]++;
     }
-    console.log("현재상태 ", flag);
-    //printMsg("현재상태 :\r", flag); //console.log(flag);
+    printMsg("현재상태 : ", objTostr(flag));
+}
+
+//object를 string 으로 변환하여 출력
+//obj = [ { id: 1, task: "자바스크립트 공부", state: "doing" } -> id:1 task:자바스크립트 공부 state:doing
+function objTostr(target) {
+    var result = "";
+    for (property in target) {
+        if (target[property].constructor == 'object') objTostr(target[property]);
+        else result += property + ":" + target[property] + " ";
+    }
+    return result;
 }
 
 //add 명령어 함수. 배열의 마지막 객체의 id값을 1증가하여 id생성. 매개변수를 task명으로 넣고 현재상태출력
 function add(task) {
-    var last;
-    for (property in obj) {
-        last = obj[property]['id'];
-    }
-    last++;
-    obj[obj.length] = { "id": last, "task": task, "state": "todo" };
-    console.log(obj);
+    var id = 1;
+    id += obj[obj.length - 1]['id'];
+    obj[obj.length] = { "id": id, "task": task, "state": "todo" };
+    printMsg("id : ", id, "  \"", task, "\" 항목이 새로 추가됬습니다.")
     getState();
 }
 
 //shwing 명렁어 함수. getObj("state","done") 등으로 사용
 function getObj(key, value) { //key로 서치. ex)getObj("task","간식먹기") getState 랑 살짝겹침
     for (property in obj) {
+        if (obj[property][key] === value) printMsg(objTostr(obj[property]));
+    }
+    start();
+}
+
+//showing 전용함수 . 출력형태를 객체전체에서 id,task로 수정 -> "1, 그래픽스 공부" , "4, 블로그쓰기" .. 
+function showing(key, value) {
+    var result = [];
+    for (property in obj) {
+        if (obj[property][key] === value)
+            result += "\"" + obj[property]['id'] + ", " + obj[property]['task'] + "\"  ";
+    }
+    printMsg(result);
+    start();
+}
+showing("state", "done");
+//obj[property][id] == index 로 값을 찾아서 state 수정
+//매개변수가 '부족'할때만 에러메세지 update$index$state -> 3개
+//update 명령어 함수. setState(1,done) 로 사용
+function setState(index, flag) {
+    getState();
+    for (property in obj) {
         if (obj[property][key] === value) {
-            console.log(obj[property]);
+            printMsg(obj[property]);
         }
     }
     rl.close();
 }
-//obj[property][id] == index 의 값을 찾아서 state 수정
-
-//매개변수가 '부족'할때만 에러메세지
-function setState(index, flag) {
-
-
-}
 
 //시작지점 종료입력이 나오기전까지 작동
 function start() {
-    rl.question(">", function (answer) {
+    rl.question("\ncmd: add showing update exit\n>", function (answer) {
         var allcmd = ["add", "showing", "update", "exit"];
         var cmd = answer.split("$")[0]; //answer = add$test -> answer.split("$")[0] = add
         var check = Number(allcmd.indexOf(cmd)); //allcmd.indexOf(cmd)); //-1일경우 없는 명령어
@@ -115,11 +142,12 @@ function start() {
                 start();
             }
             else if (cmd === "showing") { // check == 1
-                console.log("it showing!");
+                //getObj("state", answer.split("$")[1]);
+                showing("state", answer.split("$")[1]);
                 start();
             }
             else if (cmd === "update") { // check == 2
-                console.log("it update!");
+                printMsg("it update!");
                 start();
             }
             else if (cmd === "exit") {
@@ -130,6 +158,6 @@ function start() {
         }
     });
 }
-start();
+//start();
 //getState();
 //rl.close();
