@@ -112,20 +112,28 @@ function showing(key, value) {
     start();
 }
 
-showing("state", "done");
-//obj[property][id] == index 로 값을 찾아서 state 수정
-//매개변수가 '부족'할때만 에러메세지 update$index$state -> 3개
-//update 명령어 함수. setState(1,done) 로 사용
-function setState(index, flag) {
-    getState();
+//key:value 를 검색해서 value->value2로 수정 
+//ex)setState("state","doing","done") -> state가 doing인 객체의 state를 done으로 수정
+function setValue(key, value, value2) {
     for (property in obj) {
         if (obj[property][key] === value) {
-            printMsg(obj[property]);
+            obj[property][key] = value2;
         }
     }
-    rl.close();
 }
 
+//obj[property][id] == index 로 값을 찾아서 state 수정
+//매개변수가 '부족'할때만 에러메세지 update$index$state -> 3개
+//id:index 검색 -> state:value로 수정 ex)setState(1,"done") -> id가 1인 객체의 state를 "done"으로 수정
+function setState(index, value) {
+    for (property in obj) {
+        if (obj[property]['id'] === index) {
+            obj[property]['state'] = value;
+        }
+    }
+    getState();
+    start();
+}
 //시작지점 종료입력이 나오기전까지 작동
 function start() {
     rl.question("\ncmd: add showing update exit\n>", function (answer) {
@@ -143,12 +151,11 @@ function start() {
                 start();
             }
             else if (cmd === "showing") { // check == 1
-                //getObj("state", answer.split("$")[1]);
                 showing("state", answer.split("$")[1]);
                 start();
             }
             else if (cmd === "update") { // check == 2
-                printMsg("it update!");
+                setState(Number(answer.split("$")[1]), answer.split("$")[2]);
                 start();
             }
             else if (cmd === "exit") {
@@ -159,6 +166,6 @@ function start() {
         }
     });
 }
-//start();
+start();
 //getState();
 //rl.close();
