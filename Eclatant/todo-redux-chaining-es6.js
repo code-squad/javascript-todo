@@ -26,7 +26,7 @@ function ToDoApp() {
     [admin.state.doing]: 0,
     [admin.state.done]: 0
   };
-  this.createdId = 0;
+  this.lastId = 0;
   this.generateId = (() => {
     let id = -1;
 
@@ -135,8 +135,8 @@ const toDoAppMethod = {
 
     switch (type) {
       case add: {
-        this.createdId = this.generateId();
-        this.tasks = this.tasks.concat(new Task(this.createdId, things));
+        this.lastId = this.generateId();
+        this.tasks = this.tasks.concat(new Task(this.lastId, things));
         this.state[admin.state.todo] += 1;
         break;
       }
@@ -192,11 +192,11 @@ const toDoAppMethod = {
       cmd: { add, show, update },
       messages: { addComplete, updateComplete }
     } = admin;
-    let { action: { type, payload }, createdId, tasks } = this;
+    let { action: { type, payload }, lastId, tasks } = this;
 
     switch (type) {
       case add: {
-        const { id, things } = tasks[createdId];
+        const { id, things } = tasks[lastId];
 
         this.log(addComplete(id, things));
 
