@@ -53,7 +53,7 @@ var interpreter = {
 
         var isValidInput = this.validate(commandName, parmas);
         if (!isValidInput) {
-            throw '명령어 형식이 올바르지 않습니다.';
+            throw new Error('명령어 형식이 올바르지 않습니다.');
         }
 
         return {
