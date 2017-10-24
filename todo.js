@@ -93,7 +93,7 @@ function add(task) {
     getState();
 }
 
-//shwing 명렁어 함수. getObj("state","done") 등으로 사용
+//객체를 순회하며 key:value 가 있는 객체를 출력
 function getObj(key, value) { //key로 서치. ex)getObj("task","간식먹기") getState 랑 살짝겹침
     for (property in obj) {
         if (obj[property][key] === value) printMsg(objTostr(obj[property]));
@@ -111,6 +111,7 @@ function showing(key, value) {
     printMsg(result);
     start();
 }
+
 showing("state", "done");
 //obj[property][id] == index 로 값을 찾아서 state 수정
 //매개변수가 '부족'할때만 에러메세지 update$index$state -> 3개
