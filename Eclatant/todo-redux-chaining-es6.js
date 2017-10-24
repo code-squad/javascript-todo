@@ -37,7 +37,7 @@ function ToDoApp() {
   })();
 }
 
-const method = {
+const toDoAppMethod = {
   consturctor: ToDoApp,
 
   generateId: (() => {
@@ -280,7 +280,7 @@ const method = {
   }
 };
 
-ToDoApp.prototype = method;
+ToDoApp.prototype = toDoAppMethod;
 const todoApp = new ToDoApp();
 
 todoApp.getRequest(admin.messages.question);
