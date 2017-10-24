@@ -1,7 +1,7 @@
 var app = require('./app');
 
 var constants = require('./constants');
-
+var polyfill = require('./utils').polyfill;
 var statusConstant = constants.status;
 var commandConstant = constants.command;
 
@@ -32,8 +32,7 @@ var interpreter = {
          }
     },
     validate: function(commandName, params) {
-        console.log(commandConstant.getList());
-        var commandIndex = commandConstant.getList().findIndex(function (item) {
+        var commandIndex = polyfill.findIndex(commandConstant.getList(), function (item) {
             return item === commandName;
         });
 

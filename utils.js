@@ -95,4 +95,21 @@ var getTimeDiff = (function() {
     }
 })();
 
+var polyfill = {
+  findIndex: function(arr, callback) {
+    var i = 0, len = arr.length;
+
+      for (; i < len; i++) {
+        var item = arr[i];
+
+        if (callback(item, i, arr)) {
+          return i;
+        }
+      }
+
+    return -1;
+  }
+};
+
 module.exports.getTimeDiff = getTimeDiff;
+module.exports.polyfill = polyfill;

@@ -1,5 +1,6 @@
 var Task = require('./task');
 var statusConstant = require('./constants').status;
+var polyfill = require('./utils').polyfill;
 
 var app = {
     taskList: [],
@@ -45,7 +46,7 @@ var app = {
     update: function(targetId, status) {
         targetId = parseInt(targetId);
 
-        var targetIndex = this.taskList.findIndex(function(task) {
+        var targetIndex = polyfill.findIndex(this.taskList, function(task) {
             return task.id === targetId;
         });
 
