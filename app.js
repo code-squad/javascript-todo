@@ -4,16 +4,23 @@ var polyfill = require('./utils').polyfill;
 
 var app = {
     taskList: [],
+    indexOfLeastTimeSpent: null, //index of task that spent least time
     count: {
         todo: 0,
         doing: 0,
         done: 0
     },
     showCurrentStatus: function () {
-        console.log('현재상태 : ' +
+        console.log('현재상태: ' +
             statusConstant.TODO + ': ' + this.count.todo + '개, ' +
             statusConstant.DOING + ': ' + this.count.doing + '개, ' +
             statusConstant.DONE + ': ' + this.count.done + '개');
+
+        if (this.indexOfLeastTimeSpent !== null) {
+            var taskSpentLeastTime = this.taskList[this.indexOfLeastTimeSpent];
+
+            console.log('가장 빨리 완료한 작업 id: ' + taskSpentLeastTime.id + ', 걸린 시간:', taskSpentLeastTime.timeSpentString);
+        }
     },
     show: function(status) {
         var tasks = this.taskList.filter(function(task) {
@@ -26,7 +33,7 @@ var app = {
 
         if (status === statusConstant.DONE){
             tasks.forEach(function(task) {
-                console.log(`${task.id}, ${task.content}, ${task.timeSpent}`);
+                console.log(`${task.id}, ${task.content}, ${task.timeSpentString}`);
             });
         } else {
             tasks.forEach(function(task) {
@@ -59,16 +66,33 @@ var app = {
         } else {
             //상태 변경
             this.count[targetTask.status]--;
-            targetTask.updateStatus(status);
-
             this.count[status]++;
+            targetTask.updateStatus(status);
 
             //3초 후에 결과 출력
             if (status === statusConstant.DONE) {
+                this.updateSpentLeastTime(targetTask);
                 setTimeout(this.showCurrentStatus.bind(this), 3000);
             } else {
                 this.showCurrentStatus();
             }
+        }
+    },
+    updateSpentLeastTime: function(newTask) {
+        var newTaskIndex = polyfill.findIndex(this.taskList, function (item) {
+            return item.id === newTask.id;
+        });
+
+        if (this.indexOfLeastTimeSpent === null) {
+            this.indexOfLeastTimeSpent = newTaskIndex;
+            return ;
+        }
+
+        var taskLeastTimeSpent = this.taskList[this.indexOfLeastTimeSpent];
+        var leastTime = taskLeastTimeSpent.timeSpent;
+
+        if (leastTime > newTask.timeSpent) {
+            this.indexOfLeastTimeSpent = newTaskIndex;
         }
     }
 }
