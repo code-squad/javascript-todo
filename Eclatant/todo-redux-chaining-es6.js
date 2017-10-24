@@ -85,6 +85,8 @@ const toDoAppMethod = {
     this.shortestRecord
       ? this.log(shortestRecordMessgage(this.shortestRecord))
       : this.log(isComplete);
+
+    return this;
   },
 
   actionCreator() {
@@ -262,17 +264,14 @@ const toDoAppMethod = {
         console.log(quitNotice);
         rl.close();
       } else if (input === shortestRecord) {
-        this.shortestRecord();
-
-        this.getRequest(question);
+        this.shortestRecord().getRequest(question);
       } else if (this.validateRequest(input)) {
         this.input = input;
 
         this.actionCreator()
           .reducer()
-          .view();
-
-        this.getRequest(question);
+          .view()
+          .getRequest(question);
       } else {
         this.getRequest(retry);
       }
