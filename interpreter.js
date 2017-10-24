@@ -2,40 +2,32 @@ var app = require('./app');
 var statusConstant = require('./common').statusConstant;
 
 var interpreter = {
-    commandList: [
-        {
-            name: 'show',
-            validate: function (params) {
-                var status = params[0];
+    commandList: ['todo', 'doing', 'done'],
+    validator: {
+        show: function(params) {
+            var status = params[0];
 
-                if (params.length !== 1) {
-                    return false;
-                }
-
-                return statusConstant.getList().indexOf(status) > -1;
+            if (params.length !== 1) {
+                return false;
             }
+
+            return statusConstant.getList().indexOf(status) > -1;
         },
-        {
-            name: 'add',
-            validate: function(params) {
-                return params.length === 1;
-            }
+        add: function(params) {
+            return params.length === 1;
         },
-        {
-            name: 'update',
-            validate: function(params) {
-                if (params.length !== 2) {
-                    return false;
-                }
-
-                var id = params[0];
-                var status = params[1];
-
-                return /^\+?(0|[1-9]\d*)$/.test(id) &&
-                 statusConstant.getList().indexOf(status) > -1;
+        update: function(parmas) {
+            if (params.length !== 2) {
+                return false;
             }
-        }
-    ],
+
+            var id = params[0];
+            var status = params[1];
+
+            return /^\+?(0|[1-9]\d*)$/.test(id) &&
+             statusConstant.getList().indexOf(status) > -1;
+         }
+    },
     validate: function(commandName, params) {
         var commandIndex = this.commandList.findIndex(function (item) {
             return item.name === commandName;
@@ -45,7 +37,7 @@ var interpreter = {
             return false;
         }
 
-        return this.commandList[commandIndex].validate(params);
+        return this.validator[commandName](params);
     },
     execute: function(input) {
         var parmas = input.split('$');
