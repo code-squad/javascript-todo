@@ -33,7 +33,8 @@ var common = (function () {
   };
 
   return {
-    STATE_CONST,
+    STATES,
+    COMMANDS,
     messages
   };
 })();

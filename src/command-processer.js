@@ -34,13 +34,13 @@ var commandProcesser = {
   processCommand: function () {
     switch (this.command[0]) {
       case common.COMMANDS.ADD:
-        manager.addTask(command[1]);
+        manager.addTask(this.command[1]);
         break;
       case common.COMMANDS.SHOW:
-        manager.showTasks(command[1]);
+        manager.showTasks(this.command[1]);
         break;
       case common.COMMANDS.UPDATE:
-        manager.updateTask(command[1], command[2]);
+        manager.updateTask(this.command[1], this.command[2]);
         break;
       case common.COMMANDS.CHECK:
         manager.checkShortestTask();
