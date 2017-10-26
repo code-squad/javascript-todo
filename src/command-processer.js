@@ -1,4 +1,5 @@
 var util = require('./utils');
+var common = require('./common');
 var log = util.log;
 
 var commandProcesser = {
@@ -7,10 +8,27 @@ var commandProcesser = {
     this.command = command.split("$");
     return this;
   },
-  //add, show, update, check
-  //add length ==2 show ==2 update ==3 check ==1
-  //update id 지정 잘못 할 경우 / state 지정 안 할 경우
   verifyCommand: function () {
+    switch (this.command[0]) {
+      case "add":
+        if (this.command.length !== 2)
+          throw 'command error';
+        break;
+      case "show":
+        if (this.command.length !== 2)
+          throw 'command error';
+        break;
+      case "update":
+        if (this.command.length !== 3)
+          throw 'command error';
+        break;
+      case "check":
+        if (this.command.length !== 1)
+          throw 'command error';
+        break;
+      default:
+        throw 'command error';
+    }
     return this;
   },
   //switch로 add show default:throw
@@ -30,7 +48,7 @@ var commandProcesser = {
   },
   //잘못된 명령
   processError: function (error) {
-    console.log(error);
+    log(error);
   },
 }
 
