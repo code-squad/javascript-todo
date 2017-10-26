@@ -1,6 +1,5 @@
-var util = require('./utils');
 var common = require('./common');
-var log = util.log;
+var manager = require('./task-manager');
 
 var commandProcesser = {
   command: [],
@@ -10,19 +9,19 @@ var commandProcesser = {
   },
   verifyCommand: function () {
     switch (this.command[0]) {
-      case "add":
+      case common.COMMANDS.ADD:
         if (this.command.length !== 2)
           throw 'command error';
         break;
-      case "show":
+      case common.COMMANDS.SHOW:
         if (this.command.length !== 2)
           throw 'command error';
         break;
-      case "update":
+      case common.COMMANDS.UPDATE:
         if (this.command.length !== 3)
           throw 'command error';
         break;
-      case "check":
+      case common.COMMANDS.CHECK:
         if (this.command.length !== 1)
           throw 'command error';
         break;
@@ -33,22 +32,24 @@ var commandProcesser = {
   },
   //switch로 add show default:throw
   processCommand: function () {
+    switch (this.command[0]) {
+      case common.COMMANDS.ADD:
+        manager.addTask(command[1]);
+        break;
+      case common.COMMANDS.SHOW:
+        manager.showTasks(command[1]);
+        break;
+      case common.COMMANDS.UPDATE:
+        manager.updateTask(command[1], command[2]);
+        break;
+      case common.COMMANDS.CHECK:
+        manager.checkShortestTask();
+        break;
+    }
+    return this;
   },
-  processAdd: function () {
-
-  },
-  processShow: function () {
-
-  },
-  processUpdate: function () {
-
-  },
-  processCheck: function () {
-
-  },
-  //잘못된 명령
   processError: function (error) {
-    log(error);
+    console.log(error);
   },
 }
 
