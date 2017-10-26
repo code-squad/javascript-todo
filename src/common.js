@@ -1,4 +1,4 @@
-var util = require('./src/utils');
+var util = require('./utils');
 var log = util.log;
 
 var common = (function () {
@@ -9,6 +9,7 @@ var common = (function () {
   };
   var messages = {
     waitInsert: function () {
+      log('Please insert command')
     },
     taskAdded: function () {
     },
