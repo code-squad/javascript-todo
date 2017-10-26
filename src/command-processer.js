@@ -28,6 +28,7 @@ var commandProcesser = {
   processCheck: function () {
 
   },
+  //잘못된 명령
   processError: function (error) {
     console.log(error);
   },
