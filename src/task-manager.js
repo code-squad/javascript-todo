@@ -19,7 +19,7 @@ var Manager = {
     common.messages.taskAdded(this.task.id, name);
     this.showAllTasks();
   },
-  showTasks: function (state) {
+  showState: function (state) {
   },
   showAllTasks: function () {
     var todoCount = 0, doingCount = 0, doneCount = 0;

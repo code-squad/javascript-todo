@@ -46,7 +46,7 @@ var commandProcesser = {
         manager.addTask(this.command[1]);
         break;
       case common.COMMANDS.SHOW:
-        manager.showTasks(this.command[1]);
+        manager.showState(this.command[1]);
         break;
       case common.COMMANDS.UPDATE:
         manager.updateTask(this.command[1], this.command[2]);
