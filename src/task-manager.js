@@ -3,20 +3,21 @@ var common = require('./common');
 var Manager = {
   tasks: [],
   nextId: 0,
-  task: {
-    id: 0,
-    name: "",
-    state: common.STATES.TODO,
-    startTime: 0,
-    elapsedTime: 0,
+  Task: function () {
+    this.id = 0;
+    this.name = "";
+    this.state = "";
+    this.startTime = 0;
+    this.elapsedTime = 0;
   },
   addTask: function (name) {
-    this.task.id = this.nextId;
-    this.task.name = name;
-    this.task.state = common.STATES.TODO;
-    this.tasks.push(this.task);
+    task = new this.Task;
+    task.id = this.nextId;
+    task.name = name;
+    task.state = common.STATES.TODO;
+    this.tasks.push(task);
     this.nextId++;
-    common.messages.taskAdded(this.task.id, name);
+    common.messages.taskAdded(task.id, name);
     this.showAllTasks();
   },
   showState: function (insertedState) {
