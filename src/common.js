@@ -26,7 +26,13 @@ var common = (function () {
     showAll: function (todo, doing, done) {
       log('현재상태: todo: ' + todo + '개, doing: ' + doing + '개, done: ' + done + '개');
     },
-    showState: function () {
+    showState: function (tasks) {
+      tasks.forEach(function (task) {
+        var showText = "id: " + task.id + ", name: " + task.name;
+        if (task.stae === common.STATES.DONE)
+          showText += ", time: " + task.elapsedTime;
+        log(showText);
+      });
     },
     showShortest: function () {
     },
