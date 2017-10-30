@@ -24,14 +24,20 @@ var Manager = {
   //
   showAllTasks: function () {
   },
-  //doing이나 done으로 업데이트. doing이라면 시간 기록, done이라면 시간 비교해서 넣음
   updateTask: function (id, state) {
     for (task in this.tasks) {
-      if (task.id == id) {
-        task.state = state;
-        break;
+      var currentTask = this.tasks[task];
+      if (currentTask.id === +id) {
+        currentTask.state = state;
+        if (state === common.STATES.DOING)
+          currentTask.startTime = new Date();
+        if (state === common.STATES.DONE)
+          currentTask.elapsedTime = new Date() - currentTask.startTime;
+        this.showAllTasks();
+        return;
       }
     }
+    throw 'command error';
   },
   checkShortestTask: function () {
     return;
