@@ -42,8 +42,8 @@ var Manager = {
     common.messages.showAll(todoCount, doingCount, doneCount);
   },
   updateTask: function (id, state) {
-    for (task in this.tasks) {
-      var currentTask = this.tasks[task];
+    for (var i = 0; i < this.tasks.length; i++) {
+      var currentTask = this.tasks[i];
       if (currentTask.id === parseInt(id)) {
         currentTask.state = state;
         if (state === common.STATES.DOING)
