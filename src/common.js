@@ -3,16 +3,19 @@ var log = util.log;
 
 var common = (function () {
   var STATES = {
-    "TODO": "todo",
-    "DOING": "doing",
-    "DONE": "done",
+    TODO: "todo",
+    DOING: "doing",
+    DONE: "done",
   };
   var COMMANDS = {
     ADD: "add",
     SHOW: "show",
     UPDATE: "update",
     CHECK: "check",
-  }
+  };
+  var ERRORS = {
+    COMMAND_ERROR: "command error",
+  };
   var messages = {
     waitInsert: function () {
       log('Please insert command');
@@ -27,13 +30,15 @@ var common = (function () {
     },
     showShortest: function () {
     },
-    commandError: function () {
+    commandError: function (errorMessage) {
+      log(errorMessage);
     }
   };
 
   return {
     STATES,
     COMMANDS,
+    ERRORS,
     messages
   };
 })();

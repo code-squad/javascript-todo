@@ -46,7 +46,7 @@ var Manager = {
         return;
       }
     }
-    throw 'command error';
+    throw common.ERRORS.COMMAND_ERROR;
   },
   checkShortestTask: function () {
     return;
