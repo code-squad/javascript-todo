@@ -54,7 +54,7 @@ var Manager = {
         return;
       }
     }
-    throw common.ERRORS.COMMAND_ERROR;
+    common.messages.commandError();
   },
   checkShortestTask: function () {
     var shortestTask;
@@ -66,8 +66,10 @@ var Manager = {
         shortestTask = task;
       }
     });
-    if (shortestTask === undefined)
-      throw common.ERRORS.COMMAND_ERROR;
+    if (shortestTask === undefined) {
+      common.messages.commandError();
+      return;
+    }
     common.messages.showShortest(shortestTask);
   }
 };

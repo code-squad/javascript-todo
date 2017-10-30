@@ -11,24 +11,24 @@ var commandProcesser = {
     switch (this.command[0]) {
       case common.COMMANDS.ADD:
         if (this.command.length !== 2)
-          throw common.ERRORS.COMMAND_ERROR;
+          return false;
         break;
       case common.COMMANDS.SHOW:
         if (this.command.length !== 2)
-          throw common.ERRORS.COMMAND_ERROR;
+          return false;
         break;
       case common.COMMANDS.UPDATE:
         if (this.command.length !== 3)
-          throw common.ERRORS.COMMAND_ERROR;
+          return false;
         if (!this.isInStates(this.command[2]))
-          throw common.ERRORS.COMMAND_ERROR;
+          return false;
         break;
       case common.COMMANDS.CHECK:
         if (this.command.length !== 1)
-          throw common.ERRORS.COMMAND_ERROR;
+          return false;
         break;
       default:
-        throw common.ERRORS.COMMAND_ERROR;
+        return false;
     }
     return this;
   },

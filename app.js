@@ -10,11 +10,12 @@ var processer = require('./src/command-processer');
   readline.prompt();
 
   readline.on('line', function (command) {
-    try {
-      processer.setCommand(command).verifyCommand().processCommand();
-    }
-    catch (error) {
-      processer.processError(error);
+    processer.setCommand(command)
+
+    if (processer.verifyCommand()) {
+      processer.processCommand();
+    } else {
+      common.messages.commandError();
     }
     readline.prompt();
   });

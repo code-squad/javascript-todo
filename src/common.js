@@ -37,8 +37,8 @@ var common = (function () {
     showShortest: function (task) {
       log('id: ' + task.id + ', name: ' + task.name + ', time: ' + task.elapsedTime);
     },
-    commandError: function (errorMessage) {
-      log(errorMessage);
+    commandError: function () {
+      log(ERRORS.COMMAND_ERROR);
     }
   };
 
