@@ -58,17 +58,23 @@ var Manager = {
   checkShortestTask: function () {
     var shortestTask;
     this.tasks.forEach(function (task) {
-      if (task.state !== common.STATES.DONE) return;
-      shortestTask = shortestTask || task;
-      if (shortestTask.elapsedTime > task.elapsedTime) {
-        shortestTask = task;
-      }
+      shortestTask = compareShortestTask(shortestTask, task);
     });
+
     if (shortestTask === undefined) {
       common.messages.commandError();
       return;
     }
     common.messages.showShortest(shortestTask);
+  },
+  compareShortestTask(shortestTask, task) {
+    if (task.state !== common.STATES.DONE) {
+      return;
+    }
+    shortestTask = shortestTask || task;
+    if (shortestTask.elapsedTime > task.elapsedTime) {
+      shortestTask = task;
+    }
   }
 };
 
