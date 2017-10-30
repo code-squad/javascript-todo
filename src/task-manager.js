@@ -17,11 +17,10 @@ var Manager = {
     this.tasks.push(this.task);
     this.nextId++;
     common.messages.taskAdded(this.task.id, name);
+    this.showAllTasks();
   },
-  //
   showTasks: function (state) {
   },
-  //
   showAllTasks: function () {
     var taskCount = [0, 0, 0];
     this.tasks.forEach(function (task) {
@@ -32,7 +31,7 @@ var Manager = {
       if (task.state === common.STATES.DONE)
         taskCount[2]++;
     });
-    common.messages.showAll(taskCount);
+    common.messages.showAll(taskCount[0], taskCount[1], taskCount[2]);
   },
   updateTask: function (id, state) {
     for (task in this.tasks) {
