@@ -30,11 +30,12 @@ var common = (function () {
       tasks.forEach(function (task) {
         var showText = "id: " + task.id + ", name: " + task.name;
         if (task.state === common.STATES.DONE)
-          showText += ", time: " + Math.round(task.elapsedTime / 1000) + "초";
+          showText += ", time: " + task.elapsedTime;
         log(showText);
       });
     },
-    showShortest: function () {
+    showShortest: function (task) {
+      log('id: ' + task.id + ', name: ' + task.name + ', time: ' + task.elapsedTime);
     },
     commandError: function (errorMessage) {
       log(errorMessage);

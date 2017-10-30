@@ -57,7 +57,18 @@ var Manager = {
     throw common.ERRORS.COMMAND_ERROR;
   },
   checkShortestTask: function () {
-    return;
+    var shortestTask;
+    this.tasks.forEach(function (task) {
+      if (task.state !== common.STATES.DONE)
+        return;
+      shortestTask = shortestTask || task;
+      if (shortestTask.elapsedTime > task.elapsedTime) {
+        shortestTask = task;
+      }
+    });
+    if (shortestTask === undefined)
+      throw common.ERRORS.COMMAND_ERROR;
+    common.messages.showShortest(shortestTask);
   }
 };
 
