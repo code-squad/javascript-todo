@@ -18,9 +18,10 @@ var common = (function () {
   }
   var messages = {
     waitInsert: function () {
-      log('Please insert command')
+      log('Please insert command');
     },
-    taskAdded: function () {
+    taskAdded: function (id, name) {
+      log('id: ' + id + ', ' + name + ' 항목이 추가되었습니다.');
     },
     showAll: function () {
     },

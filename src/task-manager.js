@@ -21,6 +21,7 @@ var Manager = {
     this.task.state = common.STATES.TODO;
     this.tasks.push(this.task);
     this.nextId++;
+    common.messages.taskAdded(this.task.id, name);
   },
   //
   showTasks: function (state) {
