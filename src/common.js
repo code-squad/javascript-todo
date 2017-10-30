@@ -20,7 +20,8 @@ var common = (function () {
     taskAdded: function (id, name) {
       log('id: ' + id + ', ' + name + ' 항목이 추가되었습니다.');
     },
-    showAll: function () {
+    showAll: function (todo, doing, done) {
+      log('현재상태: todo: ' + todo + '개, doing: ' + doing + '개, done: ' + done + '개');
     },
     showState: function () {
     },
