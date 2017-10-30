@@ -44,7 +44,7 @@ var Manager = {
   updateTask: function (id, state) {
     for (task in this.tasks) {
       var currentTask = this.tasks[task];
-      if (currentTask.id === +id) {
+      if (currentTask.id === parseInt(id)) {
         currentTask.state = state;
         if (state === common.STATES.DOING)
           currentTask.startTime = new Date();
