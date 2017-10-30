@@ -23,6 +23,16 @@ var Manager = {
   },
   //
   showAllTasks: function () {
+    var taskCount = [0, 0, 0];
+    this.tasks.forEach(function (task) {
+      if (task.state === common.STATES.TODO)
+        taskCount[0]++;
+      if (task.state === common.STATES.DOING)
+        taskCount[1]++;
+      if (task.state === common.STATES.DONE)
+        taskCount[2]++;
+    });
+    common.messages.showAll(taskCount);
   },
   updateTask: function (id, state) {
     for (task in this.tasks) {
