@@ -20,6 +20,8 @@ var commandProcesser = {
       case common.COMMANDS.UPDATE:
         if (this.command.length !== 3)
           throw 'command error';
+        if (!this.isInStates(this.command[2]))
+          throw 'command error';
         break;
       case common.COMMANDS.CHECK:
         if (this.command.length !== 1)
@@ -29,6 +31,14 @@ var commandProcesser = {
         throw 'command error';
     }
     return this;
+  },
+  isInStates: function (insertedState) {
+    for (state in common.COMMANDS) {
+      if (common.STATES[state] === insertedState) {
+        return true;
+      }
+    }
+    return false;
   },
   processCommand: function () {
     switch (this.command[0]) {

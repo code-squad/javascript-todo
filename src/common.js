@@ -3,17 +3,14 @@ var log = util.log;
 
 var common = (function () {
   var STATES = {
-    "TODO": 0,
-    "DOING": 1,
-    "DONE": 2,
+    "TODO": "todo",
+    "DOING": "doing",
+    "DONE": "done",
   };
   var COMMANDS = {
     ADD: "add",
     SHOW: "show",
     UPDATE: "update",
-    TODO: "todo",
-    DOING: "doing",
-    DONE: "done",
     CHECK: "check",
   }
   var messages = {

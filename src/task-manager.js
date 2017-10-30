@@ -10,11 +10,6 @@ var Manager = {
     startTime: 0,
     elapsedTime: 0,
   },
-  //테스크 갖고 있는지 여부 리턴
-  hasTask: function () {
-    return;
-  },
-  //id: 5,  "자바스크립트 공부하기" 항목이 새로 추가됐습니다. 
   addTask: function (name) {
     this.task.id = this.nextId;
     this.task.name = name;
@@ -30,7 +25,13 @@ var Manager = {
   showAllTasks: function () {
   },
   //doing이나 done으로 업데이트. doing이라면 시간 기록, done이라면 시간 비교해서 넣음
-  updateTask: function (name, state) {
+  updateTask: function (id, state) {
+    for (task in this.tasks) {
+      if (task.id == id) {
+        task.state = state;
+        break;
+      }
+    }
   },
   checkShortestTask: function () {
     return;
