@@ -30,7 +30,6 @@ var commandProcesser = {
     }
     return this;
   },
-  //switch로 add show default:throw
   processCommand: function () {
     switch (this.command[0]) {
       case common.COMMANDS.ADD:

@@ -4,6 +4,7 @@ var readline = require('./config/readline')();
 var common = require('./src/common');
 var processer = require('./src/command-processer');
 
+
 (function () {
   common.messages.waitInsert();
   readline.prompt();

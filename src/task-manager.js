@@ -1,15 +1,26 @@
+var common = require('./common');
+
 var Manager = {
   tasks: [],
   nextId: 0,
-  // this.task = new Task();
-
+  task: {
+    id: 0,
+    name: "",
+    state: common.STATES.TODO,
+    startTime: 0,
+    elapsedTime: 0,
+  },
   //테스크 갖고 있는지 여부 리턴
   hasTask: function () {
     return;
   },
-  //이름 받아서 todo에 테스크 추가
   //id: 5,  "자바스크립트 공부하기" 항목이 새로 추가됐습니다. 
   addTask: function (name) {
+    this.task.id = this.nextId;
+    this.task.name = name;
+    this.task.state = common.STATES.TODO;
+    this.tasks.push(this.task);
+    this.nextId++;
   },
   //
   showTasks: function (state) {
