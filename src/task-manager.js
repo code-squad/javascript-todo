@@ -32,12 +32,9 @@ var Manager = {
   showAllTasks: function () {
     var todoCount = 0, doingCount = 0, doneCount = 0;
     this.tasks.forEach(function (task) {
-      if (task.state === common.STATES.TODO)
-        todoCount++;
-      if (task.state === common.STATES.DOING)
-        doingCount++;
-      if (task.state === common.STATES.DONE)
-        doneCount++;
+      if (task.state === common.STATES.TODO) todoCount++;
+      if (task.state === common.STATES.DOING) doingCount++;
+      if (task.state === common.STATES.DONE) doneCount++;
     });
     common.messages.showAll(todoCount, doingCount, doneCount);
   },
@@ -46,10 +43,12 @@ var Manager = {
       var currentTask = this.tasks[i];
       if (currentTask.id === parseInt(id)) {
         currentTask.state = state;
-        if (state === common.STATES.DOING)
+        if (state === common.STATES.DOING) {
           currentTask.startTime = new Date();
-        if (state === common.STATES.DONE)
+        }
+        if (state === common.STATES.DONE) {
           currentTask.elapsedTime = new Date() - currentTask.startTime;
+        }
         this.showAllTasks();
         return;
       }
@@ -59,8 +58,7 @@ var Manager = {
   checkShortestTask: function () {
     var shortestTask;
     this.tasks.forEach(function (task) {
-      if (task.state !== common.STATES.DONE)
-        return;
+      if (task.state !== common.STATES.DONE) return;
       shortestTask = shortestTask || task;
       if (shortestTask.elapsedTime > task.elapsedTime) {
         shortestTask = task;

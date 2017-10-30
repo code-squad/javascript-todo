@@ -29,8 +29,9 @@ var common = (function () {
     showState: function (tasks) {
       tasks.forEach(function (task) {
         var showText = "id: " + task.id + ", name: " + task.name;
-        if (task.state === common.STATES.DONE)
+        if (task.state === common.STATES.DONE) {
           showText += ", time: " + task.elapsedTime;
+        }
         log(showText);
       });
     },

@@ -10,22 +10,17 @@ var commandProcesser = {
   verifyCommand: function () {
     switch (this.command[0]) {
       case common.COMMANDS.ADD:
-        if (this.command.length !== 2)
-          return false;
+        if (this.command.length !== 2) return false;
         break;
       case common.COMMANDS.SHOW:
-        if (this.command.length !== 2)
-          return false;
+        if (this.command.length !== 2) return false;
         break;
       case common.COMMANDS.UPDATE:
-        if (this.command.length !== 3)
-          return false;
-        if (!this.isInStates(this.command[2]))
-          return false;
+        if (this.command.length !== 3) return false;
+        if (!this.isInStates(this.command[2])) return false;
         break;
       case common.COMMANDS.CHECK:
-        if (this.command.length !== 1)
-          return false;
+        if (this.command.length !== 1) return false;
         break;
       default:
         return false;
@@ -34,9 +29,7 @@ var commandProcesser = {
   },
   isInStates: function (insertedState) {
     for (state in common.STATES) {
-      if (common.STATES[state] === insertedState) {
-        return true;
-      }
+      if (common.STATES[state] === insertedState) return true;
     }
     return false;
   },
