@@ -33,7 +33,7 @@ var commandProcesser = {
     return this;
   },
   isInStates: function (insertedState) {
-    for (state in common.COMMANDS) {
+    for (state in common.STATES) {
       if (common.STATES[state] === insertedState) {
         return true;
       }
