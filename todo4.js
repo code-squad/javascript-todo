@@ -14,6 +14,19 @@ function Task(title) {
     this.runtime = null;
 }
 Task.prototype = {
+    setRunTime: function () {
+        this.end = Date.now();
+        this.runtime = (this.end - this.start) / 1000;
+    },
+    get getRuntime() {
+        return this.runtime;
+    },
+    get getTitle() {
+        return this.title;
+    }
+}
+var TaskMng = {
+    taskList: [],
     count: { todo: 0, doing: 0, done: 0 },
     minTaskTitle: null,
     minTaskTime: Infinity,
@@ -21,16 +34,12 @@ Task.prototype = {
         return "현재상태 : todo : " + this.count.todo +
             ", doing : " + this.count.doing +
             ", done : " + this.count.done;
-    }
-}
-function stateChanger(state) { }
-var TaskMng = {
-    taskList: [],
+    },
     add: function (title) {
         this.taskList.push(new Task(title));
-        Task.prototype.count.todo++;
+        this.count.todo++;
         console.log("id : " + (this.taskList.length) + " , \"" + title + "\" 항목이 새로 추가됐습니다.")
-        console.log(Task.prototype.counter);
+        console.log(this.counter);
     },
 
     show: function (state) {
@@ -55,7 +64,7 @@ var TaskMng = {
     update: function (id, state) {
         this.index = id - 1;
         var task = this.taskList[this.index];
-        var count = Task.prototype.count;
+        var count = this.count;
         if (task === undefined) {
             console.log("없는 id!!");
         }
@@ -65,15 +74,14 @@ var TaskMng = {
                 task.start = Date.now();
             }
             else if (state == "done") {
-                task.end = Date.now();
-                task.runtime = (task.end - task.start) / 1000;
-                if (task.runtime <= Task.prototype.minTaskTime) {
-                    Task.prototype.minTaskTime = task.runtime;
-                    Task.prototype.minTaskTitle = task.title;
+                task.setRunTime();
+                if (task.getRuntime <= this.minTaskTime) {
+                    this.minTaskTime = task.getRuntime;
+                    this.minTaskTitle = task.getTitle;
                 }
             }
         }
-        console.log(Task.prototype.counter);
+        console.log(this.counter);
     },
 };
 
@@ -90,8 +98,8 @@ var todo = {
                 }
             }
             else if (first === "mintask") {
-                if (Task.prototype.minTaskTitle !== null) {
-                    console.log(Task.prototype.minTaskTitle + " " + Task.prototype.minTaskTime + "초");
+                if (TaskMng.minTaskTitle !== null) {
+                    console.log(TaskMng.minTaskTitle + " " + TaskMng.minTaskTime + "초");
                 }
                 else console.log("빈 저장목록");
             }
