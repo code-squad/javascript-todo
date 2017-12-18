@@ -21,3 +21,20 @@ var getReadLine = (function () {
 })();
 
 var obj = [{ id: 1, task: '고양이 밥주기', state: 'doing'}];
+
+function Task(task) {
+    this.id = '';
+    this.task = task;
+    this.state = 'todo';
+}
+
+var todo = {
+    add: function (task) {
+        var id = 1;
+        id += obj[obj.length -1]['id'];
+        obj[obj.length] = {'id': id, 'task':task, 'state':'todo'};
+        console.log('id:',id,'"',task,'"','항목이 새로 추가되었습니다');
+        this.getState();
+    }
+}
+
