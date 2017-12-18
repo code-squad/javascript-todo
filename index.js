@@ -28,6 +28,7 @@ function Task(task) {
     this.state = 'todo';
 }
 
+
 var todo = {
     add: function (task) {
         var id = 1;
@@ -35,6 +36,15 @@ var todo = {
         obj[obj.length] = {'id': id, 'task':task, 'state':'todo'};
         console.log('id:',id,'"',task,'"','항목이 새로 추가되었습니다');
         this.getState();
-    }
-}
+    },
+    
+    getState: function () {
+        var flag = {todo:0, doing:0, done:0};
+        for(prop in obj){
+            flag[obj[prop]['state']]++;
+        }
+        console.log('현재상태: ',flag);
+    },
+
+};
 
