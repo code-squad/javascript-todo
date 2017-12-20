@@ -1,50 +1,82 @@
-/*
- * 할일을 추가할 수 있다.
- * 할일이 추가되면 id 값을 생성하고 결과를 알려준다.
- * 상태는 3가지로 관리된다todo, doing, done.
- * 각 일(task)는 상태값을 가지고 있고, 그 상태값을 변경할 수 있다.
- * 각 상태에 있는 task는 show함수를 통해서 볼 수 있다.
- * 명령어를 입력시이 '$'를 구분자로 사용해서 넣는다.
- * */
+var readline = require('readline');
 
-var getReadLine = (function () {
-    var readline = require('readline');
+var rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 
-    var rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
+rl.on('line',function (input) {
+    var result = interpreter.excute(input);
+    app[result.command].apply(app,result.param);
+    
+});
 
+function Task(content) {
+    this.id = this.addId();
+    this.status = 'todo';
+    this.content = content;
+}
+
+/**
+ * TIL
+ * 클로저를 이용. id변수를 즉시실행(1회만실행)으로 만든후
+ * 클로저를 이용해 id변수가 사라지지 않고 계속 참조하게 한다.
+ */
+
+Task.prototype.addId = (function () {
+    var id = 1;
     return function () {
-        return rl;
+        return id++;
     }
 })();
 
-var obj = [{ id: 1, task: '고양이 밥주기', state: 'doing'}];
-
-function Task(task) {
-    this.id = '';
-    this.task = task;
-    this.state = 'todo';
-}
-
-
-var todo = {
-    add: function (task) {
-        var id = 1;
-        id += obj[obj.length -1]['id'];
-        obj[obj.length] = {'id': id, 'task':task, 'state':'todo'};
-        console.log('id:',id,'"',task,'"','항목이 새로 추가되었습니다');
-        this.getState();
+var app = {
+    taskList: [], //[{id:1,status:doing,content:밥주기}]
+    count :{
+        todo: 0,
+        doing: 0,
+        done: 0
     },
-    
-    getState: function () {
-        var flag = {todo:0, doing:0, done:0};
-        for(prop in obj){
-            flag[obj[prop]['state']]++;
-        }
-        console.log('현재상태: ',flag);
-    },
+    show: function (status) {
+        var tasks = this.taskList.filter(function (task) {
+            return task.status === status;
+        });
 
+        tasks.forEach(function (task) {
+            console.log('"',task.id,',',task.content,'"');
+        });
+    },
+    add: function (content) {
+        var newTask = new Task(content);
+        this.taskList.push(newTask);
+        this.count.todo++;
+        console.log('id: ',newTask.id,',',newTask.content,'항목이 새로 추가됐습니다.');
+        this.showCurrentStatus();
+    },
+    showCurrentStatus: function(){
+        console.log('현재상태: todo: '+this.count.todo+'개, '
+            +'doing: '+this.count.doing+'개, '
+            +'done: '+this.count.done+'개');
+    },
+    update: function (id,status) {
+
+
+    }
 };
 
+/**
+ * TIL
+ * 리턴값으로 객체
+ */
+var interpreter = {
+    excute: function (input) {
+        var params = input.split('$');
+        var command = params[0];
+        var param = params.shift();
+
+        return {
+            command: command,
+            param: param
+        }
+    }
+};
