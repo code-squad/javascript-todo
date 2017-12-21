@@ -7,7 +7,7 @@ var rl = readline.createInterface({
 
 rl.on('line',function (input) {
     var result = interpreter.excute(input);
-    app[result.command].apply(app,result.param);
+    app[result.command].apply(app,result.params);
     
 });
 
@@ -58,9 +58,15 @@ var app = {
             +'doing: '+this.count.doing+'개, '
             +'done: '+this.count.done+'개');
     },
-    update: function (id,status) {
-
-
+    update: function (targetId,targetStatus) {
+        targetId = parseInt(targetId);
+        var targetTaskList = this.taskList.filter(function(task){
+            return task.id === targetId;
+        });
+        this.count[targetTaskList[0].status]--;
+        targetTaskList[0].status = targetStatus;
+        this.count[targetStatus]++;
+        this.showCurrentStatus();
     }
 };
 
@@ -71,12 +77,11 @@ var app = {
 var interpreter = {
     excute: function (input) {
         var params = input.split('$');
-        var command = params[0];
-        var param = params.shift();
+        var command = params.shift();
 
         return {
             command: command,
-            param: param
+            params: params
         }
     }
 };
