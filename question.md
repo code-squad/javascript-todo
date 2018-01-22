@@ -99,12 +99,12 @@ const value = a || b;
 
   - String 형태의 자바스크립트 코드를 동적으로 실행할 수 있도록 바꿔주는 함수입니다.
 
-    ```javascript
-    var dateFn = "Date(2017,5,30)";
-    var myDate;
+```javascript
+var dateFn = "Date(2017,5,30)";
+var myDate;
 
-    eval("myDate = new " + dateFn + ";");  // 2017-06-29T15:00:00.000Z
-    ```
+eval("myDate = new " + dateFn + ";");  // 2017-06-29T15:00:00.000Z
+```
 
 
 
@@ -137,14 +137,22 @@ const value = a || b;
 
 ### add(10)(2) //12 가 되도록 구현해보기 
 
-
+```javascript
+const add = (a) => {
+  return (b) => {
+    return a + b;
+  };
+}
+console.log(add(10)(2));
+```
 
 ### 함수의 인자갯수와 파라미터가 일치하지 않으면 어떤일이 생기는가 설명하기
 
 * 함수의 인자갯수보다 적게 함수를 호출했을 경우, 넘겨지지 않은 인자는 undefined 값이 할당되며, 인자 갯수보다 많게 호출했을 경우에는 에러가 발생하지 않고, 초과된 parameter는 무시됩니다.
 
 ### 함수의 반환값이 없을때 어떻게 되는가?
-  - undefined가 반환됩니다.
+
+* undefined가 반환됩니다.
 
 
 ### 익명함수는 무엇인가? 
