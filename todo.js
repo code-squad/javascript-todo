@@ -12,7 +12,6 @@
 * 이번 미션역시 대화형 프로그래밍을 위해서 nodejs에서 제공하는 방법을 구현한다.
 
 * 참고 : https://nodejs.org/api/readline.html
- 
 */
 
 const STATES = {
@@ -20,6 +19,8 @@ const STATES = {
   doing: 0,
   done: 0
 }
+
+
 
 const TODO = [{
     id: 5,
@@ -43,6 +44,10 @@ const TODO = [{
   }
 ]
 
+let MSG = {
+  add: " 항목이 새로 추가됐습니다."
+}
+
 
 const readline = require('readline');
 const rl = readline.createInterface({
@@ -58,8 +63,10 @@ rl.question('?: ', (task) => {
   const message = task.split("$")[1];
 
   addTodo(command, message, id);
-  show(command, message);
+  showStates(command, message);
+  updateTodo(command)
 });
+
 
 
 
@@ -71,33 +78,51 @@ const addTodo = (command, message, id) => {
       "task": message,
       "states": "todo"
     });
-    console.log(message + " 항목이 새로 추가됐습니다.");
+    console.log(message + MSG.add);
   }
+  rl.close();
 }
 
 
 
-const show = (command, message) => {
+const showStates = (command, message) => {
   if (command === 'show') {
-    if (message === 'todo') {
-      for (let elem in TODO) {
-        if (TODO[elem].states === 'todo') {
-          console.log(TODO[elem].id + ", " + TODO[elem].task);
-        }
-      }
-    } else if (message === 'doing') {
-      for (let elem in TODO) {
-        if (TODO[elem].states === 'doing') {
-          console.log(TODO[elem].id + ", " + TODO[elem].task);
-        }
-      }
-    } else if (message === 'done') {
-      for (let elem in TODO) {
-        if (TODO[elem].states === 'done') {
-          console.log(TODO[elem].id + ", " + TODO[elem].task);
-        }
-      }
-    }
+    declareState(message)
     rl.close();
   }
+}
+
+
+const declareState = (stateVal) => {
+  for (let elem in TODO) {
+    if (TODO[elem].states === stateVal) {
+      console.log(TODO[elem].id + ", " + TODO[elem].task);
+    }
+  }
+}
+
+
+const updateTodo = (command) => {
+  let todo = 0;
+  let doing = 0;
+  let done = 0;
+  if (command === 'update') {
+    updateSates(todo, doing, done);
+  }
+  rl.close();
+}
+
+
+const updateSates = (todo, doing, done) => {
+  for (let elem in TODO) {
+    let status = TODO[elem].states
+    if (status === 'todo') {
+      todo++;
+    } else if (status === 'doing') {
+      doing++;
+    } else if (status === 'done') {
+      done++;
+    }
+  }
+  console.log("todo: " + todo + "개,", "doing: " + doing + "개,", "done: " + done + "개");
 }
