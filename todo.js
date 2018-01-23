@@ -59,10 +59,13 @@ const init = (task) => {
 
     const command = task.split("$")[0];
     const message = task.split("$")[1];
+    const status = task.split("$")[2];
+
+
 
     add.todo(command, message);
     show.states(command, message);
-    update.todo(command)
+    update.init(command, message, status)
     againCommand(command);
   });
 }
@@ -90,27 +93,29 @@ const show = {
     }
   },
   declare(stateVal) {
-    for (let elem in TODO) {
-      if (TODO[elem].states === stateVal) {
-        console.log(TODO[elem].id + ", " + TODO[elem].task);
+    TODO.map(elem => {
+      if (elem.states === stateVal) {
+        console.log(elem.id + ", " + elem.task);
       }
-    }
+    })
   }
 }
 
 
 const update = {
-  todo(command) {
+  init(command, message, status) {
     let todo = 0;
     let doing = 0;
     let done = 0;
-    if (command === 'update') {
+    if (command === 'update' && !message) {
       update.states(todo, doing, done);
+    } else if (command === 'update' && !!message) {
+      update.shift(message, status);
     }
   },
   states(todo, doing, done) {
-    for (let elem in TODO) {
-      let status = TODO[elem].states
+    TODO.map(elem => {
+      let status = elem.states
       if (status === 'todo') {
         todo++;
       } else if (status === 'doing') {
@@ -118,9 +123,17 @@ const update = {
       } else if (status === 'done') {
         done++;
       }
-    }
+    });
     console.log("todo: " + todo + "개,", "doing: " + doing + "개,", "done: " + done + "개");
+  },
+  shift(message, status) {
+    TODO.map(elem => {
+      if (elem.id === Number(message)) {
+        elem.states = status;
+      }
+    });
   }
+
 }
 
 
