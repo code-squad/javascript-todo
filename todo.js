@@ -60,66 +60,67 @@ const init = (task) => {
     const command = task.split("$")[0];
     const message = task.split("$")[1];
 
-    addTodo(command, message);
-    showStates(command, message);
-    updateTodo(command)
+    add.todo(command, message);
+    show.states(command, message);
+    update.todo(command)
     againCommand(command);
   });
 }
 
 
-const addTodo = (command, message) => {
-  let id = TODO.length + 1;
-  if (command === 'add') {
-    TODO.push({
-      "id": id++,
-      "task": message,
-      "states": "todo"
-    });
-    console.log(message + MSG.add);
-    // console.log(TODO);
+const add = {
+  todo(command, message) {
+    let id = TODO.length + 1;
+    if (command === 'add') {
+      TODO.push({
+        "id": id,
+        "task": message,
+        "states": "todo"
+      });
+      console.log(message + MSG.add);
+    }
   }
+
 }
 
-
-const showStates = (command, message) => {
-  if (command === 'show') {
-    declareState(message)
-  }
-}
-
-
-const declareState = (stateVal) => {
-  for (let elem in TODO) {
-    if (TODO[elem].states === stateVal) {
-      console.log(TODO[elem].id + ", " + TODO[elem].task);
+const show = {
+  states(command, message) {
+    if (command === 'show') {
+      show.declare(message)
+    }
+  },
+  declare(stateVal) {
+    for (let elem in TODO) {
+      if (TODO[elem].states === stateVal) {
+        console.log(TODO[elem].id + ", " + TODO[elem].task);
+      }
     }
   }
 }
 
 
-const updateTodo = (command) => {
-  let todo = 0;
-  let doing = 0;
-  let done = 0;
-  if (command === 'update') {
-    updateSates(todo, doing, done);
-  }
-}
-
-
-const updateSates = (todo, doing, done) => {
-  for (let elem in TODO) {
-    let status = TODO[elem].states
-    if (status === 'todo') {
-      todo++;
-    } else if (status === 'doing') {
-      doing++;
-    } else if (status === 'done') {
-      done++;
+const update = {
+  todo(command) {
+    let todo = 0;
+    let doing = 0;
+    let done = 0;
+    if (command === 'update') {
+      update.states(todo, doing, done);
     }
+  },
+  states(todo, doing, done) {
+    for (let elem in TODO) {
+      let status = TODO[elem].states
+      if (status === 'todo') {
+        todo++;
+      } else if (status === 'doing') {
+        doing++;
+      } else if (status === 'done') {
+        done++;
+      }
+    }
+    console.log("todo: " + todo + "개,", "doing: " + doing + "개,", "done: " + done + "개");
   }
-  console.log("todo: " + todo + "개,", "doing: " + doing + "개,", "done: " + done + "개");
 }
 
 
