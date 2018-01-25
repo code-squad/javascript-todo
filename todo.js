@@ -39,15 +39,13 @@ const TODO = [{
     task: "운동하기",
     states: "done"
   }
-]
+];
 
 const MSG = {
   request: "명령어를 입력하세요: ",
   add: " 항목이 새로 추가됐습니다.",
   again: "또 입력할까요? (네/아니요) "
 }
-
-
 
 const readline = require('readline');
 
@@ -56,93 +54,77 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
+
+
+
 const init = (task) => {
   rl.question(MSG.request, (task) => {
     const command = task.split("$")[0];
     const message = task.split("$")[1];
     const status = task.split("$")[2];
-    checking(command, message, status);
-    againCommand(command);
-  });
-}
 
+    let checking = {
+      'add': function (command, message) {
+        let id = TODO.length + 1;
+        TODO.push({
+          "id": id,
+          "task": message,
+          "states": "todo"
+        });
+        console.log(message + MSG.add);
+      },
 
-const checking = (command, message, status) => {
-  let condition = {
-    'add': adding,
-    'show': showing,
-    'update': updating
-  }[command]
+      'show': function (command, message) {
+        TODO.map(elem => {
+          if (elem.states === message) {
+            console.log(elem.id + ", " + elem.task);
+          }
+        })
+      },
 
-  condition(command, message, status);
-}
+      'update': function (command, message, status) {
+        if (!message) {
+          TODO.forEach(elem => {
+            if (elem.states === 'todo') {
+              STATUS.todo++;
+            } else if (elem.states === 'doing') {
+              STATUS.doing++;
+            } else if (elem.states === 'done') {
+              STATUS.done++;
+            }
+          });
+          console.log("todo: " + STATUS.todo + "개,", "doing: " + STATUS.doing + "개,", "done: " + STATUS.done + "개");
 
+        } else if (!!message) {
+          TODO.forEach(elem => {
+            if (elem.id === Number(message)) {
+              elem.states = status;
+            }
+          });
+        }
+      }
+    }[command]
 
-const adding = (command, message) => {
-  let id = TODO.length + 1;
-  TODO.push({
-    "id": id,
-    "task": message,
-    "states": "todo"
-  });
-  console.log(message + MSG.add);
-}
-
-
-
-const showing = (command, message) => {
-  TODO.map(elem => {
-    if (elem.states === message) {
-      console.log(elem.id + ", " + elem.task);
-    }
-  })
-}
-
-
-const updating = (command, message, status) => {
-  if (!message) {
-    updateStates();
-  } else if (!!message) {
-    updateShift(message, status);
-  }
-}
-
-
-const updateStates = () => {
-
-  TODO.forEach(elem => {
-    let condition = {
-      'todo': STATUS.todo++,
-      'doing': STATUS.doing++,
-      'done': STATUS.done++
-    }[elem.states]
-  });
-  console.log("todo: " + STATUS.todo + "개,", "doing: " + STATUS.doing + "개,", "done: " + STATUS.done + "개");
-}
-
-
-const updateShift = (message, status) => {
-  TODO.map(elem => {
-    if (elem.id === Number(message)) {
-      elem.states = status;
-    }
+    checking(command, message, status)
+    againCmd(command);
   });
 }
 
 
 
 
-const againCommand = (command) => {
+
+const againCmd = (command) => {
   rl.question(MSG.again, (answer) => {
-    if (answer === '네') {
-      init();
-    } else if (answer === '아니요') {
-      rl.close();
-    } else {
-      againCommand(command);
-    }
+    let confirm = {
+      '네': init,
+      '아니요': rl.close
+    }[answer];
+    confirm(answer);
   })
 }
+
+
 
 
 
