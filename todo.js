@@ -13,12 +13,6 @@
     
     * 참고 : https://nodejs.org/api/readline.html
 */
-const STATUS = {
-  todo: 0,
-  doing: 0,
-  done: 0
-}
-
 const TODO = [{
     id: 1,
     task: "자바스크립트 공부하기",
@@ -64,7 +58,7 @@ const init = (task) => {
     const status = task.split("$")[2];
 
     let checking = {
-      'add': function (command, message) {
+      'add': (...theArgs) => {
         let id = TODO.length + 1;
         TODO.push({
           "id": id,
@@ -74,7 +68,7 @@ const init = (task) => {
         console.log(message + MSG.add);
       },
 
-      'show': function (command, message) {
+      'show': (...theArgs) => {
         TODO.map(elem => {
           if (elem.states === message) {
             console.log(elem.id + ", " + elem.task);
@@ -82,19 +76,19 @@ const init = (task) => {
         })
       },
 
-      'update': function (command, message, status) {
+      'update': (...theArgs) => {
         if (!message) {
+          let statesArray = [];
+          let statesResult = {};
           TODO.forEach(elem => {
-            if (elem.states === 'todo') {
-              STATUS.todo++;
-            } else if (elem.states === 'doing') {
-              STATUS.doing++;
-            } else if (elem.states === 'done') {
-              STATUS.done++;
-            }
+            statesArray.push(elem.states);
           });
-          console.log("todo: " + STATUS.todo + "개,", "doing: " + STATUS.doing + "개,", "done: " + STATUS.done + "개");
-
+          statesArray.sort().forEach(elem => {
+            statesResult[elem] = statesResult[elem] === undefined ? 1 : statesResult[elem] += 1;
+          })
+          for (var value in statesResult) {
+            console.log(value + ": " + statesResult[value] + "개");
+          }
         } else if (!!message) {
           TODO.forEach(elem => {
             if (elem.id === Number(message)) {
@@ -109,10 +103,6 @@ const init = (task) => {
     againCmd(command);
   });
 }
-
-
-
-
 
 const againCmd = (command) => {
   rl.question(MSG.again, (answer) => {
