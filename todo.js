@@ -68,35 +68,25 @@ const cmd = {
 
   update: function (...theArgs) {
     if (!execute) {
-      const statesArray = [];
       const statesResult = {};
       this.todoList.map(elem => {
-        return statesArray.push(elem.states);
+        return statesResult[elem.states] = statesResult[elem.states] === undefined ? 1 : statesResult[elem.states] += 1;
       });
-      statesArray.forEach(elem => {
-        statesResult[elem] = statesResult[elem] === undefined ? 1 : statesResult[elem] += 1;
-      })
+      
       for (let elem in statesResult) {
         console.log(elem + ": " + statesResult[elem] + "개");
       }
-    } else if (!!execute) {
+    } else if (execute) {
       const time = new Date();
-      if (status === 'doing') {
-        this.todoList.forEach(elem => {
-          if (elem.id === Number(execute)) {
-            elem.states = status;
-            elem.time = time.getHours();
-          };
-        })
-      } else if (status === 'done') {
-        this.todoList.forEach(elem => {
-          if (elem.id === Number(execute)) {
-            elem.states = status;
-            elem.time = time.getHours() - elem.time;
-          };
-        })
-
-      }
+      this.todoList.forEach(elem => {
+        if (elem.id === Number(execute)) {
+          elem.states = status;
+        };
+        const condition = {
+          'doing': elem.time = time.getHours(),
+          'done': elem.time = time.getHours() - elem.time
+        }[status]
+      });
     }
   },
 
