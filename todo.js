@@ -33,10 +33,7 @@ const cmd = {
 
   init: function (task) {
     rl.question(this.messages.request, (task) => {
-      command = task.split("$")[0];
-      execute = task.split("$")[1];
-      status = task.split("$")[2];
-
+      [command, execute, status] = task.split("$");
       if (command === 'add') {
         this.add(command, execute);
       } else if (command === 'show') {
@@ -48,51 +45,58 @@ const cmd = {
     })
   },
 
-
-  add: function (command, execute) {
+  add: function (...theArgs) {
     let id = this.todoList.length + 1;
     this.todoList.push({
       "id": id,
       "task": execute,
-      "states": "todo"
+      "states": "todo",
+      "time": 0
     });
     console.log(execute + this.messages.add);
   },
 
-
-
-
-  show: function (command, execute) {
+  show: function (...theArgs) {
     this.todoList.map(elem => {
-      if (elem.states === execute) {
+      if (elem.states === 'done') {
+        console.log(elem.id + ", " + elem.task + ", " + elem.time + "시간");
+      } else if (elem.states === execute) {
         console.log(elem.id + ", " + elem.task);
       }
     })
   },
 
-  
-
-  update: function (command, execute, status) {
+  update: function (...theArgs) {
     if (!execute) {
-      let statesArray = [];
-      let statesResult = {};
-
-      this.todoList.forEach(elem => {
-        statesArray.push(elem.states);
+      const statesArray = [];
+      const statesResult = {};
+      this.todoList.map(elem => {
+        return statesArray.push(elem.states);
       });
-      statesArray.sort().forEach(elem => {
+      statesArray.forEach(elem => {
         statesResult[elem] = statesResult[elem] === undefined ? 1 : statesResult[elem] += 1;
       })
-      
-      for (var value in statesResult) {
-        console.log(value + ": " + statesResult[value] + "개");
+      for (let elem in statesResult) {
+        console.log(elem + ": " + statesResult[elem] + "개");
       }
     } else if (!!execute) {
-      this.todoList.forEach(elem => {
-        if (elem.id === Number(execute)) {
-          elem.states = status;
-        }
-      });
+      const time = new Date();
+      if (status === 'doing') {
+        this.todoList.forEach(elem => {
+          if (elem.id === Number(execute)) {
+            elem.states = status;
+            elem.time = time.getHours();
+          };
+        })
+      } else if (status === 'done') {
+        this.todoList.forEach(elem => {
+          if (elem.id === Number(execute)) {
+            elem.states = status;
+            elem.time = time.getHours() - elem.time;
+          };
+        })
+
+      }
     }
   },
 
@@ -103,8 +107,9 @@ const cmd = {
       } else if (answer === '아니요') {
         rl.close();
       }
-    })
+    });
   }
+
 }
 
 cmd.init();
