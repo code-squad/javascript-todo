@@ -34,6 +34,7 @@ const cmd = {
   init: function (task) {
     rl.question(this.messages.request, (task) => {
       [command, execute, status] = task.split("$");
+
       if (command === 'add') {
         this.add(command, execute);
       } else if (command === 'show') {
@@ -45,6 +46,7 @@ const cmd = {
     })
   },
 
+  
   add: function (...theArgs) {
     let id = this.todoList.length + 1;
     this.todoList.push({
@@ -56,15 +58,17 @@ const cmd = {
     console.log(execute + this.messages.add);
   },
 
+
   show: function (...theArgs) {
     this.todoList.map(elem => {
       if (elem.states === 'done') {
-        console.log(elem.id + ", " + elem.task + ", " + elem.time + "시간");
-      } else if (elem.states === execute) {
         console.log(elem.id + ", " + elem.task);
+      } else if (elem.states === execute) {
+        console.log(elem.id + ", " + elem.task + ", " + elem.time + "시간");
       }
     })
   },
+
 
   update: function (...theArgs) {
     if (!execute) {
@@ -72,7 +76,6 @@ const cmd = {
       this.todoList.map(elem => {
         return statesResult[elem.states] = statesResult[elem.states] === undefined ? 1 : statesResult[elem.states] += 1;
       });
-      
       for (let elem in statesResult) {
         console.log(elem + ": " + statesResult[elem] + "개");
       }
@@ -81,14 +84,16 @@ const cmd = {
       this.todoList.forEach(elem => {
         if (elem.id === Number(execute)) {
           elem.states = status;
+          if (status === 'doing') {
+            elem.time = (Date.now() / 3600000).toFixed(0);
+          } else if (status === 'done') {
+            elem.time = ((Date.now() / 3600000) - elem.time).toFixed(0);
+          }
         };
-        const condition = {
-          'doing': elem.time = time.getHours(),
-          'done': elem.time = time.getHours() - elem.time
-        }[status]
       });
     }
   },
+
 
   again: function (command) {
     rl.question(this.messages.again, (answer) => {
@@ -99,7 +104,6 @@ const cmd = {
       }
     });
   }
-
 }
 
 cmd.init();
