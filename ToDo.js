@@ -1,24 +1,13 @@
 /* 
-    할일관리 프로그램
-    할일을 추가할 수 있다.
-    할일이 추가되면 id 값을 생성하고 결과를 알려준다.
-    상태는 3가지로 관리된다. todo, doing, done.
-    각 일(task)는 상태값을 가지고 있고, 그 상태값을 변경할 수 있다.
-    각 상태에 있는 task는 show함수를 통해서 볼 수 있다.
-    명령어를 입력시 command함수를 사용해야하고, '$'를 구분자로 사용해서 넣는다.
+    소요시간 계산
+    완료 상태가 되면, 진행중부터 완료까지 소요된 시간을 알 수 있으면 좋겠다. 
+    예를들어 공부하기라는 task가 얼마나 걸렸는지 알고 싶을 수 있다. 
+    이때 시간단위로 몇시간 걸렸는지 알 수 있게 날짜를 기반으로 시간을 계산해보자.
 
-    command("add$자바스크립트 공부하기");
-    > id: 5,  "자바스크립트 공부하기" 항목이 새로 추가됐습니다.  //추가된 결과 메시지를 출력
-    > 현재상태 :  todo:1개, doing:2개, done:2개
+    > "show$done;
+    > 'iOS공부하기, 3시간10분', '자바스크립트공부하기, 9시간31분', '주간회의 1시간40분'
 
-    command("show$doing");
-    > "1, 그래픽스공부", "4, 블로그쓰기"  //id값과 함께 task제목이 출력된다.
-
-    command("show$done");
-    > //완료 목록을 위 doing과 같은 형태로 노출한다.
-
-    command("update$3$done");
-    > 현재상태 :  todo:1개, doing:1개, done:3개  //변경된 모든 상태가 노출.
+    이런식으로 task가 doing => done까지의 소요시간을 계산해서, 출력하도록 한다.
 */
 
 function command(works, data) {
@@ -54,11 +43,19 @@ function addWorkToDo(works, content) {
     const forIndexMatchingData = 1;
 
     let idCount = works.length + forIndexMatchingData;
+    let date = new Date();
 
     var workObj = {
         id: idCount,
         content: content,
-        state: "todo"
+        state: "todo",
+        createTime: date.toLocaleString(),
+        TimeToDoing: 0,
+        TimeToDone: 0,
+
+        calDoneTime: function() {
+            return this.TimeToDone - this.TimeToDoing;
+        }
     };
 
     works.push(workObj);
@@ -82,7 +79,9 @@ function showWorkList(works, state) {
     log(" << " + mode + " 상태인 목록을 출력합니다 >> ");
 
     for(let i=0; i<works.length; i++) {
-        if (works[i].state == state) {
+        if (works[i].state === state && mode === "DONE") {
+            result = printDoneWorkList(works[i])
+        } else if (works[i].state === state) {
             content = "\"" + works[i].id + ". " + works[i].content + "\"";
             result += content;
         }
@@ -93,14 +92,43 @@ function showWorkList(works, state) {
     log(result);
 }
 
+function printDoneWorkList(data) {
+
+    let millisecondTime = data.calDoneTime();
+    let calculatedTime = Math.floor(millisecondTime / 1000);
+    let minute = Math.floor(calculatedTime / 60);
+    let hour = Math.floor(minute / 60);
+    let second = calculatedTime;
+    let result = "";
+
+    minute -= (hour * 60);
+    second -= ((hour * 60 * 60) + (minute * 60));
+    result = "\"" + data.id + ". " + data.content + "\", " + 
+             "완료 시간 : " + hour + "시간 " + minute + "분 " + second + "초";
+
+    return result;
+}
+
 function updateWorkState(works, id, content) {
     // 해당 ID 값을 상태로 바꿔주는 기능으로 구현
     // ID에 맞게 해당 state를 수정 후
 
+    // 2번째 요구사항
+    // Doing 상태로 바뀔 때 시간체크
+    // Done 상태로 바뀔 때 시간체크
+
     let forIndexMatchingData = 1;
     let index = id - forIndexMatchingData;
 
+    log(" << " + id + " 번의 상태를 '" + works[index].state + "' 에서 '" + content + "' 로 변경합니다 >> ");
+
     works[index].state = content;
+
+    if (content === "doing") {
+        works[index].TimeToDoing = Date.now();
+    } else if (content === "done") {
+        works[index].TimeToDone = Date.now();
+    }
     
     printCurrentState(works);
 }
@@ -141,12 +169,12 @@ var run = function () {
 
     command(works, "add$자바스크립트 공부하기");
     command(works, "show$todo");
-    command(works, "show$doing");
-    command(works, "show$done");
-    command(works, "update$1$done");
-    
-    command(works, "show$todo");
-    command(works, "show$done");
+
+    command(works, "update$1$doing");
+    setTimeout(function() {
+        command(works, "update$1$done");
+        command(works, "show$done");
+    }, 3000);
 };
 
 run();
