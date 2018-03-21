@@ -6,7 +6,7 @@
 const enumCheck = (checkData, enumData) => {
     return !!Object.values(checkData).filter(item => item === enumData).length;
 }
-
+const notNumber = number => isNaN(Number(number))
 
 const command = (function () {
     const Actions = {
@@ -127,7 +127,7 @@ const command = (function () {
                 const idList = Object.keys(todos);
                 return idList.filter(el => el === id).length !== 0
             }
-            const notNumber = id => isNaN(Number(id))
+
 
             const checkSpendTime = (id) => {
                 let startTime = todos[id].startTime.getTime();
@@ -170,8 +170,8 @@ const command = (function () {
                 if (!validIdCheck(id)) throw Error(errMsg.notHaveThisId)
                 todos[id].state = state;
                 stateUpdate(beforeState, state);
-                updateTimer(id, state);
-                console.log('printTime', printTime(id, state));
+                // updateTimer(id, state);
+                // console.log('printTime', printTime(id, state));
                 return statePrint();
             }
             switch (actions) {
@@ -190,17 +190,15 @@ const command = (function () {
 })();
 
 
+command('add$자바스크립트공부');
+command('add$ES6공부');
 
-
-// command('add$자바스크립트공부');
-// command('add$ES6공부');
-// command('add$TIL 블로그 글 쓰기');
-// command('add$이전에 짠 것들 Refactoring하기');
+command('add$TIL 블로그 글 쓰기');
+command('add$이전에 짠 것들 Refactoring하기');
 command('add$Express 공부');
 command('add$React 공부');
-// command('adds$React 공부');
 command('show$todo');
-// command('show$todos');
+
 command('update$1$todo');
 command('update$1$doing');
 command('update$1$done');
