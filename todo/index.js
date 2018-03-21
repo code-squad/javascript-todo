@@ -91,6 +91,7 @@ const command = (function () {
                     id: todos[id].id,
                     todo: todos[id].todo,
                 }
+                stateAddtoDo();
                 return printsByType(printData, printType.Add);
             }
 
@@ -103,7 +104,7 @@ const command = (function () {
                 })
                 const addPrint = data => {
                     console.log(`id: ${data.id} ${data.todo} 항목이 추가 되었습니다 `)
-                    stateAddtoDo();
+
                     statePrint();
                 }
                 switch (type) {
@@ -134,8 +135,6 @@ const command = (function () {
                 let doneTime = todos[id].doneTime.getTime();
                 let spendTime = doneTime - startTime;
                 console.log('spenTime', spendTime);
-
-
             }
 
             const updateTimer = (id, state) => {
