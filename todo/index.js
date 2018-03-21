@@ -127,8 +127,41 @@ const command = (function () {
                 const idList = Object.keys(todos);
                 return idList.filter(el => el === id).length !== 0
             }
-            const notNumber = id => {
-                return isNaN(Number(id))
+            const notNumber = id => isNaN(Number(id))
+
+            const checkSpendTime = (id) => {
+                let startTime = todos[id].startTime.getTime();
+                let doneTime = todos[id].doneTime.getTime();
+                let spendTime = doneTime - startTime;
+                console.log('spenTime', spendTime);
+
+
+            }
+
+            const updateTimer = (id, state) => {
+                console.log('id', id, 'state', state);
+                switch (state) {
+                    case State.Doing:
+                        return todos[id].startTime = new Date();
+
+                    case State.Done:
+                        {
+                            todos[id].doneTime = new Date();
+                            return todos[id].spendTimes = checkSpendTime(id);;
+                        }
+
+                }
+
+            }
+            const printTime = (id, state) => {
+                switch (state) {
+                    case State.Doing:
+                        return todos[id].startTime
+                    case State.Done:
+                        return todos[id].spendTimes
+                    default:
+                        break;
+                }
             }
             const updateTodo = (id, state) => {
                 let beforeState = todos[id].state;
@@ -136,7 +169,9 @@ const command = (function () {
                 if (notNumber(id)) throw Error(errMsg.notNumber)
                 if (!validIdCheck(id)) throw Error(errMsg.notHaveThisId)
                 todos[id].state = state;
-                stateUpdate(beforeState, state)
+                stateUpdate(beforeState, state);
+                updateTimer(id, state);
+                console.log('printTime', printTime(id, state));
                 return statePrint();
             }
             switch (actions) {
@@ -145,11 +180,11 @@ const command = (function () {
                 case Actions.Show:
                     return showTodo(second)
                 case Actions.Update:
-                    return updateTodo(second, last)
+                    return updateTodo(second, last);
             }
         }
-        return compileOrder(order);
 
+        return compileOrder(order);
     }
     return controller
 })();
@@ -168,5 +203,7 @@ command('show$todo');
 // command('show$todos');
 command('update$1$todo');
 command('update$1$doing');
-command('update$2$done');
-command('show$done');
+command('update$1$done');
+
+// command('update$$done');
+// command('show$done');
