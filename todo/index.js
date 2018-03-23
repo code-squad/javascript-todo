@@ -10,23 +10,25 @@ const command = (function () {
         notNumber: 'id 값은 숫자여야 합니다.  ex) update$1$done',
         notHaveThisId: '해당 id 값이 없습니다'
     }
-    const enums = {}
-    enums.actions = {
-        add: 'add',
-        show: 'show',
-        update: 'update',
+    const enums = {
+        actions: {
+            add: 'add',
+            show: 'show',
+            update: 'update',
+        },
+        state: {
+            todo: 'todo',
+            doing: 'doing',
+            done: 'done',
+        }
     }
-    enums.state = {
-        todo: 'todo',
-        doing: 'doing',
-        done: 'done',
-    }
-    const todos = {};
-    todos.id = 0;
-    todos.stateCounter = {
-        todo: 0,
-        doing: 0,
-        done: 0,
+    const todos = {
+        id: 0,
+        stateCounter: {
+            todo: 0,
+            doing: 0,
+            done: 0,
+        }
     };
     const todoController = {
         compileOrder(order) {
@@ -62,7 +64,7 @@ const command = (function () {
                 todos[id].state = state;
                 todos.stateCounter[beforeState] -= 1;
                 todos.stateCounter[state] += 1;
-                this.stateCount(todos);
+                this.printState();
             },
             validIdCheck(id) {
                 let tasks = this.getOnlyTaskData(todos);
@@ -116,7 +118,7 @@ command('add$Express 공부');
 
 command('show$todo');
 
-command('update$10$doing');
+command('update$1$doing');
 
 
 // command('update$1$doing');
