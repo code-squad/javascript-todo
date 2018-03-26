@@ -20,6 +20,11 @@ const command = (function () {
             todo: 'todo',
             doing: 'doing',
             done: 'done',
+        },
+        printMethods: {
+            add: 'added',
+            show: 'printSameState',
+            update: 'updated',
         }
     }
     const todos = {
@@ -30,30 +35,28 @@ const command = (function () {
             done: 0,
         }
     };
-    const printTodo = {
-        Added() {
-            console.log(`id: ${todos.id} ${todos[todos.id].todo} 항목이 추가 되었습니다`)
-        },
-        todoState() {
-            console.log(`현재상태 : todo: ${todos.todoStateCounter.todo}개 doing: ${todos.todoStateCounter.doing}개 done: ${todos.todoStateCounter.done}개`)
-        },
-        updated(id) {
-            console.log(`업데이트 된 todo는 `, `id: ${todos[id].id} todo: ${todos[id].todo} 상태:  ${todos[id].todoState}`)
-        },
-        printSameState(filterList, todoState) {
-            let result = ''
-            result += `원하는 상태목록은 :D ${todoState}\n`
-            filterList.forEach(todo => {
-                result += `${todo.id}, ${todo.todo}\n`
-            })
-            console.log(result);
-        },
-    }
     const todoController = {
         compileOrder(order) {
             const [actions, target, update] = order.split('$');
             if (!enumCheck(actions, enums.actions)) console.error(errMsg.notActions)
-            this.todoActions[actions](target, update);
+            const printKey = this.todoActions[actions](target, update);
+            this.printTodo[enums.printMethods[actions]](printKey);
+        },
+        printTodo: {
+            added() {
+                console.log(`id: ${todos.id} ${todos[todos.id].todo} 항목이 추가 되었습니다`)
+                this.todoState();
+            },
+            todoState() {
+                console.log(`현재상태 : todo: ${todos.todoStateCounter.todo}개 doing: ${todos.todoStateCounter.doing}개 done: ${todos.todoStateCounter.done}개`)
+            },
+            updated(id) {
+                console.log(`업데이트 된 todo는 `, `id: ${todos[id].id} todo: ${todos[id].todo} 상태:  ${todos[id].todoState}`)
+                this.todoState();
+            },
+            printSameState(printText) {
+                console.log(printText);
+            },
         },
         todoActions: {
             add(todo) {
@@ -64,14 +67,22 @@ const command = (function () {
                     todoState: enums.todoState.todo,
                 }
                 todos.todoStateCounter.todo += 1;
-                printTodo.Added();
-                printTodo.todoState();
+
+            },
+            findSameState(filterList, todoState) {
+                let result = ''
+                result += `원하는 상태목록은 :D ${todoState}\n`;
+                filterList.forEach(
+                    todo => {
+                        result += `${todo.id}, ${todo.todo}\n`
+                    })
+                return result;
             },
             show(todoState) {
                 if (!enumCheck(todoState, enums.todoState)) console.error(errMsg.wrongTodoState)
                 let tasks = this.getOnlyTaskData(todos);
                 const filtered = Object.values(tasks).filter(task => task.todoState === todoState);
-                printTodo.printSameState(filtered, todoState)
+                return this.findSameState(filtered, todoState)
             },
             update(id, todoState) {
                 //ErrorCheck
@@ -83,9 +94,7 @@ const command = (function () {
                 todos[id].todoState = todoState;
                 todos.todoStateCounter[beforeState] -= 1;
                 todos.todoStateCounter[todoState] += 1;
-                printTodo.updated(id)
-                printTodo.todoState();
-                this.stateCount(todos);
+                return id;
             },
             validIdCheck(id) {
                 let tasks = this.getOnlyTaskData(todos);
@@ -127,7 +136,10 @@ try {
     command('show$todo');
 
     command('update$1$doing');
+
     // command('update$10$doing');
+
+    // command('show$todo');
     // command('shows$todos');
     // command('show$todos');
 } catch (e) {
