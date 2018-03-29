@@ -23,18 +23,22 @@ function command(str){
 
 function addThing(name){
   let thing = {};
+  let time = new Date();
   thing["id"] = thingsList.length + 1;
   thing["name"] = name;
+  thing["time"] = time.getMilliseconds();
   thingsList.push(thing);
   statuses["todo"].push(thing["id"]);
-  console.log(`id: ${thing["id"]}, "${thing["name"]}"항목이 새로 추가되었습니다`);
+  console.log(`id: ${thing["id"]}, "${thing["name"]}" 항목이 새로 추가되었습니다`);
   printStatus();
 }
 
 function showThing(status){
   let result = [];
   statuses[status].forEach(id =>{
-    result.push(`"${id}, ${thingsList[id-1]["name"]}"`);
+    let element = `"${id}, ${thingsList[id-1]["name"]}"`;
+    if(status === "done") element = element + `(소요시간: ${thingsList[id-1]["time"]})`;
+    result.push(element);
   });
   console.log(result.join());
 }
@@ -47,6 +51,10 @@ function updateThing(id, status){
     }
   });
   statuses[status].push(id);
+  if(status === "done"){
+    let time = new Date();
+    thingsList[id-1]["time"] = time.getMilliseconds() - thingsList[id-1]["time"];
+  }
   printStatus();
 }
 
@@ -58,8 +66,10 @@ function printStatus(){
 }
 
 command("add$자전거 타기");
-command("add$독서하기");
 command("show$todo");
-command("update$2$doing");
+command("add$독서하기");
+command("update$2$done");
+command("show$todo");
+command("update$1$doing");
 command("update$1$done");
 command("show$done");
