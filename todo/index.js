@@ -45,7 +45,7 @@ const command = (function () {
         },
         printTodo: {
             add() {
-                console.log('todos', todos);
+
                 console.log(`id: ${todos.id} ${todos[todos.id].todo} 항목이 추가 되었습니다`)
                 this.todoState();
             },
@@ -56,16 +56,12 @@ const command = (function () {
                 console.log(`업데이트 된 todo는 `, `id: ${todos[id].id} todo: ${todos[id].todo} 상태:  ${todos[id].todoState}`)
                 this.todoState();
                 if (todos[id].todoState === enums.todoState.done) {
-                    this.doneTime(id)
+                    this.getSpendTime(id)
                 }
             },
-            doneTime(id) {
+            getSpendTime(id) {
                 console.log('todos[id].tiem.spentTime', todos[id].time.spentTime)
-                const {
-                    hours,
-                    mins,
-                    seconds
-                } = todos[id].time.spentTime
+                const {hours, mins, seconds} = todos[id].time.spentTime
                 console.log(`걸린시간은 ${hours} ${mins} ${seconds}`)
             },
             show(printText) {
@@ -119,18 +115,11 @@ const command = (function () {
                 const mins = parseInt((resttime / 60))
                 resttime = resttime - mins * 60
                 const seconds = resttime;
-                return {
-                    hours,
-                    mins,
-                    seconds,
-                }
+                return {hours,mins,seconds,}
             },
             spentTime(id) {
                 if (enums.todoState.done && enums.todoState.doing in todos[id].time) {
-                    const {
-                        doing,
-                        done,
-                    } = todos[id].time;
+                    const {doing, done,} = todos[id].time;
                     const timeGap = parseInt((done.getTime() - doing.getTime()) / 1000);
                     const spentTime = this.caclTime(timeGap)
                     todos[id].time.spentTime = spentTime
@@ -169,12 +158,12 @@ const command = (function () {
 
 
 try {
-    command('add$자바스크립트공부')
+    // command('add$자바스크립트공부')
 
-    command('add$ES6공부');
-    command('add$TIL 블로그 글 쓰기');
-    command('add$이전에 짠 것들 Refactoring하기');
-    command('add$Express 공부');
+    // command('add$ES6공부');
+    // command('add$TIL 블로그 글 쓰기');
+    // command('add$이전에 짠 것들 Refactoring하기');
+    // command('add$Express 공부');
 
     // command('show$todo');
 
@@ -191,12 +180,13 @@ try {
     console.log('에러메시지', e);
 }
 
-function timeDelay(arr, time) {
-    if (arr.length === 0) return;
-    let firstElement = arr.shift()
+function timeDelay(arr, time, i=0) {
+    console.log(arr.length, i);
+    if (arr.length === i) return;
     setTimeout(() => {
-        command(firstElement);
-        return timeDelay(arr, time);
+        command(arr[i]);
+        i+=1;
+        return timeDelay(arr, time, i);
     }, time)
 }
 
