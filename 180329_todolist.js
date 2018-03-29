@@ -1,15 +1,16 @@
 let thingsList = [];
 
-function command(action, str, id){
-  switch(action){
+function command(str){
+  let subString = str.split(/\$/);
+  switch(subString[0]){
     case "add":
-      addThing(str);
+      addThing(subString[1]);
       break;
     case "show":
-      showThing(str);
+      showThing(subString[1]);
       break;
     case "update":
-      updateThing(id, str);
+      updateThing(subString[1], subString[2]);
       break;
     default : console.log("올바른 값을 입력하세요");
   }
@@ -21,6 +22,7 @@ function addThing(name){
   thing.name = name;
   thing.status = "todo";
   thingsList.push(thing);
+  console.log(`id: ${thing["id"]}, "${thing["name"]}"항목이 새로 추가되었습니다`);
   printStatus();
 }
 
@@ -49,11 +51,9 @@ function printStatus(){
   console.log(`현재상태 :   todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
 }
 
-command("add", "퇴근하기");
-command("show", 'todo');
-command("add", "자전거 타기");
-command("show", 'todo');
-command("update",'doing', 2);
-command("show", 'doing');
-command("update",'done', 1);
-command("show", 'done');
+command("add$자전거 타기");
+command("add$독서하기");
+command("show$todo");
+command("update$2$doing");
+command("update$1$done");
+command("show$done");
