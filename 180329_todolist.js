@@ -1,4 +1,9 @@
 let thingsList = [];
+let statuses = {
+  "todo" : [],
+  "doing": [],
+  "done": []
+}
 
 function command(str){
   let subString = str.split(/\$/);
@@ -18,37 +23,38 @@ function command(str){
 
 function addThing(name){
   let thing = {};
-  thing.id = thingsList.length + 1;
-  thing.name = name;
-  thing.status = "todo";
+  thing["id"] = thingsList.length + 1;
+  thing["name"] = name;
   thingsList.push(thing);
+  statuses["todo"].push(thing["id"]);
   console.log(`id: ${thing["id"]}, "${thing["name"]}"항목이 새로 추가되었습니다`);
   printStatus();
 }
 
 function showThing(status){
   let result = [];
-  thingsList.forEach(function(thing){
-    if(thing["status"] === status) result.push(`"${thing['id']}, ${thing["name"]}"`);
+  statuses[status].forEach(id =>{
+    result.push(`"${id}, ${thingsList[id-1]["name"]}"`);
   });
   console.log(result.join());
 }
 
 function updateThing(id, status){
-  thingsList[id-1]["status"] = status;
+  id = +id;
+  Object.keys(statuses).forEach(e => {
+    for(let i = 0; i < statuses[e].length; i++){
+      if(statuses[e][i] === id) statuses[e].splice(i, 1);
+    }
+  });
+  statuses[status].push(id);
   printStatus();
 }
 
 function printStatus(){
-  let todo = 0;
-  let doing = 0;
-  let done = 0;
-  thingsList.forEach(thing => {
-    if(thing["status"] === "todo") todo+=1;
-    if(thing["status"] === "doing") doing+=1;
-    if(thing["status"] === "done") done+=1;
-  });
-  console.log(`현재상태 :   todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
+  let numTodo = statuses["todo"].length;
+  let numDoing = statuses["doing"].length;
+  let numDone = statuses["done"].length;
+  console.log(`현재상태 :   todo: ${numTodo}개, doing: ${numDoing}개, done: ${numDone}개`);
 }
 
 command("add$자전거 타기");
