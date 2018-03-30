@@ -1,50 +1,42 @@
 # todo
 레벨2
 
+### 설계
 
-github 저장소
-https://github.com/code-squad/javascript-todo
+### 플로우
 
-요구사항
-다음처럼 동작하는 프로그래밍을 만든다.
-
-할일관리하는 프로그램이며, 다음의 기능이 있다.
-
-할일을 추가할 수 있다.
-
-1. add Todo 
-2. todo { state -> todo, doing, done }
-3. show( tasks )
-4. show( 명령함수$구분자) 
-
-할일이 추가되면 id 값을 생성하고 결과를 알려준다.
-상태는 3가지로 관리된다. todo, doing, done.
-각 일(task)는 상태값을 가지고 있고, 그 상태값을 변경할 수 있다.
-각 상태에 있는 task는 show함수를 통해서 볼 수 있다.
-명령어를 입력시 command함수를 사용해야하고, '$'를 구분자로 사용해서 넣는다.
-command("add$자바스크립트 공부하기");
-> id: 5,  "자바스크립트 공부하기" 항목이 새로 추가됐습니다.  //추가된 결과 메시지를 출력
-> 현재상태 :  todo:1개, doing:2개, done:2개
-
-command("show$doing");
-> "1, 그래픽스공부", "4, 블로그쓰기"  //id값과 함께 task제목이 출력된다.
-
-command("show$done");
-> //완료 목록을 위 doing과 같은 형태로 노출한다.
-
-command("update$3$done");
-> 현재상태 :  todo:1개, doing:1개, done:3개  //변경된 모든 상태가 노출.
+1. 입력 -> 명령어 
+2. 명령어를 받아서 해석한다. -> add, show, update
+3. add를 받았을 떄 todos에 받은 todo를 추가한다. 
+4. show를 받았을 때 같은 상태에 있는 것들을 출력한다. 
+5. update를 받았을 때 기존에 있는 상태를 update한다. 
+6.  todo, doing, done 
 
 
+7. Model todos 라는 객체가 있고 
+todo안에는 id로 접근 가능한 todo가 있다
+todo에는 
+id: {
+    todo: '할 일 내용'
+    state: 상태 
+    time: {
+        startTime,
+        doneTime,
+        spendTime,
+    }
+}
 
-#### 요구사항을 바탕으로 디자인 
+### 요구사항 소요시간결과의 복잡도 측정
 
-1. Command를 통해서 모든 명령어 진행 
-2. Command('명령어')-> 명령어를 읽는 함수 번역 하는 함수 필요 
-3. 명령어 번역 함수에는 $를 구분자로 
-3.1 add, show, update 가 있고 
-3.2 add에서는 add$task 
-3.3 show에서는 show$filter-> search해서 보여주기 
-3.4 update$id$state -> id에 접근해서 상태를 바꿔 줄 수 있다. 
+todos에는 stateCounter가 있다. 
+상태들의 개수를 다 가지고 있다. 
+fastOne 가장 빨리 끝낸 친구에 id를 알고 있다. 
+
+1~30회 완료된 일이 늘어날수록 처음에는 그 횟수만큼 수행해서 최소값 최대값을 찾는다. 
+업데이트 된 일이 있으면 최대값, 최소값과 비교하여 id를 업데이트 한다.
+시간복잡도는 O(n)일 것 같다. 
+지금 우선 생각으로는 최소값과 최대값을 저장해서 업데이트 될 때마다 비교하여 최소 최대값을 바꿔 주는 것이 좋은 방법이라고 생각하고 있다. 
+나쁜 방법은 매번 다 돌려서 최소/최대값을 찾는 것이다!
+
 
 

@@ -1,200 +1,217 @@
-const CheckType = {
-    enumCheck(checkData, enumData) {
-        return !!enumData[checkData]
+// Flow 
+// Command함수가 Order를 받아서 Compiler함수에게 전달  
+// Compiler -> Order 를 번역해서 -> Controller에게 전달 
+// Controller 에서 번역된 명령어에 맞춰서 todos객체와 -> print객체에 전달해준다.
+const CheckType = require('./utils');
+
+// constants
+const errMsg = {
+    notActions: `명령어는 add show done 중 하나입니다. ex) show$todo`,
+    wrongTodoState: 'state는  todo, doing, done 중 하나입니다',
+    notNumber: 'id 값은 숫자여야 합니다.  ex) update$1$done',
+    notHaveThisId: '해당 id 값이 없습니다'
+}
+
+const enums = {
+    actions: {
+        add: 'add',
+        show: 'show',
+        update: 'update',
     },
-    notNumber(number) {
-        return isNaN(Number(number))
-    }
+    todoState: {
+        todo: 'todo',
+        doing: 'doing',
+        done: 'done',
+    },
+}
+
+const Seconds = 1000;
+
+
+// Models
+const printController = {
+    added(){
+        const addedOne = todos.todos[todos.currentId]
+        const { id, task } = addedOne
+        console.log(`id: ${id} ${task} 항목이 새로 추가 되었습니다.`)
+        this.printStateCounter()
+    },
+    printStateCounter(){
+        const {todo, doing, done} =  todos.stateCounter
+        console.log(`현재상태ㅣ todo: ${todo} 개 doing: ${doing} 개 done: ${done}개`)
+    },
+    updated(ID){
+        const updatedOne = todos.todos[ID]
+        const {task, state, id} = updatedOne
+        console.log(`업데이트 된 todo는 id: ${id} todo: ${task}:  ${state}`);
+        this.printStateCounter();
+        if(state === 'done') {
+            this.getSpentTime(updatedOne);
+        }
+    },
+    getSpentTime(updatedOne){
+        const {hours, mins, seconds} = updatedOne.spentTime
+        console.log(`${updatedOne.id} ${updatedOne.task}의 걸린시간은 ${hours} 시간 ${mins} 분 ${seconds} 초`)
+    },
 }
 
 
-const command = (function () {
-    const errMsg = {
-        notActions: `명령어는 add show done 중 하나입니다. ex) show$todo`,
-        wrongTodoState: 'state는  todo, dpoing, done 중 하나입니다',
-        notNumber: 'id 값은 숫자여야 합니다.  ex) update$1$done',
-        notHaveThisId: '해당 id 값이 없습니다'
+class Todo {
+    constructor(id, task){
+        this.id = id,
+        this.task = task
+        this.state = 'todo'
+        this.time = {}
     }
-    const enums = {
-        actions: {
-            add: 'add',
-            show: 'show',
-            update: 'update',
-        },
-        todoState: {
-            todo: 'todo',
-            doing: 'doing',
-            done: 'done',
-        },
-        printMethod: {
-            added: 'added',
-            updated: 'updated',
-            showSameStates: 'showSameStates',
-        }
+    update(state){
+        this.state = state;
     }
-    const todos = {
-        id: 0,
-        todoStateCounter: {
+    getState(){
+        return this.state;
+    }
+}
+
+class Todos {
+    constructor(name){
+        this.name = "",
+        this.todos = {}
+        this.currentId = 0,
+        this.stateCounter = {
             todo: 0,
             doing: 0,
             done: 0,
         }
-    };
-    const printTodo = (printMethod, printKey)=> {
-        const controller = {
-            added(){
-                console.log(`id: ${todos.id} ${todos[todos.id].todo} 항목이 추가 되었습니다`)
-                this.showStateCounter();
-            },
-            showStateCounter(){
-              console.log(`현재상태 : todo: ${todos.todoStateCounter.todo}개 doing: ${todos.todoStateCounter.doing}개 done: ${todos.todoStateCounter.done}개`)
-            },
-            updated(id) {
-                console.log(`업데이트 된 todo는 `, `id: ${todos[id].id} todo: ${todos[id].todo} 상태:  ${todos[id].todoState}`)
-                this.showStateCounter();
-                if (todos[id].todoState === enums.todoState.done) {
-                    this.getSpendTime(id)
-                }
-            },
-            getSpendTime(id) {
-                console.log('todos[id].tiem.spentTime', todos[id].time.spentTime)
-                const {hours, mins, seconds} = todos[id].time.spentTime
-                console.log(`걸린시간은 ${hours} ${mins} ${seconds}`)
-            },
-            showSameStates(sameStates) {
-                console.log(sameStates);
-            },
-            
-        }
-        return controller[printMethod](printKey);
+        this.fastest,
+        this.slowest
     }
-    const todoController = {
-        compileOrder(order) {
-            const [actions, target, update] = order.split('$');
-            if (!CheckType.enumCheck(actions, enums.actions)) console.log(errMsg.notActions)
-            this.todoActions[actions](target, update)
-        },
-        todoActions: {
-            add(todo) {
-                todos.id += 1
-                todos[todos.id] = {
-                    id: todos.id,
-                    todo,
-                    todoState: enums.todoState.todo,
-                    time: {},
-                }
-                this.updateTime(todos.id, todos[todos.id].todoState)
-                todos.todoStateCounter.todo += 1;
-                const  {added} = enums.printMethod
-                return printTodo(added)
-            },
-            findSameState(filterList, todoState) {
-                return filterList.reduce((result, todo) => {
-                    return result += `${todo.id}, ${todo.todo}\n`
-                }, `원하는 상태목록은 :D ${todoState}\n`)
-            },
-            show(todoState) {
-                if (!CheckType.enumCheck(todoState, enums.todoState)) console.log(errMsg.wrongTodoState)
-                let tasks = this.getOnlyTaskData(todos);
-                const filtered = Object.values(tasks).filter(task => task.todoState === todoState);
-                const sameStates =  this.findSameState(filtered, todoState)
-                const  {showSameStates} = enums.printMethod
-                printTodo(showSameStates, sameStates)
-            },
-            update(id, todoState) {
-                //ErrorCheck
-                if (!CheckType.enumCheck(todoState, enums.todoState)) console.log(errMsg.wrongTodoState)
-                if (CheckType.notNumber(id)) console.log(errMsg.notNumber)
-                if (!this.validIdCheck(id)) console.log(errMsg.notHaveThisId)
-                // update
-                let beforeState = todos[id].todoState;
-                todos[id].todoState = todoState;
-                this.updateTime(id, todoState)
-                todos.todoStateCounter[beforeState] -= 1;
-                todos.todoStateCounter[todoState] += 1;
-                const  {updated} = enums.printMethod
-                return printTodo(updated, id)
-            },
-            updateTime(id, todoState) {
-                todos[id].time[todoState] = new Date();
-                if (todoState === enums.todoState.done) this.spentTime(id);
-            },
-            caclTime(timeGap) {
-                const hours = parseInt((timeGap / 3600))
-                let resttime = timeGap - hours * 3600
-                const mins = parseInt((resttime / 60))
-                resttime = resttime - mins * 60
-                const seconds = resttime;
-                return {hours,mins,seconds,}
-            },
-            spentTime(id) {
-                if (enums.todoState.done && enums.todoState.doing in todos[id].time) {
-                    const {doing, done,} = todos[id].time;
-                    const timeGap = parseInt((done.getTime() - doing.getTime()) / 1000);
-                    const spentTime = this.caclTime(timeGap)
-                    todos[id].time.spentTime = spentTime
-                }
-            },
-            validIdCheck(id) {
-                let tasks = this.getOnlyTaskData(todos);
-                return !!tasks[id];
-            },
-            initState() {
-                const todoStateCounter = todos.todoStateCounter;
-                todoStateCounter.todo = 0;
-                todoStateCounter.doing = 0;
-                todoStateCounter.done = 0;
-            },
-            getOnlyTaskData(todos) {
-                let copy = Object.assign({}, todos)
-                delete copy.id;
-                delete copy.todoStateCounter;
-                return copy;
-            },
-            stateCount(todos) {
-                this.initState();
-                let tasks = this.getOnlyTaskData(todos);
-                const todoStateCounter = todos.todoStateCounter
-                Object.values(tasks).forEach(
-                    todo => todoStateCounter[todo.todoState] += 1
-                );
-            },
-        }
-
+    add(todo){
+        const newTodo = this.make(todo)
+        this.todos[this.currentId] = newTodo;
+        this.todoAddStateCounter()
+        this.updateTime(this.currentId, newTodo.getState())
     }
-
-    return todoController.compileOrder.bind(todoController);
-})();
-
-
-try {
-    command('add$자바스크립트공부')
-    command('add$ES6공부');
-    command('add$TIL 블로그 글 쓰기');
-    command('add$이전에 짠 것들 Refactoring하기');
-    command('add$Express 공부');
-
-    command('show$todo');
-
-    command('update$1$doing');
-    command('update$1$done');
-
-    //에러 검출 
-    // command('update$10$doing');
-    // command('show$todo');
-    // command('shows$todos');
-    // command('show$todos');
-} catch (e) {
-    console.log('에러메시지', e);
+    todoAddStateCounter(){
+        this.stateCounter.todo += 1
+    }
+    updateStateCounter(lastState, nowState){
+        this.stateCounter[lastState]-=1
+        this.stateCounter[nowState]+=1
+    }
+    make(todo){
+        this.currentId +=1
+        const newTodo = new Todo(this.currentId,todo)
+        return newTodo;
+    }
+    show(state){
+        const sameStateTodos = this.getSameState(state)
+        this.printSameTasks(sameStateTodos, state)
+    }
+    getSameState(state){
+        const todos = Object.values(this.todos);
+        const sameStateTodos = todos.filter(todo => todo.state === state)
+        return sameStateTodos;
+    }
+    printSameTasks(todos, state) {
+        const resultTasks = todos.reduce((ac, todo) => {
+            return ac += `${todo.id}, ${todo.task}\n`
+        }, `원하는 상태목록은 :D ${state}\n`)
+        console.log(resultTasks)
+    }
+    update(id, state){
+       if (!this.validIdCheck(id)) throw new Error(errMsg.notHaveThisId)        
+        const willUpdatedOne = this.todos[id]
+        const lastState = willUpdatedOne.getState()        
+        willUpdatedOne.update(state)
+        this.updateStateCounter(lastState, state);
+        this.updateTime(id, state)
+    }
+    validIdCheck(id){
+        return !!this.todos[id]
+    }
+    updateTime(id, todoState) {
+        this.todos[id].time[todoState] = new Date();
+        if (todoState === 'done'){
+            const spentTimeNumber = this.calcSpentTime(id);
+            this.todos[id].time['spentTimeNumber'] = spentTimeNumber;
+            const result = this.changeHumanTime(spentTimeNumber)
+            this.todos[id].spentTime = result;
+            this.saveFastest(id)
+            this.saveSlowest(id)
+        }
+    }
+    calcSpentTime(id){
+        const startTime = this.todos[id].time['doing']
+        const finishTime = this.todos[id].time['done']
+        const spentTime = parseInt((finishTime - startTime)/Seconds)
+        return spentTime;
+    }
+    saveFastest(id){
+        this.fastest = this.fastest ? 
+        this.todos[this.fastest].time.spentTimeNumber > this.todos[id].time.spentTimeNumber ? id : this.fastest
+        : id  
+    }
+    saveSlowest(id){
+        this.slowest = this.slowest ? 
+        this.todos[this.slowest].time.spentTimeNumber < this.todos[id].time.spentTimeNumber ? id : this.slowest
+        : id 
+    }
+    changeHumanTime(timeGap) {
+        const hours = parseInt((timeGap / 3600))
+        let resttime = timeGap - hours * 3600
+        const mins = parseInt((resttime / 60))
+        resttime = resttime - mins * 60
+        const seconds = resttime;
+        return {hours,mins,seconds,}
+    }
 }
 
-function timeDelay(arr, time, i=0) {
+const todos = new Todos('$ToDo')
+
+const command = order => {
+    return compileOrder(order);
+}
+const compileOrder = order => {
+    const [actions, target, update] = order.split('$');
+    if (!CheckType.enumCheck(actions, enums.actions)) console.log(errMsg.notActions)
+    return Controller[actions](target,update)    
+}
+
+const Controller = {
+    add(todo){
+        todos.add(todo);
+        printController.added();
+    },
+    show(state){
+        if(!CheckType.enumCheck(state, enums.todoState)) throw Error(errMsg.wrongTodoState)
+        todos.show(state);
+    },
+    update(id, state){
+       if (CheckType.notNumber(id)) throw Error(errMsg.notNumber)
+       todos.update(id, state)
+       printController.updated(id)
+    },
+}
+
+command('add$자바스크립트공부')
+command('add$ES6공부')
+command('add$React공부')
+command('show$todo');
+command('update$1$doing');
+
+ //에러 검출
+// command('show$todos');
+// command('update$10$doing');
+ 
+
+
+function timeDelay(arr, time, i = 0) {
     if (arr.length === i) return;
     setTimeout(() => {
         command(arr[i]);
-        i+=1;
+        i += 1;
         return timeDelay(arr, time, i);
     }, time)
 }
 
-// timeDelay(['add$ES6공부', 'add$자바스크립트공부', 'add$TIL 블로그 글 쓰기', 'update$1$doing', 'update$1$done'], 2000);
+timeDelay(['update$3$doing', 'update$3$done'], 1000);
+timeDelay(['add$TIL 블로그 글 쓰기', 'update$2$doing', 'update$2$done'], 2000);
