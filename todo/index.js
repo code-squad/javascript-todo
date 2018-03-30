@@ -43,15 +43,15 @@ const printController = {
     updated(ID){
         const updatedOne = todos.todos[ID]
         const {task, state, id} = updatedOne
-        console.log(`업데이트 된 todo는 id: ${id} todo: ${task}:  ${state}`);
+        console.log(`업데이트 된 todo는 id: ${id} todo: ${task}:  ${state}\n`);
         this.printStateCounter();
         if(state === 'done') {
             this.getSpentTime(updatedOne);
         }
     },
     getSpentTime(updatedOne){
-        const {hours, mins, seconds} = updatedOne.spentTime
-        console.log(`${updatedOne.id} ${updatedOne.task}의 걸린시간은 ${hours} 시간 ${mins} 분 ${seconds} 초`)
+        const { hours, mins, seconds} = updatedOne.time.spentTimeHMS
+        console.log(`${updatedOne.id} ${updatedOne.task}의 걸린시간은 ${hours} 시간 ${mins} 분 ${seconds} 초\n`)
     },
 }
 
@@ -68,6 +68,25 @@ class Todo {
     }
     getState(){
         return this.state;
+    }
+    addTimeInfo(state){
+        this.time[state] = new Date();
+    }
+    setTimeInfo(state, timeInfo){
+        this.time[state] = timeInfo;
+    }
+    recordSpendTime(){
+        const timeGap = this.time.done - this.time.doing
+        this.time.spentTime =  parseInt(timeGap/Seconds)
+    }
+    convertToSpendTimeHMS() {
+        const spentTime = this.time.spentTime
+        const hours = parseInt((spentTime / 3600))
+        let restTime = spentTime - hours * 3600
+        const mins = parseInt((restTime / 60))
+        restTime = restTime - mins * 60
+        const seconds = restTime;
+        return this.time.spentTimeHMS = {hours,mins,seconds,}
     }
 }
 
@@ -129,39 +148,24 @@ class Todos {
         return !!this.todos[id]
     }
     updateTime(id, todoState) {
-        this.todos[id].time[todoState] = new Date();
+        const willUpdateTimeTodo = this.todos[id]
+        willUpdateTimeTodo.addTimeInfo(todoState);
         if (todoState === 'done'){
-            const spentTimeNumber = this.calcSpentTime(id);
-            this.todos[id].time['spentTimeNumber'] = spentTimeNumber;
-            const result = this.changeHumanTime(spentTimeNumber)
-            this.todos[id].spentTime = result;
+            willUpdateTimeTodo.recordSpendTime();
+            willUpdateTimeTodo.convertToSpendTimeHMS(willUpdateTimeTodo.spentTime)
             this.saveFastest(id)
             this.saveSlowest(id)
         }
     }
-    calcSpentTime(id){
-        const startTime = this.todos[id].time['doing']
-        const finishTime = this.todos[id].time['done']
-        const spentTime = parseInt((finishTime - startTime)/Seconds)
-        return spentTime;
-    }
     saveFastest(id){
         this.fastest = this.fastest ? 
-        this.todos[this.fastest].time.spentTimeNumber > this.todos[id].time.spentTimeNumber ? id : this.fastest
+        this.todos[this.fastest].time.spentTime > this.todos[id].time.spentTime ? id : this.fastest
         : id  
     }
     saveSlowest(id){
         this.slowest = this.slowest ? 
-        this.todos[this.slowest].time.spentTimeNumber < this.todos[id].time.spentTimeNumber ? id : this.slowest
+        this.todos[this.slowest].time.spentTime < this.todos[id].time.spentTime ? id : this.slowest
         : id 
-    }
-    changeHumanTime(timeGap) {
-        const hours = parseInt((timeGap / 3600))
-        let resttime = timeGap - hours * 3600
-        const mins = parseInt((resttime / 60))
-        resttime = resttime - mins * 60
-        const seconds = resttime;
-        return {hours,mins,seconds,}
     }
 }
 
