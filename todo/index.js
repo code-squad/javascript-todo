@@ -2,6 +2,8 @@
 // Command함수가 Order를 받아서 Compiler함수에게 전달  
 // Compiler -> Order 를 번역해서 -> Controller에게 전달 
 // Controller 에서 번역된 명령어에 맞춰서 todos객체와 -> print객체에 전달해준다.
+
+
 const CheckType = require('./utils');
 
 // constants
@@ -107,7 +109,7 @@ class Todos {
         const newTodo = this.make(todo)
         this.todos[this.currentId] = newTodo;
         this.todoAddStateCounter()
-        this.updateTime(this.currentId, newTodo.getState())
+        newTodo.addTimeInfo(newTodo.state)
     }
     todoAddStateCounter(){
         this.stateCounter.todo += 1
