@@ -4,7 +4,21 @@ let category = {
   "doing": [],
   "done": []
 }
-let lastId = 0;
+
+Thing.prototype.id = 0;
+
+function Thing(name){
+  this.id = ++Thing.prototype.id;
+  this.name = name;
+  this.status = "todo";
+  this.startTime = 0;
+  this.endTime = 0;
+  this.setStatus = function(status){
+    if(status === "doing") this.startTime = (new Date()).getMilliseconds();
+    if(status === "done") this.endTime = (new Date()).getMilliseconds();
+    this.status = status;
+  }
+}
 
 function command(order){
   let subString = order.split(/\$/);
@@ -23,25 +37,11 @@ function command(order){
 }
 
 function addThing(name){
-  let thing = createThing(name);
+  let thing = new Thing(name);
+  pushId(thing["id"], "todo");  
   thingsList.push(thing);
   console.log(`id: ${thing["id"]}, "${thing["name"]}" 항목이 새로 추가되었습니다`);
   printStatus();
-}
-
-function createThing(name){
-  let thing = {};
-  thing.id = createId();
-  thing.name = name;
-  thing.status = "todo";
-  thing.startTime = 0;
-  thing.endTime = 0;
-  pushId(thing["id"], "todo");
-  return thing;
-}
-
-function createId(){
-  return ++lastId;
 }
 
 function pushId(id, status){
@@ -76,16 +76,9 @@ function updateThing(id, status){
   id = +id;
   let thing = searchThing(id);
   deleteId(id, thing["status"]);
-  thing["status"] = status;
+  thing.setStatus(status);
   pushId(id, thing["status"]);
-  if(thing["status"] === "doing") thing["startTime"] = setTime();
-  if(thing["status"] === "done") thing["endTime"] = setTime();
   printStatus();
-}
-
-function setTime(){
-  let time = new Date();
-  return time.getMilliseconds();
 }
 
 function deleteId(id, status){
