@@ -1,59 +1,37 @@
-// Flow 
-// Command함수가 Order를 받아서 Compiler함수에게 전달  
-// Compiler -> Order 를 번역해서 -> Controller에게 전달 
-// Controller 에서 번역된 명령어에 맞춰서 todos객체와 -> print객체에 전달해준다.
-
-
 const CheckType = require('./utils');
 
-// constants
 const errMsg = {
     notActions: `명령어는 add show done 중 하나입니다. ex) show$todo`,
     wrongTodoState: 'state는  todo, doing, done 중 하나입니다',
     notNumber: 'id 값은 숫자여야 합니다.  ex) update$1$done',
-    notHaveThisId: '해당 id 값이 없습니다'
+    notHaveThisId: '해당 id 값이 없습니다',
+    emptyTask: `todo에 내용이 없습니다`
 }
 
-const enums = {
-    actions: {
-        add: 'add',
-        show: 'show',
-        update: 'update',
-    },
-    todoState: {
-        todo: 'todo',
-        doing: 'doing',
-        done: 'done',
-    },
-}
-
-const Seconds = 1000;
-
-
-// Models
-const printController = {
-    added(){
+const printTodos = {
+    added(todos){
         const addedOne = todos.todos[todos.currentId]
         const { id, task } = addedOne
         console.log(`id: ${id} ${task} 항목이 새로 추가 되었습니다.`)
-        this.printStateCounter()
+        this.stateCounter(todos.stateCounter)
     },
-    printStateCounter(){
-        const {todo, doing, done} =  todos.stateCounter
+    stateCounter(stateCounter){
+        const {todo, doing, done} =  stateCounter
         console.log(`현재상태ㅣ todo: ${todo} 개 doing: ${doing} 개 done: ${done}개`)
     },
-    updated(ID){
+    updated(todos, ID){
         const updatedOne = todos.todos[ID]
         const {task, state, id} = updatedOne
         console.log(`업데이트 된 todo는 id: ${id} todo: ${task}:  ${state}\n`);
-        this.printStateCounter();
+        this.stateCounter(todos.stateCounter);
         if(state === 'done') {
-            this.getSpentTime(updatedOne);
+            this.spentTime(updatedOne, todos);
         }
     },
-    getSpentTime(updatedOne){
+    spentTime(updatedOne, todos){
         const { hours, mins, seconds} = updatedOne.time.spentTimeHMS
         console.log(`${updatedOne.id} ${updatedOne.task}의 걸린시간은 ${hours} 시간 ${mins} 분 ${seconds} 초\n`)
+        console.log('가장 빨리 끝낸 일', todos.fastest, '가장 늦게 끝낸 일 ', todos.slowest);
     },
 }
 
@@ -64,6 +42,7 @@ class Todo {
         this.task = task
         this.state = 'todo'
         this.time = {}
+        this.Seconds = 1000;
     }
     update(state){
         this.state = state;
@@ -79,7 +58,7 @@ class Todo {
     }
     recordSpendTime(){
         const timeGap = this.time.done - this.time.doing
-        this.time.spentTime =  parseInt(timeGap/Seconds)
+        this.time.spentTime =  parseInt(timeGap/this.Seconds)
     }
     convertToSpendTimeHMS() {
         const spentTime = this.time.spentTime
@@ -103,27 +82,31 @@ class Todos {
             done: 0,
         }
         this.fastest,
-        this.slowest
+        this.slowest,
+        this.actionsKey = ['add', 'show', 'update']
+        this.statesKey = ['todo', 'doing', 'done']
+    }
+    takerOrder(parseOrder){
+        const {action, target, update} = parseOrder
+        if(this.actionsKey.indexOf(action)=== -1) throw Error(errMsg.notActions)
+        this[action](target,update)
     }
     add(todo){
-        const newTodo = this.make(todo)
+        const checkEmptyString = todo.trim()
+        if(!checkEmptyString) throw new Error(errMsg.emptyTask)
+        this.currentId +=1
+        const newTodo = new Todo(this.currentId, todo)
         this.todos[this.currentId] = newTodo;
-        this.todoAddStateCounter()
+        this.stateCounter.todo +=1
         newTodo.addTimeInfo(newTodo.state)
-    }
-    todoAddStateCounter(){
-        this.stateCounter.todo += 1
+        printTodos.added(this)
     }
     updateStateCounter(lastState, nowState){
         this.stateCounter[lastState]-=1
         this.stateCounter[nowState]+=1
     }
-    make(todo){
-        this.currentId +=1
-        const newTodo = new Todo(this.currentId,todo)
-        return newTodo;
-    }
     show(state){
+        if( this.statesKey.indexOf(state)=== -1) throw Error(errMsg.wrongTodoState)
         const sameStateTodos = this.getSameState(state)
         this.printSameTasks(sameStateTodos, state)
     }
@@ -139,15 +122,14 @@ class Todos {
         console.log(resultTasks)
     }
     update(id, state){
-       if (!this.validIdCheck(id)) throw new Error(errMsg.notHaveThisId)        
+       if (CheckType.notNumber(id)) throw Error(errMsg.notNumber)        
+       if (!this.todos[id]) throw new Error(errMsg.notHaveThisId)        
         const willUpdatedOne = this.todos[id]
         const lastState = willUpdatedOne.getState()        
         willUpdatedOne.update(state)
         this.updateStateCounter(lastState, state);
         this.updateTime(id, state)
-    }
-    validIdCheck(id){
-        return !!this.todos[id]
+        printTodos.updated(this, id)
     }
     updateTime(id, todoState) {
         const willUpdateTimeTodo = this.todos[id]
@@ -171,38 +153,33 @@ class Todos {
     }
 }
 
-const todos = new Todos('$ToDo')
+
+// 초기화 안에서는 어떻게 하지???
+
+const todos = new Todos('$ToDo');
 
 const command = order => {
-    return compileOrder(order);
-}
-const compileOrder = order => {
-    const [actions, target, update] = order.split('$');
-    if (!CheckType.enumCheck(actions, enums.actions)) console.log(errMsg.notActions)
-    return Controller[actions](target,update)    
-}
-
-const Controller = {
-    add(todo){
-        todos.add(todo);
-        printController.added();
-    },
-    show(state){
-        if(!CheckType.enumCheck(state, enums.todoState)) throw Error(errMsg.wrongTodoState)
-        todos.show(state);
-    },
-    update(id, state){
-       if (CheckType.notNumber(id)) throw Error(errMsg.notNumber)
-       todos.update(id, state)
-       printController.updated(id)
-    },
+    const [action, target, update] = order.split('$');
+    const parseOrder = {
+        action,
+        target,
+        update,
+    }
+    return todos.takerOrder(parseOrder)
 }
 
 command('add$자바스크립트공부')
 command('add$ES6공부')
+command('show$todo')
+command('update$1$doing');
+
 command('add$React공부')
 command('show$todo');
 command('update$1$doing');
+
+
+
+
 
  //에러 검출
 // command('show$todos');
