@@ -154,11 +154,10 @@ class Todos {
 }
 
 
-// 초기화 안에서는 어떻게 하지???
 
 
-const command = order => todos => {
-    todos = todos ? todos : todos = new Todos('$ToDo')
+
+const command = order => (todos = new Todos('$ToDo')) => {
     const [action, target, update] = order.split('$');
     const parseOrder = {
         action,
