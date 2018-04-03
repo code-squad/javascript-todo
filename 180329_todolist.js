@@ -1,71 +1,58 @@
-const todoList = {
-  thingsList : [],
+function Thing(name){
+  this.name = name;
+  this.status = "todo";
+  this.startTime = 0;
+  this.endTime = 0;
+  this.setStatus = function(status){
+    if(status === "doing") this.startTime = (new Date()).getMilliseconds();
+    if(status === "done") this.endTime = (new Date()).getMilliseconds();
+    this.status = status;
+  }
+}
 
-  category : {
-    "todo" : [],
-    "doing": [],
-    "done": []
-  },
-
-  id : 0,
-
-  Thing: function(name){
-    this.id = ++todoList.id;
-    this.name = name;
-    this.status = "todo";
-    this.startTime = 0;
-    this.endTime = 0;
-    this.setStatus = function(status){
-      if(status === "doing") this.startTime = (new Date()).getMilliseconds();
-      if(status === "done") this.endTime = (new Date()).getMilliseconds();
-      this.status = status;
-    }
+const TodoList = {
+  Data : {
+    lastId : 0,
+    ThingsDict : {}
   },
 
   command: function(order){
-    let subString = order.split(/\$/);
-    switch(subString[0]){
-      case "add":
-        this.addThing(subString[1]);
-        break;
-      case "show":
-        this.showThing(subString[1]);
-        break;
-      case "update":
-        this.updateThing(subString[1], subString[2]);
-        break;
-      default : throw "올바른 값을 입력하세요";
+    const fns = {
+      add: this.addThing,
+      show: this.showThing,
+      update: this.updateThing
     }
+    const [flag, ...details] = order.split(/\$/);
+    fns[flag].call(this, ...details);
   },
 
   addThing: function(name){
-    let thing = new this.Thing(name);
-    this.pushId(thing["id"], "todo");  
-    this.thingsList.push(thing);
-    console.log(`id: ${thing["id"]}, "${thing["name"]}" 항목이 새로 추가되었습니다`);
+    const thing = new Thing(name);
+    const id = this.createId();
+    this.Data.ThingsDict[id] = thing;
+    console.log(`id: ${id}, "${thing["name"]}" 항목이 새로 추가되었습니다`);
     this.printStatus();
   },
 
-  pushId: function(id, status){
-    this.category[status].push(id);
+  createId: function(){
+    return ++this.Data.lastId;
   },
 
   showThing: function(status){
-    let result = [];
-    this.category[status].forEach(id=>{
-      let thing = this.searchThing(id);
-      let subStr = '';
-      if(status === "done") subStr = `(소요시간: ${this.measureTime(thing)})`;
-      result.push(`"${id}, ${thing["name"]}${subStr}"`);
-    });
+    let result = Object.keys(this.Data.ThingsDict);
+    result = result.filter(id => this.searchThing(id).status === status);
+    result = result.reduce((acc, id) => [...acc, this.makeSentence(id)], []);
     console.log(result.join());
   },
 
   searchThing: function(id){
-    for(let i = 0; i < this.thingsList.length; i++){
-      if(this.thingsList[i]["id"] === id) return this.thingsList[i];
-    }
-    throw "값을 찾지 못했습니다";
+    return this.Data.ThingsDict[id];
+  },
+
+  makeSentence: function(id){
+    const thing = this.searchThing(id);
+    const subStr = thing.status === "done" ? `(소요시간: ${this.measureTime(thing)})` : '';
+    return `"${id}, ${thing["name"]}${subStr}"`
   },
 
   measureTime: function(thing){
@@ -77,31 +64,29 @@ const todoList = {
   updateThing: function(id, status){
     id = +id;
     let thing = this.searchThing(id);
-    this.deleteId(id, thing["status"]);
     thing.setStatus(status);
-    this.pushId(id, thing["status"]);
     this.printStatus();
   },
 
-  deleteId: function(id, status){
-    let index = this.category[status].indexOf(id);
-    this.category[status].splice(index, 1);
-  },
-
   printStatus: function(){
-    let numTodo = this.category["todo"].length;
-    let numDoing = this.category["doing"].length;
-    let numDone = this.category["done"].length;
-    console.log(`현재상태 :   todo: ${numTodo}개, doing: ${numDoing}개, done: ${numDone}개`);
+    const NumStatus = {
+      todo: 0,
+      doing: 0,
+      done: 0
+    }
+    for(let id in this.Data.ThingsDict){
+      ++NumStatus[this.searchThing(id).status];
+    }
+    console.log(`현재상태 :   todo: ${NumStatus.todo}개, doing: ${NumStatus.doing}개, done: ${NumStatus.done}개`);
   },
 }
 
-todoList.command("add$자전거 타기");
-todoList.command("update$1$doing");
-todoList.command("show$todo");
-todoList.command("add$독서하기");
-todoList.command("update$2$doing");
-todoList.command("update$2$done");
-todoList.command("show$done");
-todoList.command("update$1$done");
-todoList.command("show$done");
+TodoList.command("add$자전거 타기");
+TodoList.command("update$1$doing");
+TodoList.command("show$todo");
+TodoList.command("add$독서하기");
+TodoList.command("update$2$doing");
+TodoList.command("update$2$done");
+TodoList.command("show$done");
+TodoList.command("update$1$done");
+TodoList.command("show$done");
