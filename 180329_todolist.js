@@ -33,8 +33,12 @@ const TodoList = {
     const thing = new Thing(name);
     const id = this.getId();
     this.setId(id, thing);
-    console.log(`id: ${id}, "${thing["name"]}" 항목이 새로 추가되었습니다`);
+    this.printAddedThing(id, thing);
     this.printStatus();
+  },
+
+  printAddedThing(id,thing){
+    console.log(`id: ${id}, "${thing["name"]}" 항목이 새로 추가되었습니다`);
   },
 
   getId: function(){
@@ -85,12 +89,12 @@ const TodoList = {
       ++NumStatus[this.searchThing(id).status];
     }
     console.log(`현재상태 :   todo: ${NumStatus.todo}개, doing: ${NumStatus.doing}개, done: ${NumStatus.done}개`);
-  },
+  }
 }
 
 TodoList.command("add$자전거 타기");
 TodoList.command("update$1$doing");
-TodoList.command("show$todo");
+TodoList.command("show$doing");
 TodoList.command("add$독서하기");
 TodoList.command("update$2$doing");
 TodoList.command("update$2$done");
