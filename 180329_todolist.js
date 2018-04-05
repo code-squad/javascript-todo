@@ -23,19 +23,26 @@ const TodoList = {
       update: this.updateThing
     }
     const [flag, ...details] = order.split(/\$/);
+    // ES6 문법인 distructuring과 rest parameter를 이용해 split된 값을 받습니다.    
     fns[flag].call(this, ...details);
+    // fns객체에서 flag 키에 맞는 함수를 호출합니다. fns[flag]가 가지는 함수를 곧바로 호출하면 함수 안의 함수 호출로 인해 실행 컨택스트가 바뀌게 됩니다.
+    // 실행 컨텍스트를 올바르기 위해서 call메소드를 사용하여 command함수가 실행되고 있는 컨텍스트인 this를 바인드합니다.
   },
 
   addThing: function(name){
     const thing = new Thing(name);
-    const id = this.createId();
-    this.Data.ThingsDict[id] = thing;
+    const id = this.getId();
+    this.setId(id, thing);
     console.log(`id: ${id}, "${thing["name"]}" 항목이 새로 추가되었습니다`);
     this.printStatus();
   },
 
-  createId: function(){
+  getId: function(){
     return ++this.Data.lastId;
+  },
+
+  setId: function(id, thing){
+    this.Data.ThingsDict[id] = thing;
   },
 
   showThing: function(status){
@@ -56,9 +63,9 @@ const TodoList = {
   },
 
   measureTime: function(thing){
-    let result;
-    result = thing["endTime"] - thing["startTime"];
-    return result;
+    let elapsedTime;
+    elapsedTime = thing["endTime"] - thing["startTime"];
+    return elapsedTime;
   },
 
   updateThing: function(id, status){
