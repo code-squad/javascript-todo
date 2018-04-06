@@ -18,18 +18,13 @@ let todoList = {
   doing: {},
   done: {}
 };
-
+const idValue = {
+  id: 1
+}
 const mainCommand = {
   add: addTodo,
   show: showSelectedStatus,
-  update: updateTodo,
-  getId: (function () {
-    let id = 0;
-    return function () {
-      id++;
-      return id;
-    }
-  })()
+  update: updateTodo
 };
 const errorMsg = {
   notCommand: cmd => `${cmd}는 입력 커맨드가 아닙니다.`,
@@ -45,7 +40,8 @@ function command(input) {
 }
 
 function addTodo(todoName) {
-  let id = mainCommand.getId();
+  let id = idValue.id;
+  idValue.id++;
   todoList.todo[id] = {
     name: todoName
   };
