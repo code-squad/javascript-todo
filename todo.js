@@ -93,7 +93,7 @@ function findItemById(id) {
       value: todoList[key][id]
     };
   }
-  return false;
+  return undefined;
 }
 
 command('add$자바스크립크 공부하기');
