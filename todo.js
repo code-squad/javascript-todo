@@ -79,11 +79,10 @@ function updateTodo(id, status) {
     console.log(errorMsg.alreadyHaveItem(status));
     return;
   }
-  if (findItemById(id)) {
-    todoList[status][id] = findItemById(id).value;
-    delete todoList[findItemById(id).key][id];
-    showStatus();
-  }
+
+  todoList[status][id] = findItemById(id).value;
+  delete todoList[findItemById(id).key][id];
+  showStatus();
 }
 
 function findItemById(id) {
