@@ -19,7 +19,7 @@ let todoList = {
   done: {}
 };
 
-const fn = {
+const mainCommand = {
   add: addTodo,
   show: showSelectedStatus,
   update: updateTodo,
@@ -40,12 +40,12 @@ const errorMsg = {
 
 function command(input) {
   let splited = input.split('$');
-  if (!fn[splited[0]]) console.log(errorMsg.notCommand(splited[0]));
-  else fn[splited[0]](splited[1], splited[2]);
+  if (!mainCommand[splited[0]]) console.log(errorMsg.notCommand(splited[0]));
+  else mainCommand[splited[0]](splited[1], splited[2]);
 }
 
 function addTodo(todoName) {
-  let id = fn.getId();
+  let id = mainCommand.getId();
   todoList.todo[id] = {
     name: todoName
   };
