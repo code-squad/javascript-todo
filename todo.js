@@ -71,17 +71,18 @@ function showSelectedStatus(status) {
 }
 
 function updateTodo(id, status) {
-  if (!findItemById(id)) {
+  let finding = findItemById(id);
+  if (!finding) {
     console.log(errorMsg.doNotFindId(id));
     return;
   }
-  if (findItemById(id).key === status) {
+  if (finding.key === status) {
     console.log(errorMsg.alreadyHaveItem(status));
     return;
   }
 
-  todoList[status][id] = findItemById(id).value;
-  delete todoList[findItemById(id).key][id];
+  todoList[status][id] = finding.value;
+  delete todoList[finding.key][id];
   showStatus();
 }
 
