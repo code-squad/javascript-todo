@@ -21,7 +21,7 @@ let todoList = {
 
 const fn = {
   add: addTodo,
-  show: showList,
+  show: showSelectedStatus,
   update: updateTodo,
   getId: (function () {
     let id = 0;
@@ -62,7 +62,7 @@ function showStatus() {
   console.log(`현재상태 : ${status.join(', ')}`);
 }
 
-function showList(status) {
+function showSelectedStatus(status) {
   let list = [];
   for (key in todoList[status]) {
     list.push(`[${key}] ${todoList[status][key].name}`);
