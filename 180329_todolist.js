@@ -1,9 +1,11 @@
-function Thing(name){
-  this.name = name;
-  this.status = "todo";
-  this.startTime = 0;
-  this.endTime = 0;
-  this.setStatus = function(status){
+class Thing{
+  constructor(name){
+    this.name = name;
+    this.status = "todo";
+    this.startTime = 0;
+    this.endTime = 0;
+  }
+  setStatus(status){
     if(status === "doing") this.startTime = (new Date()).getMilliseconds();
     if(status === "done") this.endTime = (new Date()).getMilliseconds();
     this.status = status;
