@@ -42,8 +42,10 @@ function command(input) {
 function addTodo(todoName) {
   let id = idValue.id;
   idValue.id++;
+  const time = new Date();
   todoList.todo[id] = {
-    name: todoName
+    name: todoName,
+    time: time.getHours()
   };
   showAddedTodo(id, todoName);
   showStatus();
@@ -61,13 +63,15 @@ function showStatus() {
 function showSelectedStatus(status) {
   let list = [];
   for (key in todoList[status]) {
-    list.push(`[${key}] ${todoList[status][key].name}`);
+    if (status === 'done') list.push(`[${key}] ${todoList[status][key].name}, ${todoList[status][key].theTime}시간`);
+    else list.push(`[${key}] ${todoList[status][key].name}`);
   }
   console.log(list.length !== 0 ? list.join(', ') : errorMsg.emptyStatus(status));
 }
 
 function updateTodo(id, status) {
   let finding = findItemById(id);
+  const time = new Date();
   if (!finding) {
     console.log(errorMsg.doNotFindId(id));
     return;
@@ -76,10 +80,23 @@ function updateTodo(id, status) {
     console.log(errorMsg.alreadyHaveItem(status));
     return;
   }
-
+  if (status === 'done') {
+    doing(finding.value.name);
+    finding.value.theTime = (time.getHours() + doing(finding.value.name)) - finding.value.time;
+  }
+  finding.value.time = time.getHours();
   todoList[status][id] = finding.value;
   delete todoList[finding.key][id];
   showStatus();
+}
+
+function doing(todo) {
+  if (todo.match(/공부/)) return 3;
+  return Math.floor(Math.random() * 2 + 1);
+}
+
+function calculateTheTime() {
+
 }
 
 function findItemById(id) {
@@ -95,10 +112,10 @@ function findItemById(id) {
 command('add$자바스크립크 공부하기');
 command('add$산책하기');
 command('show$todo');
+command('update$2$doing');
 command('update$2$done');
 command('add$코딩하기');
 command('update$7$doing');
 command('show$todo');
 command('show$doing');
 command('show$done');
-command('update$2$done');
