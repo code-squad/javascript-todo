@@ -1,3 +1,5 @@
+const getModifiedObject = require('./immutable.js').object;
+
 class Thing{
   constructor(name){
     this.name = name;
@@ -48,7 +50,9 @@ const TodoList = {
   },
 
   setId: function(id, thing){
-    this.Data.ThingsDict[id] = thing;
+    const newThing = {};
+    newThing[id] = thing;
+    this.Data.ThingsDict = getModifiedObject({source: this.Data.ThingsDict, targetProp: id, initVal: newThing});
   },
 
   showThing: function(status){
@@ -75,9 +79,9 @@ const TodoList = {
   },
 
   updateThing: function(id, status){
-    id = +id;
-    let thing = this.searchThing(id);
-    thing.setStatus(status);
+    let thing = getModifiedObject({source: this.searchThing(id)});
+    Thing.prototype.setStatus.call(thing, status);
+    this.setId(id, thing);
     this.printStatus();
   },
 
