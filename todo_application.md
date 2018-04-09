@@ -40,7 +40,7 @@
       - id 값 체크하기
     - showWorkList() : `todo` `doing` `done` 를 보여주는 기능
       - 하나의 함수에서 전부 처리
-    - updateWorkState() : 상태 갯수 변경
+    - updateWorkState() : 상태 변경
     - printCurrentState() : 현재상태 출력
 
 
