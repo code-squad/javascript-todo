@@ -58,10 +58,10 @@ class TodoList{
   }
 
   showThing(status){
-    let sameStatusGroup = Object.keys(this.Data.ThingsDict);
-    sameStatusGroup = sameStatusGroup.filter(id => this.searchThing(id).status === status);
-    sameStatusGroup = sameStatusGroup.reduce((acc, id) => [...acc, this.makeSentence(id)], []);
-    console.log(sameStatusGroup.join());
+    let sameStatusGroup = Object.keys(this.Data.ThingsDict)
+    .filter(id => this.searchThing(id).status === status)
+    .reduce((acc, id) => acc + this.makeSentence(id), '');
+    console.log(sameStatusGroup);
   }
 
   searchThing(id){
