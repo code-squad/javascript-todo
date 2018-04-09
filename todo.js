@@ -13,109 +13,109 @@
 // 3. update : 내가 추가한 할 일의 상태를 변경시킨다
 // 예를 들어 command(update$2$done)을 입력하면 id값이 2인 할 일을 done상태로 만들어준다
 
-let todoList = {
-  todo: {},
-  doing: {},
-  done: {}
-};
-const idValue = {
-  id: 1
-}
-const mainCommand = {
-  add: addTodo,
-  show: showSelectedStatus,
-  update: updateTodo
-};
-const errorMsg = {
-  notCommand: cmd => `${cmd}는 입력 커맨드가 아닙니다.`,
-  doNotFindId: id => `${id}은 존재하지 않는 id입니다.`,
-  emptyStatus: status => `${status}는 비어있습니다.`,
-  alreadyHaveItem: (status) => `해당 Id는 이미 ${status}상태입니다.`
-}
+const Todo = {
+  todoList: {
+    todo: {},
+    doing: {},
+    done: {}
+  },
+  idValue: {
+    id: 1
+  },
+  errorMsg: {
+    notCommand: cmd => `${cmd}는 입력 커맨드가 아닙니다.`,
+    doNotFindId: id => `${id}은 존재하지 않는 id입니다.`,
+    emptyStatus: status => `${status}는 비어있습니다.`,
+    alreadyHaveItem: (status) => `해당 Id는 이미 ${status}상태입니다.`
+  },
 
-function command(input) {
-  let splited = input.split('$');
-  if (!mainCommand[splited[0]]) console.log(errorMsg.notCommand(splited[0]));
-  else mainCommand[splited[0]](splited[1], splited[2]);
-}
+  command(input) {
+    const cmd = {
+      add: this.addTodo,
+      show: this.showSelectedStatus,
+      update: this.updateTodo
+    }
 
-function addTodo(todoName) {
-  let id = idValue.id;
-  idValue.id++;
-  const time = new Date();
-  todoList.todo[id] = {
-    name: todoName,
-    time: time.getHours()
-  };
-  showAddedTodo(id, todoName);
-  showStatus();
-}
+    const [cmdName, ...details] = input.split(/\$/);
 
-function showAddedTodo(id, todoName) {
-  console.log(`id : ${id} '${todoName}' 과목이 새로 추가됐습니다.`);
-}
-
-function showStatus() {
-  let status = Object.keys(todoList).map(v => `${v} : ${Object.keys(todoList[v]).length}개`);
-  console.log(`현재상태 : ${status.join(', ')}`);
-}
-
-function showSelectedStatus(status) {
-  let list = [];
-  for (key in todoList[status]) {
-    if (status === 'done') list.push(`[${key}] ${todoList[status][key].name}, ${todoList[status][key].theTime}시간`);
-    else list.push(`[${key}] ${todoList[status][key].name}`);
-  }
-  console.log(list.length !== 0 ? list.join(', ') : errorMsg.emptyStatus(status));
-}
-
-function updateTodo(id, status) {
-  let finding = findItemById(id);
-  const time = new Date();
-  if (!finding) {
-    console.log(errorMsg.doNotFindId(id));
-    return;
-  }
-  if (finding.key === status) {
-    console.log(errorMsg.alreadyHaveItem(status));
-    return;
-  }
-  if (status === 'done') {
-    doing(finding.value.name);
-    finding.value.theTime = (time.getHours() + doing(finding.value.name)) - finding.value.time;
-  }
-  finding.value.time = time.getHours();
-  todoList[status][id] = finding.value;
-  delete todoList[finding.key][id];
-  showStatus();
-}
-
-function doing(todo) {
-  if (todo.match(/공부/)) return 3;
-  return Math.floor(Math.random() * 2 + 1);
-}
-
-function calculateTheTime() {
-
-}
-
-function findItemById(id) {
-  for (key in todoList) {
-    if (todoList[key][id]) return {
-      key: key,
-      value: todoList[key][id]
+    if (cmd[cmdName]) cmd[cmdName].call(this, ...details);
+    else console.log(this.errorMsg.notCommand(cmd[cmdName]));
+  },
+  addTodo(todoName) {
+    let id = this.idValue.id;
+    this.idValue.id++;
+    const time = new Date();
+    this.todoList.todo[id] = {
+      name: todoName,
+      time: time.getHours()
     };
+    this.showAddedTodo(id, todoName);
+    this.showStatus();
+  },
+
+  showAddedTodo(id, todoName) {
+    console.log(`id : ${id} '${todoName}' 과목이 새로 추가됐습니다.`);
+  },
+
+  showStatus() {
+    let status = Object.keys(this.todoList).map(v => `${v} : ${Object.keys(this.todoList[v]).length}개`);
+    console.log(`현재상태 : ${status.join(', ')}`);
+  },
+
+  showSelectedStatus(status) {
+    let list = [];
+    let selectedStatus = this.todoList[status];
+    for (key in selectedStatus) {
+      if (status === 'done') list.push(`[${key}] ${selectedStatus[key].name}, ${selectedStatus[key].theTime}시간`);
+      else list.push(`[${key}] ${selectedStatus[key].name}`);
+    }
+    console.log(list.length !== 0 ? list.join(', ') : this.errorMsg.emptyStatus(status));
+  },
+
+  updateTodo(id, status) {
+    let finding = this.findItemById(id);
+    const time = new Date();
+    if (!finding) {
+      console.log(this.errorMsg.doNotFindId(id));
+      return;
+    }
+    if (finding.key === status) {
+      console.log(this.errorMsg.alreadyHaveItem(status));
+      return;
+    }
+    if (status === 'done') {
+      this.doing(finding.value.name);
+      finding.value.theTime = (time.getHours() + this.doing(finding.value.name)) - finding.value.time;
+    }
+    finding.value.time = time.getHours();
+    this.todoList[status][id] = finding.value;
+    delete this.todoList[finding.key][id];
+    this.showStatus();
+  },
+
+  doing(todo) {
+    if (todo.match(/공부/)) return 3;
+    return Math.floor(Math.random() * 2 + 1);
+  },
+  findItemById(id) {
+    for (key in this.todoList) {
+      if (this.todoList[key][id]) return {
+        key: key,
+        value: this.todoList[key][id]
+      };
+    }
+    return undefined;
   }
-  return undefined;
+
 }
 
-command('add$자바스크립크 공부하기');
-command('add$산책하기');
-command('show$todo');
-command('update$2$doing');
-command('update$2$done');
-command('add$코딩하기');
-command('update$7$doing');
-command('show$todo');
-command('show$doing');
-command('show$done');
+Todo.command('add$자바스크립크 공부하기');
+Todo.command('add$산책하기');
+Todo.command('show$todo');
+Todo.command('update$2$doing');
+Todo.command('update$2$done');
+Todo.command('add$코딩하기');
+Todo.command('update$7$doing');
+Todo.command('show$todo');
+Todo.command('show$doing');
+Todo.command('show$done');
