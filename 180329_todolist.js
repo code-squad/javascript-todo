@@ -8,8 +8,9 @@ class Thing{
     this.endTime = 0;
   }
   setStatus(status){
-    if(status === "doing") this.startTime = (new Date()).getMilliseconds();
-    if(status === "done") this.endTime = (new Date()).getMilliseconds();
+    function recordTime(){return (new Date()).getMilliseconds();}
+    if(status === "doing") this.startTime = recordTime();
+    if(status === "done") this.endTime = recordTime();
     this.status = status;
   }
 }
