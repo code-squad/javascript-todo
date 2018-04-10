@@ -7,12 +7,6 @@ class Thing{
     this.startTime = 0;
     this.endTime = 0;
   }
-  setStatus(status){
-    function recordTime(){return (new Date()).getMilliseconds();}
-    if(status === "doing") this.startTime = recordTime();
-    if(status === "done") this.endTime = recordTime();
-    this.status = status;
-  }
 }
 
 class TodoList{
@@ -83,9 +77,16 @@ class TodoList{
 
   updateThing(id, status){
     let thing = getModifiedObject({source: this.searchThing(id)});
-    Thing.prototype.setStatus.call(thing, status);
+    this.setStatus(thing, status);
     this.setId(id, thing);
     this.printStatus();
+  }
+
+  setStatus(target, status){
+    function recordTime(){return (new Date()).getMilliseconds();}
+    if(status === "doing") target.startTime = recordTime();
+    if(status === "done") target.endTime = recordTime();
+    target.status = status;
   }
 
   printStatus(){
