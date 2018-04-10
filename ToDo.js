@@ -2,11 +2,13 @@
     객체로 코드구현
 */
 
-const todo = {
+const todo = class {
 
-    works : [],
+    constructor(works) {
+        this.works = works;
+    }
 
-    addWorkTodo : function(content) {
+    addWorkTodo(content) {
         const forIndexMatchingData = 1;
 
         let idCount = this.works.length + forIndexMatchingData;
@@ -31,8 +33,9 @@ const todo = {
         // 출력
         log("id: " + idCount + ", " + "\"" + content + "\" 항목이 새로 추가됐습니다.");
         printCurrentState(this.works);
-    },
-    showWorkList : function(state) {
+    }
+
+    showWorkList(state) {
         let content = "";
         let result = "";
         let mode = (state === "todo") ? "TO DO" : (state === "doing") ? "DOING" : "DONE";
@@ -51,8 +54,9 @@ const todo = {
         result = (result === "") ? "해당 상태인 목록이 없습니다" : result;
     
         log(result);
-    },
-    updateWorkState : function(id, content) {
+    }
+
+    updateWorkState(id, content) {
         let forIndexMatchingData = 1;
         let index = id - forIndexMatchingData;
     
@@ -70,7 +74,10 @@ const todo = {
     }
 }
 
-function command(data) {
+function command(works, data) {
+    // class 생성
+    var todoClass = new todo(works);
+
     // $ 문자 구분
     let result = data.split("$");
     let mode = result[0];
@@ -79,15 +86,15 @@ function command(data) {
     // switch-case
     switch(mode) {
         case "add":
-         todo.addWorkTodo(content);
+         todoClass.addWorkTodo(content);
          break;
         case "show":
-         todo.showWorkList(content);
+         todoClass.showWorkList(content);
          break;
         case "update":
          replaceTargetIndex = result[1];
          content = result[2];
-         todo.updateWorkState(replaceTargetIndex, content);
+         todoClass.updateWorkState(replaceTargetIndex, content);
          break;
     }
 }
@@ -136,14 +143,16 @@ function log(data) {
 }
 
 var run = function () {
+    
+    var works = [];
 
-    command("add$자바스크립트 공부하기");
-    command("show$todo");
+    command(works, "add$자바스크립트 공부하기");
+    command(works, "show$todo");
 
-    command("update$1$doing");
+    command(works, "update$1$doing");
     setTimeout(function() {
-        command("update$1$done");
-        command("show$done");
+        command(works, "update$1$done");
+        command(works, "show$done");
     }, 3000);
 };
 
