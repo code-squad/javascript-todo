@@ -19,9 +19,13 @@ const Todo = {
     doing: {},
     done: {}
   },
-  idValue: {
-    id: 1
+
+  id: 1,
+
+  getId() {
+    return this.id++;
   },
+
   errorMsg: {
     notCommand: cmd => `${cmd}는 입력 커맨드가 아닙니다.`,
     doNotFindId: id => `${id}은 존재하지 않는 id입니다.`,
@@ -35,15 +39,13 @@ const Todo = {
       show: this.showSelectedStatus,
       update: this.updateTodo
     }
-
     const [cmdName, ...details] = input.split(/\$/);
 
     if (cmd[cmdName]) cmd[cmdName].call(this, ...details);
     else console.log(this.errorMsg.notCommand(cmd[cmdName]));
   },
   addTodo(todoName) {
-    let id = this.idValue.id;
-    this.idValue.id++;
+    let id = this.getId();
     const time = new Date();
     this.todoList.todo[id] = {
       name: todoName,
@@ -73,23 +75,23 @@ const Todo = {
   },
 
   updateTodo(id, status) {
-    let finding = this.findItemById(id);
+    let finded = this.findItemById(id);
     const time = new Date();
-    if (!finding) {
+    if (!finded) {
       console.log(this.errorMsg.doNotFindId(id));
       return;
     }
-    if (finding.key === status) {
+    if (finded.key === status) {
       console.log(this.errorMsg.alreadyHaveItem(status));
       return;
     }
     if (status === 'done') {
-      this.doing(finding.value.name);
-      finding.value.theTime = (time.getHours() + this.doing(finding.value.name)) - finding.value.time;
+      this.doing(finded.value.name);
+      finded.value.theTime = (time.getHours() + this.doing(finded.value.name)) - finded.value.time;
     }
-    finding.value.time = time.getHours();
-    this.todoList[status][id] = finding.value;
-    delete this.todoList[finding.key][id];
+    finded.value.time = time.getHours();
+    this.todoList[status][id] = finded.value;
+    delete this.todoList[finded.key][id];
     this.showStatus();
   },
 
