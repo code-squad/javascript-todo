@@ -29,10 +29,10 @@ class TodoList{
       show: this.showThing,
       update: this.updateThing
     }
-    const [flag, ...details] = order.split(/\$/);
+    const [action, ...details] = order.split(/\$/);
     // ES6 문법인 destructuring과 rest parameter를 이용해 split된 값을 받습니다.    
-    fns[flag].call(this, ...details);
-    // fns객체에서 flag 키에 맞는 함수를 호출합니다. 함수 안의 함수가 호출되면서 실행컨텍스트가 바뀌고 thisBinding은 디폴트값인 global이 됩니다.
+    fns[action].call(this, ...details);
+    // fns객체에서 action 키에 맞는 함수를 호출합니다. 함수 안의 함수가 호출되면서 실행컨텍스트가 바뀌고 thisBinding은 디폴트값인 global이 됩니다.
     // 호출되는 함수의 컨택스트가 참조하는 객체가 todoList객체이어야 하므로 this를 인자로 넘겨줘야 합니다.
   }
 
@@ -89,11 +89,7 @@ class TodoList{
   }
 
   printStatus(){
-    const NumStatus = {
-      todo: 0,
-      doing: 0,
-      done: 0
-    }
+    const NumStatus = {todo: 0, doing: 0, done: 0}
     for(let id in this.Data.ThingsDict){
       ++NumStatus[this.searchThing(id).status];
     }
