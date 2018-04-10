@@ -77,14 +77,7 @@ const Todo = {
   updateTodo(id, status) {
     let finded = this.findItemById(id);
     const time = new Date();
-    if (!finded) {
-      console.log(this.errorMsg.doNotFindId(id));
-      return;
-    }
-    if (finded.key === status) {
-      console.log(this.errorMsg.alreadyHaveItem(status));
-      return;
-    }
+    if (!this.errorCheckFinded(finded, status)) return;
     if (status === 'done') {
       this.doing(finded.value.name);
       finded.value.theTime = (time.getHours() + this.doing(finded.value.name)) - finded.value.time;
@@ -97,6 +90,18 @@ const Todo = {
   movingItem(finded, id, status) {
     this.todoList[status][id] = finded.value;
     delete this.todoList[finded.key][id];
+  },
+  errorCheckFinded(finded, id, status) {
+    if (!finded) {
+      console.log(this.errorMsg.doNotFindId(id));
+      return undefined;
+    }
+    if (finded.key === status) {
+      console.log(this.errorMsg.alreadyHaveItem(status));
+      return undefined;
+    }
+    return 1;
+
   },
 
   doing(todo) {
