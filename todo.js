@@ -90,9 +90,13 @@ const Todo = {
       finded.value.theTime = (time.getHours() + this.doing(finded.value.name)) - finded.value.time;
     }
     finded.value.time = time.getHours();
+    this.movingItem(finded, id, status)
+    this.showStatus();
+  },
+
+  movingItem(finded, id, status) {
     this.todoList[status][id] = finded.value;
     delete this.todoList[finded.key][id];
-    this.showStatus();
   },
 
   doing(todo) {
