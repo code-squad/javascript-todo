@@ -52,9 +52,9 @@ class TodoList{
   }
 
   showThing(status){
-    let sameStatusGroup = Object.keys(this.Data.ThingsDict)
-    .filter(id => this.getThing(id).status === status)
-    .reduce((acc, id) => acc + this.makeSentence(id), '');
+    const things = this.Data.ThingsDict;
+    let sameStatusGroup = Object.keys(things)
+    .reduce((acc, id) => things[id].status === status ? acc + this.makeSentence(id): acc, '')
     console.log(sameStatusGroup);
   }
 
@@ -80,9 +80,6 @@ class TodoList{
   }
 
   setStatus(target, status){
-    // function recordTime(){return (new Date()).getMilliseconds();}
-    // if(status === "doing") target.startTime = recordTime();
-    // if(status === "done") target.endTime = recordTime();
     if(status !== "todo") target.timeStamp.push((new Date()).getMilliseconds());
     target.status = status;
   }
