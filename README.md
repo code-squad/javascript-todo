@@ -93,9 +93,11 @@
 
     - #### 할일관리 애플리케이션
 
-      - 객체 리터럴과 this의 이해
-      - function call과 this
+      - [객체 리터럴과 this의 이해](https://github.com/antaehyeon/javascript-todo/blob/antaehyeon/README/%EA%B0%9D%EC%B2%B4%EB%A6%AC%ED%84%B0%EB%9F%B4%EA%B3%BC_this.md)
+      - [function call과 this](https://github.com/antaehyeon/javascript-todo/blob/antaehyeon/README/function_call%EA%B3%BC_this.md)
       - 문자열조작과 정규표현식
+      - [객체와 클래스의 이해](https://github.com/antaehyeon/javascript-todo/blob/antaehyeon/README/%EA%B0%9D%EC%B2%B4%EC%99%80%20%ED%81%B4%EB%9E%98%EC%8A%A4%EC%9D%98%20%EC%9D%B4%ED%95%B4.md)
+      - [Immutable Collection 조작](https://github.com/antaehyeon/javascript-todo/blob/antaehyeon/README/Immutable%20Collection%20%EC%A1%B0%EC%9E%91.md)
       - 구현
 
     - #### JSON 문자열 생성
