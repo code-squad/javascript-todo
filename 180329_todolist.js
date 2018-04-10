@@ -54,17 +54,17 @@ class TodoList{
 
   showThing(status){
     let sameStatusGroup = Object.keys(this.Data.ThingsDict)
-    .filter(id => this.searchThing(id).status === status)
+    .filter(id => this.getThing(id).status === status)
     .reduce((acc, id) => acc + this.makeSentence(id), '');
     console.log(sameStatusGroup);
   }
 
-  searchThing(id){
+  getThing(id){
     return this.Data.ThingsDict[id];
   }
 
   makeSentence(id){
-    const thing = this.searchThing(id);
+    const thing = this.getThing(id);
     const subStr = thing.status === "done" ? `(소요시간: ${this.measureTime(thing)})` : '';
     return `"${id}, ${thing["name"]}${subStr}"`
   }
@@ -76,7 +76,7 @@ class TodoList{
   }
 
   updateThing(id, status){
-    let thing = getModifiedObject({source: this.searchThing(id)});
+    let thing = getModifiedObject({source: this.getThing(id)});
     this.setStatus(thing, status);
     this.setId(id, thing);
     this.printStatus();
@@ -92,7 +92,7 @@ class TodoList{
   printStatus(){
     const NumStatus = {todo: 0, doing: 0, done: 0}
     for(let id in this.Data.ThingsDict){
-      ++NumStatus[this.searchThing(id).status];
+      ++NumStatus[this.getThing(id).status];
     }
     console.log(`현재상태 :   todo: ${NumStatus.todo}개, doing: ${NumStatus.doing}개, done: ${NumStatus.done}개`);
   }
