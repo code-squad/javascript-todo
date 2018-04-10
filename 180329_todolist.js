@@ -4,8 +4,7 @@ class Thing{
   constructor(name){
     this.name = name;
     this.status = "todo";
-    this.startTime = 0;
-    this.endTime = 0;
+    this.timeStamp = [];
   }
 }
 
@@ -69,10 +68,8 @@ class TodoList{
     return `"${id}, ${thing["name"]}${subStr}"`
   }
 
-  measureTime({endTime, startTime}){
-    let elapsedTime;
-    elapsedTime = endTime - startTime;
-    return elapsedTime;
+  measureTime(thing){
+    return thing.timeStamp.reduce((acc, cur) => cur - acc);
   }
 
   updateThing(id, status){
@@ -83,9 +80,10 @@ class TodoList{
   }
 
   setStatus(target, status){
-    function recordTime(){return (new Date()).getMilliseconds();}
-    if(status === "doing") target.startTime = recordTime();
-    if(status === "done") target.endTime = recordTime();
+    // function recordTime(){return (new Date()).getMilliseconds();}
+    // if(status === "doing") target.startTime = recordTime();
+    // if(status === "done") target.endTime = recordTime();
+    if(status !== "todo") target.timeStamp.push((new Date()).getMilliseconds());
     target.status = status;
   }
 
