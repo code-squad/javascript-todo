@@ -1,4 +1,6 @@
-const CheckType = require('./utils');
+const notNumber = function(number) {
+    return isNaN(Number(number))
+}  
 
 const errMsg = {
     notActions: `명령어는 add show done 중 하나입니다. ex) show$todo`,
@@ -8,7 +10,7 @@ const errMsg = {
     emptyTask: `todo에 내용이 없습니다`
 }
 
-const printTodos = {
+const PrintTodo = {
     added(todos){
         const addedOne = todos.todos[todos.currentId]
         const { id, task } = addedOne
@@ -29,7 +31,6 @@ const printTodos = {
         }
     },
     spentTime(updatedOne, todos){
-        debugger;
         const { hours, mins, seconds} = updatedOne.time.spentTimeHMS
         console.log(`${updatedOne.id} ${updatedOne.task}의 걸린시간은 ${hours} 시간 ${mins} 분 ${seconds} 초\n`)
         console.log('가장 빨리 끝낸 일', todos.fastest, '가장 늦게 끝낸 일 ', todos.slowest);
@@ -76,10 +77,10 @@ class Todo {
     }
 }
 
-class Todos {
-    constructor(name){
-        this.name = "",
-        this.todos = {}
+const Todos = class {
+    constructor(name, todos={}){
+        this.name = name;
+        this.todos = todos
         this.currentId = 0,
         this.stateCounter = {
             todo: 0,
@@ -91,34 +92,25 @@ class Todos {
         this.actionsKey = ['add', 'show', 'update']
         this.statesKey = ['todo', 'doing', 'done']
     }
-    takerOrder(parseOrder){
-        const {action, target, update} = parseOrder
-        if(this.actionsKey.indexOf(action)=== -1) throw Error(errMsg.notActions)
-        this[action](target,update)
+    addCurrentId(currentId){
+        return currentId +=1
+    }
+    addStateCounter(stateTodo){
+        return stateTodo+=1
     }
     add(todo){
-        const checkEmptyString = todo.trim()
-        if(!checkEmptyString) throw new Error(errMsg.emptyTask)
-        this.currentId +=1
-        const newTodo = new Todo(this.currentId, todo)
-        this.todos[this.currentId] = newTodo;
-        this.stateCounter.todo +=1
+        if(!todo.trim()) console.log(errMsg.emptyTask)
+        this.currentId = this.addCurrentId(this.currentId);
+        const currentId = this.currentId;
+        const newTodo = new Todo(currentId, todo)
+        this.todos[currentId] = newTodo;
+        this.stateCounter.todo = this.addStateCounter(this.stateCounter.todo);
         newTodo.addTimeInfo(newTodo.state)
-        printTodos.added(this)
-    }
-    updateStateCounter(lastState, nowState){
-        this.stateCounter[lastState]-=1
-        this.stateCounter[nowState]+=1
     }
     show(state){
-        if( this.statesKey.indexOf(state)=== -1) throw Error(errMsg.wrongTodoState)
-        const sameStateTodos = this.getSameState(state)
-        this.printSameTasks(sameStateTodos, state)
-    }
-    getSameState(state){
-        const todos = Object.values(this.todos);
-        const sameStateTodos = todos.filter(todo => todo.state === state)
-        return sameStateTodos;
+        const todos = this.todos
+        const sameStates = Object.values(todos).filter(todo => todo.state===state)
+        this.printSameTasks(sameStates, state)
     }
     printSameTasks(todos, state) {
         const resultTasks = todos.reduce((ac, todo) => {
@@ -127,19 +119,24 @@ class Todos {
         console.log(resultTasks)
     }
     update(id, state){
-       if (CheckType.notNumber(id)) throw Error(errMsg.notNumber)        
-       if (!this.todos[id]) throw new Error(errMsg.notHaveThisId)        
-        const willUpdatedOne = this.todos[id]
-        const lastState = willUpdatedOne.getState()        
-        willUpdatedOne.update(state)
-        this.updateStateCounter(lastState, state);
-        this.updateTime(id, state)
-        printTodos.updated(this, id)
+        if (notNumber(id)) console.log(errMsg.notNumber)        
+        if (!this.todos[id]) console.log(errMsg.notHaveThisId)        
+         const willUpdatedOne = this.todos[id]
+         const lastState = willUpdatedOne.getState()        
+         willUpdatedOne.update(state)
+         this.updateStateCounter(lastState, state);
+         this.updateTime(id, state)
+     }
+     updateStateCounter(lastState, nowState){
+        this.stateCounter[lastState]-=1
+        this.stateCounter[nowState]+=1
     }
     updateTime(id, todoState) {
         const willUpdateTimeTodo = this.todos[id]
         willUpdateTimeTodo.addTimeInfo(todoState);
         if (todoState === 'done'){
+            willUpdateTimeTodo.recordSpendTime();
+            willUpdateTimeTodo.convertToSpendTimeHMS(willUpdateTimeTodo.spentTime)
             this.saveFastest(id)
             this.saveSlowest(id)
         }
@@ -156,47 +153,51 @@ class Todos {
     }
 }
 
+const $Todos = new Todos('$todo', {})
+
+// command('show$todo')
+// command('update$1$doing');
+
+// command('add$React공부')
+// command('show$todo');
+// command('update$1$doing');
 
 
-
-
-const command = ((todos = new Todos('$ToDo'))=>order=>{
-    const [action, target, update] = order.split('$');
-    const parseOrder = {
-        action,
-        target,
-        update,
-    }
-    return todos.takerOrder(parseOrder)
-})();
-
-command('add$자바스크립트공부')
-command('add$ES6공부')
-command('show$todo')
-command('update$1$doing');
-
-command('add$React공부')
-command('show$todo');
-command('update$1$doing');
-
-
-
-
-
- //에러 검출
-// command('show$todos');
-// command('update$10$doing');
- 
+$Todos.add('자바스크립트공부')
+PrintTodo.added($Todos);
+$Todos.add('ES6공부')
+$Todos.add('React공부')
+PrintTodo.added($Todos);
+$Todos.show('todo')
+$Todos.update(1,'doing')
+PrintTodo.updated($Todos,1)
+// $Todos.update(1,'doing')
+// $Todos.update(3,'doing')
+// $Todos.update(3,'done')
 
 
 function timeDelay(arr, time, i = 0) {
     if (arr.length === i) return;
     setTimeout(() => {
-        command(arr[i]);
+        arr[i]();
         i += 1;
         return timeDelay(arr, time, i);
     }, time)
 }
 
-timeDelay(['update$3$doing', 'update$3$done'], 1000);
-timeDelay(['add$TIL 블로그 글 쓰기', 'update$2$doing', 'update$2$done'], 2000);
+timeDelay([
+    () => $Todos.update(1,'done'),
+    ()=> $Todos.update(3,'doing'),
+    ()=> $Todos.update(3,'done'),
+    // ()=> console.log(JSON.stringify($Todos, null, 2))
+]
+    , 1000);
+
+timeDelay([
+    ()=> $Todos.update(2,'doing'),
+    ()=> $Todos.update(2,'done'),
+    ()=> console.log(JSON.stringify($Todos, null, 2))
+]
+    , 2000);
+    
+// console.log(JSON.stringify($Todos, null, 2));
