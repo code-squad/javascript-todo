@@ -84,9 +84,6 @@ class Todo {
             this.convertToSpendTimeHMS(this.time.spentTime)
         } 
     }
-    setTimeInfo(state, timeInfo){
-        this.time[state] = timeInfo;
-    }
     recordSpendTime(){
         const timeGap = this.time.done - this.time.doing
         this.time = objUpdateByKeyValue(this.time, 'spentTime', parseInt(timeGap/this.Seconds))
@@ -125,6 +122,12 @@ const Todos = class {
     addCurrentId(currentId){
         return currentId +=1
     }
+    plusStateCounter(state){
+        return objUpdate(this.stateCounter, {[state]: this.stateCounter[state]+1})
+    }
+    minusStateCounter(state){
+        return objUpdate(this.stateCounter, {[state]: this.stateCounter[state]-1})
+    }
     add(todo){
         if(!todo.trim()) console.log(errMsg.emptyTask)
         this.currentId = this.addCurrentId(this.currentId);
@@ -132,7 +135,7 @@ const Todos = class {
         const newTodo = new Todo(currentId, todo)
         // immutable add
         this.todos = objUpdate(this.todos, {[currentId]: newTodo})
-        this.stateCounter.todo+=1
+        this.stateCounter = this.plusStateCounter('todo')
         newTodo.addTimeInfo(newTodo.state)
     }
     show(state){
@@ -148,8 +151,7 @@ const Todos = class {
     }
     update(id, state){
         if (notNumber(id)) console.log(errMsg.notNumber)        
-        if (!this.todos[id]) console.log(errMsg.notHaveThisId) 
-        // update immutable       
+        if (!this.todos[id]) console.log(errMsg.notHaveThisId)      
          const willUpdatedOne = this.todos[id]
          const lastState = willUpdatedOne.getState()        
          willUpdatedOne.update(state)
@@ -157,8 +159,8 @@ const Todos = class {
          this.updateTime(id, state)
      }
      updateStateCounter(lastState, nowState){
-        this.stateCounter[lastState]-=1
-        this.stateCounter[nowState]+=1
+        this.stateCounter = this.minusStateCounter(lastState)
+        this.stateCounter = this.plusStateCounter(nowState)
     }
     updateTime(id, todoState) {
         const willUpdateTimeTodo = this.todos[id]
@@ -195,6 +197,7 @@ const $Todos = new Todos('$todo', {})
 $Todos.add('자바스크립트공부')
 PrintTodo.added($Todos);
 $Todos.add('ES6공부')
+PrintTodo.added($Todos);
 $Todos.add('React공부')
 PrintTodo.added($Todos);
 $Todos.show('todo')
@@ -216,8 +219,10 @@ function timeDelay(arr, time, i = 0) {
 
 timeDelay([
     () => $Todos.update(1,'done'),
+    ()=> PrintTodo.updated($Todos,3),
     ()=> $Todos.update(3,'doing'),
     ()=> $Todos.update(3,'done'),
+    ()=> PrintTodo.updated($Todos,3),
     // ()=> console.log(JSON.stringify($Todos, null, 2))
 ]
     , 1000);
@@ -225,6 +230,7 @@ timeDelay([
 timeDelay([
     ()=> $Todos.update(2,'doing'),
     ()=> $Todos.update(2,'done'),
+    ()=> PrintTodo.updated($Todos,2),
     ()=> console.log(JSON.stringify($Todos, null, 2))
 ]
     , 2000);
