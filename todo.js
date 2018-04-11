@@ -13,7 +13,7 @@
 // 3. update : 내가 추가한 할 일의 상태를 변경시킨다
 // 예를 들어 command(update$2$done)을 입력하면 id값이 2인 할 일을 done상태로 만들어준다
 
-const Todo = class {
+class Todo {
   constructor() {
     this.errorMsg = {
       notCommand: cmd => `${cmd}는 입력 커맨드가 아닙니다.`,
@@ -39,14 +39,13 @@ const Todo = class {
       show: this.showSelectedStatus,
       update: this.updateTodo
     }
-    const [cmdName, ...details] = input.split(/\$/);
-
-    if (cmd[cmdName]) cmd[cmdName].call(this, ...details);
+    const [cmdName, ...item] = input.split(/\$/);
+    if (cmd[cmdName]) cmd[cmdName].call(this, ...item);
     else console.log(this.errorMsg.notCommand(cmd[cmdName]));
   };
 
   addTodo(todoName) {
-    let id = this.getId();
+    const id = this.getId();
     const time = new Date();
     this.todoList.todo[id] = {
       name: todoName,
@@ -61,18 +60,22 @@ const Todo = class {
   };
 
   showStatus() {
-    let status = Object.keys(this.todoList).map(v => `${v} : ${Object.keys(this.todoList[v]).length}개`);
+    const status = Object.keys(this.todoList).map(v => `${v} : ${Object.keys(this.todoList[v]).length}개`);
     console.log(`현재상태 : ${status.join(', ')}`);
   };
 
   showSelectedStatus(status) {
-    let list = [];
-    let selectedStatus = this.todoList[status];
+    const list = [];
+    const selectedStatus = this.todoList[status];
     for (let key in selectedStatus) {
-      if (status === 'done') list.push(`[${key}] ${selectedStatus[key].name}, ${selectedStatus[key].theTime}시간`);
+      if (status === 'done') list.push(this.measureTime(key, selectedStatus));
       else list.push(`[${key}] ${selectedStatus[key].name}`);
     }
     console.log(list.length !== 0 ? list.join(', ') : this.errorMsg.emptyStatus(status));
+  };
+
+  measureTime(key, selectedStatus) {
+    return `[${key}] ${selectedStatus[key].name}, ${selectedStatus[key].theTime}시간`
   };
 
   updateTodo(id, status) {
