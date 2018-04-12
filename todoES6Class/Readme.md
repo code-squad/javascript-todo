@@ -4,6 +4,8 @@ ES6 Classes 적용.
 
 아래코드와 같이 동작되도록 한다.
 
+```
+
 const Health = class {
   constructor(name,healthTime) {
     this.name = name;
@@ -16,7 +18,12 @@ const Health = class {
   }
 
 }
+```
 
 const ho = new Health("crong", "12:12");
 ho.showHealth();
 mdn의 ES6 Class를 활용해서 한다. 불필요한 상속구조는 하지 않는다.
+
+
+### 설계
+
