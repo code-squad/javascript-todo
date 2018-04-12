@@ -1,5 +1,25 @@
 const getModifiedObject = require('./immutable.js').object;
 
+const message = {
+  printAddedThing: function({id, name}){
+    console.log(`id: ${id}, "${name}" 항목이 새로 추가되었습니다`);
+  },
+
+  printThings: function(group){
+    // group은 id의 배열
+    let result = group.reduce((string, id) =>{
+      const thing = this.getThing(id);
+      const elapsedTime = thing.status === 'done' ? `(소요시간: ${this.getElapsedTime(thing)})` : '';
+      return string + `"${id}, ${thing.name}${elapsedTime}"`
+    }, '');
+    console.log(result);
+  },
+
+  printCurrentState: function({todo, doing, done}){
+    console.log(`현재상태 :   todo: ${todo.length}개, doing: ${doing.length}개, done: ${done.length}개`);
+  }
+}
+
 class Thing{
   constructor(name){
     this.name = name;
@@ -10,10 +30,8 @@ class Thing{
 
 class TodoList{
   constructor(){
-    this.Data = {
-      lastId : 0,
-      ThingsDict : {}
-    };
+    this.lastId = 0;
+    this.thingsDict = {};
   }
   
   command(order){
@@ -32,51 +50,38 @@ class TodoList{
   addThing(name){
     const thing = new Thing(name);
     const id = this.getId();
-    this.setId(id, thing);
-    this.printAddedThing(id, thing);
-    this.printStatus();
-  }
-
-  printAddedThing(id,thing){
-    console.log(`id: ${id}, "${thing["name"]}" 항목이 새로 추가되었습니다`);
+    this.setThing(id, thing);
+    message.printAddedThing({id:id, name: thing.name});
+    message.printCurrentState(this.groupByStatus());
   }
 
   getId(){
-    return ++this.Data.lastId;
+    return ++this.lastId;
   }
 
-  setId(id, thing){
+  setThing(id, thing){
     const newThing = {};
     newThing[id] = thing;
-    this.Data.ThingsDict = getModifiedObject({source: this.Data.ThingsDict, targetProp: id, initVal: newThing});
+    this.thingsDict = getModifiedObject({source: this.thingsDict, targetProp: id, initVal: newThing});
   }
 
   showThing(status){
-    const things = this.Data.ThingsDict;
-    let sameStatusGroup = Object.keys(things)
-    .reduce((acc, id) => things[id].status === status ? acc + this.makeSentence(id): acc, '')
-    console.log(sameStatusGroup);
+    message.printThings.call(this, this.groupByStatus()[status]);
   }
 
   getThing(id){
-    return this.Data.ThingsDict[id];
+    return this.thingsDict[id];
   }
 
-  makeSentence(id){
-    const thing = this.getThing(id);
-    const subStr = thing.status === "done" ? `(소요시간: ${this.measureTime(thing)})` : '';
-    return `"${id}, ${thing["name"]}${subStr}"`
-  }
-
-  measureTime(thing){
+  getElapsedTime(thing){
     return thing.timeStamp.reduce((acc, cur) => cur - acc);
   }
 
   updateThing(id, status){
     let thing = getModifiedObject({source: this.getThing(id)});
     this.setStatus(thing, status);
-    this.setId(id, thing);
-    this.printStatus();
+    this.setThing(id, thing);
+    message.printCurrentState(this.groupByStatus());    
   }
 
   setStatus(target, status){
@@ -84,12 +89,12 @@ class TodoList{
     target.status = status;
   }
 
-  printStatus(){
-    const NumStatus = {todo: 0, doing: 0, done: 0}
-    for(let id in this.Data.ThingsDict){
-      ++NumStatus[this.getThing(id).status];
-    }
-    console.log(`현재상태 :   todo: ${NumStatus.todo}개, doing: ${NumStatus.doing}개, done: ${NumStatus.done}개`);
+  groupByStatus(){
+    const group = {'todo': [], 'doing': [], 'done' : []};
+    Object.keys(this.thingsDict).forEach(id =>{
+      group[this.getThing(id).status].push(+id);
+    });
+    return group;
   }
 }
 
