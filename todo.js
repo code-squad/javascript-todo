@@ -23,9 +23,9 @@ class Todo {
     };
     this.id = 1;
     this.todoList = {
-      todo: {},
-      doing: {},
-      done: {}
+      todo: [],
+      doing: [],
+      done: []
     };
   }
 
@@ -47,10 +47,11 @@ class Todo {
   addTodo(todoName) {
     const id = this.getId();
     const time = new Date();
-    this.todoList.todo[id] = {
+    this.todoList.todo.push({
+      id: id,
       name: todoName,
       time: time.getHours()
-    };
+    })
     this.showAddedTodo(id, todoName);
     this.showStatus();
   };
@@ -68,45 +69,34 @@ class Todo {
     const list = [];
     const selectedStatus = this.todoList[status];
     for (let key in selectedStatus) {
-      if (status === 'done') list.push(this.measureTime(key, selectedStatus));
-      else list.push(`[${key}] ${selectedStatus[key].name}`);
+      if (status === 'done') list.push(this.measureTime(selectedStatus[key]));
+      else list.push(`[${selectedStatus[key].id}] ${selectedStatus[key].name}`);
     }
     console.log(list.length !== 0 ? list.join(', ') : this.errorMsg.emptyStatus(status));
   };
 
-  measureTime(key, selectedStatus) {
-    return `[${key}] ${selectedStatus[key].name}, ${selectedStatus[key].theTime}시간`
+  measureTime(item) {
+    return `[${item.id}] ${item.name}, ${item.theTime}시간`
   };
 
   updateTodo(id, status) {
-    let finded = this.findItemById(id);
+    let found = this.findItemById(id);
+    if (!found) return;
+    let item = found.item;
+    let previousStatus = found.status;
     const time = new Date();
-    if (!this.errorCheckFinded(finded, status)) return;
     if (status === 'done') {
-      this.doing(finded.value.name);
-      finded.value.theTime = (time.getHours() + this.doing(finded.value.name)) - finded.value.time;
+      this.doing(item.name);
+      item.theTime = (time.getHours() + this.doing(item.name)) - item.time;
     }
-    finded.value.time = time.getHours();
-    this.movingItem(finded, id, status)
+    item.time = time.getHours();
+    this.movingItem(found, id, status)
     this.showStatus();
   };
 
-  movingItem(finded, id, status) {
-    this.todoList[status][id] = finded.value;
-    delete this.todoList[finded.key][id];
-  };
-
-  errorCheckFinded(finded, id, status) {
-    if (!finded) {
-      console.log(this.errorMsg.doNotFindId(id));
-      return undefined;
-    }
-    if (finded.key === status) {
-      console.log(this.errorMsg.alreadyHaveItem(status));
-      return undefined;
-    }
-    return 1;
-
+  movingItem(item, id, status) {
+    let spliced = this.todoList[item.status].splice(item.index, 1);
+    this.todoList[status].push(spliced[0]);
   };
 
   doing(todo) {
@@ -116,11 +106,19 @@ class Todo {
 
   findItemById(id) {
     for (let key in this.todoList) {
-      if (this.todoList[key][id]) return {
-        key: key,
-        value: this.todoList[key][id]
-      };
+      let found = this.todoList[key].reduce((ac, cv, idx) => {
+        if (cv.id == id) {
+          ac.item = cv;
+          ac.index = idx;
+          ac.status = key;
+          return ac;
+        } else {
+          return ac;
+        }
+      }, {})
+      if (found.item) return found;
     }
+    console.log(this.errorMsg.doNotFindId(id));
     return undefined;
   }
 
@@ -137,3 +135,5 @@ todo.command('update$7$doing');
 todo.command('show$todo');
 todo.command('show$doing');
 todo.command('show$done');
+
+console.log(todo.todoList);
