@@ -46,11 +46,11 @@ class Todo {
 
   addTodo(todoName) {
     const id = this.getId();
-    const time = new Date();
+    const addedTime = new Date();
     this.todoList.todo.push({
       id: id,
       name: todoName,
-      time: time.getHours()
+      addedTime: addedTime.getHours()
     })
     this.showAddedTodo(id, todoName);
     this.showStatus();
@@ -84,12 +84,11 @@ class Todo {
     if (!found) return;
     let item = found.item;
     let previousStatus = found.status;
-    const time = new Date();
+    const updatedTime = new Date();
     if (status === 'done') {
-      this.doing(item.name);
-      item.theTime = (time.getHours() + this.doing(item.name)) - item.time;
+      item.theTime = (updatedTime.getHours() + this.doing(item.name)) - item.addedTime;
     }
-    item.time = time.getHours();
+    item.addedTime = updatedTime.getHours();
     this.movingItem(found, id, status)
     this.showStatus();
   };
