@@ -77,7 +77,7 @@ class Todo {
   };
 
   updateTodo(id, status) {
-    let found = this.findItemById(id);
+    let found = this.findItemById(id, this.todoList);
     if (!found) return;
     let item = found.item;
     if (status === 'done') {
@@ -102,9 +102,9 @@ class Todo {
     return Math.floor(Math.random() * 2 + 1);
   };
 
-  findItemById(id) {
-    for (let key in this.todoList) {
-      let found = this.todoList[key].reduce((ac, cv, idx) => {
+  findItemById(id, list) {
+    for (let key in list) {
+      let found = list[key].reduce((ac, cv, idx) => {
         if (cv.id == id) {
           ac.item = cv;
           ac.index = idx;
