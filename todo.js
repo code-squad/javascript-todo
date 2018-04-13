@@ -36,13 +36,13 @@ class Todo {
   command(input) {
     const cmd = {
       add: this.addTodo,
-      show: this.showSelectedStatus,
+      show: this.getSelectedStatus,
       update: this.updateTodo
     }
-    const [cmdName, ...item] = input.split(/\$/);
-    if (cmd[cmdName]) cmd[cmdName].call(this, ...item);
-    else console.log(this.errorMsg.notCommand(cmd[cmdName]));
-  };
+    const [name, ...item] = input.split(/\$/);
+    const excute = cmd[name].call(this, ...item);
+    if (excute) excute.forEach(v => console.log(v));
+  }
 
   addTodo(todoName) {
     const id = this.getId();
@@ -51,28 +51,27 @@ class Todo {
       id: id,
       name: todoName,
       addedTime: addedTime.getHours()
-    })
-    this.showAddedTodo(id, todoName);
-    this.showStatus();
+    });
+    return [this.returnAddedTodo(id, todoName), this.returnCurrentStatus()];
   };
 
-  showAddedTodo(id, todoName) {
-    console.log(`id : ${id} '${todoName}' 과목이 새로 추가됐습니다.`);
+  returnAddedTodo(id, todoName) {
+    return `id : ${id} '${todoName}' 과목이 새로 추가됐습니다.`;
   };
 
-  showStatus() {
+  returnCurrentStatus() {
     const status = Object.keys(this.todoList).map(v => `${v} : ${Object.keys(this.todoList[v]).length}개`);
-    console.log(`현재상태 : ${status.join(', ')}`);
+    return `현재상태 : ${status.join(', ')}`;
   };
 
-  showSelectedStatus(status) {
+  getSelectedStatus(status) {
     const list = [];
     const selectedStatus = this.todoList[status];
     for (let key in selectedStatus) {
       if (status === 'done') list.push(this.measureTime(selectedStatus[key]));
       else list.push(`[${selectedStatus[key].id}] ${selectedStatus[key].name}`);
     }
-    console.log(list.length !== 0 ? list.join(', ') : this.errorMsg.emptyStatus(status));
+    return list.length !== 0 ? [list.join(', ')] : [this.errorMsg.emptyStatus(status)];
   };
 
   measureTime(item) {
@@ -83,17 +82,19 @@ class Todo {
     let found = this.findItemById(id);
     if (!found) return;
     let item = found.item;
-    let previousStatus = found.status;
-    const updatedTime = new Date();
     if (status === 'done') {
-      item.theTime = (updatedTime.getHours() + this.doing(item.name)) - item.addedTime;
+      this.addTheTime(item);
     }
-    item.addedTime = updatedTime.getHours();
-    this.movingItem(found, id, status)
-    this.showStatus();
+    this.moveItem(found, id, status)
+    return [this.returnCurrentStatus()];
   };
 
-  movingItem(item, id, status) {
+  addTheTime(item) {
+    const updatedTime = new Date();
+    item.theTime = (updatedTime.getHours() + this.doing(item.name)) - item.addedTime;
+  };
+
+  moveItem(item, id, status) {
     let spliced = this.todoList[item.status].splice(item.index, 1);
     this.todoList[status].push(spliced[0]);
   };
@@ -134,5 +135,3 @@ todo.command('update$7$doing');
 todo.command('show$todo');
 todo.command('show$doing');
 todo.command('show$done');
-
-console.log(todo.todoList);
