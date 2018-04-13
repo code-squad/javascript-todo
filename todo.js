@@ -65,12 +65,10 @@ class Todo {
   };
 
   getSelectedStatus(status) {
-    const list = [];
-    const selectedStatus = this.todoList[status];
-    for (let key in selectedStatus) {
-      if (status === 'done') list.push(this.measureTime(selectedStatus[key]));
-      else list.push(`[${selectedStatus[key].id}] ${selectedStatus[key].name}`);
-    }
+    const list = this.todoList[status].reduce((ac, cv) => {
+      if (status === 'done') return ac.concat(this.measureTime(cv));
+      else return ac.concat(`[${cv.id}] ${cv.name}`);
+    }, [])
     return list.length !== 0 ? [list.join(', ')] : [this.errorMsg.emptyStatus(status)];
   };
 
