@@ -12,15 +12,15 @@
 // 예를 들어 command(show$doing)을 입력하면 doing상태의 목록이 [1] 자바공부 [2] 산책하기 와 같이 출력된다
 // 3. update : 내가 추가한 할 일의 상태를 변경시킨다
 // 예를 들어 command(update$2$done)을 입력하면 id값이 2인 할 일을 done상태로 만들어준다
-
+const errorMsg = {
+  notCommand: cmd => `${cmd}는 입력 커맨드가 아닙니다.`,
+  doNotFindId: id => `${id}은 존재하지 않는 id입니다.`,
+  emptyStatus: status => `${status}는 비어있습니다.`,
+  alreadyHaveItem: (status) => `해당 Id는 이미 ${status}상태입니다.`
+};
 class Todo {
-  constructor() {
-    this.errorMsg = {
-      notCommand: cmd => `${cmd}는 입력 커맨드가 아닙니다.`,
-      doNotFindId: id => `${id}은 존재하지 않는 id입니다.`,
-      emptyStatus: status => `${status}는 비어있습니다.`,
-      alreadyHaveItem: (status) => `해당 Id는 이미 ${status}상태입니다.`
-    };
+  constructor(errorMsg) {
+    this.errorMsg = errorMsg;
     this.id = 1;
     this.todoList = {
       todo: [],
@@ -130,7 +130,7 @@ class Todo {
   }
 
 }
-const todo = new Todo();
+const todo = new Todo(errorMsg);
 
 todo.command('add$자바스크립크 공부하기');
 todo.command('add$산책하기');
