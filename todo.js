@@ -39,8 +39,8 @@ class Todo {
       show: this.getSelectedStatus,
       update: this.updateTodo
     }
-    const [name, ...item] = input.split(/\$/);
-    const excute = cmd[name].call(this, ...item);
+    const [type, ...item] = input.split(/\$/);
+    const excute = cmd[type].call(this, ...item);
     if (excute) excute.forEach(v => console.log(v));
   }
 
