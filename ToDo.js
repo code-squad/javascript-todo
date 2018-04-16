@@ -9,20 +9,20 @@ const todo = class {
     }
 
     addWorkTodo(content) {
-        const forIndexMatchingData = 1;
+        const paddingIndex = 1;
 
-        let idCount = this.works.length + forIndexMatchingData;
-        let date = new Date();
+        let idCount = this.works.length + paddingIndex;
+        let createdDate = new Date();
 
         var workObj = {
             id: idCount,
             content: content,
             state: "todo",
-            createTime: date.toLocaleString(),
+            createTime: createdDate.toLocaleString(),
             TimeToDoing: 0,
             TimeToDone: 0,
 
-            calDoneTime: function() {
+            calcualateDoneTime: function() {
                 return this.TimeToDone - this.TimeToDoing;
             }
         };
@@ -35,21 +35,21 @@ const todo = class {
         printCurrentState(this.works);
     }
 
-    showWorkList(state) {
+    printWorkList(state) {
         let content = "";
         let result = "";
         let mode = (state === "todo") ? "TO DO" : (state === "doing") ? "DOING" : "DONE";
     
         log(" << " + mode + " 상태인 목록을 출력합니다 >> ");
-    
-        for(let i=0; i<this.works.length; i++) {
-            if (this.works[i].state === state && mode === "DONE") {
-                result = printDoneWorkList(this.works[i])
-            } else if (this.works[i].state === state) {
-                content = "\"" + this.works[i].id + ". " + this.works[i].content + "\"";
+
+        this.works.forEach(work => {
+            if(work.state === state && mode === "DONE") {
+                result = printDoneWorkList(work);
+            } else if (work.state === state) {
+                content = "\"" + work.id + ". " + work.content + "\"";
                 result += content;
             }
-        }
+        });
     
         result = (result === "") ? "해당 상태인 목록이 없습니다" : result;
     
@@ -89,7 +89,7 @@ function command(works, data) {
          todoClass.addWorkTodo(content);
          break;
         case "show":
-         todoClass.showWorkList(content);
+         todoClass.printWorkList(content);
          break;
         case "update":
          replaceTargetIndex = result[1];
@@ -101,7 +101,7 @@ function command(works, data) {
 
 function printDoneWorkList(data) {
 
-    let millisecondTime = data.calDoneTime();
+    let millisecondTime = data.calcualateDoneTime();
     let calculatedTime = Math.floor(millisecondTime / 1000);
     let minute = Math.floor(calculatedTime / 60);
     let hour = Math.floor(minute / 60);
@@ -144,15 +144,15 @@ function log(data) {
 
 var run = function () {
     
-    var works = [];
+    var todoListDataGroup = [];
 
-    command(works, "add$자바스크립트 공부하기");
-    command(works, "show$todo");
+    command(todoListDataGroup, "add$자바스크립트 공부하기");
+    command(todoListDataGroup, "show$todo");
 
-    command(works, "update$1$doing");
+    command(todoListDataGroup, "update$1$doing");
     setTimeout(function() {
-        command(works, "update$1$done");
-        command(works, "show$done");
+        command(todoListDataGroup, "update$1$done");
+        command(todoListDataGroup, "show$done");
     }, 3000);
 };
 
