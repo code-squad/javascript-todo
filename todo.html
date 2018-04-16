@@ -16,62 +16,52 @@
 		(4) show() : 인자로 받은 status의 항목의 id값과 task값을 모두 보여준다.
 		(5) update() : 인자로 id값과 status값을 받고 아이디에 해당하는 데이터의 status값을 인자로 받은 status값으로 update한다.
 */
-
-let todoList = [];
-
-let MSG = {
-	add : function(task){console.log(`id : ${todoList.length}, "${task}"이 추가되었습니다`)},
-	show : function(status){
-		const str = todoList.reduce((prev, curr) => {
-			if(curr.status === status) return prev.concat(`"${curr.id}, ${curr.task}"`);
-		},[]).join(", ");
-		console.log(str);
+const todoApp = {
+	todoList : [],
+	MSG : {
+		add(task){ console.log(`id : ${this.todoList.length}, "${task}"이 추가되었습니다.`)},
+		show(status){
+			const showMessage = todoApp.todoList.reduce((prev, curr) => {
+				if(curr.status === status){
+				 return prev.concat(`"${curr.id}, ${curr.task}"`)
+				}else return prev;
+			},[]).join(", ");
+			console.log(showMessage);
+		},
+		currentStatus(){
+			let status = {todo : 0, doing : 0, done : 0};
+			this.todoList.forEach(v => (status[v.status]++));
+			console.log(`현재상태 : todo : ${status.todo}개, doing : ${status.doing}개, done : ${status.done}개,`);
+		}
 	},
-	currentStatus : function (){
-		let todo = 0;
-		let doing = 0;
-		let done = 0;
-		todoList.forEach(v => {
-			switch(v.status){
-				case "todo" : todo++;
-				break;
-				case "doing" : doing++;
-				break;
-				case "done" : done++;
-				break;
-			}
-		})
-		console.log(`현재상태 : todo : ${todo}개, doing : ${doing}개, done : ${done}개,`);
+	command(inputString){
+		let [functionName, parameterFirstValue, parameterSecondValue] = inputString.split("$");
+		this[functionName](parameterFirstValue,parameterSecondValue);
+	},
+	add(task){
+		this.todoList.push({id : this.todoList.length+1, status : "todo", task : task });
+		this.MSG.add.call(todoApp, task);
+		this.MSG.currentStatus.call(todoApp);
+	},
+	show(status){
+		this.MSG.show.call(todoApp, status);
+	},
+	update(id, status){
+		this.todoList.some(v=>{
+			if(v.id == id) v.status = status;
+			return v.id == id;
+		});
+		this.MSG.currentStatus.call(todoApp);
 	}
 }
 
-function command(str){
-	let [functionName, parameterFirstValue, parameterSecondValue] = str.split("$");
-	eval(functionName + `(parameterFirstValue, parameterSecondValue)`);
-}
-function add(task){
-	todoList.push({id : todoList.length+1, status : "todo", task : task });
-	MSG.add(task);
-	MSG.currentStatus();
-}
-function show(status){
-	MSG.show(status);
-}
-function update(id, status){
-	todoList.some(v=>{
-		if(v.id == id) v.status = status;
-		return v.id == id;
-	});
-	MSG.currentStatus();
-}
-
-command("add$자바스크립트공부하기");
-command("add$자바공부하기");
-command("add$ios공부하기");
-command("show$todo");
-command("update$2$doing");
-command("show$doing");
-command("update$2$done");
-command("show$done");
+todoApp.command("add$자바스크립트공부하기");
+todoApp.command("add$자바공부하기");
+todoApp.command("add$ios공부하기");
+todoApp.command("show$todo");
+todoApp.command("update$2$doing");
+todoApp.command("show$doing");
+todoApp.command("update$2$done");
+todoApp.command("show$done");
 </script>
 
