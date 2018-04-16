@@ -21,7 +21,7 @@ const todoApp = {
 	MSG : {
 		add(task){ console.log(`id : ${this.todoList.length}, "${task}"이 추가되었습니다.`)},
 		show(status){
-			const showMessage = todoApp.todoList.reduce((prev, curr) => {
+			const showMessage = this.todoList.reduce((prev, curr) => {
 				if(curr.status === status){
 				 return prev.concat(`"${curr.id}, ${curr.task}"`)
 				}else return prev;
@@ -31,9 +31,18 @@ const todoApp = {
 		currentStatus(){
 			let status = {todo : 0, doing : 0, done : 0};
 			this.todoList.forEach(v => (status[v.status]++));
-			console.log(`현재상태 : todo : ${status.todo}개, doing : ${status.doing}개, done : ${status.done}개,`);
+			console.log(`현재상태 : todo : ${status.todo}개, doing : ${status.doing}개, done : ${status.done}개`);
+		},
+		showDone(){
+			const showDoneMessage = this.todoList.reduce((prev,curr)=>{
+				if(curr.status === "done"){
+					return prev.concat(`${curr.task}, ${curr.doingTime}`);
+				}else return prev;
+			},[]).join(",");
+			console.log(showDoneMessage);
 		}
 	},
+
 	command(inputString){
 		let [functionName, parameterFirstValue, parameterSecondValue] = inputString.split("$");
 		this[functionName](parameterFirstValue,parameterSecondValue);
@@ -44,15 +53,34 @@ const todoApp = {
 		this.MSG.currentStatus.call(todoApp);
 	},
 	show(status){
-		this.MSG.show.call(todoApp, status);
+		if(status === "done"){
+			this.MSG.showDone.call(todoApp);
+		}else{
+			this.MSG.show.call(todoApp, status);
+		}
 	},
 	update(id, status){
 		this.todoList.some(v=>{
-			if(v.id == id) v.status = status;
+			if(v.id == id){
+				v.status = status;
+				this.calculateDoingTime(status, v);
+			};
 			return v.id == id;
 		});
 		this.MSG.currentStatus.call(todoApp);
+	},
+	calculateDoingTime(status, v){
+		if(status === "doing"){
+			v.currentTime = Date.now()
+		}else if(status === "done"){
+			const doingTime = Date.now() - v.currentTime;
+			const hours = Math.ceil(doingTime / 1000 / 60 / 60);
+			const minutes = Math.ceil(doingTime / 1000 / 60 % 60);
+			const doingTimeString = `${hours}시간 ${minutes}분`;
+			v.doingTime = doingTimeString;
+		}
 	}
+
 }
 
 todoApp.command("add$자바스크립트공부하기");
