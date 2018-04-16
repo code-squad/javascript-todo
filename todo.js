@@ -87,7 +87,7 @@ class Todo {
 
   updateTodo(id, status) {
     let found = this.findItemById(id, this.todoList);
-    if (!found) return;
+    if (!found.item) return;
     let item = found.item;
     if (status === 'done') {
       this.addTheTime(item);
@@ -112,19 +112,24 @@ class Todo {
   };
 
   findItemById(id, list) {
-    for (let key in list) {
-      let found = list[key].reduce((ac, cv, idx) => {
-        if (cv.id == id) {
-          ac.item = cv;
-          ac.index = idx;
-          ac.status = key;
-          return ac;
-        } else {
-          return ac;
-        }
-      }, {})
-      if (found.item) return found;
+    const statusKey = {
+      0: 'todo',
+      1: 'doing',
+      2: 'done',
     }
+    const found = Object.values(list).reduce((ac, cv, ci) => {
+      const target = {};
+      cv.forEach((v, i) => {
+        if (v.id == id) {
+          target.index = i;
+          target.item = v;
+          target.status = statusKey[ci]
+          ac = target
+        }
+      });
+      return ac;
+    }, {})
+    if (found) return found;
     console.log(this.errorMsg.doNotFindId(id));
     return undefined;
   }
