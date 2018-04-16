@@ -40,26 +40,35 @@ class Todo {
       update: this.updateTodo
     }
     const [type, ...item] = input.split(/\$/);
-    const excute = cmd[type].call(this, ...item);
-    if (excute) excute.forEach(v => console.log(v));
+    const lastId = cmd[type].call(this, ...item);
+    this.printMessage(type, item, lastId);
+  }
+
+  printMessage(type, item, lastId) {
+    if (type === 'add') {
+      console.log(this.getAddedTodo(lastId, item));
+      console.log(this.getCurrentStatus());
+    }
+    if (type === 'update') console.log(this.getCurrentStatus());
+    if (type === 'show') console.log(lastId);
   }
 
   addTodo(todoName) {
-    const id = this.getId();
+    const lastId = this.getId();
     const addedTime = new Date();
     this.todoList.todo.push({
-      id: id,
+      id: lastId,
       name: todoName,
       addedTime: addedTime.getHours()
     });
-    return [this.returnAddedTodo(id, todoName), this.returnCurrentStatus()];
+    return lastId;
   };
 
-  returnAddedTodo(id, todoName) {
+  getAddedTodo(id, todoName) {
     return `id : ${id} '${todoName}' 과목이 새로 추가됐습니다.`;
   };
 
-  returnCurrentStatus() {
+  getCurrentStatus() {
     const status = Object.keys(this.todoList).map(v => `${v} : ${Object.keys(this.todoList[v]).length}개`);
     return `현재상태 : ${status.join(', ')}`;
   };
@@ -69,7 +78,7 @@ class Todo {
       if (status === 'done') return ac.concat(this.measureTime(cv));
       else return ac.concat(`[${cv.id}] ${cv.name}`);
     }, [])
-    return list.length !== 0 ? [list.join(', ')] : [this.errorMsg.emptyStatus(status)];
+    return list.length !== 0 ? list.join(', ') : this.errorMsg.emptyStatus(status);
   };
 
   measureTime(item) {
@@ -84,7 +93,7 @@ class Todo {
       this.addTheTime(item);
     }
     this.moveItem(found, id, status)
-    return [this.returnCurrentStatus()];
+    return id;
   };
 
   addTheTime(item) {
