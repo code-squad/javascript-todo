@@ -86,25 +86,39 @@ class Todo {
   };
 
   updateTodo(id, status) {
-    let found = this.findItemById(id, this.todoList);
-    if (!found.item) return;
-    let item = found.item;
-    if (status === 'done') {
-      this.addTheTime(item);
-    }
-    this.moveItem(found, id, status)
+    let item = this.findItemById(id, this.todoList);
+    if (!item) return;
+    this.addTheTime(item, status);
+    this.removeOriginalItem(item);
+    this.addNewItem(item, status);
     return id;
   };
 
-  addTheTime(item) {
-    const updatedTime = new Date();
-    item.theTime = (updatedTime.getHours() + this.doing(item.name)) - item.addedTime;
+  addTheTime(item, status) {
+    if (status === 'done') {
+      const updatedTime = new Date();
+      item.theTime = (updatedTime.getHours() + this.doing(item.name)) - item.addedTime;
+    }
   };
+  removeOriginalItem(item) {
+    let previousInfo = this.getPreviousInfo(item, this.todoList);
+    this.todoList[previousInfo.status].splice(previousInfo.index, 1);
+  }
+  addNewItem(item, status) {
+    this.todoList[status].push(item)
+  }
 
-  moveItem(item, id, status) {
-    let spliced = this.todoList[item.status].splice(item.index, 1);
-    this.todoList[status].push(spliced[0]);
-  };
+  getPreviousInfo(item, list) {
+    let foundKind = {};
+    Object.keys(list).some(v => {
+      let idx = list[v].indexOf(item);
+      if (idx > -1) {
+        foundKind.index = idx;
+        foundKind.status = v;
+      }
+    })
+    return foundKind;
+  }
 
   doing(todo) {
     if (todo.match(/공부/)) return 3;
@@ -112,25 +126,10 @@ class Todo {
   };
 
   findItemById(id, list) {
-    const statusKey = {
-      0: 'todo',
-      1: 'doing',
-      2: 'done',
-    }
-    const found = Object.values(list).reduce((ac, cv, ci) => {
-      const target = {};
-      cv.forEach((v, i) => {
-        if (v.id == id) {
-          target.index = i;
-          target.item = v;
-          target.status = statusKey[ci]
-          ac = target
-        }
-      });
-      return ac;
-    }, {})
-    if (found) return found;
-    console.log(this.errorMsg.doNotFindId(id));
+    const flattenedArrResult = Object.values(list).reduce((flattenedArr, el) => [...flattenedArr, ...el], []);
+    const matchedItem = flattenedArrResult.filter(v => v.id === +id);
+    if (matchedItem[0]) return matchedItem[0];
+    else console.log(this.errorMsg.doNotFindId(id));
     return undefined;
   }
 
