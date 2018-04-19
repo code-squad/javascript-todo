@@ -2,19 +2,19 @@
     객체로 코드구현
 */
 
-const todo = class {
+class TODO {
 
-    constructor(works) {
-        this.works = works;
+    constructor() {
+        this.todoListDataGroup = new Array();
     }
 
     addWorkTodo(content) {
         const paddingIndex = 1;
 
-        let idCount = this.works.length + paddingIndex;
-        let createdDate = new Date();
+        const idCount = this.todoListDataGroup.length + paddingIndex;
+        const createdDate = new Date();
 
-        var workObj = {
+        const workObj = {
             id: idCount,
             content: content,
             state: "todo",
@@ -27,25 +27,28 @@ const todo = class {
             }
         };
 
-        // works.push(workObj);
-        this.works.push(workObj);
+        this.todoListDataGroup.push(workObj);
 
         // 출력
         log("id: " + idCount + ", " + "\"" + content + "\" 항목이 새로 추가됐습니다.");
-        printCurrentState(this.works);
+        print.currentState(this.todoListDataGroup);
     }
 
     printWorkList(state) {
         let content = "";
         let result = "";
-        let mode = (state === "todo") ? "TO DO" : (state === "doing") ? "DOING" : "DONE";
+        const mode = (state === "todo") ? "TO DO" : (state === "doing") ? "DOING" : "DONE";
     
         log(" << " + mode + " 상태인 목록을 출력합니다 >> ");
 
-        this.works.forEach(work => {
-            if(work.state === state && mode === "DONE") {
-                result = printDoneWorkList(work);
-            } else if (work.state === state) {
+        const doneWorkList = this.todoListDataGroup.filter(work => {
+            return work.state === state;
+        });
+
+        doneWorkList.forEach(work => {
+            if (work.state === "DONE") {
+                result = print.doneWorkList(work);
+            } else {
                 content = "\"" + work.id + ". " + work.content + "\"";
                 result += content;
             }
@@ -60,100 +63,148 @@ const todo = class {
         let forIndexMatchingData = 1;
         let index = id - forIndexMatchingData;
     
-        log(" << " + id + " 번의 상태를 '" + this.works[index].state + "' 에서 '" + content + "' 로 변경합니다 >> ");
+        log(" << " + id + " 번의 상태를 '" + this.todoListDataGroup[index].state + "' 에서 '" + content + "' 로 변경합니다 >> ");
     
-        this.works[index].state = content;
+        this.todoListDataGroup[index].state = content;
     
         if (content === "doing") {
-            this.works[index].TimeToDoing = Date.now();
+            this.todoListDataGroup[index].TimeToDoing = Date.now();
         } else if (content === "done") {
-            this.works[index].TimeToDone = Date.now();
+            this.todoListDataGroup[index].TimeToDone = Date.now();
         }
         
-        printCurrentState(this.works);
+        print.currentState(this.todoListDataGroup);
     }
 }
 
-function command(works, data) {
+// 예약어 느낌이라 피하려고 했는데
+// printDoneWorkList => print.doneWorkList
+// 이런식으로 이어지게 하기 위해서 일단 적용했습니다.
+// 그래도 예약어를 피하고 다른 네이밍을 짓는게 낫겠죠?
+// printOut ?
+const print = {
+
+    doneWorkList : function(data) {
+        const millisecondTime = data.calcualateDoneTime();
+        const calculatedTime = Math.floor(millisecondTime / 1000);
+        let minute = Math.floor(calculatedTime / 60);
+        let hour = Math.floor(minute / 60);
+        let second = calculatedTime;
+        let result = "";
+    
+        minute -= (hour * 60);
+        second -= ((hour * 3600) + (minute * 60));
+        result = "\"" + data.id + ". " + data.content + "\", " + 
+                 "완료 시간 : " + hour + "시간 " + minute + "분 " + second + "초";
+    
+        return result;
+    },
+
+    currentState : function(workList) {
+        let todoCount = 0;
+        let doingCount = 0;
+        let doneCount = 0;
+    
+        let state = "";
+
+        workList.forEach(work => {
+            state = work.state;
+            if (state === "todo") {
+                todoCount++;
+            } else if (state === "doing") {
+                doingCount++;
+            } else {
+                doneCount++;
+            }
+        });
+    
+        log("현재상태 : " + "todo " + todoCount + "개, doing : " + doingCount + "개, done : " + doneCount + "개");
+    }
+};
+
+function command(data) {
     // class 생성
-    var todoClass = new todo(works);
+    let todoListClass = singleton.getInstance();
+    let todoList = todoListClass.todoList;
 
     // $ 문자 구분
-    let result = data.split("$");
-    let mode = result[0];
+    const result = data.split("$");
+    const mode = result[0];
     let content = result[1];
     let replaceTargetIndex = "";
     // switch-case
     switch(mode) {
         case "add":
-         todoClass.addWorkTodo(content);
+        todoList.addWorkTodo(content);
          break;
         case "show":
-         todoClass.printWorkList(content);
+        todoList.printWorkList(content);
          break;
         case "update":
          replaceTargetIndex = result[1];
          content = result[2];
-         todoClass.updateWorkState(replaceTargetIndex, content);
+         todoList.updateWorkState(replaceTargetIndex, content);
          break;
     }
-}
-
-function printDoneWorkList(data) {
-
-    let millisecondTime = data.calcualateDoneTime();
-    let calculatedTime = Math.floor(millisecondTime / 1000);
-    let minute = Math.floor(calculatedTime / 60);
-    let hour = Math.floor(minute / 60);
-    let second = calculatedTime;
-    let result = "";
-
-    minute -= (hour * 60);
-    second -= ((hour * 60 * 60) + (minute * 60));
-    result = "\"" + data.id + ". " + data.content + "\", " + 
-             "완료 시간 : " + hour + "시간 " + minute + "분 " + second + "초";
-
-    return result;
-}
-
-function printCurrentState(works) {
-
-    let todoCount = 0;
-    let doingCount = 0;
-    let doneCount = 0;
-
-    let state = "";
-
-    for (let i=0; i < works.length; i++) {
-        state = works[0].state;
-        if (state === "todo") {
-            todoCount++;
-        } else if (state === "doing") {
-            doingCount++;
-        } else {
-            doneCount++;
-        }
-    }
-
-    log("현재상태 : " + "todo " + todoCount + "개, doing : " + doingCount + "개, done : " + doneCount + "개");
 }
 
 function log(data) {
     console.log(data);
 }
 
-var run = function () {
-    
-    var todoListDataGroup = [];
+let run = function () {
 
-    command(todoListDataGroup, "add$자바스크립트 공부하기");
-    command(todoListDataGroup, "show$todo");
+    let todoList = new TODO();
 
-    command(todoListDataGroup, "update$1$doing");
+    command("add$자바스크립트 공부하기");
+    command("show$todo");
+    command("update$1$doing");
+
     setTimeout(function() {
-        command(todoListDataGroup, "update$1$done");
-        command(todoListDataGroup, "show$done");
+        command("update$1$done");
+        command("show$todo");
+        command("show$doing");
+        command("show$done");
     }, 3000);
 };
+
+// singleton을 만든 이유는
+// todoListDataGroup 때문입니다.
+// 저는 이렇게 해결했는데 맞는지 모르겠네요.
+
+// 일단은 todoListDataGroup을 class안으로 밀어(?)버렸습니다.
+// 그리고 코드를 수행하니, command 함수에서 계속 new TODO() 를 해버리니
+// 데이터가 보존되지 않고 초기화가 되어버리더군요.
+
+// 그래서 데이터를 어떻게 보관할까 하다가 처음에는
+// todoList 의 undefined 를 체크했습니다
+// 하지만 어차피 command 도 함수라서, 밖에 존재하는 run 함수에서
+// 데이터를 전달해주지 않는 이상 똑같은 결과(보존되지 않는)가 발생하더군요.
+
+// 하지만 run 함수에서 전달시키기는 뭔가 내키지 않았습니다.
+// todoListDataGroup를 넘겨주는것과 비슷해보여서요.
+// 그래서 디자인패턴 중 Singleton을 적용하게 된것입니다.
+
+// 더 좋은 방법이 있다면 알려주세요 @crong ! 배우고싶어요 :)
+let singleton = (function() {
+    var instance;
+    let a;
+    let todoList;
+
+    function initiate() {
+        return {
+            todoList: new TODO()
+        };
+    }
+
+    return {
+        getInstance: function() {
+            if (!instance) {
+                instance = initiate();
+            }
+            return instance;
+        }
+    }
+})();
 
 run();
