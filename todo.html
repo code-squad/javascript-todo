@@ -16,49 +16,28 @@
 		(4) show() : 인자로 받은 status의 항목의 id값과 task값을 모두 보여준다.
 		(5) update() : 인자로 id값과 status값을 받고 아이디에 해당하는 데이터의 status값을 인자로 받은 status값으로 update한다.
 */
-const todoApp = {
-	todoList : [],
-	MSG : {
-		add(task){ console.log(`id : ${this.todoList.length}, "${task}"이 추가되었습니다.`)},
-		show(status){
-			const showMessage = this.todoList.reduce((prev, curr) => {
-				if(curr.status === status){
-				 return prev.concat(`"${curr.id}, ${curr.task}"`)
-				}else return prev;
-			},[]).join(", ");
-			console.log(showMessage);
-		},
-		currentStatus(){
-			let status = {todo : 0, doing : 0, done : 0};
-			this.todoList.forEach(v => (status[v.status]++));
-			console.log(`현재상태 : todo : ${status.todo}개, doing : ${status.doing}개, done : ${status.done}개`);
-		},
-		showDone(){
-			const showDoneMessage = this.todoList.reduce((prev,curr)=>{
-				if(curr.status === "done"){
-					return prev.concat(`${curr.task}, ${curr.doingTime}`);
-				}else return prev;
-			},[]).join(",");
-			console.log(showDoneMessage);
-		}
-	},
+class todoApp{
 
+	constructor(todoList, msg){
+		this.todoList = todoList;
+		this.msg = msg;
+	}
 	command(inputString){
 		let [functionName, parameterFirstValue, parameterSecondValue] = inputString.split("$");
 		this[functionName](parameterFirstValue,parameterSecondValue);
-	},
+	}
 	add(task){
 		this.todoList.push({id : this.todoList.length+1, status : "todo", task : task });
-		this.MSG.add.call(todoApp, task);
-		this.MSG.currentStatus.call(todoApp);
-	},
+		this.msg.addMSG.call(this,task);
+		this.msg.currentStatusMSG.call(this);
+	}
 	show(status){
 		if(status === "done"){
-			this.MSG.showDone.call(todoApp);
+			this.msg.showDone.call(this);
 		}else{
-			this.MSG.show.call(todoApp, status);
+			this.msg.showMSG.call(this, status);
 		}
-	},
+	}
 	update(id, status){
 		this.todoList.some(v=>{
 			if(v.id == id){
@@ -67,8 +46,8 @@ const todoApp = {
 			};
 			return v.id == id;
 		});
-		this.MSG.currentStatus.call(todoApp);
-	},
+		this.msg.currentStatusMSG.call(this);	
+	}
 	calculateDoingTime(status, v){
 		if(status === "doing"){
 			v.currentTime = Date.now()
@@ -80,16 +59,52 @@ const todoApp = {
 			v.doingTime = doingTimeString;
 		}
 	}
+	
+}
+
+class todoMessage{
+
+	addMSG(task){
+		console.log(`id : ${this.todoList.length}, "${task}"이 추가되었습니다.`);
+	}
+	showMSG(status){
+		const showMessage = this.todoList.reduce((prev, curr) => {
+			if(curr.status === status){
+			 return prev.concat(`"${curr.id}, ${curr.task}"`)
+			}else return prev;
+		},[]).join(", ");
+		console.log(showMessage);
+	}
+	currentStatusMSG(){
+		let status = {todo : 0, doing : 0, done : 0};
+		//this.todoList.forEach( v => (status[v.status]++));
+		for(let i = 0; i < this.todoList.length; i++){
+			status[this.todoList[i].status]++;
+		}
+		console.log(`현재상태 : todo : ${status.todo}개, doing : ${status.doing}개, done : ${status.done}개`);
+	}
+	showDone(){
+		const showDoneMessage = this.todoList.reduce((prev,curr)=>{
+			if(curr.status === "done"){
+				return prev.concat(`${curr.task}, ${curr.doingTime}`);
+			}else return prev;
+		},[]).join(",");
+		console.log(showDoneMessage);
+	}
 
 }
 
-todoApp.command("add$자바스크립트공부하기");
-todoApp.command("add$자바공부하기");
-todoApp.command("add$ios공부하기");
-todoApp.command("show$todo");
-todoApp.command("update$2$doing");
-todoApp.command("show$doing");
-todoApp.command("update$2$done");
-todoApp.command("show$done");
+const msg = new todoMessage();
+const todoApplication = new todoApp([],msg);
+todoApplication.command("add$자바스크립트공부하기");
+todoApplication.command("add$자바공부하기");
+todoApplication.command("add$ios공부하기");
+todoApplication.command("show$todo");
+todoApplication.command("update$2$doing");
+todoApplication.command("update$3$doing");
+todoApplication.command("show$doing");
+todoApplication.command("update$2$done");
+todoApplication.command("update$3$done");
+todoApplication.command("show$done");
 </script>
 
