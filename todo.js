@@ -22,6 +22,18 @@ function addTodo(commandTodo) {
   showStatus();
 }
 
+// todo 리스트 출력
+function showTask(commandTodo) {
+  let command = commandTodo === "todo" || commandTodo === "doing" || commandTodo === "done"; 
+
+  if(command){
+    work[commandTodo].forEach(doingData => {
+      let list = commandTodo + "목록에 id: " + doingData;
+      console.log(list);
+    });
+  }
+}
+
 // 현재 todo list 출력 함수
 function showStatus(){
   let todoList = work["todo"].length;
@@ -48,3 +60,7 @@ function inputCommand(inputWord) {
 inputCommand("add$자바스크립트 공부하기");
 // // inputCommand("show!가짜!"); // 해당 글자는 입력 할수 없는 기호입니다.
 inputCommand("add$영어단어외우기");
+
+inputCommand("show$doing");
+inputCommand("show$done");
+inputCommand("show$todo");
