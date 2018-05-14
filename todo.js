@@ -34,12 +34,27 @@ function showTask(commandTodo) {
   }
 }
 
+// todo 데이터 update 입/출력 함수
+function updateTask(idxTodo, modifyTodo){
+  for(let key in work){
+    work[key].forEach(todoData => {
+      let split = todoData.split(/\,/);
+      if(split[0] === idxTodo) {
+        let find = work[key].indexOf(split[1])
+        work[key].splice(find-1 , 1);
+        work[modifyTodo].push(split[0] + split[1]);
+      }
+    });
+  }
+  showStatus();
+}
+
 // 현재 todo list 출력 함수
 function showStatus(){
   let todoList = work["todo"].length;
   let doingList = work["doing"].length;
   let doneList = work["done"].length;
-  console.log(`현재상태  todo: ${todoList}개, doing: ${doingList}개, done: ${doneList}개`);
+  console.log(`현재상태 :  todo: ${todoList}개, doing: ${doingList}개, done: ${doneList}개`);
 }
 
 // 명령이 입력 / 구분 함수
@@ -64,3 +79,5 @@ inputCommand("add$영어단어외우기");
 inputCommand("show$doing");
 inputCommand("show$done");
 inputCommand("show$todo");
+
+inputCommand("update$5$done");
