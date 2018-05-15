@@ -3,7 +3,7 @@ const noticeMSG = {
   addTodo: " 항목이 추가 되었습니다.",
 };
 
-let work = {
+const work = {
   todo: [],
   doing: ["3, 그래픽스 공부", "4, 알고리즘", "5, 수학공부", "6, 블로그쓰기"],
   done: ["7, 컴퓨터공학", "8, 데이터베이스"]
@@ -11,12 +11,13 @@ let work = {
 
 // todo 추가
 function addTodo(commandTodo) {
-  let inputTodo = work.todo.length+1 + ", " + commandTodo; 
+  const inputTodo = work.todo.length+1 + ", " + commandTodo; 
   work.todo.push(inputTodo);
-  let addTodoMSG = "";
-  for(let i = 0; i < work.todo.length; i++){
-    addTodoMSG = "todo 목록에 " + work.todo[i] + '"' + noticeMSG.addTodo;
-  }
+
+  const todoData = work.todo.reduce((allAddData, addTodo) => {
+    return addTodo;
+  });
+  const addTodoMSG = "todo 목록에 " + todoData + '"' + noticeMSG.addTodo;
   console.log(addTodoMSG);
 
   showStatus();
@@ -24,11 +25,11 @@ function addTodo(commandTodo) {
 
 // todo 리스트 출력
 function showTask(commandTodo) {
-  let command = commandTodo === "todo" || commandTodo === "doing" || commandTodo === "done"; 
+  const command = commandTodo === "todo" || commandTodo === "doing" || commandTodo === "done"; 
 
   if(command){
     work[commandTodo].forEach(doingData => {
-      let list = commandTodo + "목록에 id: " + doingData;
+      const list = commandTodo + "목록에 id: " + doingData;
       console.log(list);
     });
   }
@@ -38,7 +39,7 @@ function showTask(commandTodo) {
 function updateTask(idxTodo, modifyTodo){
   for(let key in work){
     work[key].forEach(todoData => {
-      let split = todoData.split(/\,/);
+      const split = todoData.split(/\,/);
       if(split[0] === idxTodo) {
         let find = work[key].indexOf(split[1])
         work[key].splice(find-1 , 1);
@@ -51,16 +52,19 @@ function updateTask(idxTodo, modifyTodo){
 
 // 현재 todo list 출력 함수
 function showStatus(){
-  let todoList = work["todo"].length;
-  let doingList = work["doing"].length;
-  let doneList = work["done"].length;
+  const todoList = work["todo"].length;
+  const doingList = work["doing"].length;
+  const doneList = work["done"].length;
   console.log(`현재상태 :  todo: ${todoList}개, doing: ${doingList}개, done: ${doneList}개`);
 }
 
 // 명령이 입력 / 구분 함수
 function inputCommand(inputWord) {
-  if (inputWord.indexOf("$") === -1) return console.log(noticeMSG.notSimbol);
-  let splitCommand = inputWord.split(/\$/);
+  if (inputWord.indexOf("$") === -1) {
+    console.log(noticeMSG.notSimbol); 
+    return;
+  }
+  const splitCommand = inputWord.split(/\$/);
 
   switch (splitCommand[0]) {
     case "add":
