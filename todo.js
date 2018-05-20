@@ -5,12 +5,9 @@ const noticeMSG = {
 
 const work = {
   todo: [],
-  doing: ["3, 그래픽스 공부", "4, 알고리즘", "5, 수학공부", "6, 블로그쓰기"],
-  done: ["7, 컴퓨터공학", "8, 데이터베이스"],
-};
-
-const times = {
-  timeList: [11, 22]
+  doing: ["3: 그래픽스 공부", "4: 알고리즘", "5: 수학공부", "6: 블로그쓰기", "7: 컴퓨터공학", "8: 데이터베이스"],
+  done: [],
+  timeList: []
 };
 
 // 시간 계산/데이터를 저장하게 하는 함수
@@ -21,25 +18,22 @@ const times = {
   - 넘겨받은 시간을 어떻게 계산하고 출력할 것인가?
 */
 
-function checkStartTime(){
+function checkTime() {
   const time = new Date();
-  const getTime = time.getSeconds();
+  const getMSTime = time.getMilliseconds();
 
-  return getTime;
+  return getMSTime;
 }
 
 // todo 추가
 function addTodo(commandTodo) {
-  let time = 0;
-  if(commandTodo) time = checkStartTime();
-  const inputTodo = work.todo.length+1 + ", " + commandTodo; 
+  const inputTodo = work.todo.length + 1 + ": " + commandTodo;
   work.todo.push(inputTodo);
-  times.timeList.push(time);
 
   const todoData = work.todo.reduce((allAddData, addTodo) => {
     return addTodo;
   });
-  const addTodoMSG = "todo 목록에 " + todoData + '"' + noticeMSG.addTodo + "\n" + "시작시간: " + time;
+  const addTodoMSG = "todo 목록에 " + todoData + '"' + noticeMSG.addTodo;
   console.log(addTodoMSG);
 
   showStatus();
@@ -47,13 +41,9 @@ function addTodo(commandTodo) {
 
 // todo 리스트 출력
 function showTask(commandTodo) {
-  let presentTime = new Date();
-  let preTimeSec = presentTime.getSeconds();
-
-  let time = times.timeList.reduce((acc, timeData) => {return timeData });
   work[commandTodo].forEach(doingData => {
-    const list = commandTodo + "목록에 id: " + doingData;
-    switch (commandTodo){
+    const list = commandTodo + "목록에 id " + doingData;
+    switch (commandTodo) {
       case "todo":
         console.log(list);
         return;
@@ -61,21 +51,23 @@ function showTask(commandTodo) {
         console.log(list);
         return;
       case "done":
-        console.log(list + "\n" + "소요시간:", preTimeSec-time);
+        let timeData = work.timeList.reduce((acc, word) => { return word.split(":"); });
+        let preMSTime = checkTime();
+        console.log(list + "", "[ 완료시간:", preMSTime - timeData[0] + "/ms ]");
         return;
     }
   });
 }
 
 // todo 데이터 update 입/출력 함수
-function updateTask(idxTodo, modifyTodo){
-  for(let key in work){
+function updateTask(idxTodo, modifyTodo) {
+  for (let key in work) {
     work[key].forEach(todoData => {
-      const split = todoData.split(/\,/);
-      if(split[0] === idxTodo) {
+      const split = todoData.split(/\:/);
+      if (split[0] === idxTodo) {
         let find = work[key].indexOf(split[1])
-        work[key].splice(find-1 , 1);
-        work[modifyTodo].push(split[0] +  "," + split[1]);
+        work[modifyTodo].push(split[0] + ":" + split[1]);
+        work[key].splice(find - 1, 1);
       }
     });
   }
@@ -84,17 +76,17 @@ function updateTask(idxTodo, modifyTodo){
 }
 
 // 현재 todo list 출력 함수
-function showStatus(){
+function showStatus() {
   const todoList = work["todo"].length;
   const doingList = work["doing"].length;
   const doneList = work["done"].length;
-  console.log(`현재상태 :  todo: ${todoList}개, doing: ${doingList}개, done: ${doneList}개`);
+  console.log(`현재상태 : todo: ${todoList}개, doing: ${doingList}개, done: ${doneList}개`);
 }
 
 // 명령이 입력 / 구분 함수
 function inputCommand(inputWord) {
   if (inputWord.indexOf("$") === -1) {
-    console.log(noticeMSG.notSimbol); 
+    console.log(noticeMSG.notSimbol);
     return;
   }
   const splitCommand = inputWord.split(/\$/);
@@ -105,6 +97,8 @@ function inputCommand(inputWord) {
     case "show":
       return showTask(splitCommand[1]);
     case "update":
+      let time = checkTime();
+      work.timeList.push(time + ":ms");
       return updateTask(splitCommand[1], splitCommand[2]);
   }
 }
@@ -114,9 +108,9 @@ inputCommand("add$자바스크립트 공부하기");
 inputCommand("add$영어단어외우기");
 
 inputCommand("show$doing");
-inputCommand("show$done");
 inputCommand("show$todo");
 
-
-inputCommand("show$done");
+inputCommand("update$1$done");
 inputCommand("update$5$done");
+inputCommand("update$4$done");
+inputCommand("show$done");
