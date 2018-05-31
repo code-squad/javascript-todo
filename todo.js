@@ -10,7 +10,7 @@ const noticeMSG = {
 
 const Todo = {
   // 시간 함수
-  checkTime: function(commandTodo) {
+  checkTime (commandTodo) {
     const splitTodo = commandTodo.split("$");
     const time = new Date();
     const nowTime = Date.now();
@@ -30,7 +30,7 @@ const Todo = {
   },
 
   // todo 추가
-  addTodo: function(commandTodo) {
+  addTodo (commandTodo) {
     const inputTodo = {
       id: worklist.length,
       name: commandTodo,
@@ -50,7 +50,7 @@ const Todo = {
   },
 
   // todo 리스트 출력
-  showTask: function(commandTodo) {
+  showTask (commandTodo) {
     worklist.forEach(workData => {
       if (commandTodo === workData.status) {
         const message = workData.status + "목록에 id " + workData.id + ": " + workData.name;
@@ -72,7 +72,7 @@ const Todo = {
   },
 
   // todo 데이터 update 입/출력 함수
-  updateTask: function(commandTodo) {
+  updateTask (commandTodo) {
     const splitCommand = commandTodo.split("$");
     const idxTodo = Number(splitCommand[0]);
     const modifyTodo = splitCommand[1];
@@ -90,7 +90,7 @@ const Todo = {
   },
 
   // 현재 todo list 출력 함수
-  showStatus: function() {
+  showStatus () {
     let todoList = 0;
     let doingList = 0;
     let doneList = 0;
@@ -108,7 +108,7 @@ const Todo = {
   },
 
   // 명령이 입력 / 구분 함수
-  inputCommand: function(inputWord) {
+  inputCommand (inputWord) {
     for (let i = 0; i < inputWord.length; i++) {
       if (inputWord.indexOf("$") === -1) {
         console.log(noticeMSG.notSimbol);
@@ -129,7 +129,7 @@ const Todo = {
 }
 
 Todo.inputCommand("add$자바스크립트 공부하기");
-// todo.inputCommand("show!가짜!"); // 해당 글자는 입력 할수 없는 기호입니다.
+// Todo.inputCommand("show!가짜!"); // 해당 글자는 입력 할수 없는 기호입니다.
 Todo.inputCommand("add$영어단어외우기");
 
 // Todo.inputCommand("show$todo");
