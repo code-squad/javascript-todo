@@ -4,53 +4,18 @@ const noticeMSG = {
   notSimbol: "해당 글자는 입력 할수 없는 기호입니다.",
   addTodo: " 항목이 추가 되었습니다.",
   updateTodo: " 항목으로 변경 되었습니다.",
-  noneTodo: " 현재 등록된 항목이 없습니다."
+  noneTodo: " 현재 등록된 항목이 없습니다.",
+  noneInput: "할일을 기입해 주십시오."
 };
 
 
-const Todo = {
-  // 시간 함수
-  checkTime (commandTodo) {
-    const splitTodo = commandTodo.split("$");
-    const time = new Date();
-    const nowTime = Date.now();
-    const getMSTime = time.getTime();
-    let calTime = 0;
-
-    if (splitTodo[1] === "doing") {
-      return getMSTime;
-    } else if (splitTodo[1] === "done") {
-      worklist.map(doingData => {
-        if (Number(splitTodo[0]) === doingData.id) {
-          calTime = Math.abs(nowTime - doingData.time);
-        }
-      });
-      return calTime;
-    }
-  },
-
-  // todo 추가
-  addTodo (commandTodo) {
-    const inputTodo = {
-      id: worklist.length,
-      name: commandTodo,
-      time: 0,
-      status: "todo"
-    };
-    worklist.push(inputTodo);
-
-    const todoData = worklist.reduce((allAddData, addTodo) => {
-      return addTodo.name;
-    });
-
-    const addTodoMSG = "todo 목록에 " + commandTodo + noticeMSG.addTodo;
-    console.log(addTodoMSG);
-
-    this.showStatus();
-  },
+const Todo = class {
+  constructor(inputWord){
+    this.inputWord = inputWord;
+  }
 
   // todo 리스트 출력
-  showTask (commandTodo) {
+  showTask(commandTodo) {
     worklist.forEach(workData => {
       if (commandTodo === workData.status) {
         const message = workData.status + "목록에 id " + workData.id + ": " + workData.name;
@@ -69,28 +34,10 @@ const Todo = {
         }
       }
     });
-  },
-
-  // todo 데이터 update 입/출력 함수
-  updateTask (commandTodo) {
-    const splitCommand = commandTodo.split("$");
-    const idxTodo = Number(splitCommand[0]);
-    const modifyTodo = splitCommand[1];
-    const checkingTime = this.checkTime(commandTodo);
-
-    Object.values(worklist).forEach(workData => {
-      if (workData.id === idxTodo) {
-        workData.status = modifyTodo;
-        workData.time = checkingTime;
-        const message = workData.status + "목록에 id " + workData.id + ": " + workData.name + noticeMSG.updateTodo;
-        console.log(message);
-      }
-    });
-    this.showStatus();
-  },
+  }
 
   // 현재 todo list 출력 함수
-  showStatus () {
+  showStatus() {
     let todoList = 0;
     let doingList = 0;
     let doneList = 0;
@@ -105,17 +52,80 @@ const Todo = {
       }
     });
     console.log(`현재상태 : todo: ${todoList}개, doing: ${doingList}개, done: ${doneList}개`);
-  },
+  }
+
+  // 시간 함수
+  checkTime(commandTodo) {
+    const splitTodo = commandTodo.split("$");
+    const time = new Date();
+    const nowTime = Date.now();
+    const getMSTime = time.getTime();
+    let calTime = 0;
+
+    if (splitTodo[1] === "doing") {
+      return getMSTime;
+    } else if (splitTodo[1] === "done") {
+      worklist.map(doingData => {
+        if (Number(splitTodo[0]) === doingData.id) {
+          calTime = Math.abs(nowTime - doingData.time);
+        }
+      });
+      return calTime;
+    }
+  }
+
+  // todo 추가
+  addTodo(commandTodo) {
+    const inputTodo = {
+      id: worklist.length,
+      name: commandTodo,
+      time: 0,
+      status: "todo"
+    };
+    worklist.push(inputTodo);
+
+    const todoData = worklist.reduce((allAddData, addTodo) => {
+      return addTodo.name;
+    });
+
+    const addTodoMSG = "todo 목록에 " + commandTodo + noticeMSG.addTodo;
+    console.log(addTodoMSG);
+
+    this.showStatus();
+  }
+
+  // todo 데이터 update 입/출력 함수
+  updateTask(commandTodo) {
+    const splitCommand = commandTodo.split("$");
+    const idxTodo = Number(splitCommand[0]);
+    const modifyTodo = splitCommand[1];
+    const checkingTime = this.checkTime(commandTodo);
+
+    Object.values(worklist).forEach(workData => {
+      if (workData.id === idxTodo) {
+        workData.status = modifyTodo;
+        workData.time = checkingTime;
+        const message = workData.status + "목록에 id " + workData.id + ": " + workData.name + noticeMSG.updateTodo;
+        console.log(message);
+      }
+    });
+    this.showStatus();
+  }
 
   // 명령이 입력 / 구분 함수
-  inputCommand (inputWord) {
-    for (let i = 0; i < inputWord.length; i++) {
-      if (inputWord.indexOf("$") === -1) {
+  inputCommand(inputWord) {
+    if(this.inputWord === undefined) {
+      console.log(noticeMSG.noneInput);
+      return;
+    } 
+
+    for (let i = 0; i < this.inputWord.length; i++) {
+      if (this.inputWord.indexOf("$") === -1) {
         console.log(noticeMSG.notSimbol);
         return;
       }
     }
-    const splitCommand = inputWord.split(/\$/);
+    const splitCommand = this.inputWord.split(/\$/);
 
     switch (splitCommand[0]) {
       case "add":
@@ -128,30 +138,20 @@ const Todo = {
   }
 }
 
-Todo.inputCommand("add$자바스크립트 공부하기");
-// Todo.inputCommand("show!가짜!"); // 해당 글자는 입력 할수 없는 기호입니다.
-Todo.inputCommand("add$영어단어외우기");
+new Todo("add$자바스크립트 공부하기").inputCommand();
+new Todo("show!가짜!").inputCommand(); // 해당 글자는 입력 할수 없는 기호입니다. 
+new Todo("add$영어단어외우기").inputCommand();
 
-// Todo.inputCommand("show$todo");
-// Todo.inputCommand("show$doing");
-// Todo.inputCommand("show$done");
+new Todo("show$todo").inputCommand();
+new Todo("show$doing").inputCommand();
 
-// Todo.inputCommand("update$4$done"); // done 목록에 id 4: ooo 항목으로 변경 되었습니다.
-// Todo.inputCommand("update$5$doing") // doing 목록에 id 5: ooo 항목으로 변경 되었습니다.
-// Todo.inputCommand("update$5$done"); // done 목록에 id 5: ooo 항목으로 변경 되었습니다.
-Todo.inputCommand("update$6$doing"); // doing 목록에 id 6: ooo 항목으로 변경 되었습니다.
+new Todo("update$4$done").inputCommand(); // done 목록에 id 4: ooo 항목으로 변경 되었습니다.
+new Todo("update$5$doing").inputCommand() // doing 목록에 id 5: ooo 항목으로 변경 되었습니다.
+new Todo("update$5$done").inputCommand(); // done 목록에 id 5: ooo 항목으로 변경 되었습니다.
+new Todo("update$6$doing").inputCommand(); // doing 목록에 id 6: ooo 항목으로 변경 되었습니다.
 
 
 setTimeout(() => {
-  Todo.inputCommand("update$6$done");
-  Todo.inputCommand("show$todo");
-  Todo.inputCommand("show$doing");
-  Todo.inputCommand("show$done"); // [소요시간 3001~5 /ms] doing -> done 순차 변경시
+  new Todo("update$6$done").inputCommand();
+  new Todo("show$done").inputCommand(); // [소요시간 3001~5 /ms] doing -> done 순차 변경시
 }, 3000);
-
-// Todo.inputCommand("update$1$done");
-// Todo.inputCommand("show$doing");
-// Todo.inputCommand("show$done");
-
-
-// console.log(worklist);
