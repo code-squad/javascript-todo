@@ -30,6 +30,8 @@ command("update$3$done");
 
 - [x] 데이터 정의하기
   - [x] 할 일 객체 클래스 만들기
+- [] 할 일 추가 기능 만들기
+  - [] 입력 문자열 분석 기능
 
 ## 3. 설계
 
@@ -48,3 +50,21 @@ const task = [{
 ```
 
 ### 3.2. 기능 설계
+
+- command 함수
+
+```javascript
+function command(cmdStr) {
+  // 1. 입력받은 문자열을 파싱한다.
+  // 2. 각 조건에 맞는 명령을 수행한다.
+}
+```
+
+- 문자열 파싱하는 함수
+
+```javascript
+function parseCmdStr(cmdStr) {
+  // 1. 구분자 '$'로 끊어서 배열로 만든다.
+  return resultArr;
+}
+```
