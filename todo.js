@@ -1,15 +1,15 @@
 'use strict';
 
 class Task {
-  constructor(name, status) {
-    this.name = name;
-    this.status = status;
+  constructor(title, state) {
+    this.title = title;
+    this.state = state;
   }
 }
 
 const todoApp = {
   taskList: [],
-  statusList: ['todo', 'doing', 'done'],
+  stateList: ['todo', 'doing', 'done'],
 
   command(cmdStr) {
     const parsedCmd = this.parseCmdStr(cmdStr);
@@ -19,8 +19,8 @@ const todoApp = {
         const taskId = this.addTask(parsedCmd[1]);
         console.log(`\n>> id : ${taskId}, "${parsedCmd[1]}" 항목이 새로 추가됐습니다.`);
 
-        const currentStatus = this.getStatusStat();
-        this.showCurrentStatus(currentStatus);
+        const stateStatistic = this.getStateStatistic();
+        this.showStateStatistic(stateStatistic);
         break;
     }
   },
@@ -28,30 +28,29 @@ const todoApp = {
     return cmdStr.split('$');
   },
   addTask(taskName) {
-    const taskId = this.taskList.push(new Task(taskName, this.statusList[0]));
+    const taskId = this.taskList.push(new Task(taskName, this.stateList[0]));
     return taskId;
   },
-  getStatusStat() {
-    const statusStat = this.statusList.reduce((statObj, status) => {
-      statObj[status] = 0;
-      return statObj;
+  getStateStatistic() {
+    const stateStatistic = this.stateList.reduce((resultObj, state) => {
+      resultObj[state] = 0;
+      return resultObj;
     }, {});
 
     this.taskList.forEach(task => {
-      if (task.status in statusStat) statusStat[task.status]++;
+      if (task.state in stateStatistic) stateStatistic[task.state]++;
     });
-
-    return statusStat;
+    return stateStatistic;
   },
-  showCurrentStatus(currentStatus) {
-    let currentStatusMsg = '';
+  showStateStatistic(stateStatistic) {
+    let stateStatisticMsg = '';
 
-    currentStatusMsg += `>> 현재 상태 : `;
-    for (let status in currentStatus) {
-      currentStatusMsg += `${status}(${currentStatus[status]}개), `;
+    stateStatisticMsg += `>> 현재 상태 : `;
+    for (let state in stateStatistic) {
+      stateStatisticMsg += `${state}(${stateStatistic[state]}개), `;
     }
 
-    console.log(currentStatusMsg.slice(0, -2));
+    console.log(stateStatisticMsg.slice(0, -2));
   }
 }
 
