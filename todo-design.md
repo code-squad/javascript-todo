@@ -35,21 +35,44 @@ command("update$3$done");
   - [x] add 함수 만들기
   - [x] add 결과 출력
   - [x] 현재상태 데이터 만드는 함수 만들고 출력
+- [] 각 상태 항목 보여주는 기능(show) 만들기
+  - [] show 함수 만들기
 
 ## 3. 설계
 
 ### 3.1. 데이터 설계
 
-* 할 일 데이터
-  - name, status 속성을 가진 객체
-  - id 값은 배열의 인덱스로
-  - class를 이용해 필요할 때 동적 생성
+* 할 일 데이터 리스트
+  - title, state 속성을 가진 객체들의 리스트
+  - id 값은 배열의 인덱스로 사용
+  - class를 이용해 필요할 때 동적으로 생성
 
 ```javascript
 const task = [{
-  name: '자바스크립트 공부하기',
-  status: 'todo'
+  title: '자바스크립트 공부하기',
+  state: 'todo'
 }];
+```
+
+* 상태 데이터
+  - todo, doing, done이 있다.
+  - 상태 추가 및 이름 변경 가능
+  - 이 데이터를 기준으로 상태 통계 데이터가 만들어진다.
+
+```javascript
+const stateList = ['todo', 'doing', 'done'];
+```
+
+* 현재 상태 통계 데이터
+  - 필요한 상황에 동적으로 만들어 사용
+  - 상태 데이터 배열을 기준으로 속성이 만들어진다.
+
+```javascript
+const stateStatistic = {
+  todo: 1,
+  doing: 0,
+  done: 0
+};
 ```
 
 ### 3.2. 기능 설계
@@ -86,9 +109,18 @@ function addTask(taskName) {
 - 상태 통계 객체를 만드는 함수
 
 ```javascript
-function getStatStatus() {
+function getStateStatistic() {
   // 1. 할일 목록에서 각 상태의 개수를 구한다.
   // 2. 객체 형태로 반환한다.
-  return statStatus;
+  return stateStatistic;
+}
+```
+
+- 입력받은 특정 상태를 가진 값들을 찾아 보여주는 함수
+
+```javascript
+function showTasksByState(state) {
+  // 1. 입력받은 state 해당하는 task와 task의 id를 찾는다.
+  // 2. 출력 포맷에 맞게 출력한다.
 }
 ```
