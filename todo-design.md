@@ -33,6 +33,8 @@ command("update$3$done");
 - [] 할 일 추가 기능 만들기
   - [x] 입력 문자열 분석 기능
   - [] add 함수 만들기
+  - [] add 결과 출력
+  - [] 현재상태 데이터 만드는 함수 만들고 출력
 
 ## 3. 설계
 
@@ -67,5 +69,26 @@ function command(cmdStr) {
 function parseCmdStr(cmdStr) {
   // 1. 구분자 '$'로 끊어서 배열로 만든다.
   return resultArr;
+}
+```
+
+- 할 일을 등록하는 함수
+
+```javascript
+function addTask(taskName) {
+  // 1. 할 일 객체를 만든다.
+  // 2. 할 일 객체를 배열에 추가한다.
+  // 3. 추가된 할 일 id를 반환한다.
+  return taskId;
+}
+```
+
+- 상태 통계 객체를 만드는 함수
+
+```javascript
+function getStatStatus() {
+  // 1. 할일 목록에서 각 상태의 개수를 구한다.
+  // 2. 객체 형태로 반환한다.
+  return statStatus;
 }
 ```
