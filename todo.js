@@ -25,6 +25,14 @@ const todoApp = {
       case 'show':
         this.showTasksByState(parsedCmd[1]);
         break;
+
+      case 'update':
+        this.updateTaskState(parsedCmd[1], parsedCmd[2]);
+        this.showStateCount(this.getStateCount());
+        break;
+
+      default:
+        console.error('잘못된 명령입니다.');
     }
   },
   parseCmdStr(cmdStr) {
@@ -64,11 +72,17 @@ const todoApp = {
 
     if (!resultMsg) resultMsg = `[${state}]에 해당하는 값이 없습니다.`;
     else resultMsg = resultMsg.slice(0, -2);
+  updateTaskState(taskId, state) {
+    this.taskList[taskId - 1].state = state;
 
-    console.log(`\n>> ${resultMsg}`);
+    const resultMsg = `"${this.taskList[taskId - 1].title}"가 ` +
+      `"${state}"상태로 변경되었습니다.`;
+    console.log(resultMsg);
   }
 }
 
 todoApp.command('add$자바스크립트 공부');
 todoApp.command('add$알고리즘 공부');
 todoApp.command('show$todo');
+todoApp.command('update$2$doing');
+todoApp.command('show$doing');

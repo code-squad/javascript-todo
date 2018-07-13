@@ -37,9 +37,9 @@ command("update$3$done");
   - [x] 현재상태 데이터 만드는 함수 만들고 출력
 - [x] 각 상태 항목 보여주는 기능(show) 만들기
   - [x] show 함수 만들기
-- [] task의 상태를 변경하는 update 기능 만들기
-  - [] update 함수 만들기
-- [] command에서 명령어 예외처리 하기
+- [x] task의 상태를 변경하는 update 기능 만들기
+  - [x] update 함수 만들기
+- [x] command에서 명령어 예외처리 하기
 
 ## 3. 설계
 
