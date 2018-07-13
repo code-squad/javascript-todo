@@ -123,70 +123,58 @@ command("update$3$done");
 
     ```
     function command(message) {
-        const [accessfn, accessmessage] = message.split("$");
-        if (accessfn === "add") return this.add(accessmessage)
-        else if (accessfn === "show") return this.show(this[accessmessage])
-        else if (accessfn === "update") return this.update(accessmessage)
+        const [accessfn, accessMsg, accessMsg2] = message.split("$");
+        if (accessfn === "add") return this.addData(accessMsg);
+        else if (accessfn === "show") return this.showData(accessMsg);
+        else if (accessfn === "update") return this.updateData(accessMsg2, parseInt(accessMsg));
     }
     ```
 
     
 
-2. #####todo, doing, done을 기록하는 객체 만들기.
+2. #####currentStateData 객체 만들기.
 
     ```
-    const currentStateList = {
-      todo: {
-          id: 0,
-          taskName: [],
-          currentState: 0
+    const currentStateData = {
+      item: [],
+      currentState: {
+        todo: 0,
+        doing: 0,
+        done: 0
       },
-      doing: {
-      ......
-      },
-      done: {
-      ......
-      },
-      command(message) {
-      ......
-      },
-      add() {
-          
-      },
-      show() {
-          
-      },
-      update() {
-          
-      }
-    }
     ```
     ###
 
-   3. #####add 함수 생성하기
+   3. ##### item목록에 할일(todo)를 추가해주는 add 함수
 
     ```
     add(taskName) {
-      this.todo.taskName.push(taskName)
-      this.todo.id = 1;
-      return `id: ${this.todo.id}, "${taskName}" 항목이 새로 추가됐습니다.`;
+      const startingIDVal = 1;
+        const taskNameLength = this.item.length + startingIDVal;
+        const dataSample = {
+          id: taskNameLength,
+          taskName: taskName,
+          state: "todo",
+        };
+        const showId = dataSample.id;
+        const showTaskName = dataSample.taskName;
+        this.item.push(dataSample);
+        this.currentState.todo++
+        console.log("현재 상태:", this.currentState);
+        return `id: ${showId}, "${showTaskName}" 항목이 새로 추가됐습니다.`;
     }
     ```
 
     
 
-4. #####show 함수 생성하기
+4. #####원하는 item데이터(todo, doing, done)를 보여주는 show함수
 
    ```
-   show(state) {
-     const showMessage = [];
-     state.taskName.forEach((element, index) => {
-       showMessage.push(`ID: ${state.idList[index]}, taskName: ${element}`)
-     });
-     return showMessage;
-     }
+   showData(state) {
+       const showMessage = this.item.filter(element => element.state === state);
+       return showMessage;
    }
    ```
 
-   
+5. 
 
