@@ -65,9 +65,8 @@ const todoApp = {
   },
   showTasksByState(state) {
     let resultMsg = this.taskList.reduce((msg, task, taskIdx) => {
-      if (state === task.state) {
-        return msg + `"${taskIdx + 1}, ${task.title}", `
-      }
+      if (state === task.state) msg += `\n"${taskIdx + 1}, ${task.title}"`;
+      return msg;
     }, '');
 
     if (!resultMsg) resultMsg = `[${state}]에 해당하는 값이 없습니다.`;
