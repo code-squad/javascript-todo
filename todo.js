@@ -22,6 +22,9 @@ const todoApp = {
         const stateStatistic = this.getStateStatistic();
         this.showStateStatistic(stateStatistic);
         break;
+      case 'show':
+        this.showTasksByState(parsedCmd[1]);
+        break;
     }
   },
   parseCmdStr(cmdStr) {
@@ -51,8 +54,21 @@ const todoApp = {
     }
 
     console.log(stateStatisticMsg.slice(0, -2));
+  },
+  showTasksByState(state) {
+    let resultMsg = this.taskList.reduce((msg, task, taskIdx) => {
+      if (state === task.state) {
+        return msg + `"${taskIdx + 1}, ${task.title}", `
+      }
+    }, '');
+
+    if (!resultMsg) resultMsg = `[${state}]에 해당하는 값이 없습니다.`;
+    else resultMsg = resultMsg.slice(0, -2);
+
+    console.log(`\n>> ${resultMsg}`);
   }
 }
 
 todoApp.command('add$자바스크립트 공부');
 todoApp.command('add$알고리즘 공부');
+todoApp.command('show$todo');
