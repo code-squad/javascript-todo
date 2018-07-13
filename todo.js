@@ -19,8 +19,8 @@ const todoApp = {
         const taskId = this.addTask(parsedCmd[1]);
         console.log(`\n>> id : ${taskId}, "${parsedCmd[1]}" 항목이 새로 추가됐습니다.`);
 
-        const stateStatistic = this.getStateStatistic();
-        this.showStateStatistic(stateStatistic);
+        const stateCount = this.getStateCount();
+        this.showStateCount(stateCount);
         break;
       case 'show':
         this.showTasksByState(parsedCmd[1]);
@@ -34,26 +34,26 @@ const todoApp = {
     const taskId = this.taskList.push(new Task(taskName, this.stateList[0]));
     return taskId;
   },
-  getStateStatistic() {
-    const stateStatistic = this.stateList.reduce((resultObj, state) => {
+  getStateCount() {
+    const stateCount = this.stateList.reduce((resultObj, state) => {
       resultObj[state] = 0;
       return resultObj;
     }, {});
 
     this.taskList.forEach(task => {
-      if (task.state in stateStatistic) stateStatistic[task.state]++;
+      if (task.state in stateCount) stateCount[task.state]++;
     });
-    return stateStatistic;
+    return stateCount;
   },
-  showStateStatistic(stateStatistic) {
-    let stateStatisticMsg = '';
+  showStateCount(stateCount) {
+    let stateCountMsg = '';
 
-    stateStatisticMsg += `>> 현재 상태 : `;
-    for (let state in stateStatistic) {
-      stateStatisticMsg += `${state}(${stateStatistic[state]}개), `;
+    stateCountMsg += `>> 현재 상태 : `;
+    for (let state in stateCount) {
+      stateCountMsg += `${state}(${stateCount[state]}개), `;
     }
 
-    console.log(stateStatisticMsg.slice(0, -2));
+    console.log(stateCountMsg.slice(0, -2));
   },
   showTasksByState(state) {
     let resultMsg = this.taskList.reduce((msg, task, taskIdx) => {

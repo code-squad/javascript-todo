@@ -68,7 +68,7 @@ const stateList = ['todo', 'doing', 'done'];
   - 상태 데이터 배열을 기준으로 속성이 만들어진다.
 
 ```javascript
-const stateStatistic = {
+const stateCount = {
   todo: 1,
   doing: 0,
   done: 0
@@ -109,10 +109,10 @@ function addTask(taskName) {
 - 상태 통계 객체를 만드는 함수
 
 ```javascript
-function getStateStatistic() {
+function getStateCount() {
   // 1. 할일 목록에서 각 상태의 개수를 구한다.
   // 2. 객체 형태로 반환한다.
-  return stateStatistic;
+  return stateCount;
 }
 ```
 
