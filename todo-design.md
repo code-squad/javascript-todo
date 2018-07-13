@@ -37,6 +37,9 @@ command("update$3$done");
   - [x] 현재상태 데이터 만드는 함수 만들고 출력
 - [x] 각 상태 항목 보여주는 기능(show) 만들기
   - [x] show 함수 만들기
+- [] task의 상태를 변경하는 update 기능 만들기
+  - [] update 함수 만들기
+- [] command에서 명령어 예외처리 하기
 
 ## 3. 설계
 
@@ -83,6 +86,7 @@ const stateCount = {
 function command(cmdStr) {
   // 1. 입력받은 문자열을 파싱한다.
   // 2. 각 조건에 맞는 명령을 수행한다.
+  // 3. 조건에 맞지 않는 명령어는 에러메세지를 출력한다.
 }
 ```
 
@@ -122,5 +126,13 @@ function getStateCount() {
 function showTasksByState(state) {
   // 1. 입력받은 state 해당하는 task와 task의 id를 찾는다.
   // 2. 출력 포맷에 맞게 출력한다.
+}
+```
+
+- 입력받은 task의 상태를 변경하는 함수
+
+```javascript
+function updateTaskState(taskId, state) {
+  // 1. taskId에 해당하는 아이템을 찾아 state값을 변경한다.
 }
 ```
