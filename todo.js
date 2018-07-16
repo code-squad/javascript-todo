@@ -25,12 +25,13 @@ const todoApp = {
         break;
 
       case 'update':
-        this.updateTaskState(parsedCmd[1], parsedCmd[2]);
+        try { this.updateTaskState(parsedCmd[1], parsedCmd[2]); }
+        catch (err) { console.error(err); }
         this.showStateCount(this.getStateCount());
         break;
 
       default:
-        console.error('잘못된 명령입니다.');
+        console.error(`[!] 잘못된 명령입니다.`);
     }
   },
   parseCmdStr(cmdStr) {
@@ -69,10 +70,12 @@ const todoApp = {
     console.log(`[${state}]${resultMsg}\n`);
   },
   updateTaskState(taskId, state) {
-    this.taskList[taskId - 1].state = state;
+    const task = this.taskList[taskId - 1];
+    if (!task) throw `[!] update error : 없는 id 입니다.`;
 
-    const resultMsg = `>> "${this.taskList[taskId - 1].title}"가 ` +
-      `"${state}"상태로 변경되었습니다.`;
+    task.state = state;
+
+    const resultMsg = `>> "${task.title}"가 "${state}"상태로 변경되었습니다.`;
     console.log(resultMsg);
   }
 }
