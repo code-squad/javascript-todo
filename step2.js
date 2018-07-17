@@ -14,6 +14,7 @@ const currentStateData = {
   },
   //item에 todo를 추가해주는 함수
   addData(taskName) {
+    let returnMsg = "";
     const startingIDVal = 1;
     const taskNameLength = this.item.length + startingIDVal;
     const dataSample = {
@@ -27,7 +28,8 @@ const currentStateData = {
     this.item.push(dataSample);
     this.currentState.todo++;
     console.log("현재 상태:", this.currentState);
-    return `id: ${showId}, "${showTaskName}" 항목이 새로 추가됐습니다.`;
+    returnMsg = `id: ${showId}, "${showTaskName}" 항목이 새로 추가됐습니다.`;
+    return returnMsg;
   },
   //원하는 item데이터(todo, doing, done) 보여주는 함수.
   showData(state) {
@@ -44,6 +46,7 @@ const currentStateData = {
   },
   //item 리스트(배열)에서 특정 id값을 찾아 해당하는 데이터의 state를 바꿔주는 함수.
   updateData(state, id) {
+    let returnMsg = "";
     if (this.checkState(state)) {
       this.item.forEach((element) => {
         if (element.id === id) {
@@ -54,8 +57,11 @@ const currentStateData = {
           element.leadTime = leadTime;
         }
       });
-      return this.item;
-    } else return `"${state}"는 올바르지 않은 state입니다. 올바른 state를 입력해주세요.`;
+      returnMsg = this.item;
+    } else {
+      returnMsg = `"${state}"는 올바르지 않은 state입니다. 올바른 state를 입력해주세요.`;
+    };
+    return returnMsg;
   },
   //updateData함수에서 받은 'state'의 인자값이 올바른지 아닌지 판별해주는 함수.
   checkState(state) {
