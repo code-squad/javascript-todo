@@ -26,7 +26,7 @@ const todoApp = {
 
       case 'update':
         try { this.updateTaskState(parsedCmd[1], parsedCmd[2]); }
-        catch (err) { console.error(err); }
+        catch (err) { console.error(`[!] update error : ${err}`); }
         this.showStateCount(this.getStateCount());
         break;
 
@@ -71,7 +71,9 @@ const todoApp = {
   },
   updateTaskState(taskId, state) {
     const task = this.taskList[taskId - 1];
-    if (!task) throw `[!] update error : 없는 id 입니다.`;
+
+    if (!task) throw `없는 id 입니다.`;
+    if (!this.stateList.includes(state)) throw `존재하지 않는 상태로 변경 불가능합니다.`;
 
     task.state = state;
 
