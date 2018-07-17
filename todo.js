@@ -17,7 +17,8 @@ const todoApp = {
     switch (parsedCmd[0]) {
       case 'add':
         this.addTask(parsedCmd[1]);
-        this.showStateCount(this.getStateCount());
+        this.getStateCount();
+        this.showStateCount();
         break;
 
       case 'show':
@@ -27,7 +28,8 @@ const todoApp = {
       case 'update':
         try { this.updateTaskState(parsedCmd[1], parsedCmd[2]); }
         catch (err) { console.error(`[!] update error : ${err}`); }
-        this.showStateCount(this.getStateCount());
+        this.getStateCount();
+        this.showStateCount();
         break;
 
       default:
@@ -42,20 +44,26 @@ const todoApp = {
     console.log(`>> id : ${taskId}, "${taskName}" 항목이 새로 추가됐습니다.`);
   },
   getStateCount() {
-    const stateCount = this.stateList.reduce((resultObj, state) => {
-      resultObj[state] = 0;
-      return resultObj;
-    }, {});
+    if (!this.stateCount) {
+      // Create and initialize stateCount
+      this.stateCount = this.stateList.reduce((resultObj, state) => {
+        resultObj[state] = 0;
+        return resultObj;
+      }, {});
+    }
 
+    // Initialize only
+    for (let state in this.stateCount) this.stateCount[state] = 0;
+
+    // Count
     this.taskList.forEach(task => {
-      if (task.state in stateCount) stateCount[task.state]++;
+      if (task.state in this.stateCount) this.stateCount[task.state]++;
     });
-    return stateCount;
   },
-  showStateCount(stateCount) {
+  showStateCount() {
     let stateCountMsg = '';
-    for (let state in stateCount) {
-      stateCountMsg += `${state}(${stateCount[state]}개), `;
+    for (let state in this.stateCount) {
+      stateCountMsg += `${state}(${this.stateCount[state]}개), `;
     }
     console.log(`>> 현재 상태 : ` + stateCountMsg.slice(0, -2) + `\n`);
   },
