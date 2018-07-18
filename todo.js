@@ -52,9 +52,10 @@ const todoApp = {
         return resultObj;
       }, {});
     }
-
-    // Initialize only
-    for (let state in this.stateCount) this.stateCount[state] = 0;
+    else {
+      // Initialize only
+      for (let state in this.stateCount) this.stateCount[state] = 0;
+    }
 
     // Count
     this.taskList.forEach(task => {
