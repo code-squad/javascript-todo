@@ -35,16 +35,17 @@ const currentStateData = {
     returnMsg = `id: ${showId}, "${showTaskName}" 항목이 새로 추가됐습니다.`;
     return returnMsg;
   },
-
   //원하는 item데이터(todo, doing, done) 보여주는 함수.
   showData(state) {
     let returnMsg = "";
     this.item.forEach((element) => {
-      if (state === element.state && (state === "todo" || state === "doing")) {
-        returnMsg += `ID: ${element.id}, taskName: ${element.taskName}, state: ${element.state}\n`;
-      }
-      else if (state === element.state && state === "done") {
-        returnMsg += `ID: ${element.id}, taskName: ${element.taskName}, state: ${element.state}, leadTime: ${element.leadTime}\n`;
+      if (state === element.state) {
+        if (state === "todo" || state === "doing") {
+          returnMsg += `ID: ${element.id}, taskName: ${element.taskName}, state: ${element.state}\n`;
+        }
+        else if (state === "done") {
+          returnMsg += `ID: ${element.id}, taskName: ${element.taskName}, state: ${element.state}, leadTime: ${element.leadTime}\n`;
+        }
       }
     });
     return returnMsg;
