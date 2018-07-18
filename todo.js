@@ -41,6 +41,7 @@ const todoApp = {
   },
   addTask(taskName) {
     const taskId = this.taskList.push(new Task(taskName, this.stateList[0]));
+    this.taskList[taskId - 1].id = taskId;
     console.log(`>> id : ${taskId}, "${taskName}" 항목이 새로 추가됐습니다.`);
   },
   getStateCount() {
@@ -68,12 +69,15 @@ const todoApp = {
     console.log(`>> 현재 상태 : ` + stateCountMsg.slice(0, -2) + `\n`);
   },
   showTasksByState(state) {
-    let resultMsg = this.taskList.reduce((msg, task, taskIdx) => {
-      if (state === task.state) msg += `\n"${taskIdx + 1}, ${task.title}"`;
-      return msg;
-    }, '');
+    const taskListByState = this.taskList.filter(task => task.state === state);
 
-    if (!resultMsg) resultMsg = `에 해당하는 값이 없습니다.`;
+    let resultMsg = '';
+    if (taskListByState.length) {
+      resultMsg = taskListByState.reduce((msg, task) =>
+        msg + `\n"${task.id}, ${task.title}"`
+        , '');
+    }
+    else resultMsg = `에 해당하는 값이 없습니다.`;
 
     console.log(`[${state}]${resultMsg}\n`);
   },
