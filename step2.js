@@ -14,7 +14,6 @@ const currentStateData = {
   },
   //item에 todo를 추가해주는 함수
   addData(taskName) {
-    let returnMsg = "";
     const startingIDVal = 1;
     const taskNameLength = this.item.length + startingIDVal;
     const dataSample = {
@@ -23,14 +22,20 @@ const currentStateData = {
       state: "todo",
       leadTime: 0
     };
-    const showId = dataSample.id;
-    const showTaskName = dataSample.taskName;
     this.item.push(dataSample);
     this.currentState.todo++;
+    const returnMsg = this.printData(dataSample.id, dataSample.taskName);
+    return returnMsg;
+  },
+  //addData함수의 결과를 출력해주는 함수.
+  printData(dataId, dataTaskName) {
+    const showId = dataId;
+    const showTaskName = dataTaskName;
     console.log("현재 상태:", this.currentState);
     returnMsg = `id: ${showId}, "${showTaskName}" 항목이 새로 추가됐습니다.`;
     return returnMsg;
   },
+
   //원하는 item데이터(todo, doing, done) 보여주는 함수.
   showData(state) {
     let returnMsg = "";
