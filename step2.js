@@ -38,14 +38,13 @@ const currentStateData = {
   //원하는 item데이터(todo, doing, done) 보여주는 함수.
   showData(state) {
     let returnMsg = "";
-    this.item.forEach((element) => {
-      if (state === element.state) {
-        if (state === "todo" || state === "doing") {
-          returnMsg += `ID: ${element.id}, taskName: ${element.taskName}, state: ${element.state}\n`;
-        }
-        else if (state === "done") {
-          returnMsg += `ID: ${element.id}, taskName: ${element.taskName}, state: ${element.state}, leadTime: ${element.leadTime}\n`;
-        }
+    const accordData = this.item.filter(element => state === element.state)
+    accordData.forEach((element) => {
+      if (state === "todo" || state === "doing") {
+        returnMsg += `ID: ${element.id}, taskName: ${element.taskName}, state: ${element.state}\n`;
+      }
+      else if (state === "done") {
+        returnMsg += `ID: ${element.id}, taskName: ${element.taskName}, state: ${element.state}, leadTime: ${element.leadTime}\n`;
       }
     });
     return returnMsg;
@@ -54,19 +53,16 @@ const currentStateData = {
   updateData(state, id) {
     let returnMsg = "";
     if (this.checkState(state)) {
-      this.item.forEach((element) => {
-        if (element.id === id) {
-          this.currentState[element.state]--;
-          this.currentState[state]++;
-          element.state = state;
-          const leadTime = this.getLeadTime(element.state, element.leadTime);
-          element.leadTime = leadTime;
-        }
+      this.item.filter(element => element.id === id).forEach((element) => {
+        this.currentState[element.state]--;
+        this.currentState[state]++;
+        element.state = state;
+        const leadTime = this.getLeadTime(element.state, element.leadTime);
+        element.leadTime = leadTime;
       });
       returnMsg = this.item;
-    } else {
-      returnMsg = `"${state}"는 올바르지 않은 state입니다. 올바른 state를 입력해주세요.`;
-    };
+    } else return returnMsg = `"${state}"는 올바르지 않은 state입니다. 올바른 state를 입력해주세요.`;
+
     return returnMsg;
   },
   //updateData함수에서 받은 'state'의 인자값이 올바른지 아닌지 판별해주는 함수.
@@ -76,14 +72,8 @@ const currentStateData = {
   },
   //소요 시간 계산해주는 함수.
   getLeadTime(state, initLeadTime) {
-    if (state === "doing") {
-      const startingTime = Date.now();
-      return startingTime;
-    }
-    else if (state === "done") {
-      const endTime = Date.now()
-      return endTime - initLeadTime;
-    }
+    if (state === "doing") return Date.now();
+    else if (state === "done") return Date.now() - initLeadTime;
   },
 };
 
