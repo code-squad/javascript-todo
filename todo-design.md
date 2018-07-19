@@ -46,12 +46,12 @@ command("update$3$done");
 ### 3.1. 데이터 설계
 
 * 할 일 데이터 리스트
-  - title, state 속성을 가진 객체들의 리스트
-  - id 값은 배열의 인덱스로 사용
+  - id, title, state 속성을 가진 객체들의 리스트
   - class를 이용해 필요할 때 동적으로 생성
 
 ```javascript
 const task = [{
+  id: 1,
   title: '자바스크립트 공부하기',
   state: 'todo'
 }];
@@ -104,9 +104,8 @@ function parseCmdStr(cmdStr) {
 ```javascript
 function addTask(taskName) {
   // 1. 할 일 객체를 만든다.
-  // 2. 할 일 객체를 배열에 추가한다.
-  // 3. 추가된 할 일 id를 반환한다.
-  return taskId;
+  // 2. id 값을 구한다.
+  // 3. 할 일 객체를 배열에 추가한다.
 }
 ```
 

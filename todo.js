@@ -1,7 +1,8 @@
 'use strict';
 
 class Task {
-  constructor(title, state) {
+  constructor(id, title, state) {
+    this.id = id;
     this.title = title;
     this.state = state;
   }
@@ -40,8 +41,9 @@ const todoApp = {
     return cmdStr.split('$');
   },
   addTask(taskName) {
-    const taskId = this.taskList.push(new Task(taskName, this.stateList[0]));
-    this.taskList[taskId - 1].id = taskId;
+    const taskId = this.taskList.length + 1;
+    const task = new Task(taskId, taskName, this.stateList[0]);
+    this.taskList.push(task);
     console.log(`>> id : ${taskId}, "${taskName}" 항목이 새로 추가됐습니다.`);
   },
   getStateCount() {
