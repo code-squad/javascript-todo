@@ -113,9 +113,17 @@ function addTask(taskName) {
 
 ```javascript
 function getStateCount() {
-  // 1. 할일 목록에서 각 상태의 개수를 구한다.
-  // 2. 객체 형태로 반환한다.
-  return stateCount;
+  // 1. 이미 존재하는 상태 통계 데이터가 있는지 확인하고
+  // 2. 없다면 상태 데이터를 기준으로 상태 통계 데이터를 만든다.
+  // 3. 있다면 상태 통계 데이터를 모두 0으로 초기화 한다.
+  // 4. 각 상태의 개수를 카운트한다.
+}
+```
+
+- 상태 통계 데이터를 포맷에 맞춰 출력하는 함수
+```javascript
+function showStateCount() {
+  // 1. 상태 통계 데이터를 포맷에 맞춰 출력한다.
 }
 ```
 
