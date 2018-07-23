@@ -1,4 +1,4 @@
-const currentStateData = class {
+class currentStateData {
   constructor() {
     this.item = [];
     this.currentState = {
