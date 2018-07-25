@@ -225,3 +225,73 @@ console.log(Date.now());
 
 2. 다시 state가 doing에서 done으로 바뀔때, 현재 시점에서 시작 시점의 시간을 빼준다. => 소요시간
 
+
+
+ES6 Classes 적용 STEP4
+
+**요구사항**
+
+객체리터럴로 된 코드를 다시한번 ES6의 Class문법에 따라서 변경해본다. 아래코드와 같이 동작되도록 한다.
+
+```
+const Health = class {
+	constructor(name,healthTime) {
+    	this.name = name; this.healthTime = healthTime; 
+    	} 
+    showHealth(){
+    	debugger; console.log(this.name + "님, 오늘은 " + this.healthTime + "에 운동을 하셨네			요"); 
+    } 
+} 
+const ho = new Health("crong", "12:12"); 
+ho.showHealth(); 
+```
+
+mdn의 ES6 Class를 활용해서 한다. 불필요한 상속구조는 하지 않는다.
+
+
+
+**class, 메소드, 속성, 인스턴스는 무엇인가**
+
+- class
+
+  - 일반화할 수 있는 어떤 것. 하나의 역할이 있다.(ex> 로그인을 한다.)
+
+  -  클래스는 다시 사용할 객체를 찍어내는 틀??
+  -  클래스 간에도 서로 협력이 가능하다. 클래스 의 메소드가 다른 클래스의 메소드를 부를 수 있다. 객체와 객체는 서로 데이터를 통신할 수 있는 인터페이스가 필요하다. 
+
+- method
+
+  - 클래스 안의 함수들
+
+- property(속성)
+
+  - 객체 속에서 어떠한 값이 할당된 자료형태
+
+- instance(object)
+
+  - 객체라고 이해해야하나..
+
+  - 객체 인스턴스
+
+     ```
+     ex) 
+     class object {
+         ~~
+     }
+     let a = new object()
+     ```
+
+      ==> 여기서 **a**가 instance다
+
+클래스의 메소드는 모든 객체와 공유해야하기 때문에 프로토타입 객체 안에 저장한다.
+
+**클래스는 왜 필요한가(언제 만드냐)**
+
+- 비슷한 역할을 하는 객체를 위해. (로그인이라는 클래스를 만들어서 재 사용하는 것)
+
+**클래스는 함수와 뭐가 다른가**
+
+- 하나의 역할을 가진다는 공통점이 있다.
+- 함수는 반환값이 필요하지만, 객체는 반환값이 필요하지 않다.
+
+프라이빗, 퍼블릭 메소드(todo의 커맨드 메소드)??
