@@ -31,22 +31,22 @@ class currentStateData {
   }
   //addData함수의 결과를 출력해주는 함수.
   printData(dataId, dataTaskName) {
-    const showId = dataId;
     const showTaskName = dataTaskName;
     console.log("현재 상태:", this.currentState);
-    let returnMsg = `id: ${showId}, "${showTaskName}" 항목이 새로 추가됐습니다.`;
+    let returnMsg = `id: ${dataId}, "${showTaskName}" 항목이 새로 추가됐습니다.`;
     return returnMsg;
   }
   //원하는 item데이터(todo, doing, done) 보여주는 함수.
   showData(state) {
     let returnMsg = "";
-    const accordData = this.item.filter(element => state === element.state)
-    accordData.forEach((element) => {
+    const temporaryStorage = this.item.filter(element => state === element.state)
+    temporaryStorage.forEach((element) => {
+      let msg = `ID: ${element.id}, taskName: ${element.taskName}, state: ${element.state}`;
       if (state === "todo" || state === "doing") {
-        returnMsg += `ID: ${element.id}, taskName: ${element.taskName}, state: ${element.state}\n`;
+        returnMsg += `${msg}\n`;
       }
       else if (state === "done") {
-        returnMsg += `ID: ${element.id}, taskName: ${element.taskName}, state: ${element.state}, leadTime: ${element.leadTime}\n`;
+        returnMsg += `${msg}, leadTime: ${element.leadTime}\n`;
       }
     });
     return returnMsg;
@@ -54,18 +54,18 @@ class currentStateData {
   //item 리스트(배열)에서 특정 id값을 찾아 해당하는 데이터의 state를 바꿔주는 함수.
   updateData(state, id) {
     let returnMsg = "";
-    if (this.checkState(state)) {
+    if (!this.checkState(state)) return returnMsg = `"${state}"는 올바르지 않은 state입니다. 올바른 state를 입력해주세요.`;
+    else {
       this.item.filter(element => element.id === id).forEach((element) => {
         this.currentState[element.state]--;
         this.currentState[state]++;
         element.state = state;
-        const leadTime = this.getLeadTime(element.state, element.leadTime);
+        const leadTime = this.getLeadTime(element.leadTime);
         element.leadTime = leadTime;
+        returnMsg = this.item;
       });
-      returnMsg = this.item;
-    } else return returnMsg = `"${state}"는 올바르지 않은 state입니다. 올바른 state를 입력해주세요.`;
-
-    return returnMsg;
+      return returnMsg;
+    }
   }
   //updateData함수에서 받은 'state'의 인자값이 올바른지 아닌지 판별해주는 함수.
   checkState(state) {
@@ -73,9 +73,9 @@ class currentStateData {
     else return false
   }
   //소요 시간 계산해주는 함수.
-  getLeadTime(state, initLeadTime) {
-    if (state === "doing") return Date.now();
-    else if (state === "done") return Date.now() - initLeadTime;
+  //startTime의 초기 값은 0이다. state가 doing이 되는 시점에 startTime에 시간이 기록된다.
+  getLeadTime(startTime) {
+    return Date.now() - startTime;
   }
 };
 
