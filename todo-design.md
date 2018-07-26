@@ -10,20 +10,21 @@
 - 각 일(task)은 상태 값을 가지고 있고, 그 상태 값을 변경할 수 있다.
 - 각 상태에 있는 task는 show 함수를 통해서 볼 수 있다.
 - 명령어 입력 시 command 함수를 사용해야 하고, '$'를 구분자로 사용해서 넣는다.
+- show$done 일 때 doing => done까지의 소요시간을 계산해서 보여준다.
 
 ```javascript
 command("add$자바스크립트 공부하기");
-> id: 5,  "자바스크립트 공부하기" 항목이 새로 추가됐습니다.  //추가된 결과 메시지를 출력
+> id: 5,  "자바스크립트 공부하기" 항목이 새로 추가됐습니다. //추가된 결과 메시지를 출력
 > 현재상태 :  todo:1개, doing:2개, done:2개
 
 command("show$doing");
-> "1, 그래픽스공부", "4, 블로그쓰기"  //id값과 함께 task제목이 출력된다.
+> "1, 그래픽스공부", "4, 블로그쓰기" //id값과 함께 task제목이 출력된다.
 
 command("show$done");
-> //완료 목록을 위 doing과 같은 형태로 노출한다.
+> "1, 그래픽스공부, 1시간 40분", "4, 블로그쓰기, 3시간 13분" //소요시간이 함께 출력된다.
 
 command("update$3$done");
-> 현재상태 :  todo:1개, doing:1개, done:3개  //변경된 모든 상태가 노출.
+> 현재상태 :  todo:1개, doing:1개, done:3개 //변경된 모든 상태가 노출.
 ```
 
 ## 2. 계획
@@ -40,20 +41,25 @@ command("update$3$done");
 - [x] task의 상태를 변경하는 update 기능 만들기
   - [x] update 함수 만들기
 - [x] command에서 명령어 예외처리 하기
+- [] done 소요시간 계산 및 출력 기능 만들기
+  - [] 할 일 객체에 상태 등록 시간 속성 추가
+  - [] 소요시간 계산 기능
+  - [] 소요시간 출력 기능
 
 ## 3. 설계
 
 ### 3.1. 데이터 설계
 
 * 할 일 데이터 리스트
-  - id, title, state 속성을 가진 객체들의 리스트
+  - id, title, state, saveTime 속성을 가진 객체들의 리스트
   - class를 이용해 필요할 때 동적으로 생성
 
 ```javascript
 const task = [{
   id: 1,
   title: '자바스크립트 공부하기',
-  state: 'todo'
+  state: 'todo',
+  saveTime: '등록시간'
 }];
 ```
 
@@ -104,7 +110,7 @@ function parseCmdStr(cmdStr) {
 ```javascript
 function addTask(taskName) {
   // 1. 할 일 객체를 만든다.
-  // 2. id 값을 구한다.
+  // 2. id 값과 현재 시간을 구한다.
   // 3. 할 일 객체를 배열에 추가한다.
 }
 ```
@@ -141,5 +147,26 @@ function showTasksByState(state) {
 ```javascript
 function updateTaskState(taskId, state) {
   // 1. taskId에 해당하는 아이템을 찾아 state값을 변경한다.
+  // 2. 상태가 변경된 시점(현재)로 saveTime을 업데이트 한다.
+  // 3. state값을 done으로 변경시 해당 task에 소요시간을 계산하여 추가한다.
+}
+```
+
+- task의 등록시간을 갱신하는 함수
+
+```javascript
+function updateTaskTime(task, newTime) {
+  // 1. task의 등록시간을 새로운 현재 시간으로 갱신한다.
+  // 2. task의 상태가 done으로 업데이트 됐을 경우 소요시간을 구한 후 소요시간 항목을 추가한다.
+}
+```
+
+- 소요시간 구하는 함수
+
+```javascript
+function getTimeTaken(startTime, endTime) {
+  // 1. 시작시간과 종료시간의 차이를 구한다.
+  // 2. 일,시간,분,초의 형식으로 데이터를 만들어 반환한다.
+  return timeTaken;
 }
 ```
