@@ -42,8 +42,8 @@ command("update$3$done");
   - [x] update 함수 만들기
 - [x] command에서 명령어 예외처리 하기
 - [] done 소요시간 계산 및 출력 기능 만들기
-  - [] 할 일 객체에 상태 등록 시간 속성 추가
-  - [] 소요시간 계산 기능
+  - [x] 할 일 객체에 상태 등록 시간 속성 추가
+  - [x] 소요시간 계산 기능
   - [] 소요시간 출력 기능
 
 ## 3. 설계
@@ -139,6 +139,7 @@ function showStateCount() {
 function showTasksByState(state) {
   // 1. 입력받은 state 해당하는 task와 task의 id를 찾는다.
   // 2. 출력 포맷에 맞게 출력한다.
+  // 3. task에 소요시간 항목이 있으면 같이 출력한다.
 }
 ```
 
@@ -166,7 +167,24 @@ function updateTaskTime(task, newTime) {
 ```javascript
 function getTimeTaken(startTime, endTime) {
   // 1. 시작시간과 종료시간의 차이를 구한다.
-  // 2. 일,시간,분,초의 형식으로 데이터를 만들어 반환한다.
+  // 2. 일, 시간, 분, 초의 형식으로 데이터를 만들어 반환한다.
   return timeTaken;
+}
+```
+
+- 소요시간 출력 메세지를 만드는 함수
+
+```javascript
+function getMsgTimeTaken(timeTaken) {
+  // 1. 일, 시간, 분, 초 각 데이터의 존재 유무에 따라 출력메세지를 만든다.
+  return msgTimeTaken;
+}
+```
+
+- 영어 시간 단위를 한글로 바꿔주는 함수
+
+```javascript
+function getKoTimeUnit(enTimeUnit) {
+  // 1. day, hour 등 영어로 된 시간 단위를 한글로 바꿔서 반환한다.
 }
 ```
