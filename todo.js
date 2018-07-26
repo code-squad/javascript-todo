@@ -77,9 +77,12 @@ const todoApp = {
 
     let resultMsg = '';
     if (taskListByState.length) {
-      resultMsg = taskListByState.reduce((msg, task) =>
-        msg + `\n"${task.id}, ${task.title}"`
-        , '');
+      resultMsg = taskListByState.reduce((msg, task) => {
+        msg += `\n"${task.id}, ${task.title}`;
+        if (task.timeTaken) msg += `, ${this.getMsgTimeTaken(task.timeTaken)}`;
+        msg += '"';
+        return msg;
+      }, '');
     }
     else resultMsg = `에 해당하는 값이 없습니다.`;
 
@@ -128,6 +131,29 @@ const todoApp = {
       sec,
       ms
     };
+  },
+  getMsgTimeTaken(timeTaken) {
+    let msgTimeTaken = '';
+    for (let unit in timeTaken) {
+      if (timeTaken[unit]) {
+        msgTimeTaken += timeTaken[unit] + this.getKoTimeUnit(unit) + ' ';
+      }
+    }
+    return msgTimeTaken.slice(0, -1);
+  },
+  getKoTimeUnit(enTimeUnit) {
+    switch (enTimeUnit) {
+      case 'day':
+        return '일';
+      case 'hour':
+        return '시간';
+      case 'min':
+        return '분';
+      case 'sec':
+        return '초';
+      case 'ms':
+        return '밀리초';
+    }
   }
 }
 
@@ -136,3 +162,5 @@ todoApp.command('add$알고리즘 공부');
 todoApp.command('show$todo');
 todoApp.command('update$2$doing');
 todoApp.command('show$doing');
+todoApp.command('update$2$done');
+todoApp.command('show$done');
