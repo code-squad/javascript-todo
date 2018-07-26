@@ -1,10 +1,11 @@
 'use strict';
 
 class Task {
-  constructor(id, title, state) {
+  constructor(id, title, state, saveTime) {
     this.id = id;
     this.title = title;
     this.state = state;
+    this.saveTime = saveTime;
   }
 }
 
@@ -42,7 +43,7 @@ const todoApp = {
   },
   addTask(taskName) {
     const taskId = this.taskList.length + 1;
-    const task = new Task(taskId, taskName, this.stateList[0]);
+    const task = new Task(taskId, taskName, this.stateList[0], new Date());
     this.taskList.push(task);
     console.log(`>> id : ${taskId}, "${taskName}" 항목이 새로 추가됐습니다.`);
   },
@@ -92,8 +93,41 @@ const todoApp = {
 
     task.state = state;
 
+    this.updateTaskTime(task, new Date());
+
     const resultMsg = `>> "${task.title}"가 "${state}"상태로 변경되었습니다.`;
     console.log(resultMsg);
+  },
+  updateTaskTime(task, newTime) {
+    if (task.state === this.stateList[2]) {
+      task.timeTaken = this.getTimeTaken(task.saveTime, newTime);
+    }
+    task.saveTime = newTime;
+  },
+  getTimeTaken(startTime, endTime) {
+    let diffTimeInMs = endTime - startTime;
+
+    const msPerSec = 1000;
+    const msPerMin = 60 * msPerSec;
+    const msPerHour = 60 * msPerMin;
+    const msPerDay = 24 * msPerHour;
+
+    const day = Math.floor(diffTimeInMs / msPerDay);
+    diffTimeInMs %= msPerDay;
+    const hour = Math.floor(diffTimeInMs / msPerHour);
+    diffTimeInMs %= msPerHour;
+    const min = Math.floor(diffTimeInMs / msPerMin);
+    diffTimeInMs %= msPerMin;
+    const sec = Math.floor(diffTimeInMs / msPerSec);
+    const ms = diffTimeInMs % msPerSec;
+
+    return {
+      day,
+      hour,
+      min,
+      sec,
+      ms
+    };
   }
 }
 
