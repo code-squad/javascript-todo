@@ -133,27 +133,20 @@ const todoApp = {
     };
   },
   getMsgTimeTaken(timeTaken) {
+    const koTimeUnit = {
+      day: '일',
+      hour: '시간',
+      min: '분',
+      sec: '초',
+      ms: '밀리초'
+    }
     let msgTimeTaken = '';
     for (let unit in timeTaken) {
       if (timeTaken[unit]) {
-        msgTimeTaken += timeTaken[unit] + this.getKoTimeUnit(unit) + ' ';
+        msgTimeTaken += timeTaken[unit] + koTimeUnit[unit] + ' ';
       }
     }
     return msgTimeTaken.slice(0, -1);
-  },
-  getKoTimeUnit(enTimeUnit) {
-    switch (enTimeUnit) {
-      case 'day':
-        return '일';
-      case 'hour':
-        return '시간';
-      case 'min':
-        return '분';
-      case 'sec':
-        return '초';
-      case 'ms':
-        return '밀리초';
-    }
   }
 }
 
