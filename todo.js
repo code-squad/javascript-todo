@@ -9,9 +9,11 @@ class Task {
   }
 }
 
-const todoApp = {
-  taskList: [],
-  stateList: ['todo', 'doing', 'done'],
+class Todo {
+  constructor() {
+    this.taskList = [];
+    this.stateList = ['todo', 'doing', 'done'];
+  }
 
   command(cmdStr) {
     const parsedCmd = this.parseCmdStr(cmdStr);
@@ -37,16 +39,19 @@ const todoApp = {
       default:
         console.error(`[!] 잘못된 명령입니다.`);
     }
-  },
+  }
+
   parseCmdStr(cmdStr) {
     return cmdStr.split('$');
-  },
+  }
+
   addTask(taskName) {
     const taskId = this.taskList.length + 1;
     const task = new Task(taskId, taskName, this.stateList[0], new Date());
     this.taskList.push(task);
     console.log(`>> id : ${taskId}, "${taskName}" 항목이 새로 추가됐습니다.`);
-  },
+  }
+
   getStateCount() {
     if (!this.stateCount) {
       // Create and initialize stateCount
@@ -64,14 +69,16 @@ const todoApp = {
     this.taskList.forEach(task => {
       if (task.state in this.stateCount) this.stateCount[task.state]++;
     });
-  },
+  }
+
   showStateCount() {
     let stateCountMsg = '';
     for (let state in this.stateCount) {
       stateCountMsg += `${state}(${this.stateCount[state]}개), `;
     }
     console.log(`>> 현재 상태 : ` + stateCountMsg.slice(0, -2) + `\n`);
-  },
+  }
+
   showTasksByState(state) {
     const taskListByState = this.taskList.filter(task => task.state === state);
 
@@ -87,7 +94,8 @@ const todoApp = {
     else resultMsg = `에 해당하는 값이 없습니다.`;
 
     console.log(`[${state}]${resultMsg}\n`);
-  },
+  }
+
   updateTaskState(taskId, state) {
     const task = this.taskList[taskId - 1];
 
@@ -100,13 +108,15 @@ const todoApp = {
 
     const resultMsg = `>> "${task.title}"가 "${state}"상태로 변경되었습니다.`;
     console.log(resultMsg);
-  },
+  }
+
   updateTaskTime(task, newTime) {
     if (task.state === this.stateList[2]) {
       task.timeTaken = this.getTimeTaken(task.saveTime, newTime);
     }
     task.saveTime = newTime;
-  },
+  }
+
   getTimeTaken(startTime, endTime) {
     let diffTimeInMs = endTime - startTime;
 
@@ -131,7 +141,8 @@ const todoApp = {
       sec,
       ms
     };
-  },
+  }
+
   getMsgTimeTaken(timeTaken) {
     const koTimeUnit = {
       day: '일',
@@ -149,6 +160,8 @@ const todoApp = {
     return msgTimeTaken.slice(0, -1);
   }
 }
+
+const todoApp = new Todo();
 
 todoApp.command('add$자바스크립트 공부');
 todoApp.command('add$알고리즘 공부');
