@@ -180,11 +180,3 @@ function getMsgTimeTaken(timeTaken) {
   return msgTimeTaken;
 }
 ```
-
-- 영어 시간 단위를 한글로 바꿔주는 함수
-
-```javascript
-function getKoTimeUnit(enTimeUnit) {
-  // 1. day, hour 등 영어로 된 시간 단위를 한글로 바꿔서 반환한다.
-}
-```
