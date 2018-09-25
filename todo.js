@@ -23,8 +23,12 @@ const todo = {
 
         this.logUpdateResult('update', {taskId: taskId, taskName: taskName, prevStatus: prevStatus, nextStatus: newStatus});
     },
-    removeTask({id}) {
-        this.logUpdateResult('remove', taskObj);
+    removeTask({id: taskId}) {
+        const {name: taskName, status} = this.todoList[taskId-1];
+        delete this.todoList[taskId-1];
+        this.countOfStatus[status]--;
+
+        this.logUpdateResult('remove', {taskId: taskId, taskName: taskName});
     },
     logUpdateResult(actionType, {taskId, taskName, prevStatus, nextStatus}) {
         let actionResult = ''
@@ -34,7 +38,7 @@ const todo = {
         } else if (actionType === 'update') {
             actionResult = `id: ${taskId} "${taskName}" 항목이 ${prevStatus} => ${nextStatus} 상태로 업데이트 됐습니다.\n현재상태 : todo: ${this.countOfStatus.todo}개, doing: ${this.countOfStatus.doing}개, done: ${this.countOfStatus.done}개`;
         } else if (actionType === 'remove') {
-            actionResult = `id: ${task.id}, "${task.name}" 항목 삭제 완료`;
+            actionResult = `id: ${taskId}, "${taskName}" 항목 삭제 완료`;
         }
         
         console.log(actionResult);
@@ -42,18 +46,14 @@ const todo = {
 };
 
 //Test cases
-/*
+
 todo.addTask({name: "자바스크립트 공부하기", tag:"programming"});
 
 todo.updateTask({id:1,  nextStatus:"doNe"});
 
-console.log(todo.todoList[0]);
-/*
-const exampleTask = {
-    tag: null,
-    status: 'todo', //it can be one of following: todo / doing / done
+todo.removeTask({id:1});
 
-}
+console.log(todo.todoList[0], todo.countOfStatus);
 
 /*
 [요구사항]
