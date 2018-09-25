@@ -1,14 +1,16 @@
 'use strict'
 
 const todo = {
-    todoList : {},
-    addTask({name, tag}) {
-        //add todo on todoList
-            // assign id#
-            const taskId = todoList.keys().length++;
-            
-        //log completion message
-        this.logUpdateResult('add', taskObj);
+    todoList : [],
+    countOfStatus: {todo: 0, doing: 0, done: 0},
+    addTask({name: newTaskName, tag: newTaskTag = ''}) {
+        const taskId = this.todoList.length + 1;
+        const taskToAdd = {id: taskId, name: newTaskName, status: 'todo', tag: newTaskTag};
+        
+        this.todoList.push(taskToAdd);
+        this.countOfStatus.todo++;
+
+        this.logUpdateResult('add', {taskId: taskId, taskName: newTaskName});
     },
     updateTask({id, nextstatus}) { // change status of task 
         const nextStatus = nextstatus.toLowerCase();
@@ -16,25 +18,26 @@ const todo = {
     },
     removeTask({id}) {
         this.logUpdateResult('remove', taskObj);
-    }
-    logUpdateResult(actionType, taskObj) {
+    },
+    logUpdateResult(actionType, {taskId, taskName, prevStatus, nextStatus}) {
         let actionResult = ''
 
         if (actionType === 'add') {
-            actionResult = `id: ${task.id} "${task.name}" 항목이 새로 추가됐습니다.\n현재상태 : todo: ${}개, doing: ${}개, done: ${}개`;    
-        }
-        if (actionType === 'update') {
-            actionResult = `id: ${task.id} "${task.name}" 항목이 ${} => ${} 상태로 업데이트 됐습니다.\n현재상태 : todo: ${}개, doing: ${}개, done: ${}개`;
-        }
-        if (actionType === 'remove') {
+            actionResult = `id: ${taskId} "${taskName}" 항목이 새로 추가됐습니다.\n현재상태 : todo: ${this.countOfStatus.todo}개, doing: ${this.countOfStatus.doing}개, done: ${this.countOfStatus.done}개`;    
+        } else if (actionType === 'update') {
+            actionResult = `id: ${taskId} "${taskName}" 항목이 ${prevStatus} => ${nextStatus} 상태로 업데이트 됐습니다.\n현재상태 : todo: ${this.countOfStatus.todo}개, doing: ${this.countOfStatus.doing}개, done: ${this.countOfStatus.done}개`;
+        } else if (actionType === 'remove') {
             actionResult = `id: ${task.id}, "${task.name}" 항목 삭제 완료`;
         }
         
         console.log(actionResult);
     }
-
-    
 };
+
+//Test cases
+/*
+todo.addTask({name: "자바스크립트 공부하기", tag:"programming"});
+console.log(todo.todoList[0]);
 /*
 const exampleTask = {
     tag: null,
