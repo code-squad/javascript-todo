@@ -12,9 +12,16 @@ const todo = {
 
         this.logUpdateResult('add', {taskId: taskId, taskName: newTaskName});
     },
-    updateTask({id, nextstatus}) { // change status of task 
-        const nextStatus = nextstatus.toLowerCase();
-        this.logUpdateResult('update', taskObj);
+    updateTask({id: taskId, nextStatus}) {
+        const newStatus = nextStatus.toLowerCase();
+        const targetTask = this.todoList[taskId-1];
+        const {name: taskName, status: prevStatus} = targetTask;
+        
+        targetTask.status = newStatus;
+        this.countOfStatus[prevStatus]--;
+        this.countOfStatus[newStatus]++;
+
+        this.logUpdateResult('update', {taskId: taskId, taskName: taskName, prevStatus: prevStatus, nextStatus: newStatus});
     },
     removeTask({id}) {
         this.logUpdateResult('remove', taskObj);
@@ -37,6 +44,9 @@ const todo = {
 //Test cases
 /*
 todo.addTask({name: "자바스크립트 공부하기", tag:"programming"});
+
+todo.updateTask({id:1,  nextStatus:"doNe"});
+
 console.log(todo.todoList[0]);
 /*
 const exampleTask = {
