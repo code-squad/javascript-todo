@@ -15,6 +15,7 @@ const todo = {
         this.countOfStatus.todo++;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         this.printUpdateResult('add', {taskId: taskId, taskName: newTaskName});
     },
     updateTask({id, nextStatus}) {
@@ -79,50 +80,62 @@ console.log(todo.todoList[0], todo.countOfStatus);
 =======
         this.logUpdateResult('add', {taskId: taskId, taskName: newTaskName});
 >>>>>>> Add task addition method
+=======
+        this.printUpdateResult('add', {taskId: taskId, taskName: newTaskName});
+>>>>>>> Improve namespace of each methods
     },
-    updateTask({id: taskId, nextStatus}) {
+    updateTask({id, nextStatus}) {
         const newStatus = nextStatus.toLowerCase();
-        const targetTask = this.todoList[taskId-1];
-        const {name: taskName, status: prevStatus} = targetTask;
+        const targetTask = this.todoList[id-1];
+        const {name: targetTaskName, status: currentStatus} = targetTask;
         
         targetTask.status = newStatus;
-        this.countOfStatus[prevStatus]--;
+        this.countOfStatus[currentStatus]--;
         this.countOfStatus[newStatus]++;
 
-        this.logUpdateResult('update', {taskId: taskId, taskName: taskName, prevStatus: prevStatus, nextStatus: newStatus});
+        this.printUpdateResult('update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
     },
-    removeTask({id: taskId}) {
-        const {name: taskName, status} = this.todoList[taskId-1];
-        delete this.todoList[taskId-1];
+    removeTask({id}) {
+        const {name, status} = this.todoList[id-1];
+        delete this.todoList[id-1];
         this.countOfStatus[status]--;
 
-        this.logUpdateResult('remove', {taskId: taskId, taskName: taskName});
+        this.printUpdateResult('remove', {taskId: id, taskName: name});
     },
-    logUpdateResult(actionType, {taskId, taskName, prevStatus, nextStatus}) {
-        let actionResult = ''
+    printUpdateResult(actionType, {taskId, taskName, prevStatus, nextStatus}) {
+        const countOfTasksPerStatus = `현재상태 : todo: ${this.countOfStatus.todo}개, doing: ${this.countOfStatus.doing}개, done: ${this.countOfStatus.done}개`;
 
         if (actionType === 'add') {
-            actionResult = `id: ${taskId} "${taskName}" 항목이 새로 추가됐습니다.\n현재상태 : todo: ${this.countOfStatus.todo}개, doing: ${this.countOfStatus.doing}개, done: ${this.countOfStatus.done}개`;    
-        } else if (actionType === 'update') {
-            actionResult = `id: ${taskId} "${taskName}" 항목이 ${prevStatus} => ${nextStatus} 상태로 업데이트 됐습니다.\n현재상태 : todo: ${this.countOfStatus.todo}개, doing: ${this.countOfStatus.doing}개, done: ${this.countOfStatus.done}개`;
-        } else if (actionType === 'remove') {
-            actionResult = `id: ${taskId}, "${taskName}" 항목 삭제 완료`;
+            console.log(`id: ${taskId} "${taskName}" 항목이 새로 추가됐습니다.\n${countOfTasksPerStatus}`);    
+            return
+        } 
+        if (actionType === 'update') {
+            console.log(`id: ${taskId} "${taskName}" 항목이 ${prevStatus} => ${nextStatus} 상태로 업데이트 됐습니다.\n${countOfTasksPerStatus}`);
+            return
+        } 
+        if (actionType === 'remove') {
+            console.log(`id: ${taskId}, "${taskName}" 항목 삭제 완료`);
+            return
         }
-        
-        console.log(actionResult);
     }
 };
 
 //Test cases
-
+/*
 todo.addTask({name: "자바스크립트 공부하기", tag:"programming"});
+//> id: 1 "자바스크립트 공부하기" 항목이 새로 추가됐습니다.
+//> 현재상태 : todo: 1개, doing: 0개, done: 0개
 
 todo.updateTask({id:1,  nextStatus:"doNe"});
+//> id: 1 "자바스크립트 공부하기" 항목이 todo => done 상태로 업데이트 됐습니다.
+//> 현재상태 : todo: 0개, doing: 0개, done: 1개
 
 todo.removeTask({id:1});
+//> id: 1, "자바스크립트 공부하기" 항목 삭제 완료
 
 console.log(todo.todoList[0], todo.countOfStatus);
 
+<<<<<<< HEAD
 /*
 [요구사항]
 새로운 task를 추가할 수 있음
@@ -148,4 +161,6 @@ id: 4,  "자바스크립트 공부하기" 항목이 todo => done 상태로 업�
 id:3, iOS공부하기 삭제완료. '
 >>>>>>> Add initial application template
 
+=======
+>>>>>>> Improve namespace of each methods
 */
