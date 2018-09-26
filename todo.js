@@ -3,9 +3,19 @@
 const todo = {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> Add task addition method
     todoList : [],
+=======
+    todoList : [
+        {id: 13, name: '자바스크립트 공부', status: 'todo', tag: 'programming'},
+        {id: 17, name: 'iOS 공부', status: 'todo', tag: 'programming'},
+        {id: 21, name: 'Closure 공부', status: 'done', startTime: '00:00', endTime: '12:01', tag: 'programming'},
+        {id: 18, name: '여행가기', status: 'doing', startTime: '04:19', tag: 'play'}
+        ],
+    
+>>>>>>> Add todoPrint.showTasksByTag method for printing all tasks after grouping them with same tags
     countOfStatus: {todo: 0, doing: 0, done: 0},
     addTask({name: newTaskName, tag: newTaskTag = ''}) {
         const taskId = this.todoList.length + 1;
@@ -54,19 +64,104 @@ const todo = {
     }
 };
 
-//Test cases
+const todoPrint = {
+    showTasksByTag(tag) {
+        let resultStr = '';
+            
+        if(tag) { //called with tag argument
+            // loop through taskArray
+            // if task matches requested tag, save the task in processing object -> {status: [task1, task2...], anotherStatus: []...}
+            // list task detail on print string using object above
+            /*
+            `[ ${status} , 총 ${numOfTask} 개 ]`
+            for (task of taskArr) {
+                += `\n- ${taskId}번, ${taskName}`
+                if(status === 'done') {+= ` ${taskTimeSpent}`}
+            }*/
+        } else { //called w/o tag argument
+            const resultObj = {};
+            //loop through taskArray
+            for (let task of todo.todoList) {
+                //if task has tag info, save the task in processing object -> {tagName: [task1, task2...], anotherTagName: []...}
+                if (task.tag) {
+                    if (!resultObj[task.tag]) resultObj[task.tag] = [];
+                    resultObj[task.tag].push(task);
+                }   
+            }
+            //list task detail on print string using object above
+            for (let tagName of Object.keys(resultObj)) {
+                if (resultStr) resultStr += `\n\n`;
+                resultStr += `[ ${tagName} , 총 ${resultObj[tagName].length} 개 ]`;
+                for (let task of resultObj[tagName]) {
+                    resultStr += `\n- ${task.id}번, ${task.name}, [${task.status}]`
+                }
+            }
+            
+        }
+
+        return resultStr
+    },
+    showTasksByStatus(status) {}
+};
+
+// Test cases
+console.log(todoPrint.showTasksByTag());
+
+
+/********
+[To-do]
+- Update todo.updateTask method for time tagging when status changed into doing & done.
+*********/
+
 /*
-todo.addTask({name: "자바스크립트 공부하기", tag:"programming"});
-//> id: 1 "자바스크립트 공부하기" 항목이 새로 추가됐습니다.
-//> 현재상태 : todo: 1개, doing: 0개, done: 0개
+다양한 출력을 지원한다. (모든태그, 특정태그, 모든리스트, 특정상태리스트)
+doing 에서 done으로 갈때는 소요시간이 출력되도록 doing상태부터 시간정보가 있어야 한다.
+showAll메서드는 모든리스트를 출력하며, 2초-> 3초 ->2초로 출력된다. (총7초 소요)
+출력을 담당하는 객체를 만든다. todo를 관리하는 객체 이외에 별도의 출력을 위한 객체를 새로 만든다.
 
-todo.updateTask({id:1,  nextStatus:"doNe"});
-//> id: 1 "자바스크립트 공부하기" 항목이 todo => done 상태로 업데이트 됐습니다.
-//> 현재상태 : todo: 0개, doing: 0개, done: 1개
 
-todo.removeTask({id:1});
-//> id: 1, "자바스크립트 공부하기" 항목 삭제 완료
+> todo.showTag('programming');  // programming 태그와 일치하는  task 출력
+[ todo , 총2개 ]
+- 13번, 자바스크립트공부
+- 17번, iOS공부
 
+[ done , 총1개 ]
+- 21번, closure공부 1일 23분
+
+
+> todo.showTags();  // 태그가 있는 모든 task 출력
+[ programming , 총2개 ]
+- 13번, 자바스크립트공부, [todo]
+- 17번, iOS공부, [doing]
+
+[ play , 총1개 ]
+- 18번, 여행가기, [doing]
+
+
+> todo.show(" Doing ");   //  'todo', 'done'도 역시 같은형태로 결과 출력되어야 함.
+- 13번, 자바스크립트공부, [programming]
+- 17번, iOS공부, [programming]
+- 18번, 여행가기, [play]
+
+
+> todo.show("done");  //done항목을 노출할때는,  doing-> done까지 소요된 시간이 출력된다.
+- 20번, 휴대폰수리, [other], 1시간1분
+- 21번, closure공부, [programming], 1일 23분
+
+
+>  todo.showAll();   //  모든 리스트를 지연출력.  'todo', 'done'도 역시 아래와 같은 형태와 방식으로 출력되어야 함.
+"총 7개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다....."
+[ todo , 총3개 ]
+- 13번, 자바스크립트공부, [programming]
+- 17번, iOS공부, [programming]
+- 18번, 여행가기, [play]
+
+"지금부터 3초뒤에 doing내역을 출력합니다...."
+[ doing , 총2개 ]
+- 14번, 블로그쓰기, [other]
+- 10번, 알고리즘공부
+
+<<<<<<< HEAD
 console.log(todo.todoList[0], todo.countOfStatus);
 =======
     todoList : {},
@@ -160,6 +255,12 @@ id: 4,  "자바스크립트 공부하기" 항목이 todo => done 상태로 업�
 > todo.remove({id:3});
 id:3, iOS공부하기 삭제완료. '
 >>>>>>> Add initial application template
+=======
+"지금부터 2초뒤에 done내역을 출력합니다....."
+[ done , 총2개 ]
+- 20번, 휴대폰수리, [other], 1시간1분
+- 21번, closure공부, [programming], 1일 23분
+>>>>>>> Add todoPrint.showTasksByTag method for printing all tasks after grouping them with same tags
 
 =======
 >>>>>>> Improve namespace of each methods
