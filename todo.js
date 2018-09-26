@@ -4,6 +4,7 @@ const todo = {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> Add task addition method
     todoList : [],
@@ -14,6 +15,9 @@ const todo = {
         {id: 21, name: 'Closure 공부', status: 'done', startTime: '00:00', endTime: '12:01', tag: 'programming'},
         {id: 18, name: '여행가기', status: 'doing', startTime: '04:19', tag: 'play'}
         ],
+=======
+    todoList : [],
+>>>>>>> Improve todoPrint.showTasksByTag method to print tasks under specific tag
     
 >>>>>>> Add todoPrint.showTasksByTag method for printing all tasks after grouping them with same tags
     countOfStatus: {todo: 0, doing: 0, done: 0},
@@ -67,19 +71,39 @@ const todo = {
 const todoPrint = {
     showTasksByTag(tag) {
         let resultStr = '';
+        const resultObj = {};
             
         if(tag) { //called with tag argument
-            // loop through taskArray
-            // if task matches requested tag, save the task in processing object -> {status: [task1, task2...], anotherStatus: []...}
+            //loop through taskArray
+            for (let task of todo.todoList) {
+                // if task matches requested tag, save the task in processing object -> {status: [task1, task2...], anotherStatus: []...}
+                if (task.tag === tag) {
+                    if (!resultObj[task.status]) resultObj[task.status] = [];
+                    resultObj[task.status].push(task);
+                }   
+            }
             // list task detail on print string using object above
-            /*
-            `[ ${status} , 총 ${numOfTask} 개 ]`
-            for (task of taskArr) {
-                += `\n- ${taskId}번, ${taskName}`
-                if(status === 'done') {+= ` ${taskTimeSpent}`}
-            }*/
+            for (let status of Object.keys(resultObj)) {
+                if (resultStr) resultStr += `\n\n`;
+                resultStr += `[ ${status} , 총 ${resultObj[status].length} 개 ]`;
+                for (let task of resultObj[status]) {
+                    resultStr += `\n- ${task.id}번, ${task.name}`
+                    if(status === 'done') {
+                        const timeSpent = task.endTime - task.startTime
+                        const daysSpent = parseInt(timeSpent/1000/60/60/24);
+                        const hoursSpent = parseInt(timeSpent/1000/60/60) - (daysSpent * 24);
+                        const minutesSpent = parseInt(timeSpent/1000/60) - (daysSpent * 24 * 60) - (hoursSpent * 60);
+                        let timeSpentStr = '';
+                        
+                        if (daysSpent) timeSpentStr += `${daysSpent} 일`;
+                        if (hoursSpent) {timeSpentStr += (timeSpentStr) ? ` ${hoursSpent} 시간`: `${hoursSpent} 시간`}
+                        if (minutesSpent) {timeSpentStr += (timeSpentStr) ? ` ${minutesSpent} 분`: `${minutesSpent} 분`}
+                        
+                        resultStr += ` ` + timeSpentStr;
+                    } 
+                }
+            }
         } else { //called w/o tag argument
-            const resultObj = {};
             //loop through taskArray
             for (let task of todo.todoList) {
                 //if task has tag info, save the task in processing object -> {tagName: [task1, task2...], anotherTagName: []...}
@@ -105,7 +129,17 @@ const todoPrint = {
 };
 
 // Test cases
+todo.todoList.push(
+    {id: 13, name: '자바스크립트 공부', status: 'todo', tag: 'programming'},
+    {id: 17, name: 'iOS 공부', status: 'todo', tag: 'programming'},
+    {id: 21, name: 'Closure 공부', status: 'done', startTime: 1537838429530, endTime: 1537926397371, tag: 'programming'},
+    {id: 18, name: '여행가기', status: 'doing', startTime: '04:19', tag: 'play'}
+);
+
 console.log(todoPrint.showTasksByTag());
+
+console.log(todoPrint.showTasksByTag('programming'));
+
 
 
 /********
