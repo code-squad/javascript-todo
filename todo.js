@@ -74,40 +74,34 @@ const todoPrint = {
         const resultObj = {};
             
         if(targetTag) {
-             // Group tasks by tags
+             // Group tasks by satus
             for (let task of todo.todoList) {
-                if (task.tag === targetTag) {
-                    if (!resultObj[task.status]) resultObj[task.status] = [];
-                    resultObj[task.status].push(task);
-                }   
+                if (task.tag !== targetTag) continue;
+                if (!resultObj[task.status]) resultObj[task.status] = [];
+                resultObj[task.status].push(task);
             }
-            // list task detail on print string using object above
+            // Add task info into resultStr for tasks in object created above
             for (let status of Object.keys(resultObj)) {
-                if (resultStr) resultStr += `\n\n`;
-                resultStr += `[ ${status} , 총 ${resultObj[status].length} 개 ]`;
+                resultStr += `${(resultStr) ? `\n\n` : ''}[ ${status} , 총 ${resultObj[status].length} 개 ]`;
                 for (let task of resultObj[status]) {
                     resultStr += `\n- ${task.id}번, ${task.name}`
                     if(status === 'done') { resultStr += ` ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); } 
                 }
             }
-        } else { //called w/o tag argument
-            //loop through taskArray
+        } else {
+            //Group tasks by tags
             for (let task of todo.todoList) {
-                //if task has tag info, save the task in processing object -> {tagName: [task1, task2...], anotherTagName: []...}
-                if (task.tag) {
-                    if (!resultObj[task.tag]) resultObj[task.tag] = [];
-                    resultObj[task.tag].push(task);
-                }   
+                if (!task.tag) continue; 
+                if (!resultObj[task.tag]) resultObj[task.tag] = [];
+                resultObj[task.tag].push(task);
             }
-            //list task detail on print string using object above
+            // Add task info into resultStr for tasks in object created above
             for (let tagName of Object.keys(resultObj)) {
-                if (resultStr) resultStr += `\n\n`;
-                resultStr += `[ ${tagName} , 총 ${resultObj[tagName].length} 개 ]`;
+                resultStr += `${(resultStr) ? `\n\n` : ''}[ ${tagName} , 총 ${resultObj[tagName].length} 개 ]`;
                 for (let task of resultObj[tagName]) {
                     resultStr += `\n- ${task.id}번, ${task.name}, [${task.status}]`
                 }
             }
-            
         }
 
         return resultStr
@@ -136,9 +130,9 @@ todo.todoList.push(
     {id: 18, name: '여행가기', status: 'doing', startTime: '04:19', tag: 'play'}
 );
 
-console.log(todoPrint.showTasksByTag());
+console.log(`\n 모든 태그 출력 \n` + todoPrint.showTasksByTag());
 
-console.log(todoPrint.showTasksByTag('programming'));
+console.log(`\n 특정 태그만 출력 \n` + todoPrint.showTasksByTag('programming'));
 
 
 
