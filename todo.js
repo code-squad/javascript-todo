@@ -69,12 +69,13 @@ const todo = {
 };
 
 const todoPrint = {
-    showTasksByTag(targetTag) {
+    showTasksByTag(tag) {
         let resultStr = '';
         const resultObj = {};
             
-        if(targetTag) {
-             // Group tasks by satus
+        if(tag) {
+            const targetTag = tag.toLowerCase();
+             // Group tasks by status
             for (let task of todo.todoList) {
                 if (task.tag !== targetTag) continue;
                 if (!resultObj[task.status]) resultObj[task.status] = [];
@@ -106,7 +107,47 @@ const todoPrint = {
 
         return resultStr
     },
-    showTasksByStatus(status) {},
+    showTasksByStatus(status) {
+        let resultStr = '';
+        const resultObj = {};
+
+        if(status) {
+            const targetStatus = status.toLowerCase();
+             // Group tasks by satus
+             for (let task of todo.todoList) {
+                if (task.status !== targetStatus) continue;
+                if (!resultObj[task.status]) resultObj[task.status] = [];
+                resultObj[task.status].push(task);
+            }
+             // Add task info into resultStr for tasks in object created above
+             for (let task of resultObj[targetStatus]) {
+                resultStr += `${(resultStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`
+                if(targetStatus === 'done') { resultStr += `, ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); } 
+            }
+        } else {
+            /*
+            
+            >  todo.showAll();   //  모든 리스트를 지연출력.  'todo', 'done'도 역시 아래와 같은 형태와 방식으로 출력되어야 함.
+            "총 7개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다....."
+            [ todo , 총3개 ]
+            - 13번, 자바스크립트공부, [programming]
+            - 17번, iOS공부, [programming]
+            - 18번, 여행가기, [play]
+
+            "지금부터 3초뒤에 doing내역을 출력합니다...."
+            [ doing , 총2개 ]
+            - 14번, 블로그쓰기, [other]
+            - 10번, 알고리즘공부
+
+            "지금부터 2초뒤에 done내역을 출력합니다....."
+            [ done , 총2개 ]
+            - 20번, 휴대폰수리, [other], 1시간1분
+            - 21번, closure공부, [programming], 1일 23분
+            */
+        }
+        
+        return resultStr
+    },
     applyPrintableTimeFormat(timeInMs) {
         let timeSpentStr = '';
 
@@ -131,20 +172,40 @@ todo.todoList.push(
 );
 
 console.log(`\n 모든 태그 출력 \n` + todoPrint.showTasksByTag());
+//> [ programming , 총 3 개 ]
+//- 13번, 자바스크립트 공부, [todo]
+//- 17번, iOS 공부, [todo]
+//- 21번, Closure 공부, [done]
+//
+//[ play , 총 1 개 ]
+//- 18번, 여행가기, [doing]
 
 console.log(`\n 특정 태그만 출력 \n` + todoPrint.showTasksByTag('programming'));
+//> [ todo , 총 2 개 ]
+//- 13번, 자바스크립트 공부
+//- 17번, iOS 공부
+//
+//[ done , 총 1 개 ]
+//- 21번, Closure 공부 1 일 26 분
 
+//console.log(`\n 모든 상태 출력 \n` + todoPrint.showTasksByStatus());
 
+console.log(`\n 특정 상태 'doing'만 출력 \n` + todoPrint.showTasksByStatus('dOing'));
+
+console.log(`\n 특정 상태 'done'만 출력 \n` + todoPrint.showTasksByStatus('dONe'));
 
 /********
 [To-do]
-- Update todo.updateTask method for time tagging when status changed into doing & done.
+    [V] 태그 기반 할일 목록 출력 메서드
+    [ ] 상태 기반 할일 목록 출력 메서드
+    [ ] Update todo.updateTask method for time tagging when status changed into doing & done.
 *********/
 
 /*
 다양한 출력을 지원한다. (모든태그, 특정태그, 모든리스트, 특정상태리스트)
 doing 에서 done으로 갈때는 소요시간이 출력되도록 doing상태부터 시간정보가 있어야 한다.
 showAll메서드는 모든리스트를 출력하며, 2초-> 3초 ->2초로 출력된다. (총7초 소요)
+<<<<<<< HEAD
 출력을 담당하는 객체를 만든다. todo를 관리하는 객체 이외에 별도의 출력을 위한 객체를 새로 만든다.
 
 
@@ -292,4 +353,6 @@ id:3, iOS공부하기 삭제완료. '
 
 =======
 >>>>>>> Improve namespace of each methods
+=======
+>>>>>>> Add todoPrint.showTasksByStatus method for printing tasks in specific status
 */
