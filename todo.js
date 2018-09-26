@@ -69,15 +69,14 @@ const todo = {
 };
 
 const todoPrint = {
-    showTasksByTag(tag) {
+    showTasksByTag(targetTag) {
         let resultStr = '';
         const resultObj = {};
             
-        if(tag) { //called with tag argument
-            //loop through taskArray
+        if(targetTag) {
+             // Group tasks by tags
             for (let task of todo.todoList) {
-                // if task matches requested tag, save the task in processing object -> {status: [task1, task2...], anotherStatus: []...}
-                if (task.tag === tag) {
+                if (task.tag === targetTag) {
                     if (!resultObj[task.status]) resultObj[task.status] = [];
                     resultObj[task.status].push(task);
                 }   
@@ -88,19 +87,7 @@ const todoPrint = {
                 resultStr += `[ ${status} , 총 ${resultObj[status].length} 개 ]`;
                 for (let task of resultObj[status]) {
                     resultStr += `\n- ${task.id}번, ${task.name}`
-                    if(status === 'done') {
-                        const timeSpent = task.endTime - task.startTime
-                        const daysSpent = parseInt(timeSpent/1000/60/60/24);
-                        const hoursSpent = parseInt(timeSpent/1000/60/60) - (daysSpent * 24);
-                        const minutesSpent = parseInt(timeSpent/1000/60) - (daysSpent * 24 * 60) - (hoursSpent * 60);
-                        let timeSpentStr = '';
-                        
-                        if (daysSpent) timeSpentStr += `${daysSpent} 일`;
-                        if (hoursSpent) {timeSpentStr += (timeSpentStr) ? ` ${hoursSpent} 시간`: `${hoursSpent} 시간`}
-                        if (minutesSpent) {timeSpentStr += (timeSpentStr) ? ` ${minutesSpent} 분`: `${minutesSpent} 분`}
-                        
-                        resultStr += ` ` + timeSpentStr;
-                    } 
+                    if(status === 'done') { resultStr += ` ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); } 
                 }
             }
         } else { //called w/o tag argument
@@ -125,7 +112,20 @@ const todoPrint = {
 
         return resultStr
     },
-    showTasksByStatus(status) {}
+    showTasksByStatus(status) {},
+    applyPrintableTimeFormat(timeInMs) {
+        let timeSpentStr = '';
+
+        const daysSpent = parseInt(timeInMs/1000/60/60/24);
+        const hoursSpent = parseInt(timeInMs/1000/60/60) - (daysSpent * 24);
+        const minutesSpent = parseInt(timeInMs/1000/60) - (daysSpent * 24 * 60) - (hoursSpent * 60);
+        
+        if (daysSpent) timeSpentStr += `${daysSpent} 일`;
+        if (hoursSpent) {timeSpentStr += (timeSpentStr) ? ` ${hoursSpent} 시간`: `${hoursSpent} 시간`}
+        if (minutesSpent) {timeSpentStr += (timeSpentStr) ? ` ${minutesSpent} 분`: `${minutesSpent} 분`}
+
+        return timeSpentStr
+    }
 };
 
 // Test cases
