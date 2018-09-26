@@ -110,21 +110,28 @@ const todoPrint = {
     showTasksByStatus(status) {
         let resultStr = '';
         const resultObj = {};
+        const targetStatus = status.toLowerCase();
+
+        // Group tasks by satus
+        for (let task of todo.todoList) {
+            if (task.status !== targetStatus) continue;
+            if (!resultObj[task.status]) resultObj[task.status] = [];
+            resultObj[task.status].push(task);
+        }
 
         if(status) {
-            const targetStatus = status.toLowerCase();
-             // Group tasks by satus
-             for (let task of todo.todoList) {
-                if (task.status !== targetStatus) continue;
-                if (!resultObj[task.status]) resultObj[task.status] = [];
-                resultObj[task.status].push(task);
-            }
              // Add task info into resultStr for tasks in object created above
              for (let task of resultObj[targetStatus]) {
                 resultStr += `${(resultStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`
                 if(targetStatus === 'done') { resultStr += `, ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); } 
             }
         } else {
+            //Print initial message 
+            console.log(`총 ${resultObj.todo.length + resultObj.doing.length + resultObj.done.length} 개의 리스트를 가져왔습니다. 2 초 뒤에 todo 내역을 출력합니다.....`);
+
+            // setTimeout (call () => {todo & ST}, 2000)
+                // setTimeout (doing & ST, 3000)
+                    // setTimeout (done, 2000)
             /*
             
             >  todo.showAll();   //  모든 리스트를 지연출력.  'todo', 'done'도 역시 아래와 같은 형태와 방식으로 출력되어야 함.
