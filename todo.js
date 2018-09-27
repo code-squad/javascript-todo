@@ -179,7 +179,7 @@ todo.todoList.push(
 );
 
 console.log(`\n 모든 태그 출력 \n` + todoPrint.showTasksByTag());
-//> [ programming , 총 3 개 ]
+// [ programming , 총 3 개 ]
 //- 13번, 자바스크립트 공부, [todo]
 //- 17번, iOS 공부, [todo]
 //- 21번, Closure 공부, [done]
@@ -188,7 +188,7 @@ console.log(`\n 모든 태그 출력 \n` + todoPrint.showTasksByTag());
 //- 18번, 여행가기, [doing]
 
 console.log(`\n 특정 태그만 출력 \n` + todoPrint.showTasksByTag('programming'));
-//> [ todo , 총 2 개 ]
+// [ todo , 총 2 개 ]
 //- 13번, 자바스크립트 공부
 //- 17번, iOS 공부
 //
@@ -198,8 +198,12 @@ console.log(`\n 특정 태그만 출력 \n` + todoPrint.showTasksByTag('programm
 //console.log(`\n 모든 상태 출력 \n` + todoPrint.showTasksByStatus());
 
 console.log(`\n 특정 상태 'doing'만 출력 \n` + todoPrint.showTasksByStatus('dOing'));
+// - 13번, 자바스크립트 공부, [programming]
+//- 17번, iOS 공부, [programming]
 
 console.log(`\n 특정 상태 'done'만 출력 \n` + todoPrint.showTasksByStatus('dONe'));
+//- 21번, Closure 공부, [programming], 1 일 26 분
+
 
 /********
 [To-do]
