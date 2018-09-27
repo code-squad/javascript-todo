@@ -112,29 +112,32 @@ const todoPrint = {
             }
             //Print initial message 
             console.log(`총 ${resultObj.todo.length + resultObj.doing.length + resultObj.done.length} 개의 리스트를 가져왔습니다. 2 초 뒤에 todo 내역을 출력합니다.....`);
-
-            // setTimeout (call () => {todo & ST}, 2000)
-                // setTimeout (doing & ST, 3000)
-                    // setTimeout (done, 2000)
-            /*
             
-            >  todo.showAll();   //  모든 리스트를 지연출력.  'todo', 'done'도 역시 아래와 같은 형태와 방식으로 출력되어야 함.
-            "총 7개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다....."
-            [ todo , 총3개 ]
-            - 13번, 자바스크립트공부, [programming]
-            - 17번, iOS공부, [programming]
-            - 18번, 여행가기, [play]
-
-            "지금부터 3초뒤에 doing내역을 출력합니다...."
-            [ doing , 총2개 ]
-            - 14번, 블로그쓰기, [other]
-            - 10번, 알고리즘공부
-
-            "지금부터 2초뒤에 done내역을 출력합니다....."
-            [ done , 총2개 ]
-            - 20번, 휴대폰수리, [other], 1시간1분
-            - 21번, closure공부, [programming], 1일 23분
-            */
+            const cb = ([status, nextStatus, delay]) => {
+                console.log(`[ ${status}, 총 ${resultObj[status].length} 개 ]`);
+                this.showTasksByStatus.bind(this)(status);
+                if(nextStatus) console.log(`\n지금부터 ${parseInt(delay/1000)} 초 뒤에 ${nextStatus} 할일 목록을 출력합니다...`);
+                return true;
+            }
+            
+            setTimeout((status, nextStatus, delay) => {
+                    cb(status, nextStatus, delay);
+                    setTimeout((status, nextStatus, delay) => {
+                            cb(status, nextStatus, delay);
+                            setTimeout((status, nextStatus, delay) => {
+                                    cb(status, nextStatus, delay);
+                                },
+                                2000,
+                                ['done']
+                            );
+                        },
+                        3000,
+                        ['doing', 'done', 2000]
+                    );
+                },
+                2000,
+                ['todo', 'doing', 3000]
+            );
         }
         console.log(resultStr);
         return
@@ -181,9 +184,6 @@ todoPrint.showTasksByTag('programming');
 //[ done , 총 1 개 ]
 //- 21번, Closure 공부 1 일 26 분
 
-console.log(`\n === 모든 상태 출력 === \n`);
-todoPrint.showTasksByStatus();
-
 console.log(`\n === 특정 상태 'doing'만 출력 === \n`);
 todoPrint.showTasksByStatus('dOing');
 // - 13번, 자바스크립트 공부, [programming]
@@ -191,6 +191,21 @@ todoPrint.showTasksByStatus('dOing');
 
 console.log(`\n === 특정 상태 'done'만 출력 === \n`);
 todoPrint.showTasksByStatus('dONe');
+//- 21번, Closure 공부, [programming], 1 일 26 분
+
+console.log(`\n === 모든 상태 출력 === \n`);
+todoPrint.showTasksByStatus();
+//총 4 개의 리스트를 가져왔습니다. 2 초 뒤에 todo 내역을 출력합니다.....
+//[ todo, 총 2 개 ]
+//- 13번, 자바스크립트 공부, [programming]
+//- 17번, iOS 공부, [programming]
+//
+//지금부터 3 초 뒤에 doing 할일 목록을 출력합니다...
+//[ doing, 총 1 개 ]
+//- 18번, 여행가기, [play]
+//
+//지금부터 2 초 뒤에 done 할일 목록을 출력합니다...
+//[ done, 총 1 개 ]
 //- 21번, Closure 공부, [programming], 1 일 26 분
 
 
