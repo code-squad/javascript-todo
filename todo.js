@@ -56,35 +56,40 @@ const todoPrint = {
         let resultStr = '';
         const resultObj = {};
             
-        if(tag) {
-            const targetTag = tag.toLowerCase();
-             // Group tasks by status
-            for (let task of todo.todoList) {
-                if (task.tag !== targetTag) continue;
-                if (!resultObj[task.status]) resultObj[task.status] = [];
-                resultObj[task.status].push(task);
+        const targetTag = tag.toLowerCase();
+        // Group tasks by status
+        for (let task of todo.todoList) {
+            if (task.tag !== targetTag) continue;
+            if (!resultObj[task.status]) resultObj[task.status] = [];
+            resultObj[task.status].push(task);
+        }
+        // Add task info into resultStr for tasks in object created above
+        for (let status of Object.keys(resultObj)) {
+            resultStr += `${(resultStr) ? `\n\n` : ''}[ ${status} , 총 ${resultObj[status].length} 개 ]`;
+            for (let task of resultObj[status]) {
+                resultStr += `\n- ${task.id}번, ${task.name}`
+                if(status === 'done') { resultStr += ` ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); } 
             }
-            // Add task info into resultStr for tasks in object created above
-            for (let status of Object.keys(resultObj)) {
-                resultStr += `${(resultStr) ? `\n\n` : ''}[ ${status} , 총 ${resultObj[status].length} 개 ]`;
-                for (let task of resultObj[status]) {
-                    resultStr += `\n- ${task.id}번, ${task.name}`
-                    if(status === 'done') { resultStr += ` ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); } 
-                }
-            }
-        } else {
-            //Group tasks by tags
-            for (let task of todo.todoList) {
-                if (!task.tag) continue; 
-                if (!resultObj[task.tag]) resultObj[task.tag] = [];
-                resultObj[task.tag].push(task);
-            }
-            // Add task info into resultStr for tasks in object created above
-            for (let tagName of Object.keys(resultObj)) {
-                resultStr += `${(resultStr) ? `\n\n` : ''}[ ${tagName} , 총 ${resultObj[tagName].length} 개 ]`;
-                for (let task of resultObj[tagName]) {
-                    resultStr += `\n- ${task.id}번, ${task.name}, [${task.status}]`
-                }
+        }
+
+        console.log(resultStr);
+        return
+    },
+    showAllTasksWithTag() {
+        let resultStr = '';
+        const resultObj = {};
+            
+        //Group tasks by tags
+        for (let task of todo.todoList) {
+            if (!task.tag) continue; 
+            if (!resultObj[task.tag]) resultObj[task.tag] = [];
+            resultObj[task.tag].push(task);
+        }
+        // Add task info into resultStr for tasks in object created above
+        for (let tagName of Object.keys(resultObj)) {
+            resultStr += `${(resultStr) ? `\n\n` : ''}[ ${tagName} , 총 ${resultObj[tagName].length} 개 ]`;
+            for (let task of resultObj[tagName]) {
+                resultStr += `\n- ${task.id}번, ${task.name}, [${task.status}]`
             }
         }
         console.log(resultStr);
@@ -93,66 +98,72 @@ const todoPrint = {
     showTasksByStatus(status) {
         let resultStr = '';
         const resultObj = {};
+        const targetStatus = status.toLowerCase();
 
-        if(status) {
-            const targetStatus = status.toLowerCase();
-
-            // Group tasks by status
-            for (let task of todo.todoList) {
-                if (task.status !== targetStatus) continue;
-                if (!resultObj[task.status]) resultObj[task.status] = [];
-                resultObj[task.status].push(task);
-            }
-            // abort method if there are no tasks under requested status
-            if(!resultObj[targetStatus]) {
-                console.log(`${targetStatus} 상태로 등록된 할일이 없습니다`);
-                return false
-            }
-
-             // Add task info into resultStr for tasks in object created above
-             for (let task of resultObj[targetStatus]) {
-                resultStr += `${(resultStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`
-                if(targetStatus === 'done') { resultStr += `, ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); } 
-            }
-        } else {
-            for (let task of todo.todoList) {
-                if (!resultObj[task.status]) resultObj[task.status] = [];
-                resultObj[task.status].push(task);
-            }
-            //Print initial message 
-            console.log(`총 ${todo.todoList.length} 개의 리스트를 가져왔습니다. 2 초 뒤에 todo 내역을 출력합니다.....`);
-            
-            const cb = ([status, nextStatus, delay]) => {
-                // abort method if there are no tasks under requested status
-                if(!resultObj[status]) {
-                    console.log(`${status} 상태로 등록된 할일이 없습니다`);
-                } else {
-                    console.log(`[ ${status}, 총 ${resultObj[status].length} 개 ]`);
-                    this.showTasksByStatus.bind(this)(status);
-                }
-                if(nextStatus) console.log(`\n지금부터 ${parseInt(delay/1000)} 초 뒤에 ${nextStatus} 할일 목록을 출력합니다...`);
-                return true;
-            }
-            
-            setTimeout((status, nextStatus, delay) => {
-                    cb(status, nextStatus, delay);
-                    setTimeout((status, nextStatus, delay) => {
-                            cb(status, nextStatus, delay);
-                            setTimeout((status, nextStatus, delay) => {
-                                    cb(status, nextStatus, delay);
-                                },
-                                2000,
-                                ['done']
-                            );
-                        },
-                        3000,
-                        ['doing', 'done', 2000]
-                    );
-                },
-                2000,
-                ['todo', 'doing', 3000]
-            );
+        // Group tasks by status
+        for (let task of todo.todoList) {
+            if (task.status !== targetStatus) continue;
+            if (!resultObj[task.status]) resultObj[task.status] = [];
+            resultObj[task.status].push(task);
         }
+        // abort method if there are no tasks under requested status
+        if(!resultObj[targetStatus]) {
+            console.log(`${targetStatus} 상태로 등록된 할일이 없습니다`);
+            return false
+        }
+
+         // Add task info into resultStr for tasks in object created above
+         for (let task of resultObj[targetStatus]) {
+            resultStr += `${(resultStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`
+            if(targetStatus === 'done') { resultStr += `, ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); } 
+        }
+
+        console.log(resultStr);
+        return
+    },
+
+    showAllTasksByStatus(status) {
+        let resultStr = '';
+        const resultObj = {};
+
+        for (let task of todo.todoList) {
+            if (!resultObj[task.status]) resultObj[task.status] = [];
+            resultObj[task.status].push(task);
+        }
+        //Print initial message 
+        console.log(`총 ${todo.todoList.length} 개의 리스트를 가져왔습니다. 2 초 뒤에 todo 내역을 출력합니다.....`);
+        
+        const cb = ([status, nextStatus, delay]) => {
+            // abort method if there are no tasks under requested status
+            if(!resultObj[status]) {
+                console.log(`${status} 상태로 등록된 할일이 없습니다`);
+            } else {
+                console.log(`[ ${status}, 총 ${resultObj[status].length} 개 ]`);
+                this.showTasksByStatus.bind(this)(status);
+            }
+            if(nextStatus) console.log(`\n지금부터 ${parseInt(delay/1000)} 초 뒤에 ${nextStatus} 할일 목록을 출력합니다...`);
+            return true;
+        }
+        
+        setTimeout((status, nextStatus, delay) => {
+                cb(status, nextStatus, delay);
+                setTimeout((status, nextStatus, delay) => {
+                        cb(status, nextStatus, delay);
+                        setTimeout((status, nextStatus, delay) => {
+                                cb(status, nextStatus, delay);
+                            },
+                            2000,
+                            ['done']
+                        );
+                    },
+                    3000,
+                    ['doing', 'done', 2000]
+                );
+            },
+            2000,
+            ['todo', 'doing', 3000]
+        );
+
         console.log(resultStr);
         return
     },
@@ -190,7 +201,7 @@ todo.todoList.push(
 );
 
 console.log(`\n === 모든 태그 출력 === \n`);
-todoPrint.showTasksByTag();
+todoPrint.showAllTasksWithTag();
 // [ programming , 총 3 개 ]
 //- 13번, 자바스크립트 공부, [todo]
 //- 17번, iOS 공부, [todo]
@@ -218,7 +229,7 @@ todoPrint.showTasksByStatus('dONe');
 //- 21번, Closure 공부, [programming], 1 일 26 분
 
 console.log(`\n === 모든 상태 출력 === \n`);
-todoPrint.showTasksByStatus();
+todoPrint.showAllTasksByStatus();
 //총 4 개의 리스트를 가져왔습니다. 2 초 뒤에 todo 내역을 출력합니다.....
 //[ todo, 총 2 개 ]
 //- 13번, 자바스크립트 공부, [programming]
