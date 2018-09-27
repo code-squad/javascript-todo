@@ -84,28 +84,32 @@ const todoPrint = {
                 }
             }
         }
-
-        return resultStr
+        console.log(resultStr);
+        return
     },
     showTasksByStatus(status) {
         let resultStr = '';
         const resultObj = {};
-        const targetStatus = status.toLowerCase();
-
-        // Group tasks by satus
-        for (let task of todo.todoList) {
-            if (task.status !== targetStatus) continue;
-            if (!resultObj[task.status]) resultObj[task.status] = [];
-            resultObj[task.status].push(task);
-        }
 
         if(status) {
+            const targetStatus = status.toLowerCase();
+
+            // Group tasks by satus
+            for (let task of todo.todoList) {
+                if (task.status !== targetStatus) continue;
+                if (!resultObj[task.status]) resultObj[task.status] = [];
+                resultObj[task.status].push(task);
+            }
              // Add task info into resultStr for tasks in object created above
              for (let task of resultObj[targetStatus]) {
                 resultStr += `${(resultStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`
                 if(targetStatus === 'done') { resultStr += `, ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); } 
             }
         } else {
+            for (let task of todo.todoList) {
+                if (!resultObj[task.status]) resultObj[task.status] = [];
+                resultObj[task.status].push(task);
+            }
             //Print initial message 
             console.log(`총 ${resultObj.todo.length + resultObj.doing.length + resultObj.done.length} 개의 리스트를 가져왔습니다. 2 초 뒤에 todo 내역을 출력합니다.....`);
 
@@ -132,8 +136,8 @@ const todoPrint = {
             - 21번, closure공부, [programming], 1일 23분
             */
         }
-        
-        return resultStr
+        console.log(resultStr);
+        return
     },
     applyPrintableTimeFormat(timeInMs) {
         let timeSpentStr = '';
@@ -158,7 +162,8 @@ todo.todoList.push(
     {id: 18, name: '여행가기', status: 'doing', startTime: '04:19', tag: 'play'}
 );
 
-console.log(`\n 모든 태그 출력 \n` + todoPrint.showTasksByTag());
+console.log(`\n === 모든 태그 출력 === \n`);
+todoPrint.showTasksByTag();
 // [ programming , 총 3 개 ]
 //- 13번, 자바스크립트 공부, [todo]
 //- 17번, iOS 공부, [todo]
@@ -167,7 +172,8 @@ console.log(`\n 모든 태그 출력 \n` + todoPrint.showTasksByTag());
 //[ play , 총 1 개 ]
 //- 18번, 여행가기, [doing]
 
-console.log(`\n 특정 태그만 출력 \n` + todoPrint.showTasksByTag('programming'));
+console.log(`\n === 특정 태그만 출력 === \n`);
+todoPrint.showTasksByTag('programming');
 // [ todo , 총 2 개 ]
 //- 13번, 자바스크립트 공부
 //- 17번, iOS 공부
@@ -175,13 +181,16 @@ console.log(`\n 특정 태그만 출력 \n` + todoPrint.showTasksByTag('programm
 //[ done , 총 1 개 ]
 //- 21번, Closure 공부 1 일 26 분
 
-//console.log(`\n 모든 상태 출력 \n` + todoPrint.showTasksByStatus());
+console.log(`\n === 모든 상태 출력 === \n`);
+todoPrint.showTasksByStatus();
 
-console.log(`\n 특정 상태 'doing'만 출력 \n` + todoPrint.showTasksByStatus('dOing'));
+console.log(`\n === 특정 상태 'doing'만 출력 === \n`);
+todoPrint.showTasksByStatus('dOing');
 // - 13번, 자바스크립트 공부, [programming]
 //- 17번, iOS 공부, [programming]
 
-console.log(`\n 특정 상태 'done'만 출력 \n` + todoPrint.showTasksByStatus('dONe'));
+console.log(`\n === 특정 상태 'done'만 출력 === \n`);
+todoPrint.showTasksByStatus('dONe');
 //- 21번, Closure 공부, [programming], 1 일 26 분
 
 
