@@ -21,25 +21,33 @@ id: 4,  "자바스크립트 공부하기" 항목이 todo => done 상태로 업�
 id:3, iOS공부하기 삭제완료. '
 */
 
-const todo = (function(){
-    const todoList = [];
-    const status = {todo: 0, doing: 0, done: 0};
-    let idStatus = 0;
+const todo = {
+    list: [],
 
-    return {
-        add(task){
-            task.id = ++idStatus;
-            task.status = todo;
-            status.todo++;
-            todoList.push(task);
-            this.printTodoList(task, this.add);    
-        },
+    add(task){
+        task.id = this.list.length + 1;
+        task.status = 'todo';
+        this.list.push(task);
+        this.printTodoList('add', task);    
+    },
 
-        printTodoList(task, func){
-            if(func === this.add){
-                console.log(`id: ${task.id},  \"${task.name}\" 항목이 새로 추가됐습니다.
-            현재상태 : todo: ${status.todo}, doing: ${status.doing}, done: ${status.done}`);
-            }
+    update({id, nextstatus}){
+        const mappedTask = this.list[id-1];
+        const prevStatus = mappedTask.status;
+        mappedTask.status = nextstatus.toLowerCase();
+        this.printTodoList('update', mappedTask, prevStatus); 
+    },
+
+    printTodoList(methodName, task, prevStatus){
+        if(methodName === 'add'){
+            console.log(`id: ${task.id},  \"${task.name}\" 항목이 새로 추가됐습니다. 현재상태 : todo: ${this.countTodoStatus('todo')}, doing: ${this.countTodoStatus('doing')}, done: ${this.countTodoStatus('done')}`);
+        } else if(methodName === 'update'){
+            console.log(`id: ${task.id},  \"${task.name}\" 항목이 ${prevStatus} => ${task.status} 상태로 업데이트 됐습니다. 현재상태 : todo: ${this.countTodoStatus('todo')}, doing: ${this.countTodoStatus('doing')}, done: ${this.countTodoStatus('done')}`);
         }
+    },
+
+    countTodoStatus(status){
+        const listOfStatus = this.list.filter(task => task.status === status);
+        return listOfStatus.length;
     }
-})();
+};
