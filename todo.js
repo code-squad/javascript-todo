@@ -60,7 +60,9 @@ const todoPrint = {
         // Group tasks by status
         for (let task of todo.todoList) {
             if (task.tag !== targetTag) continue;
-            if (!resultObj[task.status]) resultObj[task.status] = [];
+            if (!resultObj[task.status]) {
+                resultObj[task.status] = [];
+            }
             resultObj[task.status].push(task);
         }
         // Add task info into resultStr for tasks in object created above
@@ -68,7 +70,9 @@ const todoPrint = {
             resultStr += `${(resultStr) ? `\n\n` : ''}[ ${status} , 총 ${resultObj[status].length} 개 ]`;
             for (let task of resultObj[status]) {
                 resultStr += `\n- ${task.id}번, ${task.name}`
-                if(status === 'done') { resultStr += ` ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); } 
+                if(status === 'done') {
+                    resultStr += ` ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); 
+                }
             }
         }
 
@@ -82,7 +86,9 @@ const todoPrint = {
         //Group tasks by tags
         for (let task of todo.todoList) {
             if (!task.tag) continue; 
-            if (!resultObj[task.tag]) resultObj[task.tag] = [];
+            if (!resultObj[task.tag]) {
+                resultObj[task.tag] = [];
+            }
             resultObj[task.tag].push(task);
         }
         // Add task info into resultStr for tasks in object created above
@@ -103,7 +109,9 @@ const todoPrint = {
         // Group tasks by status
         for (let task of todo.todoList) {
             if (task.status !== targetStatus) continue;
-            if (!resultObj[task.status]) resultObj[task.status] = [];
+            if (!resultObj[task.status]) {
+                resultObj[task.status] = [];
+            }
             resultObj[task.status].push(task);
         }
         // abort method if there are no tasks under requested status
@@ -115,19 +123,23 @@ const todoPrint = {
          // Add task info into resultStr for tasks in object created above
          for (let task of resultObj[targetStatus]) {
             resultStr += `${(resultStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`
-            if(targetStatus === 'done') { resultStr += `, ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); } 
+            if(targetStatus === 'done') {
+                resultStr += `, ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); 
+            } 
         }
 
         console.log(resultStr);
         return
     },
 
-    showAllTasksByStatus(status) {
+    showAllTasksByStatus() {
         let resultStr = '';
         const resultObj = {};
 
         for (let task of todo.todoList) {
-            if (!resultObj[task.status]) resultObj[task.status] = [];
+            if (!resultObj[task.status]) {
+                resultObj[task.status] = [];
+            }
             resultObj[task.status].push(task);
         }
         //Print initial message 
@@ -175,8 +187,12 @@ const todoPrint = {
         const minutesSpent = parseInt(timeInMs/1000/60) - (daysSpent * 24 * 60) - (hoursSpent * 60);
         
         if (daysSpent) timeSpentStr += `${daysSpent} 일`;
-        if (hoursSpent) {timeSpentStr += (timeSpentStr) ? ` ${hoursSpent} 시간`: `${hoursSpent} 시간`}
-        if (minutesSpent) {timeSpentStr += (timeSpentStr) ? ` ${minutesSpent} 분`: `${minutesSpent} 분`}
+        if (hoursSpent) {
+            timeSpentStr += (timeSpentStr) ? ` ${hoursSpent} 시간`: `${hoursSpent} 시간`;
+        }
+        if (minutesSpent) {
+            timeSpentStr += (timeSpentStr) ? ` ${minutesSpent} 분`: `${minutesSpent} 분`;
+        }
 
         return timeSpentStr
     }
