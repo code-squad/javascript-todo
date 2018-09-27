@@ -180,6 +180,7 @@ todo.todoList[0].endTime = 1538147881901;
 todoPrint.showTasksByStatus();
 
 
+
 // Test cases for individual methods
 todo.todoList.push(
     {id: 13, name: '자바스크립트 공부', status: 'todo', tag: 'programming'},
@@ -209,8 +210,8 @@ todoPrint.showTasksByTag('programming');
 
 console.log(`\n === 특정 상태 'doing'만 출력 === \n`);
 todoPrint.showTasksByStatus('dOing');
-// - 13번, 자바스크립트 공부, [programming]
-//- 17번, iOS 공부, [programming]
+//- 18번, 여행가기, [play]
+
 
 console.log(`\n === 특정 상태 'done'만 출력 === \n`);
 todoPrint.showTasksByStatus('dONe');
