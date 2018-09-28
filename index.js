@@ -1,15 +1,16 @@
 const todo = {
-    list: [],
+    listObj: {},
+    taskId: 0,
 
     add(task){
-        task.id = this.list.length + 1;
+        task.id = ++this.taskId;
         task.status = 'todo';
-        this.list.push(task);
+        this.listObj[task.id] = task
         this.printResult('add', task);    
     },
 
     update({id, nextstatus}){
-        const targetTask = this.list[id-1];
+        const targetTask = this.listObj[id];
         const prevStatus = targetTask.status;
 
         targetTask.status = nextstatus.toLowerCase();
@@ -17,9 +18,9 @@ const todo = {
     },
 
     remove({id}){
-        const targetTask = this.list[id-1];
+        const targetTask = this.listObj[id];
 
-        this.list[id-1] = undefined;
+        delete this.listObj[id];
         this.printResult('remove', targetTask);
     },
 
@@ -36,7 +37,10 @@ const todo = {
     },
 
     countTodoStatus(status){
-        const countStatus = this.list.filter(task => !!task && task.status === status).length;
+        let countStatus = 0;
+        for(let id in this.listObj){
+            if(this.listObj.hasOwnProperty(id) && this.listObj[id].status === status) countStatus++;
+        }
         return countStatus;
     }
 };
