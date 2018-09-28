@@ -58,23 +58,24 @@ const todoPrint = {
             
         const targetTag = tag.toLowerCase();
         // Group tasks by status
-        for (let task of todo.todoList) {
-            if (task.tag !== targetTag) continue;
+        todo.todoList.forEach((task) => {
+            if (task.tag !== targetTag) return
             if (!resultObj[task.status]) {
                 resultObj[task.status] = [];
             }
             resultObj[task.status].push(task);
-        }
+        });
+        
         // Add task info into resultStr for tasks in object created above
-        for (let status of Object.keys(resultObj)) {
+        Object.keys(resultObj).forEach((status) => {
             resultStr += `${(resultStr) ? `\n\n` : ''}[ ${status} , 총 ${resultObj[status].length} 개 ]`;
-            for (let task of resultObj[status]) {
+            resultObj[status].forEach((task) => {
                 resultStr += `\n- ${task.id}번, ${task.name}`
                 if(status === 'done') {
                     resultStr += ` ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); 
                 }
-            }
-        }
+            });
+        });
 
         console.log(resultStr);
         return
@@ -84,20 +85,21 @@ const todoPrint = {
         const resultObj = {};
             
         //Group tasks by tags
-        for (let task of todo.todoList) {
-            if (!task.tag) continue; 
+        todo.todoList.forEach((task) => {
+            if (!task.tag) return
             if (!resultObj[task.tag]) {
                 resultObj[task.tag] = [];
             }
             resultObj[task.tag].push(task);
-        }
+        });
+        
         // Add task info into resultStr for tasks in object created above
-        for (let tagName of Object.keys(resultObj)) {
-            resultStr += `${(resultStr) ? `\n\n` : ''}[ ${tagName} , 총 ${resultObj[tagName].length} 개 ]`;
-            for (let task of resultObj[tagName]) {
+        Object.keys(resultObj).forEach((tag) => {
+            resultStr += `${(resultStr) ? `\n\n` : ''}[ ${tag} , 총 ${resultObj[tag].length} 개 ]`;
+            resultObj[tag].forEach((task) => {
                 resultStr += `\n- ${task.id}번, ${task.name}, [${task.status}]`
-            }
-        }
+            });
+        });
         console.log(resultStr);
         return
     },
@@ -107,13 +109,13 @@ const todoPrint = {
         const targetStatus = status.toLowerCase();
 
         // Group tasks by status
-        for (let task of todo.todoList) {
-            if (task.status !== targetStatus) continue;
+        todo.todoList.forEach((task) => {
+            if (task.status !== targetStatus) return
             if (!resultObj[task.status]) {
                 resultObj[task.status] = [];
             }
             resultObj[task.status].push(task);
-        }
+        });
         // abort method if there are no tasks under requested status
         if(!resultObj[targetStatus]) {
             console.log(`${targetStatus} 상태로 등록된 할일이 없습니다`);
@@ -121,12 +123,12 @@ const todoPrint = {
         }
 
          // Add task info into resultStr for tasks in object created above
-         for (let task of resultObj[targetStatus]) {
+         resultObj[targetStatus].forEach((task) => {
             resultStr += `${(resultStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`
             if(targetStatus === 'done') {
                 resultStr += `, ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); 
             } 
-        }
+        });
 
         console.log(resultStr);
         return
@@ -136,12 +138,13 @@ const todoPrint = {
         let resultStr = '';
         const resultObj = {};
 
-        for (let task of todo.todoList) {
+        todo.todoList.forEach((task) => {
             if (!resultObj[task.status]) {
                 resultObj[task.status] = [];
             }
             resultObj[task.status].push(task);
-        }
+        });
+    
         //Print initial message 
         console.log(`총 ${todo.todoList.length} 개의 리스트를 가져왔습니다. 2 초 뒤에 todo 내역을 출력합니다.....`);
         
@@ -206,7 +209,7 @@ todo.updateTask({id: 1, nextStatus: 'done'});
 todo.todoList[0].endTime = 1538147881901;
 todoPrint.showTasksByStatus();
 
-
+*/
 
 // Test cases for individual methods
 todo.todoList.push(
@@ -259,4 +262,3 @@ todoPrint.showAllTasksByStatus();
 //[ done, 총 1 개 ]
 //- 21번, Closure 공부, [programming], 1 일 26 분
 
-*/
