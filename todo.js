@@ -7,15 +7,20 @@ const todosList = {
             tag: tag,
             id: this.changeTodoId()
         });
-        console.log(`id: ${this.id}, ${name} 항목이 새로 추가되었습니다.`);
         console.log(this.todos);
+        console.log(`id: ${this.id}, ${name} 항목이 새로 추가되었습니다.`);
     },
     changeTodoId(){
         return ++this.id;
     },
+    remove(todoId) {
+        this.todos.splice(todoId - 1, 1);
+        console.log(this.todos);
+    }    
 };
 
 todosList.add({name: "자바스크립트 공부하기", tag:"programming"});
+todosList.remove({name: "자바스크립트 공부하기", tag:"programming"});
 
 
 //> todo.add({name: "자바스크립트 공부하기", tag:"programming"});  // 태그를 입력받는다.
