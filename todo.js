@@ -133,9 +133,7 @@ const todoPrint = {
         console.log(resultStr);
         return
     },
-
-    showAllTasksByStatus() {
-        let resultStr = '';
+    showAllTasksByStatus(sequenceArr) {
         const resultObj = {};
 
         todo.todoList.forEach((task) => {
@@ -146,41 +144,40 @@ const todoPrint = {
         });
     
         //Print initial message 
-        console.log(`총 ${todo.todoList.length} 개의 리스트를 가져왔습니다. 2 초 뒤에 todo 내역을 출력합니다.....`);
+        console.log(`총 ${todo.todoList.length} 개의 리스트를 가져왔습니다. ${parseInt(sequenceArr[0].timeout/1000)} 초 뒤에 ${sequenceArr[0].status} 내역을 출력합니다.....`);
+
+        this.printTasksAsync(resultObj, sequenceArr);
+    },
+    printTasksAsync(groupedTaskObj, sequenceArr, sequenceIdx = 0) {
+        const sequenceLen = sequenceArr.length;
+        const hasPrintFinished = !(sequenceLen-sequenceIdx);
+        const isOnLastSequence = (sequenceLen-sequenceIdx) === 1;
         
-        const cb = ([status, nextStatus, delay]) => {
+        if(hasPrintFinished) return
+        
+        const currentStatus = sequenceArr[sequenceIdx].status;
+        const currentTimeout = sequenceArr[sequenceIdx].timeout;
+        const nextStatus = (isOnLastSequence) ? null : sequenceArr[sequenceIdx+1].status;
+        const nextTimeout = (isOnLastSequence) ? null : sequenceArr[sequenceIdx+1].timeout;
+        
+        setTimeout(() => {
+            cb([currentStatus, nextStatus, nextTimeout]);
+            this.printTasksAsync(groupedTaskObj, sequenceArr, sequenceIdx+1);
+            },  
+            currentTimeout
+        );
+        
+        function cb ([status, nextStatus, delay]) {
             // abort method if there are no tasks under requested status
-            if(!resultObj[status]) {
+            if(!groupedTaskObj[status]) {
                 console.log(`${status} 상태로 등록된 할일이 없습니다`);
             } else {
-                console.log(`[ ${status}, 총 ${resultObj[status].length} 개 ]`);
-                this.showTasksByStatus.bind(this)(status);
+                console.log(`[ ${status}, 총 ${groupedTaskObj[status].length} 개 ]`);
+                todoPrint.showTasksByStatus(status);
             }
             if(nextStatus) console.log(`\n지금부터 ${parseInt(delay/1000)} 초 뒤에 ${nextStatus} 할일 목록을 출력합니다...`);
             return true;
         }
-        
-        setTimeout((status, nextStatus, delay) => {
-                cb(status, nextStatus, delay);
-                setTimeout((status, nextStatus, delay) => {
-                        cb(status, nextStatus, delay);
-                        setTimeout((status, nextStatus, delay) => {
-                                cb(status, nextStatus, delay);
-                            },
-                            2000,
-                            ['done']
-                        );
-                    },
-                    3000,
-                    ['doing', 'done', 2000]
-                );
-            },
-            2000,
-            ['todo', 'doing', 3000]
-        );
-
-        console.log(resultStr);
-        return
     },
     applyPrintableTimeFormat(timeInMs) {
         let timeSpentStr = '';
@@ -209,7 +206,7 @@ todo.updateTask({id: 1, nextStatus: 'done'});
 todo.todoList[0].endTime = 1538147881901;
 todoPrint.showTasksByStatus();
 
-*/
+
 
 // Test cases for individual methods
 todo.todoList.push(
@@ -248,7 +245,12 @@ todoPrint.showTasksByStatus('dONe');
 //- 21번, Closure 공부, [programming], 1 일 26 분
 
 console.log(`\n === 모든 상태 출력 === \n`);
-todoPrint.showAllTasksByStatus();
+const sequenceArr = [// A sequence array that contains status to print & timeout for each status
+    {status: 'todo', timeout: 2000}, 
+    {status: 'doing', timeout: 3000}, 
+    {status: 'done', timeout: 2000}
+];
+todoPrint.showAllTasksByStatus(sequenceArr);
 //총 4 개의 리스트를 가져왔습니다. 2 초 뒤에 todo 내역을 출력합니다.....
 //[ todo, 총 2 개 ]
 //- 13번, 자바스크립트 공부, [programming]
@@ -262,3 +264,4 @@ todoPrint.showAllTasksByStatus();
 //[ done, 총 1 개 ]
 //- 21번, Closure 공부, [programming], 1 일 26 분
 
+*/
