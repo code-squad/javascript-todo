@@ -206,7 +206,7 @@ todo.updateTask({id: 1, nextStatus: 'done'});
 todo.todoList[0].endTime = 1538147881901;
 todoPrint.showTasksByStatus();
 
-
+*/
 
 // Test cases for individual methods
 todo.todoList.push(
@@ -264,4 +264,3 @@ todoPrint.showAllTasksByStatus(sequenceArr);
 //[ done, 총 1 개 ]
 //- 21번, Closure 공부, [programming], 1 일 26 분
 
-*/
