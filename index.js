@@ -5,15 +5,19 @@ const todo = {
     add(task){
         task.id = ++this.taskId;
         task.status = 'todo';
-        this.listObj[task.id] = task
+        this.listObj[task.id] = task;
         this.printResult('add', task);    
     },
 
     update({id, nextstatus}){
+        const statusCaseInsensitive = nextstatus.toLowerCase();
         const targetTask = this.listObj[id];
         const prevStatus = targetTask.status;
 
-        targetTask.status = nextstatus.toLowerCase();
+        if(statusCaseInsensitive === 'doing') targetTask.timeInfo = Date.now();
+        if(prevStatus === 'doing' && statusCaseInsensitive === 'done') targetTask.timeInfo = Date.now() - targetTask.timeInfo;
+
+        targetTask.status = statusCaseInsensitive;
         this.printResult('update', targetTask, prevStatus); 
     },
 
@@ -37,10 +41,46 @@ const todo = {
     },
 
     countTodoStatus(status){
-        let countStatus = 0;
-        for(let id in this.listObj){
-            if(this.listObj.hasOwnProperty(id) && this.listObj[id].status === status) countStatus++;
-        }
+        const countStatus = Object.values(this.listObj).filter(task => task.status === status).length;
         return countStatus;
+    },
+
+    showTag(tag){
+        let resultStr = ``;
+        const tagObj = Object.values(this.listObj).filter(task => task.tag === tag).reduce((statusObj, task) => {
+            statusObj[task.status].push(task);
+            return statusObj;
+        }, {todo:[], doing: [], done: []});
+    
+        for(let status in tagObj){
+            if(tagObj.hasOwnProperty(status) && tagObj[status].length){
+                let tagStr = `[ ${status} , 총${tagObj[status].length}개 ]`;
+                tagObj[status].forEach(function(task){
+                    tagStr += `\n- ${task.id}번, ${task.name}`;    
+                })
+                resultStr += tagStr + '\n\n';
+            }
+        }
+        console.log(resultStr);
+    },
+
+    showTags(){
+        let resultStr = ``;
+        const tagObj = Object.values(this.listObj).filter(task => task.tag).reduce((tagObj, task) => {
+            if(!tagObj[task.tag]) tagObj[task.tag] = [];
+            tagObj[task.tag].push(task);
+            return tagObj;
+        }, {})
+
+        for(let tag in tagObj){
+            if(tagObj.hasOwnProperty(tag)){
+                let tagStr = `[ ${tag} , 총${tagObj[tag].length}개 ]`;
+                tagObj[tag].forEach(function(task){
+                    tagStr += `\n- ${task.id}번, ${task.name}, [${task.status}]`;    
+                })
+                resultStr += tagStr + '\n\n';
+            }
+        }
+        console.log(resultStr);
     }
-};
+}
