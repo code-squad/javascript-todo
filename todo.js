@@ -4,6 +4,10 @@ const todo = {
     todoList : [],
     countOfStatus: {todo: 0, doing: 0, done: 0},
     addTask({name: newTaskName, tag: newTaskTag = ''}) {
+        // check if there are task with requested name already
+        const isAnyErrors = todoErrorCheck.onTaskAddition(newTaskName, todo.todoList);
+        if(isAnyErrors) return false
+        
         const taskId = this.todoList.length + 1;
         const taskToAdd = {id: taskId, name: newTaskName, status: 'todo', tag: newTaskTag};
         
@@ -198,17 +202,33 @@ const todoPrint = {
     }
 };
 
-/*
-//Test case for user journey
-todo.addTask({name: '자바스크립트 공부', tag: 'programming'});
-todo.updateTask({id: 1, nextStatus: 'doing'});
-todo.updateTask({id: 1, nextStatus: 'done'});
-todo.todoList[0].endTime = 1538147881901;
-todoPrint.showTasksByStatus();
+const todoErrorCheck = {
+    onTaskAddition(newTaskName, targetTodoList) {
+        const isTaskNameTaken = this.checkTaskNameDuplication(newTaskName, targetTodoList);
+        if(isTaskNameTaken) {
+            console.log(`[error] 할 일 목록 todo에 이미 같은 이름의 할 일이 존재합니다.`);
+            return true
+        }
+        return false
+    },
+    onTaskUpdate() {
+        // Alert if user tried to update status same with current status
+        // prohibit task update from done to doing
+    },
+    onTaskRemove() {
+        // Alert if user tried to remove not existing id
+    },
+    checkTaskNameDuplication(newTaskName, todoList) {
+        const tasksInTodoStatus = ({status}) => status === 'todo';
+        const hasTheNameAlready = ({name}) => name === newTaskName;
+        
+        return todoList.filter(tasksInTodoStatus).some(hasTheNameAlready)
+    }
+};
 
-*/
+const todoUndo = {};
 
-// Test cases for individual methods
+//Test Cases
 todo.todoList.push(
     {id: 13, name: '자바스크립트 공부', status: 'todo', tag: 'programming'},
     {id: 17, name: 'iOS 공부', status: 'todo', tag: 'programming'},
@@ -216,51 +236,6 @@ todo.todoList.push(
     {id: 18, name: '여행가기', status: 'doing', startTime: '04:19', tag: 'play'}
 );
 
-console.log(`\n === 모든 태그 출력 === \n`);
-todoPrint.showAllTasksWithTag();
-// [ programming , 총 3 개 ]
-//- 13번, 자바스크립트 공부, [todo]
-//- 17번, iOS 공부, [todo]
-//- 21번, Closure 공부, [done]
-//
-//[ play , 총 1 개 ]
-//- 18번, 여행가기, [doing]
 
-console.log(`\n === 특정 태그만 출력 === \n`);
-todoPrint.showTasksByTag('programming');
-// [ todo , 총 2 개 ]
-//- 13번, 자바스크립트 공부
-//- 17번, iOS 공부
-//
-//[ done , 총 1 개 ]
-//- 21번, Closure 공부 1 일 26 분
-
-console.log(`\n === 특정 상태 'doing'만 출력 === \n`);
-todoPrint.showTasksByStatus('dOing');
-//- 18번, 여행가기, [play]
-
-
-console.log(`\n === 특정 상태 'done'만 출력 === \n`);
-todoPrint.showTasksByStatus('dONe');
-//- 21번, Closure 공부, [programming], 1 일 26 분
-
-console.log(`\n === 모든 상태 출력 === \n`);
-const sequenceArr = [// A sequence array that contains status to print & timeout for each status
-    {status: 'todo', timeout: 2000}, 
-    {status: 'doing', timeout: 3000}, 
-    {status: 'done', timeout: 2000}
-];
-todoPrint.showAllTasksByStatus(sequenceArr);
-//총 4 개의 리스트를 가져왔습니다. 2 초 뒤에 todo 내역을 출력합니다.....
-//[ todo, 총 2 개 ]
-//- 13번, 자바스크립트 공부, [programming]
-//- 17번, iOS 공부, [programming]
-//
-//지금부터 3 초 뒤에 doing 할일 목록을 출력합니다...
-//[ doing, 총 1 개 ]
-//- 18번, 여행가기, [play]
-//
-//지금부터 2 초 뒤에 done 할일 목록을 출력합니다...
-//[ done, 총 1 개 ]
-//- 21번, Closure 공부, [programming], 1 일 26 분
-
+todo.addTask({name: '자바스크립트 공부', tag: 'Hobby'});
+//[error] todo 목록에 이미 같은 이름의 할 일이 존재합니다.
