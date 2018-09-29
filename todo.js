@@ -5,7 +5,7 @@ const todo = {
     countOfStatus: {todo: 0, doing: 0, done: 0},
     addTask({name: newTaskName, tag: newTaskTag = ''}) {
         // check if there are task with requested name already
-        const isAnyErrors = todoErrorCheck.onTaskAddition(newTaskName, todo.todoList);
+        const isAnyErrors = todoErrorCheck.onTaskAddition(this.todoList, newTaskName);
         if(isAnyErrors) return false
         
         const taskId = this.todoList.length + 1;
@@ -19,6 +19,9 @@ const todo = {
     updateTask({id, nextStatus}) {
         const newStatus = nextStatus.toLowerCase();
         const targetTask = this.todoList[id-1];
+        const isAnyErrors = todoErrorCheck.onTaskUpdate(this.todoList, id, targetTask, newStatus);
+        if(isAnyErrors) return false
+
         const {name: targetTaskName, status: currentStatus} = targetTask;
         
         if (nextStatus === 'doing') targetTask.startTime = Date.now();
@@ -31,6 +34,9 @@ const todo = {
         this.printUpdateResult('update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
     },
     removeTask({id}) {
+        const isAnyErrors = todoErrorCheck.onTaskRemove(this.todoList, id);
+        if(isAnyErrors) return false
+
         const {name, status} = this.todoList[id-1];
         delete this.todoList[id-1];
         this.countOfStatus[status]--;
@@ -203,26 +209,59 @@ const todoPrint = {
 };
 
 const todoErrorCheck = {
-    onTaskAddition(newTaskName, targetTodoList) {
-        const isTaskNameTaken = this.checkTaskNameDuplication(newTaskName, targetTodoList);
+    onTaskAddition(targetTodoList, newTaskName) {
+        const isTaskNameTaken = this.checkTaskNameDuplication(targetTodoList, newTaskName);
         if(isTaskNameTaken) {
             console.log(`[error] 할 일 목록 todo에 이미 같은 이름의 할 일이 존재합니다.`);
             return true
         }
         return false
     },
-    onTaskUpdate() {
+    onTaskUpdate(targetTodoList, id, targetTask, newStatus) {
+        //Alert user if requested with not existing task ID
+        const isTaskNotExists = this.checkIfIdNotExists(targetTodoList, id);
+        if(isTaskNotExists) {
+            console.log(`[error] ${id} 번 항목이 존재하지 않아 수정하지 못했습니다.`);
+            return true
+        }
+
         // Alert if user tried to update status same with current status
-        // prohibit task update from done to doing
+        const isStatusNotNew = targetTask.status === newStatus
+        if(isStatusNotNew) {
+            console.log(`[error] ${id} 번 항목은 이미 ${targetTask.status} 상태입니다.`);
+            return true
+        }
+        
+        // prohibit task update from done to doing or todo
+        const isUpdatingTaskDone = targetTask.status === 'done'
+        if(isUpdatingTaskDone) {
+            console.log(`[error] ${id} 번 항목은 done 상태입니다. ${newStatus} 상태로 바꿀 수 없습니다.`);
+            return true
+        }
+        
+
+        return false
     },
-    onTaskRemove() {
+    onTaskRemove(targetTodoList, id) {
         // Alert if user tried to remove not existing id
+        const isTaskNotExists = this.checkIfIdNotExists(targetTodoList, id);
+        if(isTaskNotExists) {
+            console.log(`[error] ${id} 번 항목이 존재하지 않아 삭제하지 못했습니다.`);
+            return true
+        }
+
+        return false
     },
-    checkTaskNameDuplication(newTaskName, todoList) {
+    checkTaskNameDuplication(targetTodoList, newTaskName) {
         const tasksInTodoStatus = ({status}) => status === 'todo';
         const hasTheNameAlready = ({name}) => name === newTaskName;
         
-        return todoList.filter(tasksInTodoStatus).some(hasTheNameAlready)
+        return targetTodoList.filter(tasksInTodoStatus).some(hasTheNameAlready)
+    },
+    checkIfIdNotExists(targetTodoList, taskId) {
+        const isTaskExists = targetTodoList.some( ({id}) => id === taskId );
+
+        return (isTaskExists) ? false : true
     }
 };
 
@@ -230,12 +269,24 @@ const todoUndo = {};
 
 //Test Cases
 todo.todoList.push(
-    {id: 13, name: '자바스크립트 공부', status: 'todo', tag: 'programming'},
-    {id: 17, name: 'iOS 공부', status: 'todo', tag: 'programming'},
-    {id: 21, name: 'Closure 공부', status: 'done', startTime: 1537838429530, endTime: 1537926397371, tag: 'programming'},
-    {id: 18, name: '여행가기', status: 'doing', startTime: '04:19', tag: 'play'}
+    {id: 1, name: '자바스크립트 공부', status: 'todo', tag: 'programming'},
+    {id: 2, name: 'iOS 공부', status: 'todo', tag: 'programming'},
+    {id: 3, name: 'Closure 공부', status: 'done', startTime: 1537838429530, endTime: 1537926397371, tag: 'programming'},
+    {id: 4, name: '여행가기', status: 'doing', startTime: '04:19', tag: 'play'}
 );
 
 
 todo.addTask({name: '자바스크립트 공부', tag: 'Hobby'});
 //[error] todo 목록에 이미 같은 이름의 할 일이 존재합니다.
+
+todo.updateTask({id: 2, nextStatus:'todo'});
+//[error] 2 번 항목은 이미 todo 상태입니다.
+
+todo.updateTask({id: 3, nextStatus:'doing'});
+//[error] 3 번 항목은 done 상태입니다. doing 상태로 바꿀 수 없습니다.
+
+todo.updateTask({id: 23, nextStatus: 'doing'});
+//[error] 23 번 항목이 존재하지 않아 수정하지 못했습니다.
+
+todo.removeTask({id: 23});
+//[error] 23 번 항목이 존재하지 않아 삭제하지 못했습니다.
