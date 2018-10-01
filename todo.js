@@ -81,7 +81,7 @@ const todo = {
             return false
         }
         const lastUndo = todoUndoRedo.undoHistory.pop();
-        todoUndoRedo.redo[lastUndo.type](lastUndo.args);
+        todoUndoRedo.redo[lastUndo.type](...lastUndo.args);
     }
 };
 
@@ -320,19 +320,19 @@ const todoUndoRedo = {
         }
     },
     redo: {
-        add() {
-            console.log(`redo [Add] is here!`)
+        add(...args) {
+            todo.addTask(...args);
         },
-        update() {
-            console.log(`redo [Update] is here!`)
+        update(...args) {
+            todo.updateTask(...args);
         },
-        remove() {
-            console.log(`redo [Remove] is here!`)
+        remove(...args) {
+            todo.removeTask(...args);
         }
     },
     updateActionHistory(actionType, args, actionData) {
         if(this.history.length >= 3) this.history.shift();
-        this.history.push({type: actionType, argsr: args, data:actionData});
+        this.history.push({type: actionType, args: args, data:actionData});
     },
     updateUndoHistory(actionObj) {
         this.undoHistory.push(actionObj);
@@ -362,7 +362,7 @@ const todoUndoRedo = {
 // [V] Update todo.undo method to update undo history in array
 // [ ] Create todoRedo object
 // [ ] Update todo method to remove undo history when it does fresh action
-// [ ] Alert user if they try to undo/redo more than 3 times
+// [V] Alert user if they try to undo/redo more than 3 times
 // =================================
 
 //Test Cases
