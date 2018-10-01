@@ -22,10 +22,10 @@ const todo = {
         const isAnyErrors = todoErrorCheck.onTaskUpdate(this.todoList, id, targetTask, newStatus);
         if(isAnyErrors) return false
 
-        const {name: targetTaskName, status: currentStatus} = targetTask;
-        
         if (newStatus === 'doing') targetTask.startTime = Date.now();
         if (newStatus === 'done') targetTask.endTime = Date.now();
+
+        const {name: targetTaskName, status: currentStatus} = targetTask;
 
         targetTask.status = newStatus;
         this.countOfStatus[currentStatus]--;
@@ -291,6 +291,9 @@ const todoUndoRedo = {
             targetTask.status = prevStatus
             todoCountObj[currentStatus]--;
             todoCountObj[prevStatus]++;
+            //Remove start/endTime
+            if(currentStatus === 'doing') {delete targetTask.startTime}
+            if(currentStatus === 'done') {delete targetTask.endTime}
             console.log(`${targetTask.id}번, ${targetTask.name} 할일이 ${currentStatus} => ${prevStatus} 상태로 돌아갔습니다.`);
         },
         remove() {
@@ -328,12 +331,21 @@ const todoUndoRedo = {
 // =================================
 
 //Test Cases
-todo.todoList.push(
-    {id: 1, name: '자바스크립트 공부', status: 'todo', tag: 'programming'},
-    {id: 2, name: 'iOS 공부', status: 'todo', tag: 'programming'},
-    {id: 3, name: 'Closure 공부', status: 'done', startTime: 1537838429530, endTime: 1537926397371, tag: 'programming'},
-    {id: 4, name: '여행가기', status: 'doing', startTime: '04:19', tag: 'play'}
-);
+// todo.todoList.push(
+//     {id: 1, name: '자바스크립트 공부', status: 'todo', tag: 'programming'},
+//     {id: 2, name: 'iOS 공부', status: 'todo', tag: 'programming'},
+//     {id: 3, name: 'Closure 공부', status: 'done', startTime: 1537838429530, endTime: 1537926397371, tag: 'programming'},
+//     {id: 4, name: '여행가기', status: 'doing', startTime: '04:19', tag: 'play'}
+// );
+todo.addTask({name: '자바스크립트 공부', tag: 'programming'});
+todo.addTask({name: 'iOS 공부', tag: 'programming'});
+todo.addTask({name: 'Closure 공부', tag: 'programming'});
+todo.addTask({name: '여행가기', tag: 'play'});
+todo.updateTask({id: 4, nextStatus: 'doing'});
+todo.updateTask({id: 3, nextStatus: 'doing'});
+todo.updateTask({id: 3, nextStatus: 'done'});
+todo.todoList[2].startTime = 1537838429530;
+todo.todoList[2].endTime = 1537926397371;
 
 
 todo.addTask({name: '자바스크립트 공부', tag: 'Hobby'});
