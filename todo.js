@@ -3,7 +3,7 @@
 const todo = {
     todoList : [],
     countOfStatus: {todo: 0, doing: 0, done: 0},
-    addTask({name: newTaskName, tag: newTaskTag = ''}) {
+    addTask({name: newTaskName, tag: newTaskTag = ''}, isRedo = false) {
         // check if there are task with requested name already
         const isAnyErrors = todoErrorCheck.onTaskAddition(this.todoList, newTaskName);
         if(isAnyErrors) return false
@@ -15,10 +15,11 @@ const todo = {
         this.countOfStatus.todo++;
 
         todoUndoRedo.updateActionHistory('add', [...arguments], [this.todoList, this.countOfStatus]);
+        if(!isRedo)todoUndoRedo.clearUndoHistory();
 
         this.printUpdateResult('add', {taskId: taskId, taskName: newTaskName});
     },
-    updateTask({id, nextStatus}) {
+    updateTask({id, nextStatus}, isRedo = false) {
         const newStatus = nextStatus.toLowerCase();
         const targetTask = this.todoList[id-1];
         const isAnyErrors = todoErrorCheck.onTaskUpdate(this.todoList, id, targetTask, newStatus);
@@ -34,15 +35,17 @@ const todo = {
         this.countOfStatus[newStatus]++;
 
         todoUndoRedo.updateActionHistory('update', [...arguments], [this.todoList[id-1], currentStatus, this.countOfStatus]);
+        if(!isRedo)todoUndoRedo.clearUndoHistory();
 
         this.printUpdateResult('update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
     },
-    removeTask({id}) {
+    removeTask({id}, isRedo = false) {
         const isAnyErrors = todoErrorCheck.onTaskRemove(this.todoList, id);
         if(isAnyErrors) return false
 
         const {name, status} = this.todoList[id-1];
         todoUndoRedo.updateActionHistory('remove', [...arguments], [this.todoList[id-1], this.todoList]);
+        if(!isRedo)todoUndoRedo.clearUndoHistory();
 
         delete this.todoList[id-1];
         this.countOfStatus[status]--;
@@ -81,7 +84,7 @@ const todo = {
             return false
         }
         const lastUndo = todoUndoRedo.undoHistory.pop();
-        todoUndoRedo.redo[lastUndo.type](...lastUndo.args);
+        todoUndoRedo.redo[lastUndo.type](...lastUndo.args, true);
     }
 };
 
@@ -338,7 +341,7 @@ const todoUndoRedo = {
         this.undoHistory.push(actionObj);
     },
     clearUndoHistory() {
-        this.undoHistory = [];
+        this.undoHistory.length = 0;
     }
 
     //on todo object call, log action data on history Arr. 
@@ -360,18 +363,12 @@ const todoUndoRedo = {
 //      // [V] Add
 //      // [V] Update
 // [V] Update todo.undo method to update undo history in array
-// [ ] Create todoRedo object
-// [ ] Update todo method to remove undo history when it does fresh action
+// [V] Create todoRedo object
+// [V] Update todo method to remove undo history when it does fresh action
 // [V] Alert user if they try to undo/redo more than 3 times
 // =================================
 
 //Test Cases
-// todo.todoList.push(
-//     {id: 1, name: '자바스크립트 공부', status: 'todo', tag: 'programming'},
-//     {id: 2, name: 'iOS 공부', status: 'todo', tag: 'programming'},
-//     {id: 3, name: 'Closure 공부', status: 'done', startTime: 1537838429530, endTime: 1537926397371, tag: 'programming'},
-//     {id: 4, name: '여행가기', status: 'doing', startTime: '04:19', tag: 'play'}
-// );
 todo.addTask({name: '자바스크립트 공부', tag: 'programming'});
 todo.addTask({name: 'iOS 공부', tag: 'programming'});
 todo.addTask({name: 'Closure 공부', tag: 'programming'});
@@ -381,6 +378,12 @@ todo.updateTask({id: 3, nextStatus: 'doing'});
 todo.updateTask({id: 3, nextStatus: 'done'});
 todo.todoList[2].startTime = 1537838429530;
 todo.todoList[2].endTime = 1537926397371;
+// 이상의 코드로 아래 상태가 됨 : todo.todoList = (
+//     {id: 1, name: '자바스크립트 공부', status: 'todo', tag: 'programming'},
+//     {id: 2, name: 'iOS 공부', status: 'todo', tag: 'programming'},
+//     {id: 3, name: 'Closure 공부', status: 'done', startTime: 1537838429530, endTime: 1537926397371, tag: 'programming'},
+//     {id: 4, name: '여행가기', status: 'doing', startTime: 1537838429530, tag: 'play'}
+// );
 
 
 todo.addTask({name: '자바스크립트 공부', tag: 'Hobby'});
@@ -399,29 +402,33 @@ todo.removeTask({id: 23});
 //[error] 23 번 항목이 존재하지 않아 삭제하지 못했습니다.
 
 // ==== undo & redo Test cases
-
-// Add 
 todo.addTask({name: "알고리즘 스터디", tag:"Study"});
+//id: 5 "알고리즘 스터디" 항목이 새로 추가됐습니다.
 
-// Update
 todo.updateTask({id:1,  nextStatus:"doNe"});
 //id: 1,  "자바스크립트 공부하기" 항목이 todo => done 상태로 업데이트 됐습니다.
 
-// Remove
 todo.removeTask({id:3});
 //id: 3, "Closure 공부" 항목 삭제 완료
 
-
-/*
-const targetTask = todo.todoList[0];
-todoUndoRedo.undo.update(targetTask, 'todo', todo.countOfStatus);
-//1번, 자바스크립트 공부 할일이 done => todo 상태로 돌아갔습니다.
-
-todoUndoRedo.redo.update();
-
-todoUndoRedo.undo.remove(todoUndoRedo.history[2]['data'][0], todo.todoList);
+todo.undo();
 //3번, Closure 공부 할일이 삭제 => done 상태로 돌아갔습니다.
 
-todoUndoRedo.redo.remove();
+todo.undo();
+//1번, 자바스크립트 공부 할일이 done => todo 상태로 돌아갔습니다.
 
-*/
+todo.undo();
+//5번, 알고리즘 스터디 할일이 삭제됐습니다.
+
+todo.redo();
+//id: 5 "알고리즘 스터디" 항목이 새로 추가됐습니다.
+
+todo.redo();
+//id: 1 "자바스크립트 공부" 항목이 todo => done 상태로 업데이트 됐습니다.
+
+//Undohistory clear test - do something while one more redo-able task exists
+todo.addTask({name: "스타벅스 방문", tag:"Dring"});
+//id: 6 "스타벅스 방문" 항목이 새로 추가됐습니다.
+
+todo.redo();
+// 모든 undo를 취소했습니다.
