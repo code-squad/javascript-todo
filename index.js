@@ -14,8 +14,8 @@ const todo = {
         const targetTask = this.id[id];
         const prevStatus = targetTask.status;
 
-        if(caseInsensitiveStatus === 'doing') targetTask.timeInfo = Date.now();
-        if(prevStatus === 'doing' && caseInsensitiveStatus === 'done') targetTask.timeInfo = Date.now() - targetTask.timeInfo;
+        if(caseInsensitiveStatus === 'doing') targetTask.timeInfo = new Date(Date.now());
+        if(prevStatus === 'doing' && caseInsensitiveStatus === 'done') targetTask.timeInfo = Date.now() - (targetTask.timeInfo).getTime();
 
         targetTask.status = caseInsensitiveStatus;
         this.printResult('update', targetTask, prevStatus); 
@@ -29,10 +29,12 @@ const todo = {
 
     printResult(methodName, task, prevStatus){
         if(methodName === 'add'){
-            console.log(`id: ${task.id}, \"${task.name}\" 항목이 새로 추가됐습니다. \n현재상태 : todo: ${this.countTodoStatus('todo')}, doing: ${this.countTodoStatus('doing')}, done: ${this.countTodoStatus('done')}`);
+            console.log(`id: ${task.id}, \"${task.name}\" 항목이 새로 추가됐습니다. 
+            현재상태 : todo: ${this.countTodoStatus('todo')}, doing: ${this.countTodoStatus('doing')}, done: ${this.countTodoStatus('done')}`);
         }
         if(methodName === 'update'){
-            console.log(`id: ${task.id}, \"${task.name}\" 항목이 ${prevStatus} => ${task.status} 상태로 업데이트 됐습니다. \n현재상태 : todo: ${this.countTodoStatus('todo')}, doing: ${this.countTodoStatus('doing')}, done: ${this.countTodoStatus('done')}`);
+            console.log(`id: ${task.id}, \"${task.name}\" 항목이 ${prevStatus} => ${task.status} 상태로 업데이트 됐습니다. 
+            현재상태 : todo: ${this.countTodoStatus('todo')}, doing: ${this.countTodoStatus('doing')}, done: ${this.countTodoStatus('done')}`);
         }
         if(methodName === 'remove'){
             console.log(`id: ${task.id}, ${task.name} 삭제완료`);
@@ -48,9 +50,9 @@ const todo = {
 const todoPrint = {
     getTodoByStatus(list, status){
         const todoByStatus = Object.values(list).reduce((statusObj, task) => {
-            statusObj[task.status].push(task);
+            !statusObj[task.status] ? statusObj[task.status] = [task] : statusObj[task.status].push(task);
             return statusObj;
-        }, {todo: [], doing: [], done: []});
+        }, {todo: '', doing: '', done: ''});
         return !status ? todoByStatus : todoByStatus[status];
     },
 
@@ -65,13 +67,17 @@ const todoPrint = {
     showTag(tag){
         const todoTag = this.getTodoByStatus(this.getTodoByTag(tag));
         let resultStr = ``;
-        
-        for(let status in todoTag){
-            if(todoTag.hasOwnProperty(status) && todoTag[status].length){
+
+        Object.keys(todoTag).filter(status => todoTag[status].length).forEach(status => {
+            if(status === 'done'){
+                const tagStr = todoTag[status].reduce((str, task) => str += `\n- ${task.id}번, ${task.name} ${this.getTime(task.timeInfo)}`, `[ ${status} , 총${todoTag[status].length}개 ]`);
+                resultStr += tagStr + '\n\n';
+            } else {
                 const tagStr = todoTag[status].reduce((str, task) => str += `\n- ${task.id}번, ${task.name}`, `[ ${status} , 총${todoTag[status].length}개 ]`);
                 resultStr += tagStr + '\n\n';
             }
-        }
+        })
+
         console.log(resultStr);
     },
 
@@ -79,19 +85,18 @@ const todoPrint = {
         const todoTags = this.getTodoByTag();
         let resultStr = ``;
 
-        for(let tag in todoTags){
-            if(todoTags.hasOwnProperty(tag)){
-                const tagStr = todoTags[tag].reduce((str, task) => str += `\n- ${task.id}번, ${task.name}, ${task.status}`, `[ ${tag} , 총${todoTags[tag].length}개 ]`);
-                resultStr += tagStr + '\n\n';
-            }
-        }
+        Object.keys(todoTags).forEach(tag => {
+            const tagStr = todoTags[tag].reduce((str, task) => str += `\n- ${task.id}번, ${task.name}, ${task.status}`, `[ ${tag} , 총${todoTags[tag].length}개 ]`);
+            resultStr += tagStr + '\n\n';
+        });
+
         console.log(resultStr);
     },
 
     show(status){
         const resultStr = this.getTodoByStatus(todo.id, status).reduce((statusStr, task) => {
             if(status === 'done' && task.timeInfo) { 
-                task.tag ? statusStr += `- ${task.id}번, ${task.name}, [${task.tag}], ${todoPrint.getTime(task.timeInfo)}\n` : statusStr += `- ${task.id}번, ${task.name}\n`;
+                task.tag ? statusStr += `- ${task.id}번, ${task.name}, [${task.tag}], ${this.getTime(task.timeInfo)}\n` : statusStr += `- ${task.id}번, ${task.name} ${this.getTime(task.timeInfo)}\n`;
             } else {
                 task.tag ? statusStr += `- ${task.id}번, ${task.name}, [${task.tag}]\n` : statusStr += `- ${task.id}번, ${task.name}\n`;
             }
@@ -101,27 +106,18 @@ const todoPrint = {
     },
 
     showAll(){
-        const self = this;
-        const asyncPrint = new Promise(function(resolve, reject){
-            resolve(self.show);
-        });
-
-        asyncPrint.then(function(show){
-            console.log(`\"총 ${Object.values(todo.id).length}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다.....\"\n`);
-            setTimeout(function(){
-                console.log(self.show('todo') + '\n\n\"지금부터 3초뒤에 doing내역을 출력합니다.....\"\n');
-            }, 2000);
-            return show;
-        }).then(function(show){
-            setTimeout(function(){
-                console.log(self.show('doing') + '\n\n\"지금부터 2초뒤에 done내역을 출력합니다.....\"\n');
-            }, 5000);
-            return show;
-        }).then(function(show){
-            setTimeout(function(){
-                console.log(self.show('done'));
-            }, 7000);
-        })
+        const self = this;        
+        console.log(`\"총 ${Object.values(todo.id).length}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다.....\"\n`);
+        
+        setTimeout(function(){
+            console.log(self.show('todo') + '\n\n\"지금부터 3초뒤에 doing내역을 출력합니다.....\"\n');
+        }, 2000);
+        setTimeout(function(){
+            console.log(self.show('doing') + '\n\n\"지금부터 2초뒤에 done내역을 출력합니다.....\"\n');
+        }, 5000);
+        setTimeout(function(){
+           console.log(self.show('done'));
+        }, 7000);
     },
     
     getTime(timeInfo){
