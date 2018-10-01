@@ -274,14 +274,31 @@ const todoErrorCheck = {
     }
 };
 
-const todoUndo = {
+const todoUndoRedo = {
     history: [], // [ {actionType: add, argument: {name: "자바스크립트 공부하기", tag:"programming"} } ]
     undoHistory: [],
     addToHistory(actionType, argument, result) {
         
     },
-    addToUndoHistory() {
-
+    undo: {
+        add(todoList, todoCountObj) {
+            const targetTask = todoList.pop(-1);
+            todoCountObj[targetTask.status]--;
+            console.log(`${targetTask.id}번, ${targetTask.name} 할일이 삭제됐습니다.`);
+        },
+        update(targetTask, prevStatus, todoCountObj) {
+            targetTask.status = prevStatus;
+            todoCountObj[nextStatus]--;
+            todoCountObj[prevStatus]++;
+        },
+        remove() {
+            todoList[idx] = removedTask;
+        }
+    },
+    redo: {
+        add() {
+            console.log(`redo Add is here!`)
+        }
     }
     //on todo object call, log action data on history Arr. 
         // if history.length =3, shift 1 & push new one
@@ -294,9 +311,10 @@ const todoUndo = {
 // ========== [To do] =============
 // Improve todo methods considering future undo
 // [ ] Create todoUndo object
-//      // undo(add) => todoList.length--; & countofstatus['todo']--;
-//      // undo(update) => targetTask.status = prevStatus & countOfStatus[newStatus]--; & countOfStatus[prevStatus]++;
-//      // undo(remove) => this.todoList[id-1] = ${removedTask}
+//      // [V] undo(add) => todoList.length--; & countofstatus['todo']--;
+//      // [V] undo(update) => targetTask.status = prevStatus & countOfStatus[newStatus]--; & countOfStatus[prevStatus]++;
+//      // [ ] undo(remove) => this.todoList[id-1] = ${removedTask}
+// [ ] Create todoRedo object
 // [ ] update methods under todo object to liase with todoUndo
 // =================================
 
@@ -327,23 +345,28 @@ todo.removeTask({id: 23});
 // ==== undo & redo Test cases
 
 // Add 
-todo.add({name: "알고리즘 스터디", tag:"Study"});
+todo.addTask({name: "알고리즘 스터디", tag:"Study"});
 
-todo.undo();
+todoUndoRedo.undo.add(todo.todoList,todo.countOfStatus);
+// "5번, 자바스크립 공부하기가 삭제됐습니다"
 
-todo.redo();
+todoUndoRedo.redo();
+
+/* 
 
 // Update
-todo.update({id:1,  nextstatus:"doNe"});
+todo.updateTask({id:1,  nextstatus:"doNe"});
 //id: 1,  "자바스크립트 공부하기" 항목이 todo => done 상태로 업데이트 됐습니다.
 
-todo.undo();
+todoUndoRedo.undo();
 
-todo.redo();
+todoUndoRedo.redo();
 
 // Remove
-todo.remove({id:3});
+todo.removeTask({id:3});
 
-todo.undo();
+todoUndoRedo.undo();
 
-todo.redo();
+todoUndoRedo.redo();
+
+*/
