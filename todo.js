@@ -69,32 +69,35 @@ const todo = {
 
 const todoPrint = {
     showTasksByTag(tag) {
-        let resultStr = '';
-        const resultObj = {};
-            
         const targetTag = tag.toLowerCase();
-        // Group tasks by status
-        todo.todoList.forEach((task) => {
-            if (task.tag !== targetTag) return
-            if (!resultObj[task.status]) {
-                resultObj[task.status] = [];
-            }
-            resultObj[task.status].push(task);
-        });
         
-        // Add task info into resultStr for tasks in object created above
-        Object.keys(resultObj).forEach((status) => {
-            resultStr += `${(resultStr) ? `\n\n` : ''}[ ${status} , 총 ${resultObj[status].length} 개 ]`;
-            resultObj[status].forEach((task) => {
-                resultStr += `\n- ${task.id}번, ${task.name}`
-                if(status === 'done') {
-                    resultStr += ` ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); 
-                }
-            });
-        });
+        // Group tasks by status
+        const resultObj = todo.todoList
+                            .filter(({tag}) => tag === targetTag)
+                            .reduce(
+                                (resultObj, task) => {
+                                    resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
+                                    return resultObj
+                                }, 
+                                {}
+                            );
+        
+        // Convert resultObj into printable String
+        const resultStr = Object.keys(resultObj).reduce((statusInStr, status) => {
+                statusInStr += `${(statusInStr) ? `\n\n` : ''}[ ${status} , 총 ${resultObj[status].length} 개 ]`;
+                statusInStr += resultObj[status].reduce( (tasksInStr, task) => {
+                        tasksInStr += `\n- ${task.id}번, ${task.name}`;
+                        tasksInStr += ( (task.status === 'done') ? ` ${this.applyPrintableTimeFormat(task.endTime - task.startTime)}` : `` );
+                        return tasksInStr
+                    },
+                    ``
+                );
+                return statusInStr
+            },
+            ``
+        );
 
         console.log(resultStr);
-        return
     },
     showAllTasksWithTag() {
         let resultStr = '';
