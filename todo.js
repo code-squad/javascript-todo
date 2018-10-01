@@ -45,19 +45,25 @@ const todo = {
     },
     printUpdateResult(actionType, {taskId, taskName, prevStatus, nextStatus}) {
         const countOfTasksPerStatus = `현재상태 : todo: ${this.countOfStatus.todo}개, doing: ${this.countOfStatus.doing}개, done: ${this.countOfStatus.done}개`;
+        const printAction = {
+            add() {
+                console.log(`id: ${taskId} "${taskName}" 항목이 새로 추가됐습니다.\n${countOfTasksPerStatus}`);
+            },
+            update() {
+                console.log(`id: ${taskId} "${taskName}" 항목이 ${prevStatus} => ${nextStatus} 상태로 업데이트 됐습니다.\n${countOfTasksPerStatus}`);
+            },
+            remove() {
+                console.log(`id: ${taskId}, "${taskName}" 항목 삭제 완료`);
+            }
+        };
+        
+        printAction[actionType]();
+    },
+    undo() {
 
-        if (actionType === 'add') {
-            console.log(`id: ${taskId} "${taskName}" 항목이 새로 추가됐습니다.\n${countOfTasksPerStatus}`);    
-            return
-        } 
-        if (actionType === 'update') {
-            console.log(`id: ${taskId} "${taskName}" 항목이 ${prevStatus} => ${nextStatus} 상태로 업데이트 됐습니다.\n${countOfTasksPerStatus}`);
-            return
-        } 
-        if (actionType === 'remove') {
-            console.log(`id: ${taskId}, "${taskName}" 항목 삭제 완료`);
-            return
-        }
+    },
+    redo() {
+        
     }
 };
 
@@ -265,7 +271,31 @@ const todoErrorCheck = {
     }
 };
 
-const todoUndo = {};
+const todoUndo = {
+    history: [], // [ {actionType: add, argument: {name: "자바스크립트 공부하기", tag:"programming"} } ]
+    undoHistory: [],
+    addToHistory(actionType, argument, result) {
+        
+    },
+    addToUndoHistory() {
+
+    }
+    //on todo object call, log action data on history Arr. 
+        // if history.length =3, shift 1 & push new one
+    //on todo.undo call, do proper action to negate previous action (i.e. do remove to undo add call)
+        //and move argument object from history to undo History
+    //on todo.redo call, execute function using undoHistory arr
+    // If user do something while something still there in undoHistory, clear them all
+};
+
+// ========== [To do] =============
+// Improve todo methods considering future undo
+// [ ] Create todoUndo object
+//      // undo(add) => todoList.length--; & countofstatus['todo']--;
+//      // undo(update) => targetTask.status = prevStatus & countOfStatus[newStatus]--; & countOfStatus[prevStatus]++;
+//      // undo(remove) => this.todoList[id-1] = ${removedTask}
+// [ ] update methods under todo object to liase with todoUndo
+// =================================
 
 //Test Cases
 todo.todoList.push(
@@ -290,3 +320,27 @@ todo.updateTask({id: 23, nextStatus: 'doing'});
 
 todo.removeTask({id: 23});
 //[error] 23 번 항목이 존재하지 않아 삭제하지 못했습니다.
+
+// ==== undo & redo Test cases
+
+// Add 
+todo.add({name: "알고리즘 스터디", tag:"Study"});
+
+todo.undo();
+
+todo.redo();
+
+// Update
+todo.update({id:1,  nextstatus:"doNe"});
+//id: 1,  "자바스크립트 공부하기" 항목이 todo => done 상태로 업데이트 됐습니다.
+
+todo.undo();
+
+todo.redo();
+
+// Remove
+todo.remove({id:3});
+
+todo.undo();
+
+todo.redo();
