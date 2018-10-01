@@ -24,8 +24,8 @@ const todo = {
 
         const {name: targetTaskName, status: currentStatus} = targetTask;
         
-        if (nextStatus === 'doing') targetTask.startTime = Date.now();
-        if (nextStatus === 'done') targetTask.endTime = Date.now();
+        if (newStatus === 'doing') targetTask.startTime = Date.now();
+        if (newStatus === 'done') targetTask.endTime = Date.now();
 
         targetTask.status = newStatus;
         this.countOfStatus[currentStatus]--;
@@ -287,9 +287,11 @@ const todoUndoRedo = {
             console.log(`${targetTask.id}번, ${targetTask.name} 할일이 삭제됐습니다.`);
         },
         update(targetTask, prevStatus, todoCountObj) {
-            targetTask.status = prevStatus;
-            todoCountObj[nextStatus]--;
+            const currentStatus = targetTask.status;
+            targetTask.status = prevStatus
+            todoCountObj[currentStatus]--;
             todoCountObj[prevStatus]++;
+            console.log(`${targetTask.id}번, ${targetTask.name} 할일이 ${currentStatus} => ${prevStatus} 상태로 돌아갔습니다.`);
         },
         remove() {
             todoList[idx] = removedTask;
@@ -297,8 +299,15 @@ const todoUndoRedo = {
     },
     redo: {
         add() {
-            console.log(`redo Add is here!`)
+            console.log(`redo [Add] is here!`)
+        },
+        update() {
+            console.log(`redo [Update] is here!`)
+        },
+        remove() {
+            console.log(`redo [Remove] is here!`)
         }
+
     }
     //on todo object call, log action data on history Arr. 
         // if history.length =3, shift 1 & push new one
@@ -350,23 +359,25 @@ todo.addTask({name: "알고리즘 스터디", tag:"Study"});
 todoUndoRedo.undo.add(todo.todoList,todo.countOfStatus);
 // "5번, 자바스크립 공부하기가 삭제됐습니다"
 
-todoUndoRedo.redo();
+todoUndoRedo.redo.add();
 
-/* 
+
 
 // Update
-todo.updateTask({id:1,  nextstatus:"doNe"});
+todo.updateTask({id:1,  nextStatus:"doNe"});
 //id: 1,  "자바스크립트 공부하기" 항목이 todo => done 상태로 업데이트 됐습니다.
 
-todoUndoRedo.undo();
+const targetTask = todo.todoList[0];
+todoUndoRedo.undo.update(targetTask, 'todo', todo.countOfStatus);
+//"4번항목이 done => todo 상태로 변경됐습니다"
 
-todoUndoRedo.redo();
-
+todoUndoRedo.redo.update();
+/* 
 // Remove
 todo.removeTask({id:3});
 
-todoUndoRedo.undo();
+todoUndoRedo.undo.remove();
 
-todoUndoRedo.redo();
+todoUndoRedo.redo.remove();
 
 */
