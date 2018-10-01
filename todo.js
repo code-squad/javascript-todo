@@ -122,16 +122,17 @@ const todoPrint = {
     },
     showAllTasksWithTag() {
         let resultStr = '';
-        const resultObj = {};
             
         //Group tasks by tags
-        todo.todoList.forEach((task) => {
-            if (!task.tag) return
-            if (!resultObj[task.tag]) {
-                resultObj[task.tag] = [];
-            }
-            resultObj[task.tag].push(task);
-        });
+        const resultObj = todo.todoList
+                            .filter(({tag}) => !!tag)
+                            .reduce(
+                                (resultObj, task) => {
+                                    resultObj[task.tag] = [task].concat( (!resultObj[task.tag]) ? [] : resultObj[task.tag] );
+                                    return resultObj
+                                }, 
+                                {}
+                            );
         
         // Add task info into resultStr for tasks in object created above
         Object.keys(resultObj).forEach((tag) => {
@@ -145,17 +146,19 @@ const todoPrint = {
     },
     showTasksByStatus(status) {
         let resultStr = '';
-        const resultObj = {};
         const targetStatus = status.toLowerCase();
 
         // Group tasks by status
-        todo.todoList.forEach((task) => {
-            if (task.status !== targetStatus) return
-            if (!resultObj[task.status]) {
-                resultObj[task.status] = [];
-            }
-            resultObj[task.status].push(task);
-        });
+        const resultObj = todo.todoList
+                            .filter(({status}) => status === targetStatus)
+                            .reduce(
+                                (resultObj, task) => {
+                                    resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
+                                    return resultObj
+                                }, 
+                                {}
+                            );
+        
         // abort method if there are no tasks under requested status
         if(!resultObj[targetStatus]) {
             console.log(`${targetStatus} 상태로 등록된 할일이 없습니다`);
@@ -174,14 +177,21 @@ const todoPrint = {
         return
     },
     showAllTasksByStatus(sequenceArr) {
-        const resultObj = {};
+        // const resultObj = {};
 
-        todo.todoList.forEach((task) => {
-            if (!resultObj[task.status]) {
-                resultObj[task.status] = [];
-            }
-            resultObj[task.status].push(task);
-        });
+        // Group tasks by status
+        const resultObj = todo.todoList.reduce( (resultObj, task) => {
+                                    resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
+                                    return resultObj
+                                }, 
+                                {}
+                            );
+        // todo.todoList.forEach((task) => {
+        //     if (!resultObj[task.status]) {
+        //         resultObj[task.status] = [];
+        //     }
+        //     resultObj[task.status].push(task);
+        // });
     
         //Print initial message 
         console.log(`총 ${todo.todoList.length} 개의 리스트를 가져왔습니다. ${parseInt(sequenceArr[0].timeout/1000)} 초 뒤에 ${sequenceArr[0].status} 내역을 출력합니다.....`);
@@ -233,6 +243,7 @@ const todoPrint = {
         if (minutesSpent) {
             timeSpentStr += (timeSpentStr) ? ` ${minutesSpent} 분`: `${minutesSpent} 분`;
         }
+        if (!timeSpentStr) return `doing 상태 없이 완료된 할일`
 
         return timeSpentStr
     }
@@ -411,7 +422,7 @@ todo.redo();
 //id: 1 "자바스크립트 공부" 항목이 todo => done 상태로 업데이트 됐습니다.
 
 //Undohistory clear test - do something while one more redo-able task exists
-todo.addTask({name: "스타벅스 방문", tag:"Dring"});
+todo.addTask({name: "스타벅스 방문", tag:"Drink"});
 //id: 6 "스타벅스 방문" 항목이 새로 추가됐습니다.
 
 todo.redo();
