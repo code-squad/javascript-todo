@@ -352,22 +352,6 @@ const todoUndoRedo = {
     // If user do something while something still there in undoHistory, clear them all
 };
 
-// ========== [To do] =============
-// Improve todo methods considering future undo
-// [V] Create todoUndo object
-//      // [V] undo(add) => todoList.length--; & countofstatus['todo']--;
-//      // [V] undo(update) => targetTask.status = prevStatus & countOfStatus[newStatus]--; & countOfStatus[prevStatus]++;
-//      // [V] undo(remove) => this.todoList[id-1] = ${removedTask}
-// [V] update methods under todo object to liase with todoUndo history
-//      // [V] Remove
-//      // [V] Add
-//      // [V] Update
-// [V] Update todo.undo method to update undo history in array
-// [V] Create todoRedo object
-// [V] Update todo method to remove undo history when it does fresh action
-// [V] Alert user if they try to undo/redo more than 3 times
-// =================================
-
 //Test Cases
 todo.addTask({name: '자바스크립트 공부', tag: 'programming'});
 todo.addTask({name: 'iOS 공부', tag: 'programming'});
