@@ -38,6 +38,7 @@ const todo = {
         if(isAnyErrors) return false
 
         const {name, status} = this.todoList[id-1];
+        todoUndoRedo.history.push(['remove', this.todoList[id-1]]);
         delete this.todoList[id-1];
         this.countOfStatus[status]--;
 
@@ -282,7 +283,7 @@ const todoUndoRedo = {
     },
     undo: {
         add(todoList, todoCountObj) {
-            const targetTask = todoList.pop(-1);
+            const targetTask = todoList.pop();
             todoCountObj[targetTask.status]--;
             console.log(`${targetTask.id}번, ${targetTask.name} 할일이 삭제됐습니다.`);
         },
@@ -296,8 +297,9 @@ const todoUndoRedo = {
             if(currentStatus === 'done') {delete targetTask.endTime}
             console.log(`${targetTask.id}번, ${targetTask.name} 할일이 ${currentStatus} => ${prevStatus} 상태로 돌아갔습니다.`);
         },
-        remove() {
-            todoList[idx] = removedTask;
+        remove(targetTask, todoList) {
+            todoList[targetTask.id-1] = targetTask;
+            console.log(`${targetTask.id}번, ${targetTask.name} 할일이 삭제 => ${targetTask.status} 상태로 돌아갔습니다.`);
         }
     },
     redo: {
@@ -384,12 +386,11 @@ todoUndoRedo.undo.update(targetTask, 'todo', todo.countOfStatus);
 //"4번항목이 done => todo 상태로 변경됐습니다"
 
 todoUndoRedo.redo.update();
-/* 
+
 // Remove
 todo.removeTask({id:3});
 
-todoUndoRedo.undo.remove();
+todoUndoRedo.undo.remove(todoUndoRedo.history[0][1], todo.todoList);
 
 todoUndoRedo.redo.remove();
 
-*/
