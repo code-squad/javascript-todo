@@ -96,28 +96,21 @@ const todoPrint = {
         // Group tasks by status
         const resultObj = todo.todoList
                             .filter(({tag}) => tag === targetTag)
-                            .reduce(
-                                (resultObj, task) => {
-                                    resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
-                                    return resultObj
-                                }, 
-                                {}
-                            );
+                            .reduce((resultObj, task) => {
+                                resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
+                                return resultObj
+                            },{});
         
         // Convert resultObj into printable String
-        const resultStr = Object.keys(resultObj).reduce((statusInStr, status) => {
-                statusInStr += `${(statusInStr) ? `\n\n` : ''}[ ${status} , 총 ${resultObj[status].length} 개 ]`;
-                statusInStr += resultObj[status].reduce( (tasksInStr, task) => {
-                        tasksInStr += `\n- ${task.id}번, ${task.name}`;
-                        tasksInStr += ( (task.status === 'done') ? ` ${this.applyPrintableTimeFormat(task.endTime - task.startTime)}` : `` );
-                        return tasksInStr
-                    },
-                    ``
-                );
-                return statusInStr
-            },
-            ``
-        );
+        const resultStr = Object.keys(resultObj).reduce( (statusInStr, status) => {
+            statusInStr += `${(statusInStr) ? `\n\n` : ''}[ ${status} , 총 ${resultObj[status].length} 개 ]`;
+            statusInStr += resultObj[status].reduce( (tasksInStr, task) => {
+                tasksInStr += `\n- ${task.id}번, ${task.name}`;
+                tasksInStr += ( (task.status === 'done') ? ` ${this.applyPrintableTimeFormat(task.endTime - task.startTime)}` : `` );
+                return tasksInStr
+            },``);
+            return statusInStr
+        },``);
 
         console.log(resultStr);
     },
@@ -127,13 +120,10 @@ const todoPrint = {
         //Group tasks by tags
         const resultObj = todo.todoList
                             .filter(({tag}) => !!tag)
-                            .reduce(
-                                (resultObj, task) => {
-                                    resultObj[task.tag] = [task].concat( (!resultObj[task.tag]) ? [] : resultObj[task.tag] );
-                                    return resultObj
-                                }, 
-                                {}
-                            );
+                            .reduce( (resultObj, task) => {
+                                resultObj[task.tag] = [task].concat( (!resultObj[task.tag]) ? [] : resultObj[task.tag] );
+                                return resultObj
+                            }, {});
         
         // Add task info into resultStr for tasks in object created above
         Object.keys(resultObj).forEach((tag) => {
@@ -152,13 +142,10 @@ const todoPrint = {
         // Group tasks by status
         const resultObj = todo.todoList
                             .filter(({status}) => status === targetStatus)
-                            .reduce(
-                                (resultObj, task) => {
-                                    resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
-                                    return resultObj
-                                }, 
-                                {}
-                            );
+                            .reduce( (resultObj, task) => {
+                                resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
+                                return resultObj
+                            }, {});
         
         // abort method if there are no tasks under requested status
         if(!resultObj[targetStatus]) {
@@ -182,9 +169,7 @@ const todoPrint = {
         const resultObj = todo.todoList.reduce( (resultObj, task) => {
                                     resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
                                     return resultObj
-                                }, 
-                                {}
-                            );
+                                }, {});
     
         //Print initial message 
         console.log(`총 ${todo.todoList.length} 개의 리스트를 가져왔습니다. ${parseInt(sequenceArr[0].timeout/1000)} 초 뒤에 ${sequenceArr[0].status} 내역을 출력합니다.....`);
