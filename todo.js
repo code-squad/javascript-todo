@@ -70,7 +70,6 @@ const todo = {
         task = removedTask
         console.log(`ID : ${extractedTask[0].id}, ${extractedTask[0].name} 삭제 완료`)
     },//할일 제거 함수
-        
 
     printTask: function () {
         console.log(`입력된 할 일들`)
@@ -80,7 +79,13 @@ const todo = {
     },//현재 해야할 일들과 상태를 출력해주는 함수
 
     printTagRelate: function (tag) {
-
+        console.log(`현재 ${tag} 태그를 가진 할 일들은 다음과 같습니다.`);
+        const tagSeparatedTask = task.filter(obj => {
+            return obj.tag === tag
+        })
+        tagSeparatedTask.forEach(obj => {
+            console.log(`ID : ${obj.id}, 이름 : ${obj.name}, 상태 : ${obj.status}`)
+        })
     }//tag가 같은 할 일들 출력
 }//해야 할일 객체
 
