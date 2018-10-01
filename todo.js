@@ -66,13 +66,20 @@ const todo = {
         printAction[actionType]();
     },
     undo() {
-        debugger;
+        if(!todoUndoRedo.history[0]) {
+            console.log(`undo는 최대 3번까지만 할 수 있습니다!`);
+            return false
+        } 
         const lastAction = todoUndoRedo.history.pop();
         todoUndoRedo.undo[lastAction.type](...lastAction.data);
 
         todoUndoRedo.updateUndoHistory(lastAction);
     },
     redo() {
+        if(!todoUndoRedo.undoHistory[0]) {
+            console.log(`모든 undo를 취소했습니다.`);
+            return false
+        }
         const lastUndo = todoUndoRedo.undoHistory.pop();
         todoUndoRedo.redo[lastUndo.type](lastUndo.args);
     }
@@ -352,10 +359,10 @@ const todoUndoRedo = {
 //      // [V] Remove
 //      // [V] Add
 //      // [V] Update
-// [ ] Update todo.undo method to update undo history in array
+// [V] Update todo.undo method to update undo history in array
 // [ ] Create todoRedo object
 // [ ] Update todo method to remove undo history when it does fresh action
-// [ ] Alert user if they try to undo more than 3 times
+// [ ] Alert user if they try to undo/redo more than 3 times
 // =================================
 
 //Test Cases
