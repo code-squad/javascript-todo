@@ -12,19 +12,19 @@ const todo = {
         })
         return num;
     },
-    getStatusNum: function () {
-        let todo, doing, done = 0
-        task.forEach(obj => {
-            if (obj.status === 'todo') {
-                todo = todo + 1
-            } else if (obj.status === 'doing') {
-                doing = doing + 1
-            } else if (obj.status === 'done') {
-                done = done + 1
-            }
+    getStatusNum: function (accumulatedTask) {
+        const statusNum = {
+            todo:0,
+            doing:0,
+            done:0
+        }
+        accumulatedTask.forEach(obj => {
+            obj['status'] === 'todo' ? statusNum.todo++ :
+            obj['status'] === 'doing' ? statusNum.doing++ :
+            obj['status'] === 'done' ? statusNum.done++ :
+            console.log('에러메세지 : 현재상태가 존재하지 않습니다.')
         })
-        const status = [todo, doing, done]
-        return status
+        return statusNum
     },
     add: function (obj) {
         const newTodo = {
@@ -34,9 +34,9 @@ const todo = {
             tag: obj.tag
         }
         task.push(newTodo)
-        const statusNumArrays = this.getStatusNum()
+        const statusNum = todo.getStatusNum(task)
         console.log(`id : ${newTodo.id}, '${newTodo.name}' 항목이 새로 추가되었습니다.
-    현재상태 : todo : ${statusNumArrays[0]}, doing: ${statusNumArrays[1]}, done : ${statusNumArrays[2]}`)
+현재상태 todo : ${statusNum.todo}, doing: ${statusNum.doing}, done : ${statusNum.done}`)
     },//해야할일 추가 함수
     update: function (obj) {
 
@@ -56,5 +56,5 @@ const todo = {
 
 }//해야 할일 객체
 
-console.log(todo.add({name:'자바스크립트', tag:'programming'}));
-console.log(task)
+todo.add({name:'자바스크립트', tag:'programming'});
+todo.add({name:'이름', tag:'getName'});
