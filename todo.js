@@ -15,7 +15,7 @@ const todo = {
         this.countOfStatus.todo++;
 
         todoUndoRedo.updateActionHistory('add', [...arguments], [this.todoList, this.countOfStatus]);
-        if(!isRedo)todoUndoRedo.clearUndoHistory();
+        if(!isRedo) todoUndoRedo.clearUndoHistory();
 
         this.printUpdateResult('add', {taskId: taskId, taskName: newTaskName});
     },
@@ -35,22 +35,23 @@ const todo = {
         this.countOfStatus[newStatus]++;
 
         todoUndoRedo.updateActionHistory('update', [...arguments], [this.todoList[id-1], currentStatus, this.countOfStatus]);
-        if(!isRedo)todoUndoRedo.clearUndoHistory();
+        if(!isRedo) todoUndoRedo.clearUndoHistory();
 
         this.printUpdateResult('update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
     },
     removeTask({id}, isRedo = false) {
+        const targetTask = Object.assign({}, this.todoList[id-1] || {});
+
         const isAnyErrors = todoErrorCheck.onTaskRemove(this.todoList, id);
         if(isAnyErrors) return false
 
-        const {name, status} = this.todoList[id-1];
-        todoUndoRedo.updateActionHistory('remove', [...arguments], [this.todoList[id-1], this.todoList]);
-        if(!isRedo)todoUndoRedo.clearUndoHistory();
-
         delete this.todoList[id-1];
-        this.countOfStatus[status]--;
+        this.countOfStatus[targetTask.status]--;
 
-        this.printUpdateResult('remove', {taskId: id, taskName: name});
+        todoUndoRedo.updateActionHistory('remove', [...arguments], [targetTask, this.todoList]);
+        if(!isRedo) todoUndoRedo.clearUndoHistory();
+
+        this.printUpdateResult('remove', {taskId: id, taskName: targetTask.name});
     },
     printUpdateResult(actionType, {taskId, taskName, prevStatus, nextStatus}) {
         const countOfTasksPerStatus = `현재상태 : todo: ${this.countOfStatus.todo}개, doing: ${this.countOfStatus.doing}개, done: ${this.countOfStatus.done}개`;
@@ -314,7 +315,8 @@ const todoUndoRedo = {
             targetTask.status = prevStatus
             todoCountObj[currentStatus]--;
             todoCountObj[prevStatus]++;
-            //Remove start/endTime
+            
+            //Remove start/endTime if they were added during the update
             if(currentStatus === 'doing') {delete targetTask.startTime}
             if(currentStatus === 'done') {delete targetTask.endTime}
 
