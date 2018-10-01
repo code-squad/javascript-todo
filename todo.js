@@ -1,7 +1,7 @@
 let task = []//데이터를 축적시키는 배열
 const todo = {
     getRanNum: function () {
-        ranNum = Math.floor(Math.random() * 100);
+        ranNum = Math.floor(Math.random() * 10);
         return this.checkOverlap(ranNum)
     },
     checkOverlap: function (num) {
@@ -9,8 +9,8 @@ const todo = {
             if (obj['id'] === num) {
                 return this.getRanNum();
             }
-            return num;
         })
+        return num;
     },
     getStatusNum: function () {
         let todo, doing, done = 0
@@ -56,4 +56,5 @@ const todo = {
 
 }//해야 할일 객체
 
-console.log(todo.add({name:'자바스크립트 공부하기', tag:'프로그래밍'}));
+console.log(todo.add({name:'자바스크립트', tag:'programming'}));
+console.log(task)
