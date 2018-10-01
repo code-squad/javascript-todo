@@ -14,7 +14,7 @@ const todo = {
         this.todoList.push(taskToAdd);
         this.countOfStatus.todo++;
 
-        todoUndoRedo.updateActionHistory('add');
+        todoUndoRedo.updateActionHistory('add', [...arguments]);
 
         this.printUpdateResult('add', {taskId: taskId, taskName: newTaskName});
     },
@@ -33,7 +33,7 @@ const todo = {
         this.countOfStatus[currentStatus]--;
         this.countOfStatus[newStatus]++;
 
-        todoUndoRedo.updateActionHistory('update', [this.todoList[id-1], currentStatus]);
+        todoUndoRedo.updateActionHistory('update', [...arguments], [this.todoList[id-1], currentStatus]);
 
         this.printUpdateResult('update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
     },
@@ -42,7 +42,7 @@ const todo = {
         if(isAnyErrors) return false
 
         const {name, status} = this.todoList[id-1];
-        todoUndoRedo.updateActionHistory('remove', [this.todoList[id-1]]);
+        todoUndoRedo.updateActionHistory('remove', [...arguments], [this.todoList[id-1]]);
 
         delete this.todoList[id-1];
         this.countOfStatus[status]--;
@@ -66,10 +66,12 @@ const todo = {
         printAction[actionType]();
     },
     undo() {
-
+        const lastAction = todoUndoRedo.history.pop();
+        todoUndoRedo.undo[lastAction.type]();
     },
     redo() {
-        
+        const lastUndo = todoUndoRedo.undoHistory.pop();
+        todoUndoRedo.redo[lastUndo.type]();
     }
 };
 
@@ -281,15 +283,13 @@ const todoErrorCheck = {
 };
 
 const todoUndoRedo = {
-    history: [], // [ {actionType: add, argument: {name: "자바스크립트 공부하기", tag:"programming"} } ]
+    history: [],
     undoHistory: [],
-    addToHistory(actionType, argument, result) {
-        
-    },
     undo: {
         add(todoList, todoCountObj) {
             const targetTask = todoList.pop();
             todoCountObj[targetTask.status]--;
+            
             console.log(`${targetTask.id}번, ${targetTask.name} 할일이 삭제됐습니다.`);
         },
         update(targetTask, prevStatus, todoCountObj) {
@@ -318,9 +318,13 @@ const todoUndoRedo = {
             console.log(`redo [Remove] is here!`)
         }
     },
-    updateActionHistory(actionType, actionData) {
+    updateActionHistory(actionType, args, actionData) {
         if(this.history.length >= 3) this.history.shift();
-        this.history.push({type: actionType, data:actionData});
+        this.history.push({type: actionType, arguments: args, data:actionData});
+    },
+    updateUndoHistory(actionType, actionData) {
+        if(this.undoHistory.length >= 3) this.undoHistory.shift();
+        this.undoHistory.push({type: actionType, data:actionData});
     }
     //on todo object call, log action data on history Arr. 
         // if history.length =3, shift 1 & push new one
@@ -340,8 +344,8 @@ const todoUndoRedo = {
 //      // [V] Remove
 //      // [V] Add
 //      // [V] Update
-// [ ] Update todoUndo object to update undo history in array
 // [ ] Create todoRedo object
+// [ ] Update todoUndo object to update undo history in array
 // [ ] Update todo method to remove undo history when it does fresh action
 // =================================
 
@@ -383,12 +387,12 @@ todo.removeTask({id: 23});
 // Add 
 todo.addTask({name: "알고리즘 스터디", tag:"Study"});
 
-todoUndoRedo.undo.add(todo.todoList,todo.countOfStatus);
+todoUndoRedo.undo.add(todo.todoList, todo.countOfStatus);
 // "5번, 자바스크립 공부하기가 삭제됐습니다"
 
 todoUndoRedo.redo.add();
 
-
+/*
 
 // Update
 todo.updateTask({id:1,  nextStatus:"doNe"});
@@ -409,3 +413,4 @@ todoUndoRedo.undo.remove(todoUndoRedo.history[2]['data'][0], todo.todoList);
 
 todoUndoRedo.redo.remove();
 
+*/
