@@ -65,15 +65,18 @@ const todo = {
     },//상태 업데이트 함수
 
     remove: function (objToRemove) {
-        task.forEach(obj => {
-            if(obj.id === objToRemove.id) {
-                
-            }
-        })
+        let extractedTask = task.filter(taskObj => taskObj.id === objToRemove.id)
+        let removedTask = task.filter(taskObj => taskObj.id !== objToRemove.id)
+        task = removedTask
+        console.log(`ID : ${extractedTask[0].id}, ${extractedTask[0].name} 삭제 완료`)
     },//할일 제거 함수
+        
 
     printTask: function () {
-
+        console.log(`입력된 할 일들`)
+        task.forEach(obj => {
+            console.log(`ID : ${obj.id}, 이름 : ${obj.name}, 상태 : ${obj.status}, 태그 : ${obj.tag}`)
+        })
     },//현재 해야할 일들과 상태를 출력해주는 함수
 
     showTags: function () {
