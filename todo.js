@@ -79,10 +79,6 @@ const todo = {
         })
     },//현재 해야할 일들과 상태를 출력해주는 함수
 
-    showTags: function () {
-
-    },//태그들의 이름을 출력해주는 함수
-
     printTagRelate: function (tag) {
 
     }//tag가 같은 할 일들 출력
