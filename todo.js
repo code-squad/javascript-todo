@@ -177,8 +177,6 @@ const todoPrint = {
         return
     },
     showAllTasksByStatus(sequenceArr) {
-        // const resultObj = {};
-
         // Group tasks by status
         const resultObj = todo.todoList.reduce( (resultObj, task) => {
                                     resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
@@ -186,16 +184,11 @@ const todoPrint = {
                                 }, 
                                 {}
                             );
-        // todo.todoList.forEach((task) => {
-        //     if (!resultObj[task.status]) {
-        //         resultObj[task.status] = [];
-        //     }
-        //     resultObj[task.status].push(task);
-        // });
     
         //Print initial message 
         console.log(`총 ${todo.todoList.length} 개의 리스트를 가져왔습니다. ${parseInt(sequenceArr[0].timeout/1000)} 초 뒤에 ${sequenceArr[0].status} 내역을 출력합니다.....`);
 
+        //Print tasks in each status async
         this.printTasksAsync(resultObj, sequenceArr);
     },
     printTasksAsync(groupedTaskObj, sequenceArr, sequenceIdx = 0) {
