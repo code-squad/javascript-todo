@@ -14,6 +14,8 @@ const todo = {
         this.todoList.push(taskToAdd);
         this.countOfStatus.todo++;
 
+        todoUndoRedo.updateActionHistory('add');
+
         this.printUpdateResult('add', {taskId: taskId, taskName: newTaskName});
     },
     updateTask({id, nextStatus}) {
@@ -31,6 +33,8 @@ const todo = {
         this.countOfStatus[currentStatus]--;
         this.countOfStatus[newStatus]++;
 
+        todoUndoRedo.updateActionHistory('update', [this.todoList[id-1], currentStatus]);
+
         this.printUpdateResult('update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
     },
     removeTask({id}) {
@@ -38,7 +42,8 @@ const todo = {
         if(isAnyErrors) return false
 
         const {name, status} = this.todoList[id-1];
-        todoUndoRedo.history.push(['remove', this.todoList[id-1]]);
+        todoUndoRedo.updateActionHistory('remove', [this.todoList[id-1]]);
+
         delete this.todoList[id-1];
         this.countOfStatus[status]--;
 
@@ -312,7 +317,10 @@ const todoUndoRedo = {
         remove() {
             console.log(`redo [Remove] is here!`)
         }
-
+    },
+    updateActionHistory(actionType, actionData) {
+        if(this.history.length >= 3) this.history.shift();
+        this.history.push({type: actionType, data:actionData});
     }
     //on todo object call, log action data on history Arr. 
         // if history.length =3, shift 1 & push new one
@@ -324,12 +332,17 @@ const todoUndoRedo = {
 
 // ========== [To do] =============
 // Improve todo methods considering future undo
-// [ ] Create todoUndo object
+// [V] Create todoUndo object
 //      // [V] undo(add) => todoList.length--; & countofstatus['todo']--;
 //      // [V] undo(update) => targetTask.status = prevStatus & countOfStatus[newStatus]--; & countOfStatus[prevStatus]++;
-//      // [ ] undo(remove) => this.todoList[id-1] = ${removedTask}
+//      // [V] undo(remove) => this.todoList[id-1] = ${removedTask}
+// [V] update methods under todo object to liase with todoUndo history
+//      // [V] Remove
+//      // [V] Add
+//      // [V] Update
+// [ ] Update todoUndo object to update undo history in array
 // [ ] Create todoRedo object
-// [ ] update methods under todo object to liase with todoUndo
+// [ ] Update todo method to remove undo history when it does fresh action
 // =================================
 
 //Test Cases
@@ -383,14 +396,16 @@ todo.updateTask({id:1,  nextStatus:"doNe"});
 
 const targetTask = todo.todoList[0];
 todoUndoRedo.undo.update(targetTask, 'todo', todo.countOfStatus);
-//"4번항목이 done => todo 상태로 변경됐습니다"
+//1번, 자바스크립트 공부 할일이 done => todo 상태로 돌아갔습니다.
 
 todoUndoRedo.redo.update();
 
 // Remove
 todo.removeTask({id:3});
+//id: 3, "Closure 공부" 항목 삭제 완료
 
-todoUndoRedo.undo.remove(todoUndoRedo.history[0][1], todo.todoList);
+todoUndoRedo.undo.remove(todoUndoRedo.history[2]['data'][0], todo.todoList);
+//3번, Closure 공부 할일이 삭제 => done 상태로 돌아갔습니다.
 
 todoUndoRedo.redo.remove();
 
