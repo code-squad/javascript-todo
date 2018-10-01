@@ -334,15 +334,9 @@ const todoUndoRedo = {
     clearUndoHistory() {
         this.undoHistory.length = 0;
     }
-
-    //on todo object call, log action data on history Arr. 
-        // if history.length =3, shift 1 & push new one
-    //on todo.undo call, do proper action to negate previous action (i.e. do remove to undo add call)
-        //and move argument object from history to undo History
-    //on todo.redo call, execute function using undoHistory arr
-    // If user do something while something still there in undoHistory, clear them all
 };
 
+/*
 //Test Cases
 todo.addTask({name: '자바스크립트 공부', tag: 'programming'});
 todo.addTask({name: 'iOS 공부', tag: 'programming'});
@@ -360,7 +354,7 @@ todo.todoList[2].endTime = 1537926397371;
 //     {id: 4, name: '여행가기', status: 'doing', startTime: 1537838429530, tag: 'play'}
 // );
 
-
+console.log(`\n====입력 오류 검증 살펴보기====\n`);
 todo.addTask({name: '자바스크립트 공부', tag: 'Hobby'});
 //[error] todo 목록에 이미 같은 이름의 할 일이 존재합니다.
 
@@ -376,7 +370,9 @@ todo.updateTask({id: 23, nextStatus: 'doing'});
 todo.removeTask({id: 23});
 //[error] 23 번 항목이 존재하지 않아 삭제하지 못했습니다.
 
+
 // ==== undo & redo Test cases
+console.log(`\n====되돌리기 / 다시 실행하기 살펴보기====\n`);
 todo.addTask({name: "알고리즘 스터디", tag:"Study"});
 //id: 5 "알고리즘 스터디" 항목이 새로 추가됐습니다.
 
@@ -386,6 +382,7 @@ todo.updateTask({id:1,  nextStatus:"doNe"});
 todo.removeTask({id:3});
 //id: 3, "Closure 공부" 항목 삭제 완료
 
+console.log(`\n==== undo * 3 ====\n`);
 todo.undo();
 //3번, Closure 공부 할일이 삭제 => done 상태로 돌아갔습니다.
 
@@ -395,6 +392,7 @@ todo.undo();
 todo.undo();
 //5번, 알고리즘 스터디 할일이 삭제됐습니다.
 
+console.log(`\n==== redo * 2 >> 새 데이터 추가 >> redo * 1 (에러) ====\n`);
 todo.redo();
 //id: 5 "알고리즘 스터디" 항목이 새로 추가됐습니다.
 
@@ -407,3 +405,5 @@ todo.addTask({name: "스타벅스 방문", tag:"Drink"});
 
 todo.redo();
 // 모든 undo를 취소했습니다.
+
+*/
