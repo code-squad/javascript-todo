@@ -100,45 +100,22 @@ const todoPrint = {
         });
         
         // process above Array into formatted string
-        const resultStr = formattedArr.reduce( (workingStr, arrItem) => {
-            const process = {
-                string() {
-                    workingStr += `${(workingStr) ? `\n\n` : ''}[ ${arrItem}`;
-                },
-                number() {
-                    workingStr += ` , 총 ${arrItem} 개 ]`;
-                },
-                object() {
-                    workingStr += `\n- ${arrItem.id}번, ${arrItem.name}`;
-                    workingStr += ( (arrItem.status === 'done') ? ` ${this.applyPrintableTimeFormat(arrItem.endTime - arrItem.startTime)}` : `` );
-                }
-            };
-            
-            process[typeof arrItem].bind(this)();
-            
-            return workingStr
-        }, ``);
+        const resultStr = this.convertToFormattedStr(formattedArr, 'byTag');
 
         console.log(resultStr);
     },
     showAllTasksWithTag(todoList) {
-        let resultStr = '';
-            
         //Group tasks by tags
         const filter = ({tag}) => !!tag;
         const groupedTasksObj = this.groupTasks(todoList, filter, 'tag');
         
         // Add task info into resultStr for tasks in object created above
-        Object.keys(groupedTasksObj).forEach((tag) => {
-            resultStr += `${(resultStr) ? `\n\n` : ''}[ ${tag} , 총 ${groupedTasksObj[tag].length} 개 ]`;
-            groupedTasksObj[tag].forEach((task) => {
-                resultStr += `\n- ${task.id}번, ${task.name}, [${task.status}]`
-            });
-        });
+        const resultStr = this.convertToFormattedStr(groupedTasksObj, 'allTag');
+        
         console.log(resultStr);
     },
     showTasksByStatus(status, todoList) {
-        let resultStr = '';
+        // let resultStr = '';
         const targetStatus = status.toLowerCase();
 
         // Group tasks by status
@@ -152,12 +129,7 @@ const todoPrint = {
         }
 
          // Add task info into resultStr for tasks in object created above
-         groupedTasksObj[targetStatus].forEach((task) => {
-            resultStr += `${(resultStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`
-            if(targetStatus === 'done') {
-                resultStr += `, ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); 
-            } 
-        });
+         const resultStr = this.convertToFormattedStr([groupedTasksObj, targetStatus], 'byStatus');
 
         console.log(resultStr);
         return
@@ -244,6 +216,51 @@ const todoPrint = {
                         resultObj[task[groupingType]] = [task].concat( (!resultObj[task[groupingType]]) ? [] : resultObj[task[groupingType]] );
                         return resultObj
                     },{});
+    },
+    convertToFormattedStr(iterable, printType) {
+        if (printType === 'byTag') {
+            return iterable.reduce( (workingStr, arrItem) => {
+                const process = {
+                    string() {
+                        workingStr += `${(workingStr) ? `\n\n` : ''}[ ${arrItem}`;
+                    },
+                    number() {
+                        workingStr += ` , 총 ${arrItem} 개 ]`;
+                    },
+                    object() {
+                        workingStr += `\n- ${arrItem.id}번, ${arrItem.name}`;
+                        workingStr += ( (arrItem.status === 'done') ? ` ${this.applyPrintableTimeFormat(arrItem.endTime - arrItem.startTime)}` : `` );
+                    }
+                };
+                
+                process[typeof arrItem].bind(this)();
+                
+                return workingStr
+            }, ``)
+        }
+        if (printType === 'allTag') {
+            let resultStr = ``;
+            Object.keys(iterable).forEach((tag) => {
+                resultStr += `${(resultStr) ? `\n\n` : ''}[ ${tag} , 총 ${iterable[tag].length} 개 ]`;
+                iterable[tag].forEach((task) => {
+                    resultStr += `\n- ${task.id}번, ${task.name}, [${task.status}]`
+                });
+            });
+
+            return resultStr
+        }
+        if (printType === 'byStatus') {
+            const [groupedTasksObj, targetStatus] = iterable;
+            let resultStr = ``;
+            groupedTasksObj[targetStatus].forEach((task) => {
+                resultStr += `${(resultStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`
+                if(targetStatus === 'done') {
+                    resultStr += `, ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); 
+                } 
+            });
+
+            return resultStr
+        }
     }
 };
 
@@ -444,3 +461,18 @@ todo.addTask({name: "스타벅스 방문", tag:"Drink"});
 todo.redo();
 // 모든 undo를 취소했습니다.
 
+
+// 출력 객체 호출 테스트
+console.log(`======= 출력 객체 호출 test cases`);
+
+console.log(`\nㅇ 특정 태그만 불러오기`);
+todo.showTag('proGraMMing');
+
+console.log(`\nㅇ 모든 태그 불러오기`);
+todo.showTags();
+
+console.log(`\nㅇ 특정 상태만 불러오기`);
+todo.show('DoNe');
+
+console.log(`\nㅇ 모든 할일 불러오기`);
+todo.showAll();
