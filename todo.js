@@ -3,7 +3,7 @@ const todo = {
     idArrays: [],
     getRanNum: function () {
         const ranNum = Math.floor(Math.random() * 5)
-        if(this.idArrays.includes(ranNum)) {
+        if (this.idArrays.includes(ranNum)) {
             return this.getRanNum();
         }
         return ranNum;
@@ -40,8 +40,10 @@ const todo = {
     },//해야할일 추가 함수
 
     update: function (objToUpdate) {
+        let beforeTaskStatus = []
         this.task = this.task.map(taskObj => {
             if (objToUpdate.id === taskObj.id) {
+                beforeTaskStatus.push(taskObj.status)
                 taskObj.status = objToUpdate.nextstatus.toLowerCase();
                 return taskObj
             }
@@ -53,7 +55,7 @@ const todo = {
             }
         })
         let statusNum = this.getStatusNum(this.task)
-        console.log(`ID: ${changedTask[0].id}, ${changedTask[0].name} 항목이 todo => ${changedTask[0].status} 상태로 업데이트 되었습니다.`)
+        console.log(`ID: ${changedTask[0].id}, ${changedTask[0].name} 항목이 ${beforeTaskStatus[0]} => ${changedTask[0].status} 상태로 업데이트 되었습니다.`)
         this.printStatusNum(statusNum)
     },//상태 업데이트 함수
 
