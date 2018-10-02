@@ -67,6 +67,8 @@ const todo = {
 
     remove: function (objToRemove) {
         let extractedTask = saveData.task.filter(taskObj => taskObj.id === objToRemove.id)
+        let deletedArrays = saveData.idArrays.filter(value => objToRemove.id !== value)
+        saveData.idArrays = deletedArrays
         let removedTask = saveData.task.filter(taskObj => taskObj.id !== objToRemove.id)
         saveData.task = removedTask
         console.log(`ID : ${extractedTask[0].id}, ${extractedTask[0].name} 삭제 완료`)
