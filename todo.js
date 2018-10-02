@@ -12,7 +12,7 @@ const todo = {
         const taskToAdd = {id: taskId, name: newTaskName, status: 'todo', tag: newTaskTag};
         
         this.todoList.push(taskToAdd);
-        this.countOfStatus.todo++;
+        this.updateStatusCount(['todo', +1]);
 
         todoUndoRedo.updateActionHistory('add', [...arguments], [this.todoList, this.countOfStatus]);
         if(!bRedo) todoUndoRedo.clearUndoHistory();
@@ -25,14 +25,11 @@ const todo = {
         const bNoErrors = todoErrorCheck.onTaskUpdate(this.todoList, id, targetTask, newStatus);
         if(!bNoErrors) return false
 
-        if (newStatus === 'doing') targetTask.startTime = Date.now();
-        if (newStatus === 'done') targetTask.endTime = Date.now();
-
+        this.addTimestamp(targetTask, newStatus);
         const {name: targetTaskName, status: currentStatus} = targetTask;
 
         targetTask.status = newStatus;
-        this.countOfStatus[currentStatus]--;
-        this.countOfStatus[newStatus]++;
+        this.updateStatusCount([currentStatus, -1], [newStatus, +1]);
 
         todoUndoRedo.updateActionHistory('update', [...arguments], [this.todoList[id-1], currentStatus, this.countOfStatus]);
         if(!bRedo) todoUndoRedo.clearUndoHistory();
@@ -46,7 +43,7 @@ const todo = {
         if(!bNoErrors) return false
 
         delete this.todoList[id-1];
-        this.countOfStatus[targetTask.status]--;
+        this.updateStatusCount([targetTask.status, -1]);
 
         todoUndoRedo.updateActionHistory('remove', [...arguments], [targetTask, this.todoList]);
         if(!bRedo) todoUndoRedo.clearUndoHistory();
@@ -68,6 +65,15 @@ const todo = {
         };
         
         printAction[actionType]();
+    },
+    updateStatusCount(...args) { //[targetStatus, increment]
+        args.forEach( ([targetStatus, increment]) => {
+            this.countOfStatus[targetStatus] += increment;    
+        } );
+    },
+    addTimestamp(targetTask, newStatus) {
+        if (newStatus === 'doing') targetTask.startTime = Date.now();
+        if (newStatus === 'done') targetTask.endTime = Date.now();
     },
     undo() {
         if(!todoUndoRedo.history[0]) {
@@ -277,10 +283,10 @@ const todoErrorCheck = {
         
         return targetTodoList.filter(tasksInTodoStatus).some(hasTheNameAlready)
     },
-    checkIfIdExists(targetTodoList, taskId) {
-        const bTaskExists = targetTodoList.some( ({id}) => id === taskId );
+    checkIfIdExists(targetTodoList, taskIdToEdit) {
+        const bTaskExists = targetTodoList.some( ({id}) => id === taskIdToEdit );
 
-        return (bTaskExists) ? true : false
+        return bTaskExists
     }
 };
 
