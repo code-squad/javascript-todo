@@ -7,7 +7,7 @@ class Todo {
         task.id = Date.now().toString(36);
         task.status = 'todo';
         this.list.push(task);
-        this.printCommandResult('add', task);
+        PrintTodo.prototype.commandResult.call(this, 'add', task);
     }  
 
     update({id, nextstatus}){
@@ -16,36 +16,70 @@ class Todo {
         const nextStatus = nextstatus.toLowerCase();
         const isDoingDone = (prevStatus === 'doing' && nextStatus === 'done');    
 
-        if(nextStatus === 'doing' || isDoingDone){
-            targetTask.timeInfo = new Date(Date.now());
-        } else {
-            delete targetTask.timeInfo;
+        if(nextStatus === 'doing') targetTask.startTime = new Date(Date.now());
+        else if(isDoingDone) targetTask.spentTime = Date.now() - targetTask.startTime;
+        else { 
+            delete targetTask.startTime;
+            delete targetTask.spentTime;
         }
 
         targetTask.status = nextStatus;
 
-        this.printCommandResult('update', targetTask, prevStatus);    
+        PrintTodo.prototype.commandResult.call(this, 'update', targetTask, prevStatus);    
     }
 
     remove({id}){
-        let target;
+        const targetIndex = this.list.findIndex(task => task.id === id)
+        const targetTask = this.list[targetIndex];
 
-        this.list.forEach((task, i) => {
-            if(task.id === id) target = {task: task, index: i};
-        });
-
-        this.list.splice(target.index, 1); 
-        this.printCommandResult('remove', target.task);
+        this.list.splice(targetIndex, 1); 
+        PrintTodo.prototype.commandResult.call(this, 'remove', targetTask);
     }
-    
-    printCommandResult(command, task, prevStatus){
+
+    showTag(tag){
+        PrintTodo.prototype.taskByTag.call(this, tag);
+    }
+
+    showTags(){
+        PrintTodo.prototype.allTaskByTag.call(this);
+    }
+
+    show(status){
+        PrintTodo.prototype.taskByStatus.call(this, status);
+    }
+
+    showAll(){
+        PrintTodo.prototype.allTaskByStatus.call(this);
+    }
+
+    getTime(spentTime){
+        const days = parseInt(spentTime/24/60/60/1000);
+        spentTime -= (days * 24 * 60 * 60 * 1000);
+        const hours = parseInt(spentTime/60/60/1000);
+        spentTime -= (hours * 60 * 60 * 1000);
+        const mins = parseInt(spentTime/60/1000);
+        
+        let timeStr = ``
+        
+        if(days) timeStr += `${days}일\n`;
+        if(hours) timeStr += `${hours}시간\n`;
+        if (mins) timeStr += `${mins}분`;
+     
+        return timeStr;
+    }
+}
+
+class PrintTodo{
+    commandResult(command, task, prevStatus){
+        const countTodoStatus = (status) => this.list.filter(task => task.status === status).length;
+
         switch(command){
             case 'add':
-                console.log(`id: ${task.id}, \"${task.name}\" 항목이 새로 추가됐습니다. \n현재상태 : todo: ${this.countTodoStatus('todo')}, doing: ${this.countTodoStatus('doing')}, done: ${this.countTodoStatus('done')}`);
+                console.log(`id: ${task.id}, \"${task.name}\" 항목이 새로 추가됐습니다. \n현재상태 : todo: ${countTodoStatus('todo')}, doing: ${countTodoStatus('doing')}, done: ${countTodoStatus('done')}`);
                 break;
 
             case 'update':
-                console.log(`id: ${task.id}, \"${task.name}\" 항목이 ${prevStatus} => ${task.status} 상태로 업데이트 됐습니다. \n현재상태 : todo: ${this.countTodoStatus('todo')}, doing: ${this.countTodoStatus('doing')}, done: ${this.countTodoStatus('done')}`);
+                console.log(`id: ${task.id}, \"${task.name}\" 항목이 ${prevStatus} => ${task.status} 상태로 업데이트 됐습니다. \n현재상태 : todo: ${countTodoStatus('todo')}, doing: ${countTodoStatus('doing')}, done: ${countTodoStatus('done')}`);
                 break;
 
             case 'remove':
@@ -54,23 +88,6 @@ class Todo {
 
             default:
                 console.log('command를 확인하세요.')
-        }
-    }
-
-    countTodoStatus(status){
-        const countStatus = this.list.filter(task => task.status === status).length;
-        return countStatus;
-    }
-
-    show(status){
-        if(status !== 'done'){
-            this.list.filter(task => task.status === status).forEach(task => {
-                console.log(`- ${task.id}, ${task.name}, [${task.tag}]`)
-            });
-        } else {
-            this.list.filter(task => task.status === status).forEach(task => {
-                console.log(`- ${task.id}, ${task.name}, [${task.tag}], 시간`)
-            });
         }
     }
 
@@ -122,6 +139,16 @@ class Todo {
         });
     }
 
+    taskByStatus(status){
+        this.list.filter(task => task.status === status).forEach(task => {
+            if(status !== 'done'){
+                console.log(`- ${task.id}, ${task.name}${!task.tag ? '' : `, [${task.tag}]`}`);
+            } else {
+                console.log(`- ${task.id}, ${task.name}, [${task.tag}], ${this.getTime(task.spentTime)}`);
+            }                       
+        });
+    }
+
     allTaskByStatus(){
         const self = this;
         let todoByStatus = {todo: '', doing: '', done: ''};
@@ -150,3 +177,16 @@ class Todo {
         }, 2000)
     }
 }
+
+/*
+const todo = new Todo;
+todo.add({name: "js 공부하기", tag:"programming"});
+todo.add({name: "algorithm 공부하기", tag:"programming"});
+todo.add({name: "database 공부하기", tag:"database"});
+
+todo.showTag('programming');
+todo.showTags();
+todo.show('todo');
+todo.showAll();
+*/
+
