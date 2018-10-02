@@ -16,10 +16,7 @@ const todo = {
             done: 0
         }
         accumulatedTask.forEach(obj => {
-        obj['status'] === 'todo' ? statusNum.todo++ :
-        obj['status'] === 'doing' ? statusNum.doing++ :
-        obj['status'] === 'done' ? statusNum.done++ :
-        console.log('에러메세지 : 현재상태가 존재하지 않습니다.')
+            statusNum[obj.status]++
         })
         return statusNum
     },
