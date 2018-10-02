@@ -92,16 +92,34 @@ const todo = {
         }
         const lastUndo = todoUndoRedo.undoHistory.pop();
         todoUndoRedo.redo[lastUndo.type](...lastUndo.args, true);
+    },
+    showTag(tag) {
+        todoPrint.showTasksByTag(tag, this.todoList);
+    },
+    showTags() {
+        todoPrint.showAllTasksWithTag(this.todoList);
+    },
+    show(status) {
+        todoPrint.showTasksByStatus(status, this.todoList);
+    },
+    showAll() {
+        const sequenceArr = [ //Status print order & timeout for each status
+            {status: 'todo', timeout: 2000}, 
+            {status: 'doing', timeout: 3000}, 
+            {status: 'done', timeout: 2000}
+        ];
+
+        todoPrint.showAllTasksByStatus(sequenceArr, this.todoList);
     }
 };
 
 const todoPrint = {
-    showTasksByTag(tag) {
+    showTasksByTag(tag, todoList) {
         const targetTag = tag.toLowerCase();
         
         // Group tasks by status
-        const resultObj = todo.todoList
-                            .filter(({tag}) => tag === targetTag)
+        const resultObj = todoList
+                            .filter(({tag}) => tag.toLowerCase() === targetTag)
                             .reduce((resultObj, task) => {
                                 resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
                                 return resultObj
@@ -120,11 +138,11 @@ const todoPrint = {
 
         console.log(resultStr);
     },
-    showAllTasksWithTag() {
+    showAllTasksWithTag(todoList) {
         let resultStr = '';
             
         //Group tasks by tags
-        const resultObj = todo.todoList
+        const resultObj = todoList
                             .filter(({tag}) => !!tag)
                             .reduce( (resultObj, task) => {
                                 resultObj[task.tag] = [task].concat( (!resultObj[task.tag]) ? [] : resultObj[task.tag] );
@@ -139,15 +157,14 @@ const todoPrint = {
             });
         });
         console.log(resultStr);
-        return
     },
-    showTasksByStatus(status) {
+    showTasksByStatus(status, todoList) {
         let resultStr = '';
         const targetStatus = status.toLowerCase();
 
         // Group tasks by status
-        const resultObj = todo.todoList
-                            .filter(({status}) => status === targetStatus)
+        const resultObj = todoList
+                            .filter(({status}) => status.toLowerCase() === targetStatus)
                             .reduce( (resultObj, task) => {
                                 resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
                                 return resultObj
@@ -170,20 +187,20 @@ const todoPrint = {
         console.log(resultStr);
         return
     },
-    showAllTasksByStatus(sequenceArr) {
+    showAllTasksByStatus(sequenceArr, todoList) {
         // Group tasks by status
-        const resultObj = todo.todoList.reduce( (resultObj, task) => {
+        const resultObj = todoList.reduce( (resultObj, task) => {
                                     resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
                                     return resultObj
                                 }, {});
     
         //Print initial message 
-        console.log(`총 ${todo.todoList.length} 개의 리스트를 가져왔습니다. ${parseInt(sequenceArr[0].timeout/1000)} 초 뒤에 ${sequenceArr[0].status} 내역을 출력합니다.....`);
+        console.log(`총 ${todoList.length} 개의 리스트를 가져왔습니다. ${parseInt(sequenceArr[0].timeout/1000)} 초 뒤에 ${sequenceArr[0].status} 내역을 출력합니다.....`);
 
         //Print tasks in each status async
-        this.printTasksAsync(resultObj, sequenceArr);
+        this.printTasksAsync(resultObj, sequenceArr, todoList);
     },
-    printTasksAsync(groupedTaskObj, sequenceArr, sequenceIdx = 0) {
+    printTasksAsync(groupedTaskObj, sequenceArr, todoList, sequenceIdx = 0) {
         const sequenceLen = sequenceArr.length;
         const hasPrintFinished = !(sequenceLen-sequenceIdx);
         const bOnLastSequence = (sequenceLen-sequenceIdx) === 1;
@@ -196,19 +213,19 @@ const todoPrint = {
         const nextTimeout = (bOnLastSequence) ? null : sequenceArr[sequenceIdx+1].timeout;
         
         setTimeout( (() => {
-            cb.call(this,[currentStatus, nextStatus, nextTimeout]);
-            this.printTasksAsync(groupedTaskObj, sequenceArr, sequenceIdx+1);
+            cb.call(this,[currentStatus, nextStatus, nextTimeout], todoList);
+            this.printTasksAsync(groupedTaskObj, sequenceArr, todoList, sequenceIdx+1);
             }).bind(this),  
             currentTimeout
         );
         
-        function cb ([status, nextStatus, delay]) {
+        function cb ([status, nextStatus, delay], todoList) {
             // abort method if there are no tasks under requested status
             if(!groupedTaskObj[status]) {
                 console.log(`${status} 상태로 등록된 할일이 없습니다`);
             } else {
                 console.log(`[ ${status}, 총 ${groupedTaskObj[status].length} 개 ]`);
-                this.showTasksByStatus(status);
+                this.showTasksByStatus(status, todoList);
             }
             if(nextStatus) console.log(`\n지금부터 ${parseInt(delay/1000)} 초 뒤에 ${nextStatus} 할일 목록을 출력합니다...`);
             return true;
