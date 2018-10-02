@@ -23,9 +23,9 @@ const todo = {
         }
         accumulatedTask.forEach(obj => {
             obj['status'] === 'todo' ? statusNum.todo++ :
-                obj['status'] === 'doing' ? statusNum.doing++ :
-                    obj['status'] === 'done' ? statusNum.done++ :
-                        console.log('에러메세지 : 현재상태가 존재하지 않습니다.')
+            obj['status'] === 'doing' ? statusNum.doing++ :
+            obj['status'] === 'done' ? statusNum.done++ :
+            console.log('에러메세지 : 현재상태가 존재하지 않습니다.')
         })
         return statusNum
     },
@@ -79,9 +79,9 @@ const todo = {
         saveData.task.forEach(obj => {
             console.log(`ID : ${obj.id}, 이름 : ${obj.name}, 상태 : ${obj.status}, 태그 : ${obj.tag}`)
         })
-    },//현재 해야할 일들과 상태를 출력해주는 함수
+    },//입력된 데이터들을 출력해주는 함수
 
-    printTagRelate: function (tag) {
+    printSameTag: function (tag) {
         console.log(`현재 ${tag} 태그를 가진 할 일들은 다음과 같습니다.`);
         const tagSeparatedTask = saveData.task.filter(obj => {
             return obj.tag === tag
@@ -92,8 +92,11 @@ const todo = {
     }//tag가 같은 할 일들 출력
 }//해야 할일 객체
 
-todo.add({ name: '자바스크립트', tag: 'programming' });
-todo.add({ name: '이름', tag: 'getName' });
-todo.add({ name: '이름1', tag: 'gmm' })
-todo.add({ name: '이름2', tag: 'awef' })
+// 테스트
+// todo.add({ name: '자바스크립트', tag: 'programming' });
+// todo.add({ name: 'C++', tag: 'programming'});
+// todo.add({ name: '회식', tag: '회사'});
+// todo.add({ name: '노래연습', tag: '자기개발'});
+// todo.add({ name: '과장님업무',tag:'회사'})
+// todo.add({ name: '요리연습', tag: '자기개발'})
 
