@@ -4,7 +4,7 @@ const todo = {
     todoList : [],
     countOfStatus: {todo: 0, doing: 0, done: 0},
     addTask({name: newTaskName, tag: newTaskTag = ''}, bRedo = false) {
-        // check if there are task with requested name already
+        // check if there are tasks with requested name already
         const bNoErrors = todoErrorCheck.onTaskAddition(this.todoList, newTaskName);
         if(!bNoErrors) return false
         
@@ -14,8 +14,7 @@ const todo = {
         this.todoList.push(taskToAdd);
         this.updateStatusCount(['todo', +1]);
 
-        todoUndoRedo.updateActionHistory('add', [...arguments], [this.todoList, this.countOfStatus]);
-        if(!bRedo) todoUndoRedo.clearUndoHistory();
+        todoUndoRedo.updateActionHistory('add', bRedo, [...arguments], [this.todoList, this.countOfStatus]);
 
         this.printUpdateResult('add', {taskId: taskId, taskName: newTaskName});
     },
@@ -31,8 +30,7 @@ const todo = {
         targetTask.status = newStatus;
         this.updateStatusCount([currentStatus, -1], [newStatus, +1]);
 
-        todoUndoRedo.updateActionHistory('update', [...arguments], [this.todoList[id-1], currentStatus, this.countOfStatus]);
-        if(!bRedo) todoUndoRedo.clearUndoHistory();
+        todoUndoRedo.updateActionHistory('update', bRedo, [...arguments], [this.todoList[id-1], currentStatus, this.countOfStatus]);
 
         this.printUpdateResult('update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
     },
@@ -45,8 +43,7 @@ const todo = {
         delete this.todoList[id-1];
         this.updateStatusCount([targetTask.status, -1]);
 
-        todoUndoRedo.updateActionHistory('remove', [...arguments], [targetTask, this.todoList]);
-        if(!bRedo) todoUndoRedo.clearUndoHistory();
+        todoUndoRedo.updateActionHistory('remove', bRedo, [...arguments], [targetTask, this.todoList]);
 
         this.printUpdateResult('remove', {taskId: id, taskName: targetTask.name});
     },
@@ -72,8 +69,11 @@ const todo = {
         } );
     },
     addTimestamp(targetTask, newStatus) {
-        if (newStatus === 'doing') targetTask.startTime = Date.now();
-        if (newStatus === 'done') targetTask.endTime = Date.now();
+        const timestamp = {
+            doing : () => targetTask.startTime = Date.now(),
+            done : () => targetTask.endTime = Date.now()
+        }
+        timestamp[newStatus]();
     },
     undo() {
         if(!todoUndoRedo.history[0]) {
@@ -329,9 +329,10 @@ const todoUndoRedo = {
             todo.removeTask(...args);
         }
     },
-    updateActionHistory(actionType, args, actionData) {
+    updateActionHistory(actionType, bRedo, args, actionData) {
         if(this.history.length >= 3) this.history.shift();
         this.history.push({type: actionType, args: args, data:actionData});
+        if(!bRedo) todoUndoRedo.clearUndoHistory();
     },
     updateUndoHistory(actionObj) {
         this.undoHistory.push(actionObj);
