@@ -98,4 +98,27 @@ class Todo {
             }
         })
     }
+
+    allTaskByTag(){
+        let todoByTag = {};
+        this.list.filter(task => task.tag).forEach(task => {
+            if(!todoByTag[task.tag]){
+                todoByTag[task.tag] = [task];
+            }else {
+                todoByTag[task.tag].push(task);
+            }
+        });
+
+        Object.keys(todoByTag).forEach(tag => {
+            console.log(`[ ${tag} , 총${todoByTag[tag].length}개 ]`);
+            todoByTag[tag].forEach(task => {
+                if(task.status !== 'done'){
+                    console.log(`- ${task.id}, ${task.name}, [${task.status}]`);
+                } else {
+                    console.log(`- ${task.id}, ${task.name}, [${task.status}], ${this.getTime(task.spentTime)}`);
+                }        
+            });
+            console.log(`\n`);
+        });
+    }
 }
