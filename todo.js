@@ -16,7 +16,7 @@ const todo = {
 
         todoUndoRedo.updateActionHistory('add', bRedo, [...arguments], [this.todoList, this.countOfStatus]);
 
-        this.printUpdateResult('add', {taskId: taskId, taskName: newTaskName});
+        todoPrint.printUpdateResult.call(this,'add', {taskId: taskId, taskName: newTaskName});
     },
     updateTask({id, nextStatus}, bRedo = false) {
         const newStatus = nextStatus.toLowerCase();
@@ -32,7 +32,7 @@ const todo = {
 
         todoUndoRedo.updateActionHistory('update', bRedo, [...arguments], [this.todoList[id-1], currentStatus, this.countOfStatus]);
 
-        this.printUpdateResult('update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
+        todoPrint.printUpdateResult.call(this,'update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
     },
     removeTask({id}, bRedo = false) {
         const targetTask = Object.assign({}, this.todoList[id-1] || {});
@@ -45,23 +45,7 @@ const todo = {
 
         todoUndoRedo.updateActionHistory('remove', bRedo, [...arguments], [targetTask, this.todoList]);
 
-        this.printUpdateResult('remove', {taskId: id, taskName: targetTask.name});
-    },
-    printUpdateResult(actionType, {taskId, taskName, prevStatus, nextStatus}) {
-        const countOfTasksPerStatus = `현재상태 : todo: ${this.countOfStatus.todo}개, doing: ${this.countOfStatus.doing}개, done: ${this.countOfStatus.done}개`;
-        const printAction = {
-            add() {
-                console.log(`id: ${taskId} "${taskName}" 항목이 새로 추가됐습니다.\n${countOfTasksPerStatus}`);
-            },
-            update() {
-                console.log(`id: ${taskId} "${taskName}" 항목이 ${prevStatus} => ${nextStatus} 상태로 업데이트 됐습니다.\n${countOfTasksPerStatus}`);
-            },
-            remove() {
-                console.log(`id: ${taskId}, "${taskName}" 항목 삭제 완료`);
-            }
-        };
-        
-        printAction[actionType]();
+        todoPrint.printUpdateResult.call(this,'remove', {taskId: id, taskName: targetTask.name});
     },
     updateStatusCount(...args) { //[targetStatus, increment]
         args.forEach( ([targetStatus, increment]) => {
@@ -236,6 +220,22 @@ const todoPrint = {
         if (!timeSpentStr) return `doing 상태 없이 완료된 할일`
 
         return timeSpentStr
+    },
+    printUpdateResult(actionType, {taskId, taskName, prevStatus, nextStatus}) {
+        const countOfTasksPerStatus = `현재상태 : todo: ${this.countOfStatus.todo}개, doing: ${this.countOfStatus.doing}개, done: ${this.countOfStatus.done}개`;
+        const printAction = {
+            add() {
+                console.log(`id: ${taskId} "${taskName}" 항목이 새로 추가됐습니다.\n${countOfTasksPerStatus}`);
+            },
+            update() {
+                console.log(`id: ${taskId} "${taskName}" 항목이 ${prevStatus} => ${nextStatus} 상태로 업데이트 됐습니다.\n${countOfTasksPerStatus}`);
+            },
+            remove() {
+                console.log(`id: ${taskId}, "${taskName}" 항목 삭제 완료`);
+            }
+        };
+        
+        printAction[actionType]();
     }
 };
 
