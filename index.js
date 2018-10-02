@@ -121,4 +121,32 @@ class Todo {
             console.log(`\n`);
         });
     }
+
+    allTaskByStatus(){
+        const self = this;
+        let todoByStatus = {todo: '', doing: '', done: ''};
+        this.list.forEach(task => {
+            if(!todoByStatus[task.status]){
+                todoByStatus[task.status] = [task];
+            } else {
+                todoByStatus[task.status].push(task);
+            }
+        });
+           
+        console.log(`\"총 ${this.list.length}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다.....\"`)
+        setTimeout(function(){
+            console.log(`[ todo , 총${todoByStatus['todo'].length}개 ]`)
+            self.show('todo');
+            console.log(`\n\"지금부터 3초뒤에 doing내역을 출력합니다....\"`);
+            setTimeout(function(){
+                console.log(`[ doing , 총${todoByStatus['doing'].length}개 ]`)
+                self.show('doing');
+                console.log(`\n\"지금부터 2초뒤에 done내역을 출력합니다....\"`);
+                setTimeout(function(){
+                    console.log(`[ done , 총${todoByStatus['done'].length}개 ]`)
+                    self.show('done');
+                }, 2000)
+            }, 3000)
+        }, 2000)
+    }
 }
