@@ -178,7 +178,7 @@ class PrintTodo{
     }
 }
 
-/*
+/* Test Case
 const todo = new Todo;
 todo.add({name: "js 공부하기", tag:"programming"});
 todo.add({name: "algorithm 공부하기", tag:"programming"});
