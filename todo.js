@@ -3,10 +3,10 @@
 const todo = {
     todoList : [],
     countOfStatus: {todo: 0, doing: 0, done: 0},
-    addTask({name: newTaskName, tag: newTaskTag = ''}, isRedo = false) {
+    addTask({name: newTaskName, tag: newTaskTag = ''}, bRedo = false) {
         // check if there are task with requested name already
-        const isAnyErrors = todoErrorCheck.onTaskAddition(this.todoList, newTaskName);
-        if(isAnyErrors) return false
+        const bNoErrors = todoErrorCheck.onTaskAddition(this.todoList, newTaskName);
+        if(!bNoErrors) return false
         
         const taskId = this.todoList.length + 1;
         const taskToAdd = {id: taskId, name: newTaskName, status: 'todo', tag: newTaskTag};
@@ -15,15 +15,15 @@ const todo = {
         this.countOfStatus.todo++;
 
         todoUndoRedo.updateActionHistory('add', [...arguments], [this.todoList, this.countOfStatus]);
-        if(!isRedo) todoUndoRedo.clearUndoHistory();
+        if(!bRedo) todoUndoRedo.clearUndoHistory();
 
         this.printUpdateResult('add', {taskId: taskId, taskName: newTaskName});
     },
-    updateTask({id, nextStatus}, isRedo = false) {
+    updateTask({id, nextStatus}, bRedo = false) {
         const newStatus = nextStatus.toLowerCase();
         const targetTask = this.todoList[id-1];
-        const isAnyErrors = todoErrorCheck.onTaskUpdate(this.todoList, id, targetTask, newStatus);
-        if(isAnyErrors) return false
+        const bNoErrors = todoErrorCheck.onTaskUpdate(this.todoList, id, targetTask, newStatus);
+        if(!bNoErrors) return false
 
         if (newStatus === 'doing') targetTask.startTime = Date.now();
         if (newStatus === 'done') targetTask.endTime = Date.now();
@@ -35,21 +35,21 @@ const todo = {
         this.countOfStatus[newStatus]++;
 
         todoUndoRedo.updateActionHistory('update', [...arguments], [this.todoList[id-1], currentStatus, this.countOfStatus]);
-        if(!isRedo) todoUndoRedo.clearUndoHistory();
+        if(!bRedo) todoUndoRedo.clearUndoHistory();
 
         this.printUpdateResult('update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
     },
-    removeTask({id}, isRedo = false) {
+    removeTask({id}, bRedo = false) {
         const targetTask = Object.assign({}, this.todoList[id-1] || {});
 
-        const isAnyErrors = todoErrorCheck.onTaskRemove(this.todoList, id);
-        if(isAnyErrors) return false
+        const bNoErrors = todoErrorCheck.onTaskRemove(this.todoList, id);
+        if(!bNoErrors) return false
 
         delete this.todoList[id-1];
         this.countOfStatus[targetTask.status]--;
 
         todoUndoRedo.updateActionHistory('remove', [...arguments], [targetTask, this.todoList]);
-        if(!isRedo) todoUndoRedo.clearUndoHistory();
+        if(!bRedo) todoUndoRedo.clearUndoHistory();
 
         this.printUpdateResult('remove', {taskId: id, taskName: targetTask.name});
     },
@@ -180,19 +180,19 @@ const todoPrint = {
     printTasksAsync(groupedTaskObj, sequenceArr, sequenceIdx = 0) {
         const sequenceLen = sequenceArr.length;
         const hasPrintFinished = !(sequenceLen-sequenceIdx);
-        const isOnLastSequence = (sequenceLen-sequenceIdx) === 1;
+        const bOnLastSequence = (sequenceLen-sequenceIdx) === 1;
         
         if(hasPrintFinished) return
         
         const currentStatus = sequenceArr[sequenceIdx].status;
         const currentTimeout = sequenceArr[sequenceIdx].timeout;
-        const nextStatus = (isOnLastSequence) ? null : sequenceArr[sequenceIdx+1].status;
-        const nextTimeout = (isOnLastSequence) ? null : sequenceArr[sequenceIdx+1].timeout;
+        const nextStatus = (bOnLastSequence) ? null : sequenceArr[sequenceIdx+1].status;
+        const nextTimeout = (bOnLastSequence) ? null : sequenceArr[sequenceIdx+1].timeout;
         
-        setTimeout(() => {
-            cb([currentStatus, nextStatus, nextTimeout]);
+        setTimeout( (() => {
+            cb.call(this,[currentStatus, nextStatus, nextTimeout]);
             this.printTasksAsync(groupedTaskObj, sequenceArr, sequenceIdx+1);
-            },  
+            }).bind(this),  
             currentTimeout
         );
         
@@ -202,7 +202,7 @@ const todoPrint = {
                 console.log(`${status} 상태로 등록된 할일이 없습니다`);
             } else {
                 console.log(`[ ${status}, 총 ${groupedTaskObj[status].length} 개 ]`);
-                todoPrint.showTasksByStatus(status);
+                this.showTasksByStatus(status);
             }
             if(nextStatus) console.log(`\n지금부터 ${parseInt(delay/1000)} 초 뒤에 ${nextStatus} 할일 목록을 출력합니다...`);
             return true;
@@ -230,47 +230,46 @@ const todoPrint = {
 
 const todoErrorCheck = {
     onTaskAddition(targetTodoList, newTaskName) {
-        const isTaskNameTaken = this.checkTaskNameDuplication(targetTodoList, newTaskName);
-        if(isTaskNameTaken) {
+        const bTaskNameTaken = this.checkTaskNameDuplication(targetTodoList, newTaskName);
+        if(bTaskNameTaken) {
             console.log(`[error] 할 일 목록 todo에 이미 같은 이름의 할 일이 존재합니다.`);
-            return true
+            return false
         }
-        return false
+        return true
     },
     onTaskUpdate(targetTodoList, id, targetTask, newStatus) {
         //Alert user if requested with not existing task ID
-        const isTaskNotExists = this.checkIfIdNotExists(targetTodoList, id);
-        if(isTaskNotExists) {
+        const bTaskExists = this.checkIfIdExists(targetTodoList, id);
+        if(!bTaskExists) {
             console.log(`[error] ${id} 번 항목이 존재하지 않아 수정하지 못했습니다.`);
-            return true
+            return false
         }
 
         // Alert if user tried to update status same with current status
-        const isStatusNotNew = targetTask.status === newStatus
-        if(isStatusNotNew) {
+        const bStatusNew = targetTask.status !== newStatus
+        if(!bStatusNew) {
             console.log(`[error] ${id} 번 항목은 이미 ${targetTask.status} 상태입니다.`);
-            return true
+            return false
         }
         
         // prohibit task update from done to doing or todo
-        const isUpdatingTaskDone = targetTask.status === 'done'
-        if(isUpdatingTaskDone) {
+        const bTaskEditable = targetTask.status !== 'done'
+        if(!bTaskEditable) {
             console.log(`[error] ${id} 번 항목은 done 상태입니다. ${newStatus} 상태로 바꿀 수 없습니다.`);
-            return true
+            return false
         }
         
-
-        return false
+        return true
     },
     onTaskRemove(targetTodoList, id) {
         // Alert if user tried to remove not existing id
-        const isTaskNotExists = this.checkIfIdNotExists(targetTodoList, id);
-        if(isTaskNotExists) {
+        const bTaskNotExists = this.checkIfIdExists(targetTodoList, id);
+        if(!bTaskNotExists) {
             console.log(`[error] ${id} 번 항목이 존재하지 않아 삭제하지 못했습니다.`);
-            return true
+            return false
         }
 
-        return false
+        return true
     },
     checkTaskNameDuplication(targetTodoList, newTaskName) {
         const tasksInTodoStatus = ({status}) => status === 'todo';
@@ -278,10 +277,10 @@ const todoErrorCheck = {
         
         return targetTodoList.filter(tasksInTodoStatus).some(hasTheNameAlready)
     },
-    checkIfIdNotExists(targetTodoList, taskId) {
-        const isTaskExists = targetTodoList.some( ({id}) => id === taskId );
+    checkIfIdExists(targetTodoList, taskId) {
+        const bTaskExists = targetTodoList.some( ({id}) => id === taskId );
 
-        return (isTaskExists) ? false : true
+        return (bTaskExists) ? true : false
     }
 };
 
@@ -336,7 +335,7 @@ const todoUndoRedo = {
     }
 };
 
-/*
+
 //Test Cases
 todo.addTask({name: '자바스크립트 공부', tag: 'programming'});
 todo.addTask({name: 'iOS 공부', tag: 'programming'});
@@ -406,4 +405,3 @@ todo.addTask({name: "스타벅스 방문", tag:"Drink"});
 todo.redo();
 // 모든 undo를 취소했습니다.
 
-*/
