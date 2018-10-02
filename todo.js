@@ -89,9 +89,7 @@ const todo = {
 
 // 테스트
 todo.add({ name: '자바스크립트', tag: 'programming' });
-console.log(todo.idArrays)
 todo.add({ name: 'C++', tag: 'programming' });
-console.log(todo.idArrays)
 todo.add({ name: '회식', tag: '회사' });
 todo.add({ name: '노래연습', tag: '자기개발' });
 todo.add({ name: '과장님업무', tag: '회사' })
