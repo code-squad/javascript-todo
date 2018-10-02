@@ -76,22 +76,10 @@ const todo = {
         timestamp[newStatus]();
     },
     undo() {
-        if(!todoUndoRedo.history[0]) {
-            console.log(`undo는 최대 3번까지만 할 수 있습니다!`);
-            return false
-        } 
-        const lastAction = todoUndoRedo.history.pop();
-        todoUndoRedo.undo[lastAction.type](...lastAction.data);
-
-        todoUndoRedo.updateUndoHistory(lastAction);
+        todoUndoRedo.undo();
     },
     redo() {
-        if(!todoUndoRedo.undoHistory[0]) {
-            console.log(`모든 undo를 취소했습니다.`);
-            return false
-        }
-        const lastUndo = todoUndoRedo.undoHistory.pop();
-        todoUndoRedo.redo[lastUndo.type](...lastUndo.args, true);
+        todoUndoRedo.redo();
     },
     showTag(tag) {
         todoPrint.showTasksByTag(tag, this.todoList);
@@ -310,7 +298,7 @@ const todoErrorCheck = {
 const todoUndoRedo = {
     history: [],
     undoHistory: [],
-    undo: {
+    undoLast: {
         add(todoList, todoCountObj) {
             const targetTask = todoList.pop();
             todoCountObj[targetTask.status]--;
@@ -335,7 +323,7 @@ const todoUndoRedo = {
             console.log(`${targetTask.id}번, ${targetTask.name} 할일이 삭제 => ${targetTask.status} 상태로 돌아갔습니다.`);
         }
     },
-    redo: {
+    redoLast: {
         add(...args) {
             todo.addTask(...args);
         },
@@ -345,6 +333,25 @@ const todoUndoRedo = {
         remove(...args) {
             todo.removeTask(...args);
         }
+    },
+    undo() {
+        if(!this.history[0]) {
+            console.log(`undo는 최대 3번까지만 할 수 있습니다!`);
+            return false
+        } 
+
+        const lastAction = this.history.pop();
+        this.undoLast[lastAction.type](...lastAction.data);
+
+        this.updateUndoHistory(lastAction);
+    },
+    redo() {
+        if(!this.undoHistory[0]) {
+            console.log(`모든 undo를 취소했습니다.`);
+            return false
+        }
+        const lastUndo = this.undoHistory.pop();
+        this.redoLast[lastUndo.type](...lastUndo.args, true);
     },
     updateActionHistory(actionType, bRedo, args, actionData) {
         if(this.history.length >= 3) this.history.shift();
