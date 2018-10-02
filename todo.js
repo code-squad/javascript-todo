@@ -90,23 +90,38 @@ const todoPrint = {
         const targetTag = tag.toLowerCase();
         
         // Group tasks by status
-        const resultObj = todoList
+        const groupedTasksObj = todoList
                             .filter(({tag}) => tag.toLowerCase() === targetTag)
                             .reduce((resultObj, task) => {
                                 resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
                                 return resultObj
                             },{});
         
-        // Convert resultObj into printable String
-        const resultStr = Object.keys(resultObj).reduce( (statusInStr, status) => {
-            statusInStr += `${(statusInStr) ? `\n\n` : ''}[ ${status} , 총 ${resultObj[status].length} 개 ]`;
-            statusInStr += resultObj[status].reduce( (tasksInStr, task) => {
-                tasksInStr += `\n- ${task.id}번, ${task.name}`;
-                tasksInStr += ( (task.status === 'done') ? ` ${this.applyPrintableTimeFormat(task.endTime - task.startTime)}` : `` );
-                return tasksInStr
-            },``);
-            return statusInStr
-        },``);
+        // Flatten grouped object into formatted Array
+        const formattedArr = [];
+        Object.keys(groupedTasksObj).forEach( (status) => {
+            formattedArr.push(status, groupedTasksObj[status].length, ...groupedTasksObj[status]);
+        });
+        
+        // process above Array into formatted string
+        const resultStr = formattedArr.reduce( (workingStr, arrItem) => {
+            const process = {
+                string() {
+                    workingStr += `${(workingStr) ? `\n\n` : ''}[ ${arrItem}`;
+                },
+                number() {
+                    workingStr += ` , 총 ${arrItem} 개 ]`;
+                },
+                object() {
+                    workingStr += `\n- ${arrItem.id}번, ${arrItem.name}`;
+                    workingStr += ( (arrItem.status === 'done') ? ` ${this.applyPrintableTimeFormat(arrItem.endTime - arrItem.startTime)}` : `` );
+                }
+            };
+            
+            process[typeof arrItem].bind(this)();
+            
+            return workingStr
+        }, ``);
 
         console.log(resultStr);
     },
@@ -114,7 +129,7 @@ const todoPrint = {
         let resultStr = '';
             
         //Group tasks by tags
-        const resultObj = todoList
+        const groupedTasksObj = todoList
                             .filter(({tag}) => !!tag)
                             .reduce( (resultObj, task) => {
                                 resultObj[task.tag] = [task].concat( (!resultObj[task.tag]) ? [] : resultObj[task.tag] );
@@ -122,9 +137,9 @@ const todoPrint = {
                             }, {});
         
         // Add task info into resultStr for tasks in object created above
-        Object.keys(resultObj).forEach((tag) => {
-            resultStr += `${(resultStr) ? `\n\n` : ''}[ ${tag} , 총 ${resultObj[tag].length} 개 ]`;
-            resultObj[tag].forEach((task) => {
+        Object.keys(groupedTasksObj).forEach((tag) => {
+            resultStr += `${(resultStr) ? `\n\n` : ''}[ ${tag} , 총 ${groupedTasksObj[tag].length} 개 ]`;
+            groupedTasksObj[tag].forEach((task) => {
                 resultStr += `\n- ${task.id}번, ${task.name}, [${task.status}]`
             });
         });
@@ -135,7 +150,7 @@ const todoPrint = {
         const targetStatus = status.toLowerCase();
 
         // Group tasks by status
-        const resultObj = todoList
+        const groupedTasksObj = todoList
                             .filter(({status}) => status.toLowerCase() === targetStatus)
                             .reduce( (resultObj, task) => {
                                 resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
@@ -143,13 +158,13 @@ const todoPrint = {
                             }, {});
         
         // abort method if there are no tasks under requested status
-        if(!resultObj[targetStatus]) {
+        if(!groupedTasksObj[targetStatus]) {
             console.log(`${targetStatus} 상태로 등록된 할일이 없습니다`);
             return false
         }
 
          // Add task info into resultStr for tasks in object created above
-         resultObj[targetStatus].forEach((task) => {
+         groupedTasksObj[targetStatus].forEach((task) => {
             resultStr += `${(resultStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`
             if(targetStatus === 'done') {
                 resultStr += `, ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); 
@@ -161,7 +176,7 @@ const todoPrint = {
     },
     showAllTasksByStatus(sequenceArr, todoList) {
         // Group tasks by status
-        const resultObj = todoList.reduce( (resultObj, task) => {
+        const groupedTasksObj = todoList.reduce( (resultObj, task) => {
                                     resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
                                     return resultObj
                                 }, {});
@@ -170,9 +185,9 @@ const todoPrint = {
         console.log(`총 ${todoList.length} 개의 리스트를 가져왔습니다. ${parseInt(sequenceArr[0].timeout/1000)} 초 뒤에 ${sequenceArr[0].status} 내역을 출력합니다.....`);
 
         //Print tasks in each status async
-        this.printTasksAsync(resultObj, sequenceArr, todoList);
+        this.printTasksAsync(groupedTasksObj, sequenceArr, todoList);
     },
-    printTasksAsync(groupedTaskObj, sequenceArr, todoList, sequenceIdx = 0) {
+    printTasksAsync(groupedTasksObj, sequenceArr, todoList, sequenceIdx = 0) {
         const sequenceLen = sequenceArr.length;
         const hasPrintFinished = !(sequenceLen-sequenceIdx);
         const bOnLastSequence = (sequenceLen-sequenceIdx) === 1;
@@ -186,17 +201,17 @@ const todoPrint = {
         
         setTimeout( (() => {
             cb.call(this,[currentStatus, nextStatus, nextTimeout], todoList);
-            this.printTasksAsync(groupedTaskObj, sequenceArr, todoList, sequenceIdx+1);
+            this.printTasksAsync(groupedTasksObj, sequenceArr, todoList, sequenceIdx+1);
             }).bind(this),  
             currentTimeout
         );
         
         function cb ([status, nextStatus, delay], todoList) {
             // abort method if there are no tasks under requested status
-            if(!groupedTaskObj[status]) {
+            if(!groupedTasksObj[status]) {
                 console.log(`${status} 상태로 등록된 할일이 없습니다`);
             } else {
-                console.log(`[ ${status}, 총 ${groupedTaskObj[status].length} 개 ]`);
+                console.log(`[ ${status}, 총 ${groupedTasksObj[status].length} 개 ]`);
                 this.showTasksByStatus(status, todoList);
             }
             if(nextStatus) console.log(`\n지금부터 ${parseInt(delay/1000)} 초 뒤에 ${nextStatus} 할일 목록을 출력합니다...`);
@@ -236,6 +251,9 @@ const todoPrint = {
         };
         
         printAction[actionType]();
+    },
+    groupTasks() {
+        
     }
 };
 
