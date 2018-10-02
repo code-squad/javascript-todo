@@ -90,13 +90,9 @@ const todoPrint = {
         const targetTag = tag.toLowerCase();
         
         // Group tasks by status
-        const groupedTasksObj = todoList
-                            .filter(({tag}) => tag.toLowerCase() === targetTag)
-                            .reduce((resultObj, task) => {
-                                resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
-                                return resultObj
-                            },{});
-        
+        const filter = ({tag}) => tag.toLowerCase() === targetTag;
+        const groupedTasksObj = this.groupTasks(todoList, filter, 'status');
+
         // Flatten grouped object into formatted Array
         const formattedArr = [];
         Object.keys(groupedTasksObj).forEach( (status) => {
@@ -129,12 +125,8 @@ const todoPrint = {
         let resultStr = '';
             
         //Group tasks by tags
-        const groupedTasksObj = todoList
-                            .filter(({tag}) => !!tag)
-                            .reduce( (resultObj, task) => {
-                                resultObj[task.tag] = [task].concat( (!resultObj[task.tag]) ? [] : resultObj[task.tag] );
-                                return resultObj
-                            }, {});
+        const filter = ({tag}) => !!tag;
+        const groupedTasksObj = this.groupTasks(todoList, filter, 'tag');
         
         // Add task info into resultStr for tasks in object created above
         Object.keys(groupedTasksObj).forEach((tag) => {
@@ -150,12 +142,8 @@ const todoPrint = {
         const targetStatus = status.toLowerCase();
 
         // Group tasks by status
-        const groupedTasksObj = todoList
-                            .filter(({status}) => status.toLowerCase() === targetStatus)
-                            .reduce( (resultObj, task) => {
-                                resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
-                                return resultObj
-                            }, {});
+        const filter = ({status}) => status.toLowerCase() === targetStatus;
+        const groupedTasksObj = this.groupTasks(todoList, filter, 'status');
         
         // abort method if there are no tasks under requested status
         if(!groupedTasksObj[targetStatus]) {
@@ -176,10 +164,7 @@ const todoPrint = {
     },
     showAllTasksByStatus(sequenceArr, todoList) {
         // Group tasks by status
-        const groupedTasksObj = todoList.reduce( (resultObj, task) => {
-                                    resultObj[task.status] = [task].concat( (!resultObj[task.status]) ? [] : resultObj[task.status] );
-                                    return resultObj
-                                }, {});
+        const groupedTasksObj = this.groupTasks(todoList, () => true, 'status');
     
         //Print initial message 
         console.log(`총 ${todoList.length} 개의 리스트를 가져왔습니다. ${parseInt(sequenceArr[0].timeout/1000)} 초 뒤에 ${sequenceArr[0].status} 내역을 출력합니다.....`);
@@ -252,8 +237,13 @@ const todoPrint = {
         
         printAction[actionType]();
     },
-    groupTasks() {
-        
+    groupTasks(todoList, filterFn, groupingType) {
+        return todoList
+                    .filter(filterFn)
+                    .reduce((resultObj, task) => {
+                        resultObj[task[groupingType]] = [task].concat( (!resultObj[task[groupingType]]) ? [] : resultObj[task[groupingType]] );
+                        return resultObj
+                    },{});
     }
 };
 
