@@ -7,7 +7,7 @@ const todo = {
             return this.getRanNum();
         }
         return ranNum;
-    },
+    },//중복되지 않는 랜덤한 숫자를뽑아내는 함수
 
     getStatusNum: function (accumulatedTask) {
         const statusNum = {
@@ -19,11 +19,11 @@ const todo = {
             statusNum[obj.status]++
         })
         return statusNum
-    },
+    },//상태를 초기화 시켜주는 함수
 
     printStatusNum: function (statusNum) {
         console.log(`현재상태 todo : ${statusNum.todo}, doing: ${statusNum.doing}, done : ${statusNum.done}`)
-    },
+    },//상태를 출력해주는 함수
 
     add: function (objToAdd) {
         const newTodo = {
@@ -37,7 +37,7 @@ const todo = {
         let statusNum = this.getStatusNum(this.task)
         console.log(`ID : ${newTodo.id}, ${newTodo.name} 항목이 추가되었습니다.`);
         this.printStatusNum(statusNum)
-    },//해야할일 추가 함수
+    },//해야할일과 id값을 추가해주는 함수
 
     update: function (objToUpdate) {
         let beforeTaskStatus = []
@@ -66,7 +66,7 @@ const todo = {
         let removedTask = this.task.filter(taskObj => taskObj.id !== objToRemove.id)
         this.task = removedTask
         console.log(`ID : ${extractedTask[0].id}, ${extractedTask[0].name} 삭제 완료`)
-    },//할일 제거 함수
+    },//할 일과 id값을 제거해주는 함수
 
     printTask: function () {
         console.log(`입력된 할 일들`)
