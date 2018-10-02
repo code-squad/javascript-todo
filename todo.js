@@ -9,58 +9,58 @@ const todosList = {
             id: this.id,
             status : 'todo'
         });
-        this.showActiveMessage('add', this.id);
-        this.getCurrentStatus(this.statusList);
+        this.showActiveMessage(['add', this.id, name]);
         this.id++;
     },
     remove({id}){
-        let prevStatus = this.findDataById(id)[0].name;
-        const idx = this.findIdex(id);
-        this.todos.splice(idx, 1);
-        this.showActiveMessage('remove', id, prevStatus);
-        this.getCurrentStatus(this.statusList);
+        let prev_data = this.getPrevData('remove', id);
+        this.todos = this.todos.filter((target)=>target.id !== id);
+        this.showActiveMessage(prev_data);
     },
     update({id,  nextstatus}){
-        let prevStatus = this.findDataById(id)[0].status;
-        this.findDataById(id)[0].status = nextstatus.toLowerCase();
-        this.showActiveMessage('update', id, prevStatus);
-        this.getCurrentStatus(this.statusList);
+        let prev_data = this.getPrevData('update', id);
+        for(let o of this.todos){
+            if(o.id === id) {
+                o.status = nextstatus.toLowerCase();
+            }
+        };
+        this.showActiveMessage(prev_data, nextstatus.toLowerCase());
     },
-    findIdex(id){
-        return this.todos.findIndex((v) => v.id === this.findDataById(id)[0].id);
-    },
-    findDataById(id){
-        return this.todos.filter((v) => v.id === id);
-    },
-    showActiveMessage(activeType, id, prevStatus){
-        (activeType === 'add') ? console.log(`id: ${this.id} ${this.findDataById(id)[0].name} 항목이 새로 추가되었습니다.`) :
-        (activeType === 'remove') ? console.log(`id:${id}, ${prevStatus} 삭제완료.`) :
-        (activeType === 'update') ? console.log(`id:${id},  "${this.findDataById(id)[0].name}" 항목이 ${prevStatus} => ${this.findDataById(id)[0].status} 상태로 업데이트 됐습니다.`) :
-        console.log('');
+    getPrevData(funcName, id){
+        let prev_data = {
+            prevName: '', 
+            idx: 0
+        };
+        for(let o of this.todos){
+            if(o.id === id){
+                prev_data.prevName = o.name;
+                prev_data.prevStatus = o.status;
+                prev_data.idx = o.id;
+            }
+        };
+        return [funcName ,id ,prev_data.prevName, prev_data.prevStatus];
     },
     getCurrentStatus(statusList){
-        const countObj = {todo:0, done:0, doing:0}
+        const countObj = {todo:0, done:0, doing:0};
         this.todos.forEach((v)=> {
-            if(statusList.indexOf(v.status) < 0) return;
-            countObj[v.status] = (countObj[v.status])  ? countObj[v.status] + 1 : 1;
+            if(statusList.indexOf(v.status) >= 0) ++countObj[v.status];
         });
-        this.showCurrentStatus(countObj.todo, countObj.done, countObj.doing);
+        console.log(`현재상태 :  todo:${countObj.todo}개, doing:${countObj.doing}개, done:${countObj.done}개`);
     },
-    showCurrentStatus(todo=0, done=0, doing=0){
-        console.log(`현재상태 :  todo:${todo}개, doing:${doing}개, done:${done}개`);
+    showActiveMessage([activeType, id, name, status], update_status){
+        (activeType === 'add') ? console.log(`id: ${this.id} ${name}항목이 새로 추가되었습니다.`) :
+        (activeType === 'remove') ? console.log(`id:${id}, ${name} 삭제완료.`) :
+        (activeType === 'update') ? console.log(`id:${id},  "${name}" 항목이 ${status} => ${update_status} 상태로 업데이트 됐습니다.`) :
+        '';
+        this.getCurrentStatus(this.statusList);
     },
 };
 
 todosList.add({name: "자바스크립트 공부하기", tag:"programming"});
-todosList.add({name: "자바스크립트 공부하기", tag:"programming"});
-todosList.add({name: "알고리즘 공부하기", tag:"programming"});
 todosList.add({name: "자료구조 공부하기", tag:"programming"});
+todosList.update({id:2,  nextstatus:"doing"});
 todosList.add({name: "OS 공부하기", tag:"programming"});
 todosList.remove({id:2});
+todosList.update({id:3,  nextstatus:"done"});
 todosList.remove({id:3});
 todosList.add({name: "OS 공부하기", tag:"programming"});
-todosList.remove({id:4});
-todosList.remove({id:5});
-todosList.add({name: "OS 공부하기", tag:"programming"});
-todosList.remove({id:6});
-todosList.update({id:1,  nextstatus:"doNe"});
