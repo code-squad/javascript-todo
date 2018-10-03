@@ -99,15 +99,9 @@ const todoPrint = {
         // Group tasks by status
         const filter = ({tag}) => tag.toLowerCase() === targetTag;
         const groupedTasksObj = this.groupTasks(todoList, filter, 'status');
-
-        // Flatten grouped object into formatted Array
-        const formattedArr = [];
-        Object.keys(groupedTasksObj).forEach( (status) => {
-            formattedArr.push(status, groupedTasksObj[status].length, ...groupedTasksObj[status]);
-        });
         
-        // Process above Array into formatted string
-        const resultStr = this.convertToFormattedStr(formattedArr, 'byTag');
+        // Process above Object into formatted string
+        const resultStr = this.convertToFormattedStr.byTag(groupedTasksObj);
 
         console.log(resultStr);
     },
@@ -116,8 +110,8 @@ const todoPrint = {
         const filter = ({tag}) => !!tag;
         const groupedTasksObj = this.groupTasks(todoList, filter, 'tag');
         
-        // Add task info into resultStr for tasks in object created above
-        const resultStr = this.convertToFormattedStr(groupedTasksObj, 'allTag');
+        // Process above Object into formatted string
+        const resultStr = this.convertToFormattedStr.allTag(groupedTasksObj);
         
         console.log(resultStr);
     },
@@ -134,8 +128,8 @@ const todoPrint = {
             return false
         }
 
-         // Add task info into resultStr for tasks in object created above
-         const resultStr = this.convertToFormattedStr([groupedTasksObj, targetStatus], 'byStatus');
+         // Process above Object into formatted string
+         const resultStr = this.convertToFormattedStr.byStatus(groupedTasksObj, targetStatus);
 
         console.log(resultStr);
     },
@@ -222,50 +216,29 @@ const todoPrint = {
                         return resultObj
                     },{});
     },
-    convertToFormattedStr(iterable, printType) {
-        if (printType === 'byTag') {
-            return iterable.reduce( (workingStr, arrItem) => {
-                const process = {
-                    string() {
-                        workingStr += `${(workingStr) ? `\n\n` : ''}[ ${arrItem}`;
-                    },
-                    number() {
-                        workingStr += ` , 총 ${arrItem} 개 ]`;
-                    },
-                    object() {
-                        workingStr += `\n- ${arrItem.id}번, ${arrItem.name}`;
-                        workingStr += ( (arrItem.status === 'done') ? ` ${this.applyPrintableTimeFormat(arrItem.endTime - arrItem.startTime)}` : `` );
-                    }
-                };
-                
-                process[typeof arrItem].bind(this)();
-                
-                return workingStr
-            }, ``)
-        }
-        if (printType === 'allTag') {
-            let resultStr = ``;
-            Object.keys(iterable).forEach((tag) => {
-                resultStr += `${(resultStr) ? `\n\n` : ''}[ ${tag} , 총 ${iterable[tag].length} 개 ]`;
-                iterable[tag].forEach((task) => {
-                    resultStr += `\n- ${task.id}번, ${task.name}, [${task.status}]`
-                });
-            });
+    convertToFormattedStr: {
+        byTag(objToPrint) {
+            const makeHeader = (workingStr, status) => `${(workingStr) ? `\n\n` : ''}[ ${status} , 총 ${objToPrint[status].length} 개 ]`;
+            const makeFormattedTaskStrings = (status) => {
+                return objToPrint[status].reduce( (workingStr, task) => workingStr + `\n- ${task.id}번, ${task.name}` + this.addTimeSpent(task.status, task), ``);
+            };
 
-            return resultStr
-        }
-        if (printType === 'byStatus') {
-            const [groupedTasksObj, targetStatus] = iterable;
-            let resultStr = ``;
-            groupedTasksObj[targetStatus].forEach((task) => {
-                resultStr += `${(resultStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`
-                if(targetStatus === 'done') {
-                    resultStr += `, ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); 
-                } 
-            });
+            return Object.keys(objToPrint).reduce( (workingStr, status) => workingStr + makeHeader(workingStr, status) + makeFormattedTaskStrings(status), ``);
+        },
+        allTag(objToPrint) {
+            const makeHeader = (workingStr, tag) => `${(workingStr) ? `\n\n` : ''}[ ${tag} , 총 ${objToPrint[tag].length} 개 ]`;
+            const makeFormattedTaskStrings = (tag) => {
+                return objToPrint[tag].reduce( (workingStr, task) => workingStr + `\n- ${task.id}번, ${task.name}, [${task.status}]` , ``);
+            }
 
-            return resultStr
-        }
+            return Object.keys(objToPrint).reduce( (workingStr, tag) => workingStr + makeHeader(workingStr, tag) + makeFormattedTaskStrings(tag), ``);
+        },
+        byStatus(groupedTasksObj, targetStatus) {
+            const makeFormattedTaskString = (workingStr, task) => `${(workingStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`;
+            
+            return groupedTasksObj[targetStatus].reduce( (workingStr, task) => workingStr + makeFormattedTaskString(workingStr, task) + this.addTimeSpent(targetStatus, task), ``);
+        },
+        addTimeSpent : (targetStatus, task) => {return (targetStatus === 'done') ? `, ` + todoPrint.applyPrintableTimeFormat(task.endTime - task.startTime) : ''}
     }
 };
 
@@ -466,7 +439,7 @@ todo.redo();
 
 
 // 출력 객체 호출 테스트
-console.log(`======= 출력 객체 호출 test cases`);
+console.log(`\n======= 출력 객체 호출 test cases\n`);
 
 console.log(`\nㅇ 특정 태그만 불러오기`);
 todo.showTag('proGraMMing');
