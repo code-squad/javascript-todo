@@ -320,6 +320,7 @@ const todoUndoRedo = {
         },
         remove(targetTask, todoList) {
             todoList[targetTask.id-1] = targetTask;
+            todo.updateStatusCount([targetTask.status, +1]);
 
             console.log(`${targetTask.id}번, ${targetTask.name} 할일이 삭제 => ${targetTask.status} 상태로 돌아갔습니다.`);
         }
