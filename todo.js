@@ -3,19 +3,18 @@
 const todo = {
     todoList : [],
     countOfStatus: {todo: 0, doing: 0, done: 0},
-    addTask({name: newTaskName, tag: newTaskTag = ''}, bRedo = false) {
+    addTask({name: newTaskName, tag: newTaskTag}, bRedo = false) {
         const taskId = this.todoList.length + 1;
-        const taskToAdd = {id: taskId, name: newTaskName, status: 'todo', tag: newTaskTag};
         
         const bNoErrors = todoErrorCheck.onTaskAddition(this.todoList, newTaskName);
         if(!bNoErrors) return false
         
-        this.todoList.push(taskToAdd);
+        this.todoList.push(new Task(taskId, newTaskName, 'todo', newTaskTag));
         this.updateStatusCount(['todo', +1]);
 
         todoUndoRedo.updateActionHistory('add', bRedo, [...arguments], [this.todoList, this.countOfStatus]);
 
-        todoPrint.printUpdateResult.call(this,'add', {taskId: taskId, taskName: newTaskName});
+        todoPrint.printUpdateResult.call(this,'add', new UpdateResult(taskId, newTaskName));
     },
     updateTask({id, nextStatus}, bRedo = false) {
         const newStatus = nextStatus.toLowerCase();
@@ -32,10 +31,10 @@ const todo = {
 
         todoUndoRedo.updateActionHistory('update', bRedo, [...arguments], [this.todoList[id-1], currentStatus, this.countOfStatus]);
 
-        todoPrint.printUpdateResult.call(this,'update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
+        todoPrint.printUpdateResult.call(this,'update', new UpdateResult(id, targetTaskName, currentStatus, newStatus));
     },
     removeTask({id}, bRedo = false) {
-        const targetTask = Object.assign({}, this.todoList[id-1] || {});
+        const targetTask = this.todoList[id-1] || new Task();
 
         const bNoErrors = todoErrorCheck.onTaskRemove(this.todoList, id);
         if(!bNoErrors) return false
@@ -45,7 +44,7 @@ const todo = {
 
         todoUndoRedo.updateActionHistory('remove', bRedo, [...arguments], [targetTask, this.todoList, this.countOfStatus]);
 
-        todoPrint.printUpdateResult.call(this,'remove', {taskId: id, taskName: targetTask.name});
+        todoPrint.printUpdateResult.call(this,'remove', new UpdateResult(id, targetTask.name));
     },
     updateStatusCount(...args) { //[targetStatus, increment]
         args.forEach( ([targetStatus, increment]) => {
@@ -56,13 +55,6 @@ const todo = {
         const timestamp = {
             doing : () => targetTask.startTime = Date.now(),
             done : () => targetTask.endTime = Date.now()
-        }
-        timestamp[newStatus]();
-    },
-    removeTimestamp(targetTask, newStatus) {
-        const timestamp = {
-            doing : () => delete targetTask.startTime,
-            done : () => delete targetTask.endTime
         }
         timestamp[newStatus]();
     },
@@ -374,6 +366,35 @@ const todoUndoRedo = {
     }
 };
 
+class Task {
+    constructor (id, name, status, tag) {
+        this.id = id;
+        this.name = name;
+        this.status = status || 'todo';
+        this.tag = tag || '';
+    }
+    set startTime(timeDate) {
+        this.startedAt = timeDate;
+    }
+    get startTime() {
+        return this.startedAt
+    }
+    set endTime(timeDate) {
+        this.endedAt = timeDate;
+    }
+    get endTime() {
+        return this.endedAt
+    }
+}
+
+class UpdateResult {
+    constructor (taskId, taskName, prevStatus, nextStatus) {
+        this.taskId = taskId;
+        this.taskName = taskName;
+        this.prevStatus = prevStatus || null;
+        this.nextStatus = nextStatus || null;
+    }
+}
 
 //Test Cases
 todo.addTask({name: '자바스크립트 공부', tag: 'programming'});
