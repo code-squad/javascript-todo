@@ -1,4 +1,5 @@
 const todo = {
+    //task의 아이디와idArrays의 sync가 정확하게 맞을까??
     task: [],
     idArrays: [],
     getRanNum: function () {
@@ -35,6 +36,7 @@ const todo = {
         this.idArrays.push(newTodo.id)
         this.task.push(newTodo)
         let statusNum = this.getStatusNum(this.task)
+        //printStatusNum함수 수정해보기.if문 사용하면 되지 않을까.
         console.log(`ID : ${newTodo.id}, ${newTodo.name} 항목이 추가되었습니다.`);
         this.printStatusNum(statusNum)
     },//해야할일과 id값을 추가해주는 함수
@@ -85,8 +87,9 @@ const todo = {
         })
     }//tag가 같은 할 일들 출력
 }//해야 할일 객체
-
+//map filter중복적으로 사용하지 말아보기.
 // 테스트
+
 todo.add({ name: '자바스크립트', tag: 'programming' });
 todo.add({ name: 'C++', tag: 'programming' });
 todo.add({ name: '회식', tag: '회사' });
