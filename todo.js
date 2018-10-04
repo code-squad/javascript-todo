@@ -1,5 +1,4 @@
 const todo = {
-    //task의 아이디와idArrays의 sync가 정확하게 맞을까?
     task: [],
     getRanNum: function () {
         const ranNum = Math.floor(Math.random() * 5)
@@ -62,8 +61,6 @@ const todo = {
 
     remove: function (objToRemove) {
         let extractedTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
-        let deletedArrays = this.idArrays.filter(value => objToRemove.id !== value)
-        this.idArrays = deletedArrays
         let removedTask = this.task.filter(taskObj => taskObj.id !== objToRemove.id)
         this.task = removedTask
         console.log(`ID : ${extractedTask[0].id}, ${extractedTask[0].name} 삭제 완료`)
