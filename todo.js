@@ -1,11 +1,11 @@
 const todo = {
     //task의 아이디와idArrays의 sync가 정확하게 맞을까?
     task: [],
-    idArrays: [],
     getRanNum: function () {
         const ranNum = Math.floor(Math.random() * 5)
-        if (this.idArrays.includes(ranNum)) {
-            return this.getRanNum();
+        const idArrays = this.task.map(obj => obj.id)
+        if(idArrays.includes(ranNum)) {
+            return this.getRanNum()
         }
         return ranNum;
     },//중복되지 않는 랜덤한 숫자를뽑아내는 함수
@@ -23,7 +23,6 @@ const todo = {
     },//상태를 초기화 시켜주는 함수
 
     printStatusNum: function (statusNum) {
-
         console.log(`현재상태 todo : ${statusNum.todo}, doing: ${statusNum.doing}, done : ${statusNum.done}`)
     },//상태를 출력해주는 함수
 
@@ -34,7 +33,6 @@ const todo = {
             status: 'todo',
             tag: objToAdd.tag
         }
-        this.idArrays.push(newTodo.id)
         this.task.push(newTodo)
         let statusNum = this.getStatusNum(this.task)
         //printStatusNum함수 수정해보기.if문 사용하면 되지 않을까.
