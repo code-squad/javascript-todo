@@ -3,177 +3,172 @@
 const todo = {
     todoList : [],
     countOfStatus: {todo: 0, doing: 0, done: 0},
-    addTask({name: newTaskName, tag: newTaskTag = ''}) {
+    addTask({name: newTaskName, tag: newTaskTag = ''}, bRedo = false) {
         const taskId = this.todoList.length + 1;
         const taskToAdd = {id: taskId, name: newTaskName, status: 'todo', tag: newTaskTag};
         
+        const bNoErrors = todoErrorCheck.onTaskAddition(this.todoList, newTaskName);
+        if(!bNoErrors) return false
+        
         this.todoList.push(taskToAdd);
-        this.countOfStatus.todo++;
+        this.updateStatusCount(['todo', +1]);
 
-        this.printUpdateResult('add', {taskId: taskId, taskName: newTaskName});
+        todoUndoRedo.updateActionHistory('add', bRedo, [...arguments], [this.todoList]);
+
+        todoPrint.printUpdateResult.call(this,'add', {taskId: taskId, taskName: newTaskName});
     },
-    updateTask({id, nextStatus}) {
+    updateTask({id, nextStatus}, bRedo = false) {
         const newStatus = nextStatus.toLowerCase();
         const targetTask = this.todoList[id-1];
-        const {name: targetTaskName, status: currentStatus} = targetTask;
         
-        if (nextStatus === 'doing') targetTask.startTime = Date.now();
-        if (nextStatus === 'done') targetTask.endTime = Date.now();
+        const bNoErrors = todoErrorCheck.onTaskUpdate(this.todoList, id, targetTask, newStatus);
+        if(!bNoErrors) return false
 
+        this.addTimestamp(targetTask, newStatus);
+
+        const {name: targetTaskName, status: currentStatus} = targetTask;
         targetTask.status = newStatus;
-        this.countOfStatus[currentStatus]--;
-        this.countOfStatus[newStatus]++;
+        this.updateStatusCount([currentStatus, -1], [newStatus, +1]);
 
-        this.printUpdateResult('update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
+        todoUndoRedo.updateActionHistory('update', bRedo, [...arguments], [this.todoList[id-1], currentStatus]);
+
+        todoPrint.printUpdateResult.call(this,'update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
     },
-    removeTask({id}) {
-        const {name, status} = this.todoList[id-1];
+    removeTask({id}, bRedo = false) {
+        const targetTask = Object.assign({}, this.todoList[id-1] || {});
+
+        const bNoErrors = todoErrorCheck.onTaskRemove(this.todoList, id);
+        if(!bNoErrors) return false
+
         delete this.todoList[id-1];
-        this.countOfStatus[status]--;
+        this.updateStatusCount([targetTask.status, -1]);
 
-        this.printUpdateResult('remove', {taskId: id, taskName: name});
+        todoUndoRedo.updateActionHistory('remove', bRedo, [...arguments], [targetTask, this.todoList]);
+
+        todoPrint.printUpdateResult.call(this,'remove', {taskId: id, taskName: targetTask.name});
     },
-    printUpdateResult(actionType, {taskId, taskName, prevStatus, nextStatus}) {
-        const countOfTasksPerStatus = `현재상태 : todo: ${this.countOfStatus.todo}개, doing: ${this.countOfStatus.doing}개, done: ${this.countOfStatus.done}개`;
-
-        if (actionType === 'add') {
-            console.log(`id: ${taskId} "${taskName}" 항목이 새로 추가됐습니다.\n${countOfTasksPerStatus}`);    
-            return
-        } 
-        if (actionType === 'update') {
-            console.log(`id: ${taskId} "${taskName}" 항목이 ${prevStatus} => ${nextStatus} 상태로 업데이트 됐습니다.\n${countOfTasksPerStatus}`);
-            return
-        } 
-        if (actionType === 'remove') {
-            console.log(`id: ${taskId}, "${taskName}" 항목 삭제 완료`);
-            return
+    updateStatusCount(...args) { //[targetStatus, increment]
+        args.forEach( ([targetStatus, increment]) => {
+            this.countOfStatus[targetStatus] += increment;    
+        } );
+    },
+    addTimestamp(targetTask, newStatus) {
+        const timestamp = {
+            doing : () => targetTask.startTime = Date.now(),
+            done : () => targetTask.endTime = Date.now()
         }
+        timestamp[newStatus]();
+    },
+    removeTimestamp(targetTask, newStatus) {
+        const timestamp = {
+            doing : () => delete targetTask.startTime,
+            done : () => delete targetTask.endTime
+        }
+        timestamp[newStatus]();
+    },
+    undo() {
+        todoUndoRedo.undo();
+    },
+    redo() {
+        todoUndoRedo.redo();
+    },
+    showTag(tag) {
+        todoPrint.showTasksByTag(tag, this.todoList);
+    },
+    showTags() {
+        todoPrint.showAllTasksWithTag(this.todoList);
+    },
+    show(status) {
+        todoPrint.showTasksByStatus(status, this.todoList);
+    },
+    showAll() {
+        const sequenceArr = [ // Print order & timeout for each status
+            {status: 'todo', timeout: 2000}, 
+            {status: 'doing', timeout: 3000}, 
+            {status: 'done', timeout: 2000}
+        ];
+
+        todoPrint.showAllTasksByStatus(sequenceArr, this.todoList);
     }
 };
 
 const todoPrint = {
-    showTasksByTag(tag) {
-        let resultStr = '';
-        const resultObj = {};
-            
+    showTasksByTag(tag, todoList) {
         const targetTag = tag.toLowerCase();
-        // Group tasks by status
-        todo.todoList.forEach((task) => {
-            if (task.tag !== targetTag) return
-            if (!resultObj[task.status]) {
-                resultObj[task.status] = [];
-            }
-            resultObj[task.status].push(task);
-        });
         
-        // Add task info into resultStr for tasks in object created above
-        Object.keys(resultObj).forEach((status) => {
-            resultStr += `${(resultStr) ? `\n\n` : ''}[ ${status} , 총 ${resultObj[status].length} 개 ]`;
-            resultObj[status].forEach((task) => {
-                resultStr += `\n- ${task.id}번, ${task.name}`
-                if(status === 'done') {
-                    resultStr += ` ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); 
-                }
-            });
-        });
+        // Group tasks by status
+        const filter = ({tag}) => tag.toLowerCase() === targetTag;
+        const groupedTasksObj = this.groupTasks(todoList, filter, 'status');
+        
+        // Process above Object into formatted string
+        const resultStr = this.convertToFormattedStr.byTag(groupedTasksObj);
 
         console.log(resultStr);
-        return
     },
-    showAllTasksWithTag() {
-        let resultStr = '';
-        const resultObj = {};
-            
-        //Group tasks by tags
-        todo.todoList.forEach((task) => {
-            if (!task.tag) return
-            if (!resultObj[task.tag]) {
-                resultObj[task.tag] = [];
-            }
-            resultObj[task.tag].push(task);
-        });
+    showAllTasksWithTag(todoList) {
+        // Group tasks by tags
+        const filter = ({tag}) => !!tag;
+        const groupedTasksObj = this.groupTasks(todoList, filter, 'tag');
         
-        // Add task info into resultStr for tasks in object created above
-        Object.keys(resultObj).forEach((tag) => {
-            resultStr += `${(resultStr) ? `\n\n` : ''}[ ${tag} , 총 ${resultObj[tag].length} 개 ]`;
-            resultObj[tag].forEach((task) => {
-                resultStr += `\n- ${task.id}번, ${task.name}, [${task.status}]`
-            });
-        });
+        // Process above Object into formatted string
+        const resultStr = this.convertToFormattedStr.allTag(groupedTasksObj);
+        
         console.log(resultStr);
-        return
     },
-    showTasksByStatus(status) {
-        let resultStr = '';
-        const resultObj = {};
+    showTasksByStatus(status, todoList) {
         const targetStatus = status.toLowerCase();
 
         // Group tasks by status
-        todo.todoList.forEach((task) => {
-            if (task.status !== targetStatus) return
-            if (!resultObj[task.status]) {
-                resultObj[task.status] = [];
-            }
-            resultObj[task.status].push(task);
-        });
-        // abort method if there are no tasks under requested status
-        if(!resultObj[targetStatus]) {
+        const filter = ({status}) => status.toLowerCase() === targetStatus;
+        const groupedTasksObj = this.groupTasks(todoList, filter, 'status');
+        
+        // Abort method if there are no tasks under requested status
+        if(!groupedTasksObj[targetStatus]) {
             console.log(`${targetStatus} 상태로 등록된 할일이 없습니다`);
             return false
         }
 
-         // Add task info into resultStr for tasks in object created above
-         resultObj[targetStatus].forEach((task) => {
-            resultStr += `${(resultStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`
-            if(targetStatus === 'done') {
-                resultStr += `, ` + this.applyPrintableTimeFormat(task.endTime - task.startTime); 
-            } 
-        });
+         // Process above Object into formatted string
+         const resultStr = this.convertToFormattedStr.byStatus(groupedTasksObj, targetStatus);
 
         console.log(resultStr);
-        return
     },
-    showAllTasksByStatus(sequenceArr) {
-        const resultObj = {};
-
-        todo.todoList.forEach((task) => {
-            if (!resultObj[task.status]) {
-                resultObj[task.status] = [];
-            }
-            resultObj[task.status].push(task);
-        });
+    showAllTasksByStatus(sequenceArr, todoList) {
+        // Group tasks by status
+        const groupedTasksObj = this.groupTasks(todoList, () => true, 'status');
     
-        //Print initial message 
-        console.log(`총 ${todo.todoList.length} 개의 리스트를 가져왔습니다. ${parseInt(sequenceArr[0].timeout/1000)} 초 뒤에 ${sequenceArr[0].status} 내역을 출력합니다.....`);
+        // Print initial message 
+        console.log(`총 ${todoList.length} 개의 리스트를 가져왔습니다. ${parseInt(sequenceArr[0].timeout/1000)} 초 뒤에 ${sequenceArr[0].status} 내역을 출력합니다.....`);
 
-        this.printTasksAsync(resultObj, sequenceArr);
+        // Print tasks in each status async
+        this.printTasksAsync(groupedTasksObj, sequenceArr, todoList);
     },
-    printTasksAsync(groupedTaskObj, sequenceArr, sequenceIdx = 0) {
+    printTasksAsync(groupedTasksObj, sequenceArr, todoList, sequenceIdx = 0) {
         const sequenceLen = sequenceArr.length;
-        const hasPrintFinished = !(sequenceLen-sequenceIdx);
-        const isOnLastSequence = (sequenceLen-sequenceIdx) === 1;
+        const bOnLastSequence = (sequenceLen-sequenceIdx) === 1;
+        const bPrintFinished = !(sequenceLen-sequenceIdx);
         
-        if(hasPrintFinished) return
+        if(bPrintFinished) return
         
         const currentStatus = sequenceArr[sequenceIdx].status;
         const currentTimeout = sequenceArr[sequenceIdx].timeout;
-        const nextStatus = (isOnLastSequence) ? null : sequenceArr[sequenceIdx+1].status;
-        const nextTimeout = (isOnLastSequence) ? null : sequenceArr[sequenceIdx+1].timeout;
+        const nextStatus = (bOnLastSequence) ? null : sequenceArr[sequenceIdx+1].status;
+        const nextTimeout = (bOnLastSequence) ? null : sequenceArr[sequenceIdx+1].timeout;
         
-        setTimeout(() => {
-            cb([currentStatus, nextStatus, nextTimeout]);
-            this.printTasksAsync(groupedTaskObj, sequenceArr, sequenceIdx+1);
-            },  
+        setTimeout( (() => {
+            cb.call(this,[currentStatus, nextStatus, nextTimeout], todoList);
+            this.printTasksAsync(groupedTasksObj, sequenceArr, todoList, sequenceIdx+1);
+            }).bind(this),  
             currentTimeout
         );
         
-        function cb ([status, nextStatus, delay]) {
+        function cb ([status, nextStatus, delay], todoList) {
             // abort method if there are no tasks under requested status
-            if(!groupedTaskObj[status]) {
+            if(!groupedTasksObj[status]) {
                 console.log(`${status} 상태로 등록된 할일이 없습니다`);
             } else {
-                console.log(`[ ${status}, 총 ${groupedTaskObj[status].length} 개 ]`);
-                todoPrint.showTasksByStatus(status);
+                console.log(`[ ${status}, 총 ${groupedTasksObj[status].length} 개 ]`);
+                this.showTasksByStatus(status, todoList);
             }
             if(nextStatus) console.log(`\n지금부터 ${parseInt(delay/1000)} 초 뒤에 ${nextStatus} 할일 목록을 출력합니다...`);
             return true;
@@ -193,75 +188,268 @@ const todoPrint = {
         if (minutesSpent) {
             timeSpentStr += (timeSpentStr) ? ` ${minutesSpent} 분`: `${minutesSpent} 분`;
         }
+        if (!timeSpentStr) return `doing 상태 없이 완료된 할일`
 
         return timeSpentStr
+    },
+    printUpdateResult(actionType, {taskId, taskName, prevStatus, nextStatus}) {
+        const countOfTasksPerStatus = `현재상태 : todo: ${this.countOfStatus.todo}개, doing: ${this.countOfStatus.doing}개, done: ${this.countOfStatus.done}개`;
+        const printAction = {
+            add() {
+                console.log(`id: ${taskId} "${taskName}" 항목이 새로 추가됐습니다.\n${countOfTasksPerStatus}`);
+            },
+            update() {
+                console.log(`id: ${taskId} "${taskName}" 항목이 ${prevStatus} => ${nextStatus} 상태로 업데이트 됐습니다.\n${countOfTasksPerStatus}`);
+            },
+            remove() {
+                console.log(`id: ${taskId}, "${taskName}" 항목 삭제 완료`);
+            }
+        };
+        
+        printAction[actionType]();
+    },
+    groupTasks(todoList, filterFn, groupingType) {
+        return todoList
+                    .filter(filterFn)
+                    .reduce((resultObj, task) => {
+                        resultObj[task[groupingType]] = [task].concat( (!resultObj[task[groupingType]]) ? [] : resultObj[task[groupingType]] );
+                        return resultObj
+                    },{});
+    },
+    convertToFormattedStr: {
+        byTag(objToPrint) {
+            const makeHeader = (workingStr, status) => `${(workingStr) ? `\n\n` : ''}[ ${status} , 총 ${objToPrint[status].length} 개 ]`;
+            const makeFormattedTaskStrings = (status) => {
+                return objToPrint[status].reduce( (workingStr, task) => workingStr + `\n- ${task.id}번, ${task.name}` + this.addTimeSpent(task.status, task), ``);
+            };
+
+            return Object.keys(objToPrint).reduce( (workingStr, status) => workingStr + makeHeader(workingStr, status) + makeFormattedTaskStrings(status), ``);
+        },
+        allTag(objToPrint) {
+            const makeHeader = (workingStr, tag) => `${(workingStr) ? `\n\n` : ''}[ ${tag} , 총 ${objToPrint[tag].length} 개 ]`;
+            const makeFormattedTaskStrings = (tag) => {
+                return objToPrint[tag].reduce( (workingStr, task) => workingStr + `\n- ${task.id}번, ${task.name}, [${task.status}]` , ``);
+            }
+
+            return Object.keys(objToPrint).reduce( (workingStr, tag) => workingStr + makeHeader(workingStr, tag) + makeFormattedTaskStrings(tag), ``);
+        },
+        byStatus(groupedTasksObj, targetStatus) {
+            const makeFormattedTaskString = (workingStr, task) => `${(workingStr) ? `\n` : ''}- ${task.id}번, ${task.name}, [${task.tag}]`;
+            
+            return groupedTasksObj[targetStatus].reduce( (workingStr, task) => workingStr + makeFormattedTaskString(workingStr, task) + this.addTimeSpent(targetStatus, task), ``);
+        },
+        addTimeSpent : (targetStatus, task) => {return (targetStatus === 'done') ? `, ` + todoPrint.applyPrintableTimeFormat(task.endTime - task.startTime) : ''}
     }
 };
 
-/*
-//Test case for user journey
+const todoErrorCheck = {
+    onTaskAddition(targetTodoList, newTaskName) {
+        const bTaskNameTaken = this.isTaskNameDuplicated(targetTodoList, newTaskName);
+        if(bTaskNameTaken) {
+            console.log(`[error] 할 일 목록 todo에 이미 같은 이름의 할 일이 존재합니다.`);
+            return false
+        }
+        return true
+    },
+    onTaskUpdate(targetTodoList, id, targetTask, newStatus) {
+        //Alert user if requested with not existing task ID
+        const bTaskExists = this.isIdExists(targetTodoList, id);
+        if(!bTaskExists) {
+            console.log(`[error] ${id} 번 항목이 존재하지 않아 수정하지 못했습니다.`);
+            return false
+        }
+
+        // Alert if user tried to update status same with current status
+        const bStatusNew = targetTask.status !== newStatus
+        if(!bStatusNew) {
+            console.log(`[error] ${id} 번 항목은 이미 ${targetTask.status} 상태입니다.`);
+            return false
+        }
+        
+        // prohibit task update from done to doing or todo
+        const bTaskEditable = targetTask.status !== 'done'
+        if(!bTaskEditable) {
+            console.log(`[error] ${id} 번 항목은 done 상태입니다. ${newStatus} 상태로 바꿀 수 없습니다.`);
+            return false
+        }
+        
+        return true
+    },
+    onTaskRemove(targetTodoList, id) {
+        // Alert if user tried to remove not existing id
+        const bTaskNotExists = this.isIdExists(targetTodoList, id);
+        if(!bTaskNotExists) {
+            console.log(`[error] ${id} 번 항목이 존재하지 않아 삭제하지 못했습니다.`);
+            return false
+        }
+
+        return true
+    },
+    isTaskNameDuplicated(targetTodoList, newTaskName) {
+        const tasksInTodoStatus = ({status}) => status === 'todo';
+        const hasTheNameAlready = ({name}) => name === newTaskName;
+        
+        return targetTodoList.filter(tasksInTodoStatus).some(hasTheNameAlready)
+    },
+    isIdExists(targetTodoList, taskIdToEdit) {
+        const bTaskExists = targetTodoList.some( ({id}) => id === taskIdToEdit );
+
+        return bTaskExists
+    }
+};
+
+const todoUndoRedo = {
+    history: [],
+    undoHistory: [],
+    undoLast: {
+        add(todoList) {
+            const targetTask = todoList.pop();
+            todo.updateStatusCount([targetTask.status, -1]);
+
+            console.log(`${targetTask.id}번, ${targetTask.name} 할일이 삭제됐습니다.`);
+        },
+        update(targetTask, prevStatus) {
+            const currentStatus = targetTask.status;
+            targetTask.status = prevStatus
+            todo.updateStatusCount([currentStatus, -1], [prevStatus, +1]);
+            
+            // Remove start/endTime if they were added during the update
+            todo.removeTimestamp(targetTask, currentStatus);
+
+            console.log(`${targetTask.id}번, ${targetTask.name} 할일이 ${currentStatus} => ${prevStatus} 상태로 돌아갔습니다.`);
+        },
+        remove(targetTask, todoList) {
+            todoList[targetTask.id-1] = targetTask;
+            todo.updateStatusCount([targetTask.status, +1]);
+
+            console.log(`${targetTask.id}번, ${targetTask.name} 할일이 삭제 => ${targetTask.status} 상태로 돌아갔습니다.`);
+        }
+    },
+    redoLast: {
+        add(...args) {
+            todo.addTask(...args);
+        },
+        update(...args) {
+            todo.updateTask(...args);
+        },
+        remove(...args) {
+            todo.removeTask(...args);
+        }
+    },
+    undo() {
+        if(!this.history[0]) {
+            console.log(`undo는 최대 3번까지만 할 수 있습니다.`);
+            return false
+        } 
+
+        const lastAction = this.history.pop();
+        this.undoLast[lastAction.type](...lastAction.data);
+
+        this.updateUndoHistory(lastAction);
+    },
+    redo() {
+        if(!this.undoHistory[0]) {
+            console.log(`모든 undo를 취소했습니다.`);
+            return false
+        }
+        const lastUndo = this.undoHistory.pop();
+        this.redoLast[lastUndo.type](...lastUndo.args, true);
+    },
+    updateActionHistory(actionType, bRedo, args, actionData) {
+        if(this.history.length >= 3) this.history.shift();
+        this.history.push({type: actionType, args: args, data:actionData});
+        if(!bRedo) this.clearUndoHistory();
+    },
+    updateUndoHistory(actionObj) {
+        this.undoHistory.push(actionObj);
+    },
+    clearUndoHistory() {
+        this.undoHistory.length = 0;
+    }
+};
+
+
+//Test Cases
 todo.addTask({name: '자바스크립트 공부', tag: 'programming'});
-todo.updateTask({id: 1, nextStatus: 'doing'});
-todo.updateTask({id: 1, nextStatus: 'done'});
-todo.todoList[0].endTime = 1538147881901;
-todoPrint.showTasksByStatus();
+todo.addTask({name: 'iOS 공부', tag: 'programming'});
+todo.addTask({name: 'Closure 공부', tag: 'programming'});
+todo.addTask({name: '여행가기', tag: 'play'});
+todo.updateTask({id: 4, nextStatus: 'doing'});
+todo.updateTask({id: 3, nextStatus: 'doing'});
+todo.updateTask({id: 3, nextStatus: 'done'});
+todo.todoList[2].startTime = 1537838429530;
+todo.todoList[2].endTime = 1537926397371;
+// 이상의 코드로 아래 상태가 됨 : todo.todoList = (
+//     {id: 1, name: '자바스크립트 공부', status: 'todo', tag: 'programming'},
+//     {id: 2, name: 'iOS 공부', status: 'todo', tag: 'programming'},
+//     {id: 3, name: 'Closure 공부', status: 'done', startTime: 1537838429530, endTime: 1537926397371, tag: 'programming'},
+//     {id: 4, name: '여행가기', status: 'doing', startTime: 1537838429530, tag: 'play'}
+// );
+
+console.log(`\n====입력 오류 검증 살펴보기====\n`);
+todo.addTask({name: '자바스크립트 공부', tag: 'Hobby'});
+//[error] todo 목록에 이미 같은 이름의 할 일이 존재합니다.
+
+todo.updateTask({id: 2, nextStatus:'todo'});
+//[error] 2 번 항목은 이미 todo 상태입니다.
+
+todo.updateTask({id: 3, nextStatus:'doing'});
+//[error] 3 번 항목은 done 상태입니다. doing 상태로 바꿀 수 없습니다.
+
+todo.updateTask({id: 23, nextStatus: 'doing'});
+//[error] 23 번 항목이 존재하지 않아 수정하지 못했습니다.
+
+todo.removeTask({id: 23});
+//[error] 23 번 항목이 존재하지 않아 삭제하지 못했습니다.
 
 
+// ==== undo & redo Test cases
+console.log(`\n====되돌리기 / 다시 실행하기 살펴보기====\n`);
+todo.addTask({name: "알고리즘 스터디", tag:"Study"});
+//id: 5 "알고리즘 스터디" 항목이 새로 추가됐습니다.
 
-// Test cases for individual methods
-todo.todoList.push(
-    {id: 13, name: '자바스크립트 공부', status: 'todo', tag: 'programming'},
-    {id: 17, name: 'iOS 공부', status: 'todo', tag: 'programming'},
-    {id: 21, name: 'Closure 공부', status: 'done', startTime: 1537838429530, endTime: 1537926397371, tag: 'programming'},
-    {id: 18, name: '여행가기', status: 'doing', startTime: '04:19', tag: 'play'}
-);
+todo.updateTask({id:1,  nextStatus:"doNe"});
+//id: 1,  "자바스크립트 공부하기" 항목이 todo => done 상태로 업데이트 됐습니다.
 
-console.log(`\n === 모든 태그 출력 === \n`);
-todoPrint.showAllTasksWithTag();
-// [ programming , 총 3 개 ]
-//- 13번, 자바스크립트 공부, [todo]
-//- 17번, iOS 공부, [todo]
-//- 21번, Closure 공부, [done]
-//
-//[ play , 총 1 개 ]
-//- 18번, 여행가기, [doing]
+todo.removeTask({id:3});
+//id: 3, "Closure 공부" 항목 삭제 완료
 
-console.log(`\n === 특정 태그만 출력 === \n`);
-todoPrint.showTasksByTag('programming');
-// [ todo , 총 2 개 ]
-//- 13번, 자바스크립트 공부
-//- 17번, iOS 공부
-//
-//[ done , 총 1 개 ]
-//- 21번, Closure 공부 1 일 26 분
+console.log(`\n==== undo * 3 ====\n`);
+todo.undo();
+//3번, Closure 공부 할일이 삭제 => done 상태로 돌아갔습니다.
 
-console.log(`\n === 특정 상태 'doing'만 출력 === \n`);
-todoPrint.showTasksByStatus('dOing');
-//- 18번, 여행가기, [play]
+todo.undo();
+//1번, 자바스크립트 공부 할일이 done => todo 상태로 돌아갔습니다.
+
+todo.undo();
+//5번, 알고리즘 스터디 할일이 삭제됐습니다.
+
+console.log(`\n==== redo * 2 >> 새 데이터 추가 >> redo * 1 (에러) ====\n`);
+todo.redo();
+//id: 5 "알고리즘 스터디" 항목이 새로 추가됐습니다.
+
+todo.redo();
+//id: 1 "자바스크립트 공부" 항목이 todo => done 상태로 업데이트 됐습니다.
+
+//Undohistory clear test - do something while one more redo-able task exists
+todo.addTask({name: "스타벅스 방문", tag:"Drink"});
+//id: 6 "스타벅스 방문" 항목이 새로 추가됐습니다.
+
+todo.redo();
+// 모든 undo를 취소했습니다.
 
 
-console.log(`\n === 특정 상태 'done'만 출력 === \n`);
-todoPrint.showTasksByStatus('dONe');
-//- 21번, Closure 공부, [programming], 1 일 26 분
+// 출력 객체 호출 테스트
+console.log(`\n======= 출력 객체 호출 test cases\n`);
 
-console.log(`\n === 모든 상태 출력 === \n`);
-const sequenceArr = [// A sequence array that contains status to print & timeout for each status
-    {status: 'todo', timeout: 2000}, 
-    {status: 'doing', timeout: 3000}, 
-    {status: 'done', timeout: 2000}
-];
-todoPrint.showAllTasksByStatus(sequenceArr);
-//총 4 개의 리스트를 가져왔습니다. 2 초 뒤에 todo 내역을 출력합니다.....
-//[ todo, 총 2 개 ]
-//- 13번, 자바스크립트 공부, [programming]
-//- 17번, iOS 공부, [programming]
-//
-//지금부터 3 초 뒤에 doing 할일 목록을 출력합니다...
-//[ doing, 총 1 개 ]
-//- 18번, 여행가기, [play]
-//
-//지금부터 2 초 뒤에 done 할일 목록을 출력합니다...
-//[ done, 총 1 개 ]
-//- 21번, Closure 공부, [programming], 1 일 26 분
+console.log(`\nㅇ 특정 태그만 불러오기`);
+todo.showTag('proGraMMing');
 
-*/
+console.log(`\nㅇ 모든 태그 불러오기`);
+todo.showTags();
+
+console.log(`\nㅇ 특정 상태만 불러오기`);
+todo.show('DoNe');
+
+console.log(`\nㅇ 모든 할일 불러오기`);
+todo.showAll();
