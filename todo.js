@@ -1,5 +1,6 @@
 const todo = {
     task: [],
+
     getRanNum: function () {
         const ranNum = Math.floor(Math.random() * 5)
         const idArrays = this.task.map(obj => obj.id)
@@ -25,17 +26,28 @@ const todo = {
         console.log(`현재상태 todo : ${statusNum.todo}, doing: ${statusNum.doing}, done : ${statusNum.done}`)
     },//상태를 출력해주는 함수
 
+    printChangeThing: function (objToPrint, beforeTaskLength, beforeTaskStatus) {
+        if(this.task.length > beforeTaskLength) {
+            console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 항목이 추가되었습니다.`);
+        } else if(this.task.length < beforeTaskLength) {
+            console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 삭제 완료`)
+        } else {
+            console.log(`ID: ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 업데이트 되었습니다.`)
+        }
+    },
+
     add: function (objToAdd) {
+        const notAddedLength = this.task.length
         const newTodo = {
             id: this.getRanNum(),
             name: objToAdd.name,
             status: 'todo',
             tag: objToAdd.tag
         }
-        this.task.push(newTodo)
         let statusNum = this.getStatusNum(this.task)
         //printStatusNum함수 수정해보기.if문 사용하면 되지 않을까.
-        console.log(`ID : ${newTodo.id}, ${newTodo.name} 항목이 추가되었습니다.`);
+        this.task.push(newTodo)
+        this.printChangeThing(newTodo, notAddedLength)
         this.printStatusNum(statusNum)
     },//해야할일과 id값을 추가해주는 함수
 
@@ -55,15 +67,16 @@ const todo = {
             }
         })
         let statusNum = this.getStatusNum(this.task)
-        console.log(`ID: ${changedTask[0].id}, ${changedTask[0].name} 항목이 ${beforeTaskStatus[0]} => ${changedTask[0].status} 상태로 업데이트 되었습니다.`)
+        this.printChangeThing(changedTask[0], this.task.length, beforeTaskStatus[0])
         this.printStatusNum(statusNum)
     },//상태 업데이트 함수
 
     remove: function (objToRemove) {
-        let filterdTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
+        const notRemovedLength = todo.task.length
+        let filteredTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
         let removedTask = this.task.filter(taskObj => taskObj.id !== objToRemove.id)
         this.task = removedTask
-        console.log(`ID : ${filterdTask[0].id}, ${filterdTask[0].name} 삭제 완료`)
+        this.printChangeThing(filteredTask[0], notRemovedLength)
     },//할 일과 id값을 제거해주는 함수
 
     printTask: function () {
