@@ -60,10 +60,10 @@ const todo = {
     },//상태 업데이트 함수
 
     remove: function (objToRemove) {
-        let extractedTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
+        let filterdTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
         let removedTask = this.task.filter(taskObj => taskObj.id !== objToRemove.id)
         this.task = removedTask
-        console.log(`ID : ${extractedTask[0].id}, ${extractedTask[0].name} 삭제 완료`)
+        console.log(`ID : ${filterdTask[0].id}, ${filterdTask[0].name} 삭제 완료`)
     },//할 일과 id값을 제거해주는 함수
 
     printTask: function () {
