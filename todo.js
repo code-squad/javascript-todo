@@ -13,7 +13,7 @@ const todo = {
         this.todoList.push(taskToAdd);
         this.updateStatusCount(['todo', +1]);
 
-        todoUndoRedo.updateActionHistory('add', bRedo, [...arguments], [this.todoList]);
+        todoUndoRedo.updateActionHistory('add', bRedo, [...arguments], [this.todoList, this.countOfStatus]);
 
         todoPrint.printUpdateResult.call(this,'add', {taskId: taskId, taskName: newTaskName});
     },
@@ -30,7 +30,7 @@ const todo = {
         targetTask.status = newStatus;
         this.updateStatusCount([currentStatus, -1], [newStatus, +1]);
 
-        todoUndoRedo.updateActionHistory('update', bRedo, [...arguments], [this.todoList[id-1], currentStatus]);
+        todoUndoRedo.updateActionHistory('update', bRedo, [...arguments], [this.todoList[id-1], currentStatus, this.countOfStatus]);
 
         todoPrint.printUpdateResult.call(this,'update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
     },
@@ -43,7 +43,7 @@ const todo = {
         delete this.todoList[id-1];
         this.updateStatusCount([targetTask.status, -1]);
 
-        todoUndoRedo.updateActionHistory('remove', bRedo, [...arguments], [targetTask, this.todoList]);
+        todoUndoRedo.updateActionHistory('remove', bRedo, [...arguments], [targetTask, this.todoList, this.countOfStatus]);
 
         todoPrint.printUpdateResult.call(this,'remove', {taskId: id, taskName: targetTask.name});
     },
@@ -70,7 +70,7 @@ const todo = {
         todoUndoRedo.undo();
     },
     redo() {
-        todoUndoRedo.redo();
+        todoUndoRedo.redo(this);
     },
     showTag(tag) {
         todoPrint.showTasksByTag(tag, this.todoList);
@@ -302,38 +302,44 @@ const todoUndoRedo = {
     history: [],
     undoHistory: [],
     undoLast: {
-        add(todoList) {
+        add(todoList, countOfStatus) {
             const targetTask = todoList.pop();
-            todo.updateStatusCount([targetTask.status, -1]);
+            countOfStatus[targetTask.status]--;
 
             console.log(`${targetTask.id}번, ${targetTask.name} 할일이 삭제됐습니다.`);
         },
-        update(targetTask, prevStatus) {
+        update(targetTask, prevStatus, countOfStatus) {
             const currentStatus = targetTask.status;
+            countOfStatus[targetTask.status]--;
+            countOfStatus[prevStatus]++;
+            
             targetTask.status = prevStatus
-            todo.updateStatusCount([currentStatus, -1], [prevStatus, +1]);
             
             // Remove start/endTime if they were added during the update
-            todo.removeTimestamp(targetTask, currentStatus);
+            if(currentStatus === 'doing') delete targetTask.startTime
+            if(currentStatus === 'done') delete targetTask.startTime
 
             console.log(`${targetTask.id}번, ${targetTask.name} 할일이 ${currentStatus} => ${prevStatus} 상태로 돌아갔습니다.`);
         },
-        remove(targetTask, todoList) {
+        remove(targetTask, todoList, countOfStatus) {
             todoList[targetTask.id-1] = targetTask;
-            todo.updateStatusCount([targetTask.status, +1]);
+            countOfStatus[targetTask.status]++;
 
             console.log(`${targetTask.id}번, ${targetTask.name} 할일이 삭제 => ${targetTask.status} 상태로 돌아갔습니다.`);
         }
     },
     redoLast: {
         add(...args) {
-            todo.addTask(...args);
+            const caller = this;
+            caller.addTask(...args);
         },
         update(...args) {
-            todo.updateTask(...args);
+            const caller = this;
+            caller.updateTask(...args);
         },
         remove(...args) {
-            todo.removeTask(...args);
+            const caller = this;
+            caller.removeTask(...args);
         }
     },
     undo() {
@@ -347,13 +353,13 @@ const todoUndoRedo = {
 
         this.updateUndoHistory(lastAction);
     },
-    redo() {
+    redo(caller) {
         if(!this.undoHistory[0]) {
             console.log(`모든 undo를 취소했습니다.`);
             return false
         }
         const lastUndo = this.undoHistory.pop();
-        this.redoLast[lastUndo.type](...lastUndo.args, true);
+        this.redoLast[lastUndo.type].bind(caller)(...lastUndo.args, true);
     },
     updateActionHistory(actionType, bRedo, args, actionData) {
         if(this.history.length >= 3) this.history.shift();
@@ -401,7 +407,7 @@ todo.updateTask({id: 23, nextStatus: 'doing'});
 
 todo.removeTask({id: 23});
 //[error] 23 번 항목이 존재하지 않아 삭제하지 못했습니다.
-
+ 
 
 // ==== undo & redo Test cases
 console.log(`\n====되돌리기 / 다시 실행하기 살펴보기====\n`);
