@@ -1,5 +1,5 @@
 const todo = {
-    //task의 아이디와idArrays의 sync가 정확하게 맞을까??
+    //task의 아이디와idArrays의 sync가 정확하게 맞을까?
     task: [],
     idArrays: [],
     getRanNum: function () {
@@ -23,6 +23,7 @@ const todo = {
     },//상태를 초기화 시켜주는 함수
 
     printStatusNum: function (statusNum) {
+
         console.log(`현재상태 todo : ${statusNum.todo}, doing: ${statusNum.doing}, done : ${statusNum.done}`)
     },//상태를 출력해주는 함수
 
