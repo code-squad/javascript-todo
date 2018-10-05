@@ -45,7 +45,6 @@ const todo = {
             tag: objToAdd.tag
         }
         let statusNum = this.getStatusNum(this.task)
-        //printStatusNum함수 수정해보기.if문 사용하면 되지 않을까.
         this.task.push(newTodo)
         this.printChangeThing(newTodo, notAddedLength)
         this.printStatusNum(statusNum)
