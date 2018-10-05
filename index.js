@@ -84,16 +84,13 @@ class PrintTodo{
         const todoByTag = this.getTodoObj.tag(todoList, tag);
 
         Object.keys(todoByTag).forEach(status => {
-            if(!todoByTag[status]) return;
-            console.log(`[ ${status} , 총${todoByTag[status].length}개 ]`);
-            todoByTag[status].forEach(task => {
-                if(status !== 'done'){
-                    console.log(`- ${task.id}, ${task.name}`);
-                } else {
-                    console.log(`- ${task.id}, ${task.name}, ${this.getTime(task.spentTime)}`);
-                }        
-            });
-            console.log(`\n`);
+            if(!todoByTag[status]) return; 
+            const resultStr = todoByTag[status].reduce((accStr, task) => {
+                    if(status === 'done') return accStr += `- ${task.id}, ${task.name}, ${this.getTime(task.spentTime)}\n`;
+                    return accStr += `- ${task.id}, ${task.name}\n`;
+                }, `[ ${status} , 총${todoByTag[status].length}개 ]\n`)
+        
+            console.log(resultStr);
         })
     }
 
@@ -101,47 +98,45 @@ class PrintTodo{
         const todoByTags = this.getTodoObj.tags(todoList);
 
         Object.keys(todoByTags).forEach(tag => {
-            console.log(`[ ${tag} , 총${todoByTags[tag].length}개 ]`);
-            todoByTags[tag].forEach(task => {
-                if(task.status !== 'done'){
-                    console.log(`- ${task.id}, ${task.name}, [${task.status}]`);
-                } else {
-                    console.log(`- ${task.id}, ${task.name}, [${task.status}], ${this.getTime(task.spentTime)}`);
-                }        
-            });
-            console.log(`\n`);
+            const resultStr = todoByTags[tag].reduce((accStr, task) => {
+                if(task.status === 'done') return accStr += `- ${task.id}, ${task.name}, [${task.status}], ${this.getTime(task.spentTime)}\n`;
+                return accStr += `- ${task.id}, ${task.name}, [${task.status}]\n`;
+            }, `[ ${tag} , 총${todoByTags[tag].length}개 ]\n`);
+            
+            console.log(resultStr);
         });
     }
 
     listByStatus(list, status){
-        list.filter(task => task.status === status).forEach(task => {
-            if(status !== 'done'){
-                console.log(`- ${task.id}, ${task.name}${!task.tag ? '' : `, [${task.tag}]`}`);
-            } else {
-                console.log(`- ${task.id}, ${task.name}, [${task.tag}], ${this.getTime(task.spentTime)}`);
-            }                       
-        });
+        let resultStr = '';
+        list.filter(task => task.status === status)
+            .forEach(task => {
+                if(status === 'done')  resultStr += `- ${task.id}, ${task.name}, [${task.tag}], ${this.getTime(task.spentTime)}\n`;
+                resultStr += `- ${task.id}, ${task.name}${!task.tag ? '' : `, [${task.tag}]\n`}`;                  
+            });
+        console.log(resultStr);
     }
 
     listByAllStatus(todoList){
         const todoByStatus = this.getTodoObj.status(todoList);
+        const statusOfAsyn = Object.keys(todoByStatus);
+        const asynTime = [2000, 3000, 2000];
+        let asynIndex = 0;
+
+        const asynPrint = (status) => {
+            asynIndex += 1;
+            console.log(`[ ${status} , 총${todoByStatus[status].length}개 ]`)
+            todo.show(status);
+            if(statusOfAsyn[asynIndex]) console.log(`\n\"지금부터 ${asynTime[asynIndex]/1000}초뒤에 ${statusOfAsyn[asynIndex]}내역을 출력합니다....\"`);
+            if(asynIndex < 3) setTimeout(asynPrint, asynTime[asynIndex], statusOfAsyn[asynIndex]);
+        }
            
-        console.log(`\"총 ${todoList.length}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다.....\"`)
-        setTimeout(function(){
-            console.log(`[ todo , 총${todoByStatus['todo'].length}개 ]`)
-            self.show('todo');
-            console.log(`\n\"지금부터 3초뒤에 doing내역을 출력합니다....\"`);
-            setTimeout(function(){
-                console.log(`[ doing , 총${todoByStatus['doing'].length}개 ]`)
-                self.show('doing');
-                console.log(`\n\"지금부터 2초뒤에 done내역을 출력합니다....\"`);
-                setTimeout(function(){
-                    console.log(`[ done , 총${todoByStatus['done'].length}개 ]`)
-                    self.show('done');
-                }, 2000)
-            }, 3000)
-        }, 2000)
+        console.log(`\"총 ${todoList.length}개의 리스트를 가져왔습니다. ${asynTime[asynIndex]/1000}초뒤에 ${statusOfAsyn[asynIndex]}내역을 출력합니다.....\"`)
+
+        setTimeout(asynPrint, asynTime[asynIndex], statusOfAsyn[asynIndex])
     }
+
+
 
     getTime(spentTime){
         const days = parseInt(spentTime/24/60/60/1000);
