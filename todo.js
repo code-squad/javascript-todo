@@ -62,7 +62,7 @@ const todo = {
         } else {
             console.log(`ID: ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 업데이트 되었습니다.`)
         }
-    },
+    },//할일이 추가되거나 제거되거나 업데이트 될 때 적합한 내용을 출력해 주는 함수
 
     add: function (objToAdd) {
         const notAddedLength = this.task.length
@@ -79,10 +79,8 @@ const todo = {
     },//해야할일과 id값을 추가해주는 함수
 
     update: function (objToUpdate) {
-        if(objToUpdate.status = 'doing') {
-            time.doingChangedTimeArrays.push(Date.now)
-        }
         let beforeTaskStatus = []
+        todo.updateTime(objToUpdate)
         this.task = this.task.map(taskObj => {
             if (objToUpdate.id === taskObj.id) {
                 beforeTaskStatus.push(taskObj.status)
@@ -100,6 +98,22 @@ const todo = {
         this.printChangeThing(changedTask[0], this.task.length, beforeTaskStatus[0])
         this.printStatusNum(statusNum)
     },//상태 업데이트 함수//주어진 정보의 시간을 넣을 수 있도록 수정 요망
+
+    updateTime: function(objToUpdate) {
+        if(objToUpdate.nextstatus === 'doing') {
+            const doingTimeData = {
+                id: objToUpdate.id,
+                time: Date.now(),
+            }
+            saveTimeObj.doingChangedTimeArrays.push(doingTimeData)
+        } else if (objToUpdate.nextstatus === 'done') {
+            const doneTimeData = {
+                id: objToUpdate.id,
+                time: Date.now(),
+            }
+            saveTimeObj.doneChangedTimeArrays.push(doneTimeData)
+        }
+    },//업데이트할 객체를 인자로 받아 id값과 업데이트될때의 시간 값을 saveTimeObj에 저장.
 
     remove: function (objToRemove) {
         const notRemovedLength = todo.task.length
