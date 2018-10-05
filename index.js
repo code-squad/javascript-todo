@@ -1,7 +1,7 @@
 class Todo {
-    constructor(printTodo){
+    constructor(){
         this.list = [];
-        this.printTodo = printTodo;      
+        this.printTodo = new PrintTodo;      
     }
     
     add(task){
@@ -55,13 +55,12 @@ class Todo {
 }
 
 class PrintTodo{
-    constructor(getTodoObj){
-        this.getTodoObj = getTodoObj;
+    constructor(){
+        this.getTodoObj = new GetTodoObj;
     }
 
     commandResult(todoList, command, task, prevStatus){
         const countTodoStatus = (status) => todoList.filter(task => task.status === status).length;
-
         switch(command){
             case 'add':
                 console.log(`id: ${task.id}, \"${task.name}\" 항목이 새로 추가됐습니다. \n현재상태 : todo: ${countTodoStatus('todo')}, doing: ${countTodoStatus('doing')}, done: ${countTodoStatus('done')}`);
@@ -85,12 +84,13 @@ class PrintTodo{
 
         Object.keys(todoByTag).forEach(status => {
             if(!todoByTag[status]) return; 
-            const resultStr = todoByTag[status].reduce((accStr, task) => {
-                    if(status === 'done') return accStr += `- ${task.id}, ${task.name}, ${this.getTime(task.spentTime)}\n`;
+            const resultStr = 
+                todoByTag[status].reduce((accStr, task) => {
+                    if(task.spentTime) return accStr += `- ${task.id}, ${task.name}, ${this.getTime(task.spentTime)}\n`;
                     return accStr += `- ${task.id}, ${task.name}\n`;
                 }, `[ ${status} , 총${todoByTag[status].length}개 ]\n`)
         
-            console.log(resultStr);
+            console.log(resultStr + '\n');
         })
     }
 
@@ -98,12 +98,13 @@ class PrintTodo{
         const todoByTags = this.getTodoObj.tags(todoList);
 
         Object.keys(todoByTags).forEach(tag => {
-            const resultStr = todoByTags[tag].reduce((accStr, task) => {
-                if(task.status === 'done') return accStr += `- ${task.id}, ${task.name}, [${task.status}], ${this.getTime(task.spentTime)}\n`;
-                return accStr += `- ${task.id}, ${task.name}, [${task.status}]\n`;
-            }, `[ ${tag} , 총${todoByTags[tag].length}개 ]\n`);
+            const resultStr = 
+                todoByTags[tag].reduce((accStr, task) => {
+                    if(task.spentTime) return accStr += `- ${task.id}, ${task.name}, [${task.status}], ${this.getTime(task.spentTime)}\n`;
+                    return accStr += `- ${task.id}, ${task.name}, [${task.status}]\n`;
+                }, `[ ${tag} , 총${todoByTags[tag].length}개 ]\n`);
             
-            console.log(resultStr);
+            console.log(resultStr + '\n');
         });
     }
 
@@ -111,32 +112,32 @@ class PrintTodo{
         let resultStr = '';
         list.filter(task => task.status === status)
             .forEach(task => {
-                if(status === 'done')  resultStr += `- ${task.id}, ${task.name}, [${task.tag}], ${this.getTime(task.spentTime)}\n`;
-                resultStr += `- ${task.id}, ${task.name}${!task.tag ? '' : `, [${task.tag}]\n`}`;                  
-            });
+                if(task.spentTime)  resultStr += `- ${task.id}, ${task.name}, [${task.tag}], ${this.getTime(task.spentTime)}\n`;
+                else resultStr += `- ${task.id}, ${task.name}${!task.tag ? '' : `, [${task.tag}]\n`}`;                  
+        });
         console.log(resultStr);
     }
 
     listByAllStatus(todoList){
         const todoByStatus = this.getTodoObj.status(todoList);
-        const statusOfAsyn = Object.keys(todoByStatus);
+
+        const kindOfPrint = Object.keys(todoByStatus);
+        const countOfCallback = kindOfPrint.length;
         const asynTime = [2000, 3000, 2000];
         let asynIndex = 0;
 
         const asynPrint = (status) => {
             asynIndex += 1;
             console.log(`[ ${status} , 총${todoByStatus[status].length}개 ]`)
-            todo.show(status);
-            if(statusOfAsyn[asynIndex]) console.log(`\n\"지금부터 ${asynTime[asynIndex]/1000}초뒤에 ${statusOfAsyn[asynIndex]}내역을 출력합니다....\"`);
-            if(asynIndex < 3) setTimeout(asynPrint, asynTime[asynIndex], statusOfAsyn[asynIndex]);
+            if(todoByStatus[status].length) todo.show(status);
+            if(kindOfPrint[asynIndex]) console.log(`\n\"지금부터 ${asynTime[asynIndex]/1000}초뒤에 ${kindOfPrint[asynIndex]}내역을 출력합니다....\"`);
+            if(asynIndex < countOfCallback) setTimeout(asynPrint, asynTime[asynIndex], kindOfPrint[asynIndex]);
         }
            
-        console.log(`\"총 ${todoList.length}개의 리스트를 가져왔습니다. ${asynTime[asynIndex]/1000}초뒤에 ${statusOfAsyn[asynIndex]}내역을 출력합니다.....\"`)
+        console.log(`\"총 ${todoList.length}개의 리스트를 가져왔습니다. ${asynTime[asynIndex]/1000}초뒤에 ${kindOfPrint[asynIndex]}내역을 출력합니다.....\"`)
 
-        setTimeout(asynPrint, asynTime[asynIndex], statusOfAsyn[asynIndex])
+        setTimeout(asynPrint, asynTime[asynIndex], kindOfPrint[asynIndex])
     }
-
-
 
     getTime(spentTime){
         const days = parseInt(spentTime/24/60/60/1000);
@@ -160,7 +161,7 @@ class GetTodoObj{
         const todoObj = {todo: '', doing: '', done: ''};
         todoList
             .filter(task => task.tag === tag)
-            .reduce(this.statusReducer, todoObj);
+            .forEach(task => !todoObj[task.status] ? todoObj[task.status] = [task] : todoObj[task.status].push(task));
 
         return todoObj;
     }
@@ -169,36 +170,17 @@ class GetTodoObj{
         const todoObj = {};
         todoList
             .filter(task => task.tag)
-            .reduce((todoObj, task) => {
-                if(!todoObj[task.tag]) return todoObj[task.tag] = [task];
-                return todoObj[task.tag].push(task);
-            }, todoObj);
+            .forEach(task => !todoObj[task.tag] ? todoObj[task.tag] = [task] : todoObj[task.tag].push(task));
 
         return todoObj;
     }
 
     status(todoList){
         const todoObj = {todo: '', doing: '', done: ''};
-        todoList.reduce(this.statusReducer, todoObj);
+        todoList.forEach(task => !todoObj[task.status] ? todoObj[task.status] = [task] : todoObj[task.status].push(task));
         
         return todoObj;
     }
-
-    statusReducer(todoObj, task){
-        if(!todoObj[task.status]) return todoObj[task.status] = [task];
-        return todoObj[task.status].push(task);
-    }
 }
 
-const getTodoObj = new GetTodoObj();
-const printTodo = new PrintTodo(getTodoObj);
-const todo = new Todo(printTodo);
-todo.add({name: "js 공부하기", tag:"programming"});
-todo.add({name: "algorithm 공부하기", tag:"programming"});
-todo.add({name: "database 공부하기", tag:"database"});
-
-todo.showTag('programming');
-todo.showTags();
-todo.show('todo');
-todo.showAll();
-
+const todo = new Todo();
