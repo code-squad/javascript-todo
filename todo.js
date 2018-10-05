@@ -32,6 +32,8 @@ const todo = {
         todoUndoRedo.updateActionHistory('update', bRedo, [...arguments], [this.todoList[id-1], currentStatus, this.countOfStatus]);
 
         todoPrint.printUpdateResult.call(this,'update', new UpdateResult(id, targetTaskName, currentStatus, newStatus));
+
+        if(newStatus === 'done') todoPrint.cheer(this.todoList)
     },
     removeTask({id}, bRedo = false) {
         const targetTask = this.todoList[id-1] || new Task();
@@ -231,7 +233,46 @@ const todoPrint = {
             return groupedTasksObj[targetStatus].reduce( (workingStr, task) => workingStr + makeFormattedTaskString(workingStr, task) + this.addTimeSpent(targetStatus, task), ``);
         },
         addTimeSpent : (targetStatus, task) => {return (targetStatus === 'done') ? `, ` + todoPrint.applyPrintableTimeFormat(task.endTime - task.startTime) : ''}
-    }
+    },
+    cheer(todoList) {
+        const thisMonth = (new Date).getMonth() +1;
+        const lastMonth = (thisMonth -1) ? thisMonth -1 : 12;
+        const convertDateNumToMonth = (dateNum) => new Date(dateNum).getMonth() + 1;
+        const numOfTasksDoneThisMonth = todoList.filter( (task) => convertDateNumToMonth(task.endTime) === thisMonth ).length;
+        const numOfTasksDoneLastMonth = todoList.filter( (task) => convertDateNumToMonth(task.endTime) === lastMonth ).length;
+        
+        // Template string to make cheer message stands out
+        console.log(`\n====================\n해냈다, 해냈어!\n====================\n`);
+
+        // log # of tasks completed THIS & LAST month
+        console.log(`만세! 지금까지 ${numOfTasksDoneThisMonth} 개의 할 일을 마무리했습니다.`);
+        console.log(`지난 ${lastMonth}월에는 ${numOfTasksDoneLastMonth} 개의 할 일을 마무리했네요.`);
+        
+        // log completion ratio between THIS & LAST month
+        (numOfTasksDoneThisMonth >= numOfTasksDoneLastMonth) ? 
+            console.log(`지난달보다 ${numOfTasksDoneThisMonth - numOfTasksDoneLastMonth} 개 더 많은 일을 해내셨습니다.`)
+            : console.log(`지난달만큼 일감을 마무리하기까지 ${numOfTasksDoneLastMonth - numOfTasksDoneThisMonth} 개 남았습니다. 화이팅!`)
+        
+        // log random quote 
+        console.log(`\n=== 성공적인 이 달을 위한 오늘의 명언 ===\n${this.randomQuote(this.quoteArr)}\n\n`);
+    },
+    randomQuote(quoteArr) {
+        const quote = quoteArr[Math.floor(Math.random() * quoteArr.length)];
+        return `"${quote.message}" \n- ${quote.author}`
+    },
+    quoteArr: [
+        {message: `Anyone who has never made a mistake has never tried anything new`, author: `Albert Einstein`},
+        {message: `If you spend too much time thinking about a thing, you’ll never get it done`, author: `Bruce Lee`},
+        {message: `My general attitude to life is to enjoy every minute of every day. I never do anything with a feeling of, “Oh God, I’ve got to do this today"`, author: `Richard Branson`},
+        {message: `The way to get started is to quit talking and begin doing`, author: `Walt Disney`},
+        {message: `Remembering you are going to die is the best way I know to avoid the trap of thinking you have something to lose. You are already naked. There’s no reason not to follow your heart`, author: `Steve Jobs`},
+        {message: `Glory lies in the attempt to reach one’s goal and not in reaching it`, author: `Mahatma Ghandi`},
+        {message: `The secret of getting ahead is getting started`, author: `Mark Twain`},
+        {message: `It is no good getting furious if you get stuck. What I do is keep thinking about the problem but work on something else`, author: `Stephen Hawking`},
+        {message: `Don’t count the days. Make the days count`, author: `Muhammad Ali`},
+        {message: `You can, you should, and if you’re brave enough to start, you will`, author: `Steven King`},
+        {message: `Art is the elimination of the unnecessary`, author: `Pablo Picasso`}
+    ]
 };
 
 const todoErrorCheck = {
@@ -393,6 +434,13 @@ class UpdateResult {
         this.taskName = taskName;
         this.prevStatus = prevStatus || null;
         this.nextStatus = nextStatus || null;
+    }
+}
+
+class Quote {
+    constructor (message, author) {
+        this.message = message;
+        this.author = author;
     }
 }
 
