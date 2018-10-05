@@ -70,7 +70,8 @@ const todo = {
             id: this.getRanNum(),
             name: objToAdd.name,
             status: 'todo',
-            tag: objToAdd.tag
+            tag: objToAdd.tag,
+            takeTime: 0,
         }
         let statusNum = this.getStatusNum(this.task)
         this.task.push(newTodo)
@@ -114,6 +115,8 @@ const todo = {
             saveTimeObj.doneChangedTimeArrays.push(doneTimeData)
         }
     },//업데이트할 객체를 인자로 받아 id값과 업데이트될때의 시간 값을 saveTimeObj에 저장.
+    
+    
 
     remove: function (objToRemove) {
         const notRemovedLength = todo.task.length
