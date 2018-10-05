@@ -22,7 +22,7 @@ const taskProgram = {
     },
     update(obj) {
         let updatedStatus, id, updatedName, paststate;
-        [updatedStatus, id] = [obj.nextstatus, obj.id];
+        [updatedStatus, id] = [obj.nextstatus.toLowerCase(), obj.id];
         this.taskArray.forEach(v => {
             if (v.id === id) {
                 [updatedName, paststate, v.state] = [v.name, v.state, updatedStatus];
@@ -36,7 +36,7 @@ const taskProgram = {
         return console.log(`id : ${removedtodo[0].id}, "${removedtodo[0].name}" 삭제완료.`);
     }
 };
-taskProgram.add({ name: '숨쉬기', tag: '신나는일' });
-taskProgram.add({ name: '밥먹기', tag: '신나는일' });
-taskProgram.update({ id: 0, nextstatus: 'done' });
-taskProgram.remove({ id: 0 });
+// taskProgram.add({ name: '숨쉬기', tag: '신나는일' });
+// taskProgram.add({ name: '밥먹기', tag: '신나는일' });
+// taskProgram.update({ id: 0, nextstatus: 'DOne' });
+// taskProgram.remove({ id: 0 });
