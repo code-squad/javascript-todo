@@ -1,13 +1,14 @@
 class Todo {
-    constructor(){
-        this.list = [];      
+    constructor(printTodo){
+        this.list = [];
+        this.printTodo = printTodo;      
     }
     
     add(task){
         task.id = Date.now().toString(36);
         task.status = 'todo';
         this.list.push(task);
-        PrintTodo.prototype.commandResult.call(this, 'add', task);
+        this.printTodo.commandResult(this.list, 'add', task);
     }  
 
     update({id, nextstatus}){
@@ -18,14 +19,14 @@ class Todo {
 
         if(nextStatus === 'doing') targetTask.startTime = new Date(Date.now());
         else if(isDoingDone) targetTask.spentTime = Date.now() - targetTask.startTime;
-        else { 
+        else if(targetTask.startTime || targetTask.spentTime){ 
             delete targetTask.startTime;
             delete targetTask.spentTime;
         }
 
         targetTask.status = nextStatus;
 
-        PrintTodo.prototype.commandResult.call(this, 'update', targetTask, prevStatus);    
+        this.printTodo.commandResult(this.list, 'update', targetTask, prevStatus);    
     }
 
     remove({id}){
@@ -33,45 +34,33 @@ class Todo {
         const targetTask = this.list[targetIndex];
 
         this.list.splice(targetIndex, 1); 
-        PrintTodo.prototype.commandResult.call(this, 'remove', targetTask);
+        this.printTodo.commandResult(this.list, 'remove', targetTask);
     }
 
     showTag(tag){
-        PrintTodo.prototype.taskByTag.call(this, tag);
+        this.printTodo.listByTag(this.list, tag);
     }
 
     showTags(){
-        PrintTodo.prototype.allTaskByTag.call(this);
+        this.printTodo.allTaskByTags(this.list);
     }
 
     show(status){
-        PrintTodo.prototype.taskByStatus.call(this, status);
+        this.printTodo.taskByStatus(this.list, status);
     }
 
     showAll(){
-        PrintTodo.prototype.allTaskByStatus.call(this);
-    }
-
-    getTime(spentTime){
-        const days = parseInt(spentTime/24/60/60/1000);
-        spentTime -= (days * 24 * 60 * 60 * 1000);
-        const hours = parseInt(spentTime/60/60/1000);
-        spentTime -= (hours * 60 * 60 * 1000);
-        const mins = parseInt(spentTime/60/1000);
-        
-        let timeStr = ``
-        
-        if(days) timeStr += `${days}일\n`;
-        if(hours) timeStr += `${hours}시간\n`;
-        if (mins) timeStr += `${mins}분`;
-     
-        return timeStr;
+        this.printTodo.allTaskByStatus(this.list);
     }
 }
 
 class PrintTodo{
-    commandResult(command, task, prevStatus){
-        const countTodoStatus = (status) => this.list.filter(task => task.status === status).length;
+    constructor(getTaskObjByProperty){
+        this.getTaskObjByProperty = getTaskObjByProperty;
+    }
+
+    commandResult(list, command, task, prevStatus){
+        const countTodoStatus = (status) => list.filter(task => task.status === status).length;
 
         switch(command){
             case 'add':
@@ -91,44 +80,29 @@ class PrintTodo{
         }
     }
 
-    taskByTag(tag){
-        let todoByTag = {todo: '', doing: '', done: ''};
-        this.list.filter(task => task.tag === tag).forEach(task => {
-            if(!todoByTag[task.status]){
-                todoByTag[task.status] = [task];
-            }else {
-                todoByTag[task.status].push(task);
-            }
-        })
+    listByTag(todoList, tag){
+        const todoByTag = this.getTaskObjByProperty.tag(todoList, tag);
 
         Object.keys(todoByTag).forEach(status => {
-            if(todoByTag[status]){
-                console.log(`[ ${status} , 총${todoByTag[status].length}개 ]`);
-                todoByTag[status].forEach(task => {
-                    if(status !== 'done'){
-                        console.log(`- ${task.id}, ${task.name}`);
-                    } else {
-                        console.log(`- ${task.id}, ${task.name}, ${this.getTime(task.spentTime)}`);
-                    }        
-                });
-                console.log(`\n`);
-            }
+            if(!todoByTag[status]) return;
+            console.log(`[ ${status} , 총${todoByTag[status].length}개 ]`);
+            todoByTag[status].forEach(task => {
+                if(status !== 'done'){
+                    console.log(`- ${task.id}, ${task.name}`);
+                } else {
+                    console.log(`- ${task.id}, ${task.name}, ${this.getTime(task.spentTime)}`);
+                }        
+            });
+            console.log(`\n`);
         })
     }
 
-    allTaskByTag(){
-        let todoByTag = {};
-        this.list.filter(task => task.tag).forEach(task => {
-            if(!todoByTag[task.tag]){
-                todoByTag[task.tag] = [task];
-            }else {
-                todoByTag[task.tag].push(task);
-            }
-        });
+    allTaskByTags(list){
+        const todoByTags = this.getTaskObjByProperty.tags(list);
 
-        Object.keys(todoByTag).forEach(tag => {
-            console.log(`[ ${tag} , 총${todoByTag[tag].length}개 ]`);
-            todoByTag[tag].forEach(task => {
+        Object.keys(todoByTags).forEach(tag => {
+            console.log(`[ ${tag} , 총${todoByTags[tag].length}개 ]`);
+            todoByTags[tag].forEach(task => {
                 if(task.status !== 'done'){
                     console.log(`- ${task.id}, ${task.name}, [${task.status}]`);
                 } else {
@@ -139,8 +113,8 @@ class PrintTodo{
         });
     }
 
-    taskByStatus(status){
-        this.list.filter(task => task.status === status).forEach(task => {
+    taskByStatus(list, status){
+        list.filter(task => task.status === status).forEach(task => {
             if(status !== 'done'){
                 console.log(`- ${task.id}, ${task.name}${!task.tag ? '' : `, [${task.tag}]`}`);
             } else {
@@ -149,18 +123,10 @@ class PrintTodo{
         });
     }
 
-    allTaskByStatus(){
-        const self = this;
-        let todoByStatus = {todo: '', doing: '', done: ''};
-        this.list.forEach(task => {
-            if(!todoByStatus[task.status]){
-                todoByStatus[task.status] = [task];
-            } else {
-                todoByStatus[task.status].push(task);
-            }
-        });
+    allTaskByStatus(list){
+        const todoByStatus = this.getTaskObjByProperty.status(list);
            
-        console.log(`\"총 ${this.list.length}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다.....\"`)
+        console.log(`\"총 ${list.length}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다.....\"`)
         setTimeout(function(){
             console.log(`[ todo , 총${todoByStatus['todo'].length}개 ]`)
             self.show('todo');
@@ -176,10 +142,65 @@ class PrintTodo{
             }, 3000)
         }, 2000)
     }
+
+    getTime(spentTime){
+        const days = parseInt(spentTime/24/60/60/1000);
+        spentTime -= (days * 24 * 60 * 60 * 1000);
+        const hours = parseInt(spentTime/60/60/1000);
+        spentTime -= (hours * 60 * 60 * 1000);
+        const mins = parseInt(spentTime/60/1000);
+        
+        let timeStr = ``
+        
+        if(days) timeStr += `${days}일 `;
+        if(hours) timeStr += `${hours}시간 `;
+        if (mins) timeStr += `${mins}분`;
+     
+        return timeStr;
+    }
 }
 
-/* Test Case
-const todo = new Todo;
+class GetTaskObjByProperty{
+    tag(list, tag){
+        let todoByTag = {todo: '', doing: '', done: ''};
+        list.filter(task => task.tag === tag).forEach(task => {
+            if(!todoByTag[task.status]){
+                todoByTag[task.status] = [task];
+            } else {
+                todoByTag[task.status].push(task);
+            }
+        });
+        return todoByTag;
+    }
+    
+    tags(list){
+        let todoByTags = {};
+        list.filter(task => task.tag).forEach(task => {
+            if(!todoByTags[task.tag]){
+                todoByTags[task.tag] = [task];
+            }else {
+                todoByTags[task.tag].push(task);
+            }
+        });
+        return todoByTags;
+    }
+
+    status(list){
+        let todoByStatus = {todo: '', doing: '', done: ''};
+        list.forEach(task => {
+            if(!todoByStatus[task.status]){
+                todoByStatus[task.status] = [task];
+            } else {
+                todoByStatus[task.status].push(task);
+            }
+        });
+        return todoByStatus;
+    }
+}
+
+const getTaskObjByProperty = new GetTaskObjByProperty();
+const printTodo = new PrintTodo(getTaskObjByProperty);
+const todo = new Todo(printTodo);
 todo.add({name: "js 공부하기", tag:"programming"});
 todo.add({name: "algorithm 공부하기", tag:"programming"});
 todo.add({name: "database 공부하기", tag:"database"});
@@ -188,5 +209,4 @@ todo.showTag('programming');
 todo.showTags();
 todo.show('todo');
 todo.showAll();
-*/
 
