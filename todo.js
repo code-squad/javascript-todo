@@ -44,59 +44,92 @@ const todosList = {
 };
 
 let todoMessage = {
-    getCurrentStatus(statusList){
+    getCurrentStatus(data, statusList){
         const countObj = {todo:0, done:0, doing:0};
-        todosList.todos.forEach((v)=> {
+        data.forEach((v)=> {
             if(statusList.indexOf(v.status) >= 0) ++countObj[v.status];
         });
-        console.log(`현재상태 :  todo:${countObj.todo}개, doing:${countObj.doing}개, done:${countObj.done}개`);
+        return countObj;
     },
     showActiveMessage([activeType, id, name, status], update_status){
-        (activeType === 'add') ? console.log(`id: ${this.id} ${name}항목이 새로 추가되었습니다.`) :
+        (activeType === 'add') ? console.log(`id: ${id} ${name}항목이 새로 추가되었습니다.`) :
         (activeType === 'remove') ? console.log(`id:${id}, ${name} 삭제완료.`) :
         (activeType === 'update') ? console.log(`id:${id},  "${name}" 항목이 ${status} => ${update_status} 상태로 업데이트 됐습니다.`) :
         '';
-        this.getCurrentStatus(todosList.statusList);
+        let countObj = this.getCurrentStatus(todosList.todos, todosList.statusList);
+        console.log(`현재상태 :  todo:${countObj.todo}개, doing:${countObj.doing}개, done:${countObj.done}개`);
     },
     showTag(tagName){
-        // 태그 네임을 인자로 받는다.
-        // 각 상태에 따라 출력을 한다.
-        // 각 상태에 따른 총 개수를 어떻게 구할지 고민해볼것.
-        this.getTagData('todo');
-    },
-    getTagData(status){
-        console.log(`[ ${status} , 총 개 ]`);
-        let data_arr = todosList.todos.filter((v) => v.status === status)
-                    .forEach((v,i) => {
-                        console.log(
-                        `- ${v.status}, ${v.name}`
-                        )
-                    });
+        let result_value = [];
+        let showTagValue = todosList.todos.filter((v) => v.tag === tagName);
+        showTagValue.forEach((v,i) => {
+            result_value.push(v);
+        })
+        this.showMessage(result_value);
     },
     showTags(){
-        this.getTagData();
+        // 필요한 정보 : status, tag, tag.length, id, name
+        let result_value = [];
+        // let showTagValue = todosList.todos.filter((v) => v.tag === tagName);
+        todosList.todos.forEach((v,i) => {
+            result_value.push(v);
+        })
+        this.showMessage2(result_value);
     },
+    showMessage2(inputData){
+        let countObj = this.getCurrentStatus(inputData, todosList.statusList);
+        let status_count_check = [];
+        inputData.reduce((acc, curr,i) => {
+            status_count_check.push(curr.status);
+            if(status_count_check[i-1] !== status_count_check[i] && i > 0){
+                console.log();
+            }
+            if(status_count_check.indexOf(curr.status) == i){
+                console.log(`[ ${curr.status} , 총${countObj[curr.status]}개 ]`)
+            }
+                console.log(`- ${curr.id}번, ${curr.name}`)
+            return curr;
+        },'');
+    },
+    showMessage(inputData){
+        let countObj = this.getCurrentStatus(inputData, todosList.statusList);
+        let status_count_check = [];
+        inputData.reduce((acc, curr,i) => {
+            status_count_check.push(curr.status);
+            if(status_count_check[i-1] !== status_count_check[i] && i > 0){
+                console.log();
+            }
+            if(status_count_check.indexOf(curr.status) == i){
+                console.log(`[ ${curr.status} , 총${countObj[curr.status]}개 ]`)
+            }
+                console.log(`- ${curr.id}번, ${curr.name}`)
+            return curr;
+        },'');
+    },
+    
     getTags(tagName){
+        // 필요한 정보 : status, status.length, id, name
 
     },
     show(status){
-
+        // 필요한 정보 : id, name, time
     },
     showAll(){
-
+        // 필요한 정보 : status, status.length, id, name, time
     }
 }
 
-todosList.add({name: "자바스크립트 공부하기", tag:"programming"});
+todosList.add({name: "자바스크립트 공부하기", tag:"study"});
 todosList.add({name: "자료구조 공부하기", tag:"programming"});
 todosList.update({id:2,  nextstatus:"doing"});
-todosList.add({name: "OS 공부하기", tag:"programming"});
-todosList.remove({id:2});
+todosList.add({name: "OS 공부하기", tag:"game"});
 todosList.update({id:3,  nextstatus:"done"});
-todosList.remove({id:3});
 todosList.add({name: "OS 공부하기", tag:"programming"});
-todoMessage.showTag();
-
+todosList.add({name: "여행가기", tag:"play"});
+todosList.add({name: "OS", tag:"programming"});
+todosList.add({name: "ios", tag:"programming"});
+// todoMessage.showTag("programming");
+todoMessage.showTags();
 
 
 // 고려해야 할 점
