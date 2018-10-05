@@ -1,3 +1,20 @@
+
+// 다양한 출력을 지원한다. (모든태그, 특정태그, 모든리스트, 특정상태리스트)
+// 만들어야 할 함수 todo.showTag, todo.show(status), todo.showAll()
+
+// doing 에서 done으로 갈때는 소요시간이 출력되도록 doing상태부터 '시간정보' 가 있어야 한다.
+// ex) > todo.show("done");  //done항목을 노출할때는,  doing-> done까지 소요된 시간이 출력된다.
+// - 20번, 휴대폰수리, [other], 1시간1분
+// - 21번, closure공부, [programming], 1일 23분
+
+// showAll메서드는 모든리스트를 출력하며, 2초-> 3초 ->2초로 출력된다. (총7초 소요)
+// 개발과정에서 본인이 판단해서, 별도의 객체를 분리해야 할 것이면 그렇게 시도한다.
+const time = {
+    doingChangedTimeArrays: [],
+    doneChangedTimeArrays: [],
+    takenTimeArrays: [],
+}//각각 의 시간 정보들을 저장해주는 obj
+
 const todo = {
     task: [],
 
@@ -78,14 +95,18 @@ const todo = {
         this.printChangeThing(filteredTask[0], notRemovedLength)
     },//할 일과 id값을 제거해주는 함수
 
-    printTask: function () {
+    showAll: function () {
         console.log(`입력된 할 일들`)
         this.task.forEach(obj => {
             console.log(`ID : ${obj.id}, 이름 : ${obj.name}, 상태 : ${obj.status}, 태그 : ${obj.tag}`)
         })
-    },//입력된 데이터들을 출력해주는 함수
+    },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수(수정필요)
 
-    printSameTag: function (tag) {
+    show: function (status) {
+
+    },//인자로 입력받은 상태의 정보들을 출력해주는 함수
+
+    showTag: function (tag) {
         console.log(`현재 ${tag} 태그를 가진 할 일들은 다음과 같습니다.`);
         const tagSeparatedTask = this.task.filter(obj => {
             return obj.tag === tag
@@ -93,7 +114,7 @@ const todo = {
         tagSeparatedTask.forEach(obj => {
             console.log(`ID : ${obj.id}, 이름 : ${obj.name}, 상태 : ${obj.status}`)
         })
-    }//tag가 같은 할 일들 출력
+    },//수정필요, 여기에 showTags기능까지 넣어볼 것.
 }//해야 할일 객체
 //map filter중복적으로 사용하지 말아보기.
 // 테스트
