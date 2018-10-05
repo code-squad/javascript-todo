@@ -9,10 +9,21 @@
 
 // showAll메서드는 모든리스트를 출력하며, 2초-> 3초 ->2초로 출력된다. (총7초 소요)
 // 개발과정에서 본인이 판단해서, 별도의 객체를 분리해야 할 것이면 그렇게 시도한다.
-const time = {
+const saveTimeObj = {
     doingChangedTimeArrays: [],
     doneChangedTimeArrays: [],
     takenTimeArrays: [],
+    getTakeTime: function(doingTime, doneTime) {
+        let takenMsecTime = doneTime - doingTime
+        const msecPerMinute = 1000 * 60, msecPerHour = msecPerMinute * 60, msecPerDay = msecPerHour * 24
+        const takenDays = Math.floor(takenMsecTime / msecPerDay)
+        takenMsecTime = takenMsecTime - takenDays * msecPerDay
+        const takenHours = Math.floor(takenMsecTime / msecPerHour)
+        takenMsecTime = takenMsecTime - takenHours * msecPerHour
+        const takenMinutes = Math.floor(takenMsecTime / msecPerMinute)
+        takenMsecTime = takenMsecTime - takenMinutes * msecPerMinute
+        console.log(`${takenDays}일 ${takenHours}시간 ${takenMinutes}분이 걸렸습니다.`)
+    }
 }//각각 의 시간 정보들을 저장해주는 obj
 
 const todo = {
@@ -68,6 +79,9 @@ const todo = {
     },//해야할일과 id값을 추가해주는 함수
 
     update: function (objToUpdate) {
+        if(objToUpdate.status = 'doing') {
+            time.doingChangedTimeArrays.push(Date.now)
+        }
         let beforeTaskStatus = []
         this.task = this.task.map(taskObj => {
             if (objToUpdate.id === taskObj.id) {
@@ -85,7 +99,7 @@ const todo = {
         let statusNum = this.getStatusNum(this.task)
         this.printChangeThing(changedTask[0], this.task.length, beforeTaskStatus[0])
         this.printStatusNum(statusNum)
-    },//상태 업데이트 함수
+    },//상태 업데이트 함수//주어진 정보의 시간을 넣을 수 있도록 수정 요망
 
     remove: function (objToRemove) {
         const notRemovedLength = todo.task.length
