@@ -40,14 +40,20 @@ const todosList = {
         };
         return [funcName ,id ,prev_data.prevName, prev_data.prevStatus];
     },
-    
+    getTags(todosList, valueType){
+        let countObj = (valueType === 'status') ? {todo: 0, doing: 0, done: 0} : {};
+        todosList.forEach((target)=> {
+            countObj[target[valueType]] = 0;
+        });
+        return countObj;
+    }
 };
 
 let todoMessage = {
-    getCurrentStatus(data, statusList){
-        const countObj = {todo:0, done:0, doing:0};
+    getCurrentStatus(data, valueType){
+        const countObj =  todosList.getTags(todosList.todos, valueType);
         data.forEach((v)=> {
-            if(statusList.indexOf(v.status) >= 0) ++countObj[v.status];
+            ++countObj[v[valueType]];
         });
         return countObj;
     },
@@ -56,7 +62,7 @@ let todoMessage = {
         (activeType === 'remove') ? console.log(`id:${id}, ${name} 삭제완료.`) :
         (activeType === 'update') ? console.log(`id:${id},  "${name}" 항목이 ${status} => ${update_status} 상태로 업데이트 됐습니다.`) :
         '';
-        let countObj = this.getCurrentStatus(todosList.todos, todosList.statusList);
+        let countObj = this.getCurrentStatus(todosList.todos, 'status');
         console.log(`현재상태 :  todo:${countObj.todo}개, doing:${countObj.doing}개, done:${countObj.done}개`);
     },
     showTag(tagName){
@@ -67,49 +73,37 @@ let todoMessage = {
         })
         this.showMessage(result_value);
     },
+    showMessage(inputData){
+        let countObj = this.getCurrentStatus(inputData, 'status');
+        let status_count_check = [];
+        inputData.reduce((acc, curr,i) => {
+            status_count_check.push(curr.status);
+            if(status_count_check.indexOf(curr.status) == i){
+                console.log(`[ ${curr.status} , 총${countObj[curr.status]}개 ]`)
+            }
+                console.log(`- ${curr.id}번, ${curr.name}`)
+            return curr;
+        },'');
+    },
     showTags(){
         // 필요한 정보 : status, tag, tag.length, id, name
         let result_value = [];
-        // let showTagValue = todosList.todos.filter((v) => v.tag === tagName);
         todosList.todos.forEach((v,i) => {
             result_value.push(v);
         })
         this.showMessage2(result_value);
     },
     showMessage2(inputData){
-        let countObj = this.getCurrentStatus(inputData, todosList.statusList);
-        let status_count_check = [];
+        let countObj = this.getCurrentStatus(inputData, 'tag');
+        let tag_count_check = [];
         inputData.reduce((acc, curr,i) => {
-            status_count_check.push(curr.status);
-            if(status_count_check[i-1] !== status_count_check[i] && i > 0){
-                console.log();
-            }
-            if(status_count_check.indexOf(curr.status) == i){
-                console.log(`[ ${curr.status} , 총${countObj[curr.status]}개 ]`)
+            tag_count_check.push(curr.tag);
+            if(tag_count_check.indexOf(curr.tag) == i){
+                console.log(`[ ${curr.tag} , 총${countObj[curr.tag]}개 ]`)
             }
                 console.log(`- ${curr.id}번, ${curr.name}`)
             return curr;
         },'');
-    },
-    showMessage(inputData){
-        let countObj = this.getCurrentStatus(inputData, todosList.statusList);
-        let status_count_check = [];
-        inputData.reduce((acc, curr,i) => {
-            status_count_check.push(curr.status);
-            if(status_count_check[i-1] !== status_count_check[i] && i > 0){
-                console.log();
-            }
-            if(status_count_check.indexOf(curr.status) == i){
-                console.log(`[ ${curr.status} , 총${countObj[curr.status]}개 ]`)
-            }
-                console.log(`- ${curr.id}번, ${curr.name}`)
-            return curr;
-        },'');
-    },
-    
-    getTags(tagName){
-        // 필요한 정보 : status, status.length, id, name
-
     },
     show(status){
         // 필요한 정보 : id, name, time
@@ -128,7 +122,7 @@ todosList.add({name: "OS 공부하기", tag:"programming"});
 todosList.add({name: "여행가기", tag:"play"});
 todosList.add({name: "OS", tag:"programming"});
 todosList.add({name: "ios", tag:"programming"});
-// todoMessage.showTag("programming");
+todoMessage.showTag("programming");
 todoMessage.showTags();
 
 
