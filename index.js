@@ -42,25 +42,25 @@ class Todo {
     }
 
     showTags(){
-        this.printTodo.allTaskByTags(this.list);
+        this.printTodo.listByAllTags(this.list);
     }
 
     show(status){
-        this.printTodo.taskByStatus(this.list, status);
+        this.printTodo.listByStatus(this.list, status);
     }
 
     showAll(){
-        this.printTodo.allTaskByStatus(this.list);
+        this.printTodo.listByAllStatus(this.list);
     }
 }
 
 class PrintTodo{
-    constructor(getTaskObjByProperty){
-        this.getTaskObjByProperty = getTaskObjByProperty;
+    constructor(getTodoObj){
+        this.getTodoObj = getTodoObj;
     }
 
-    commandResult(list, command, task, prevStatus){
-        const countTodoStatus = (status) => list.filter(task => task.status === status).length;
+    commandResult(todoList, command, task, prevStatus){
+        const countTodoStatus = (status) => todoList.filter(task => task.status === status).length;
 
         switch(command){
             case 'add':
@@ -81,7 +81,7 @@ class PrintTodo{
     }
 
     listByTag(todoList, tag){
-        const todoByTag = this.getTaskObjByProperty.tag(todoList, tag);
+        const todoByTag = this.getTodoObj.tag(todoList, tag);
 
         Object.keys(todoByTag).forEach(status => {
             if(!todoByTag[status]) return;
@@ -97,8 +97,8 @@ class PrintTodo{
         })
     }
 
-    allTaskByTags(list){
-        const todoByTags = this.getTaskObjByProperty.tags(list);
+    listByAllTags(todoList){
+        const todoByTags = this.getTodoObj.tags(todoList);
 
         Object.keys(todoByTags).forEach(tag => {
             console.log(`[ ${tag} , 총${todoByTags[tag].length}개 ]`);
@@ -113,7 +113,7 @@ class PrintTodo{
         });
     }
 
-    taskByStatus(list, status){
+    listByStatus(list, status){
         list.filter(task => task.status === status).forEach(task => {
             if(status !== 'done'){
                 console.log(`- ${task.id}, ${task.name}${!task.tag ? '' : `, [${task.tag}]`}`);
@@ -123,10 +123,10 @@ class PrintTodo{
         });
     }
 
-    allTaskByStatus(list){
-        const todoByStatus = this.getTaskObjByProperty.status(list);
+    listByAllStatus(todoList){
+        const todoByStatus = this.getTodoObj.status(todoList);
            
-        console.log(`\"총 ${list.length}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다.....\"`)
+        console.log(`\"총 ${todoList.length}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다.....\"`)
         setTimeout(function(){
             console.log(`[ todo , 총${todoByStatus['todo'].length}개 ]`)
             self.show('todo');
@@ -160,46 +160,43 @@ class PrintTodo{
     }
 }
 
-class GetTaskObjByProperty{
-    tag(list, tag){
-        let todoByTag = {todo: '', doing: '', done: ''};
-        list.filter(task => task.tag === tag).forEach(task => {
-            if(!todoByTag[task.status]){
-                todoByTag[task.status] = [task];
-            } else {
-                todoByTag[task.status].push(task);
-            }
-        });
-        return todoByTag;
+class GetTodoObj{
+    tag(todoList, tag){
+        const todoObj = {todo: '', doing: '', done: ''};
+        todoList
+            .filter(task => task.tag === tag)
+            .reduce(this.statusReducer, todoObj);
+
+        return todoObj;
     }
     
-    tags(list){
-        let todoByTags = {};
-        list.filter(task => task.tag).forEach(task => {
-            if(!todoByTags[task.tag]){
-                todoByTags[task.tag] = [task];
-            }else {
-                todoByTags[task.tag].push(task);
-            }
-        });
-        return todoByTags;
+    tags(todoList){
+        const todoObj = {};
+        todoList
+            .filter(task => task.tag)
+            .reduce((todoObj, task) => {
+                if(!todoObj[task.tag]) return todoObj[task.tag] = [task];
+                return todoObj[task.tag].push(task);
+            }, todoObj);
+
+        return todoObj;
     }
 
-    status(list){
-        let todoByStatus = {todo: '', doing: '', done: ''};
-        list.forEach(task => {
-            if(!todoByStatus[task.status]){
-                todoByStatus[task.status] = [task];
-            } else {
-                todoByStatus[task.status].push(task);
-            }
-        });
-        return todoByStatus;
+    status(todoList){
+        const todoObj = {todo: '', doing: '', done: ''};
+        todoList.reduce(this.statusReducer, todoObj);
+        
+        return todoObj;
+    }
+
+    statusReducer(todoObj, task){
+        if(!todoObj[task.status]) return todoObj[task.status] = [task];
+        return todoObj[task.status].push(task);
     }
 }
 
-const getTaskObjByProperty = new GetTaskObjByProperty();
-const printTodo = new PrintTodo(getTaskObjByProperty);
+const getTodoObj = new GetTodoObj();
+const printTodo = new PrintTodo(getTodoObj);
 const todo = new Todo(printTodo);
 todo.add({name: "js 공부하기", tag:"programming"});
 todo.add({name: "algorithm 공부하기", tag:"programming"});
