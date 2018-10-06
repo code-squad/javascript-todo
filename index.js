@@ -1,7 +1,8 @@
 class Todo {
-    constructor(printTodo){
+    constructor(printTodo, errorCheck){
         this.list = [];
-        this.printTodo = printTodo;      
+        this.printTodo = printTodo;
+        this.errorCheck = errorCheck;
     }
     
     add({name, tag}){
@@ -11,22 +12,27 @@ class Todo {
             status: 'todo',
             tag: tag
         }
-        const isSameTaskName = !!(this.list.filter(task => task.name === name)[0]);
+        const bError = this.errorCheck.inCaseAdd(this.list, name);
+        if(bError) return;
 
-        if(isSameTaskName){
-            console.log('[error] todo에는 이미 같은 이름의 task가 존재합니다.');
-        } else{
-            this.list.push(newTask);
-            this.printTodo.commandResult(this.list, 'add', newTask);
-        } 
+        this.list.push(newTask);
+        this.printTodo.commandResult(this.list, 'add', newTask);
     }  
 
     update({id, nextstatus}){
-        const targetTask = this.list.filter(task => task.id === id)[0];
-        const prevStatus = targetTask.status;
-        const nextStatus = nextstatus.toLowerCase();
-        const isDoingDone = (prevStatus === 'doing' && nextStatus === 'done');    
+        if(typeof arguments[0] === 'string'){
+            [id, nextstatus] = arguments[0].split('$').map(word => word.trim());
+        }
 
+        const targetTask = this.list.filter(task => task.id === id)[0];
+        const nextStatus = nextstatus.toLowerCase();
+
+        const bError = this.errorCheck.inCaseUpdate(this.list, targetTask, id, nextStatus);
+        if(bError) return;
+
+        const prevStatus = targetTask.status;
+        const isDoingDone = (prevStatus === 'doing' && nextStatus === 'done');
+        
         if(nextStatus === 'doing'){
             targetTask.startTime = new Date(Date.now());
         } else if(isDoingDone){
@@ -42,6 +48,9 @@ class Todo {
     }
 
     remove({id}){
+        const bError = this.errorCheck.inCaseRemove(this.list, id);
+        if(bError) return;
+
         const targetIndex = this.list.findIndex(task => task.id === id)
         const targetTask = this.list[targetIndex];
 
@@ -194,6 +203,57 @@ class GetTodoObj{
     }
 }
 
+class ErrorCheck{
+    inCaseAdd(list, name){
+        const bSameName = this.isSameTaskName(list, name);
+        if(bSameName){
+            console.log(`[error] todo에는 이미 같은 이름의 task가 존재합니다.`);
+            return true;
+        }
+        return false;
+    }
+
+    inCaseUpdate(list, targetTask, id, status){
+        const bSameId = this.isExist(list, id);
+        if(!bSameId){
+            console.log(`[error] ${id} ID는 존재하지 않습니다.`);
+            return true;
+        } 
+        
+        const bSameStatus = targetTask.status !== status;
+        if(!bSameStatus){
+            console.log(`[error] ${targetTask.id}는 이미 ${status}입니다.`);
+            return true;
+        }
+
+        const bSameDone = targetTask.status !== 'done';
+        if(!bSameDone){
+            console.log(`[error] done 상태에서 ${status}상태로 갈 수 없습니다.`);
+            return true;
+        }
+        return false;
+
+    }
+
+    inCaseRemove(list, id){
+        const bSameId = this.isExist(list, id);
+        if(!bSameId){
+            console.log(`[error] ${id} ID는 존재하지 않습니다.`);
+            return true;
+        }
+        return false 
+    }
+
+    isSameTaskName(list, name){
+        return list.some(task => task.name === name);
+    }
+
+    isExist(list, id){
+        return list.some(task => task.id === id);
+    }
+}
+
+const errorCheck = new ErrorCheck;
 const getTodoObj = new GetTodoObj;
 const printTodo = new PrintTodo(getTodoObj);
-const todo = new Todo(printTodo);
+const todo = new Todo(printTodo, errorCheck);
