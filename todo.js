@@ -18,13 +18,15 @@ const todosList = {
         todoMessage.showActiveMessage(prev_data);
     },
     update({id,  nextstatus}){
+        nextstatus = nextstatus.toLowerCase();
         let prev_data = this.getPrevData('update', id);
         for(let o of this.todos){
             if(o.id === id) {
-                o.status = nextstatus.toLowerCase();
+                o.status = nextstatus;
+                (nextstatus === 'doing')? o.startTime = stopWatch.start() : o.elapsedTime = stopWatch.stop(o.startTime);
             }
         };
-        todoMessage.showActiveMessage(prev_data, nextstatus.toLowerCase());
+        todoMessage.showActiveMessage(prev_data, nextstatus);
     },
     getPrevData(funcName, id){
         let prev_data = {
@@ -54,7 +56,7 @@ const todosList = {
     }
 };
 
-let todoMessage = {
+const todoMessage = {
     getCurrentStatus(data, valueType){
         const countObj =  todosList.getTags(todosList.todos, valueType);
         data.forEach((v)=> {
@@ -72,19 +74,38 @@ let todoMessage = {
     },
     showTag(tagName){
         let requiredData = this.getRequiredData(todosList.todos, 'status', 'tag', tagName);
-        this.showMessage(requiredData);
+        this.showMessage(requiredData, 'status');
     },
     showTags(){
         let requiredData = this.getRequiredData(todosList.todos, 'tag');
-        this.showMessage2(requiredData);
+        this.showMessage(requiredData, 'tag');
     },
     show(status){
         let requiredData = this.getRequiredData(todosList.todos, 'tag', 'status', status);
-        this.showMessage3(requiredData, status);
+        this.showMessage(requiredData, status);
     },
     showAll(){
         let requiredData = this.getRequiredData(todosList.todos, 'status');
-        this.showMessage4(requiredData, 'status');
+        this.showMessage(requiredData, 'status', 'showAll');
+    },
+    showMessage(inputData, key, checkAsync){
+        let countObj = this.getCurrentStatus(inputData, key);
+        let requiredValueObj = {};
+        for(let value in countObj){
+            requiredValueObj[value] = '';
+        }
+        inputData.reduce((acc, curr,i) => {
+            requiredValueObj[curr[key]] += `-${curr.id}번, ${curr.name} ${(curr.status === 'done')? curr.elapsedTime+' msec':''} \n`;
+            return curr;
+        }, requiredValueObj);
+        this.getAsyncTime(requiredValueObj);
+        if(checkAsync){ getRequiredData(requiredValueObj) }
+        for(let value in requiredValueObj){
+            if(value !== 'undefined'){
+                console.log(`[ ${value} , 총${countObj[value]}개 ]`);
+            }
+            console.log(`${requiredValueObj[value]}`);
+        }
     },
     getRequiredData(data, sortElement, kind, value){
         let requiredData = [];
@@ -96,71 +117,53 @@ let todoMessage = {
         showTagValue.forEach((v,i) => {
             requiredData.push(v);
         })
+        console.log(requiredData)
         return requiredData;
     },
-    showMessage(inputData){
-        let countObj = this.getCurrentStatus(inputData, 'status');
-        let status_count_check = [];
-        inputData.reduce((acc, curr,i) => {
-            status_count_check.push(curr.status);
-            if(status_count_check.indexOf(curr.status) == i){
-                console.log(`[ ${curr.status} , 총${countObj[curr.status]}개 ]`)
-            }
-                console.log(`- ${curr.id}번, ${curr.name}`)
-            return curr;
-        },'');
+    getAsyncTime(obj, statusCheckj){
+        const delayTime = {
+            todo: 2000, 
+            doing: 3000,
+            done: 2000
+        }
+        for(let statusCheck in obj){
+            console.log("world");
+            setTimeout(() => { 
+                console.log("hello");
+                this.getAsyncTime(obj, statusCheck);
+            }, delayTime[statusCheck]);
+        }
     },
-    showMessage2(inputData){
-        let countObj = this.getCurrentStatus(inputData, 'tag');
-        let tag_count_check = [];
-        inputData.reduce((acc, curr,i) => {
-            tag_count_check.push(curr.tag);
-            if(tag_count_check.indexOf(curr.tag) == i){
-                console.log(`[ ${curr.tag} , 총${countObj[curr.tag]}개 ]`)
-            }
-                console.log(`- ${curr.id}번, ${curr.name}[${curr.status}]`)
-            return curr;
-        },'');
+}
+
+const stopWatch = {
+    startTime : 0,
+    ElapsedTime : 0,
+    start(){
+        this.startTime = new Date().getTime();
+        return this.startTime;
     },
-    showMessage3(inputData, status){
-        let countObj = this.getCurrentStatus(inputData, status);
-        let tag_count_check = [];
-        inputData.reduce((acc, curr,i) => {
-            tag_count_check.push(curr.tag);
-            console.log(`- ${curr.id}번, ${curr.name}[${curr.tag}]`)
-            return curr;
-        },'');
-    },
-    showMessage4(inputData, status){
-        let countObj = this.getCurrentStatus(inputData, status);
-        let tag_count_check = [];
-        inputData.reduce((acc, curr,i) => {
-            tag_count_check.push(curr.status);
-            if(tag_count_check.indexOf(curr.status) == i){
-                console.log(`[ ${curr.status} , 총${countObj[curr.status]}개 ]`)
-            }
-                console.log(`- ${curr.id}번, ${curr.name}[${curr.tag}]`)
-            return curr;
-        },'');
-    },
-    getAsyncTime(){
-        
-    },
-    
+    stop(start){
+        this.ElapsedTime = new Date().getTime() - start;
+        return this.ElapsedTime
+    }
 }
 
 todosList.add({name: "자바스크립트 공부하기", tag:"study"});
 todosList.add({name: "자료구조 공부하기", tag:"programming"});
 todosList.update({id:2,  nextstatus:"doing"});
 todosList.add({name: "OS 공부하기", tag:"game"});
-todosList.update({id:3,  nextstatus:"done"});
+todosList.update({id:2,  nextstatus:"done"});
 todosList.add({name: "OS 공부하기", tag:"programming"});
+todosList.update({id:3,  nextstatus:"doing"});
+todosList.update({id:4,  nextstatus:"doing"});
 todosList.add({name: "여행가기", tag:"play"});
 todosList.add({name: "OS", tag:"programming"});
+todosList.update({id:3,  nextstatus:"done"});
 todosList.add({name: "ios", tag:"programming"});
-// todoMessage.showTag("programming");
-todoMessage.showTags();
-// todoMessage.show('todo');
+todoMessage.showTag("programming");
+// todoMessage.showTags();
+// todoMessage.show('done');
 // todoMessage.showAll();
 
 
