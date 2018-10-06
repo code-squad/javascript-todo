@@ -63,7 +63,7 @@ const todoMessage = {
                 todosListObj.push({
                     title :`[ ${value} , 총${countObj[value]}개 ]`,
                     list: `${requiredValueObj[value]}`,
-                    sec: `${(value==='todo')  ?2000:
+                    sec: `${(value==='todo') ?2000:
                             (value==='doing') ? 3000:
                             (value === 'done')? 2000: 0}`,
                     value,
