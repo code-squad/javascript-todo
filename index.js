@@ -1,7 +1,7 @@
 class Todo {
-    constructor(){
+    constructor(printTodo){
         this.list = [];
-        this.printTodo = new PrintTodo;      
+        this.printTodo = printTodo;      
     }
     
     add(task){
@@ -17,9 +17,11 @@ class Todo {
         const nextStatus = nextstatus.toLowerCase();
         const isDoingDone = (prevStatus === 'doing' && nextStatus === 'done');    
 
-        if(nextStatus === 'doing') targetTask.startTime = new Date(Date.now());
-        else if(isDoingDone) targetTask.spentTime = Date.now() - targetTask.startTime;
-        else if(targetTask.startTime || targetTask.spentTime){ 
+        if(nextStatus === 'doing'){
+            targetTask.startTime = new Date(Date.now());
+        } else if(isDoingDone){
+            targetTask.spentTime = Date.now() - targetTask.startTime;
+        } else if(targetTask.startTime || targetTask.spentTime){ 
             delete targetTask.startTime;
             delete targetTask.spentTime;
         }
@@ -50,13 +52,14 @@ class Todo {
     }
 
     showAll(){
-        this.printTodo.listByAllStatus(this.list);
+        const asynTime = [2000, 3000, 2000];
+        this.printTodo.listByAllStatus(this.list, asynTime);
     }
 }
 
 class PrintTodo{
-    constructor(){
-        this.getTodoObj = new GetTodoObj;
+    constructor(getTodoObj){
+        this.getTodoObj = getTodoObj;
     }
 
     commandResult(todoList, command, task, prevStatus){
@@ -118,12 +121,10 @@ class PrintTodo{
         console.log(resultStr);
     }
 
-    listByAllStatus(todoList){
+    listByAllStatus(todoList, asynTime){
         const todoByStatus = this.getTodoObj.status(todoList);
-
         const kindOfPrint = Object.keys(todoByStatus);
         const countOfCallback = kindOfPrint.length;
-        const asynTime = [2000, 3000, 2000];
         let asynIndex = 0;
 
         const asynPrint = (status) => {
@@ -183,4 +184,6 @@ class GetTodoObj{
     }
 }
 
-const todo = new Todo();
+const getTodoObj = new GetTodoObj;
+const printTodo = new PrintTodo(getTodoObj);
+const todo = new Todo(printTodo);
