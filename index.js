@@ -1,21 +1,25 @@
 class Todo {
-    constructor(printTodo, errorCheck){
+    constructor(printTodo, errorCheck, log, undoOrRedo){
         this.list = [];
         this.printTodo = printTodo;
         this.errorCheck = errorCheck;
+        this.log = log;
+        this.undoOrRedo = undoOrRedo; 
     }
     
     add({name, tag}){
+        const bError = this.errorCheck.inCaseAdd(this.list, name);
+        if(bError) return;
+        
         const newTask = {
             id: Date.now().toString(36),
             name: name,
             status: 'todo',
             tag: tag
         }
-        const bError = this.errorCheck.inCaseAdd(this.list, name);
-        if(bError) return;
-
+        
         this.list.push(newTask);
+        this.log.pushMethod('add', this.log.copyTargetTask(newTask));
         this.printTodo.commandResult(this.list, 'add', newTask);
     }  
 
@@ -31,7 +35,9 @@ class Todo {
         if(bError) return;
 
         const prevStatus = targetTask.status;
-        const isDoingDone = (prevStatus === 'doing' && nextStatus === 'done');
+        const isDoingDone = (prevStatus === 'doing' && nextStatus === 'done'); 
+
+        this.log.pushMethod('update', this.log.copyTargetTask(targetTask), nextStatus);
         
         if(nextStatus === 'doing'){
             targetTask.startTime = new Date(Date.now());
@@ -54,7 +60,8 @@ class Todo {
         const targetIndex = this.list.findIndex(task => task.id === id)
         const targetTask = this.list[targetIndex];
 
-        this.list.splice(targetIndex, 1); 
+        this.list.splice(targetIndex, 1);
+        this.log.pushMethod('remove', this.log.copyTargetTask(targetTask)); 
         this.printTodo.commandResult(this.list, 'remove', targetTask);
     }
 
@@ -73,6 +80,10 @@ class Todo {
     showAll(){
         const asynTime = [2000, 3000, 2000];
         this.printTodo.listByAllStatus(this.list, asynTime);
+    }
+
+    undo(){
+        this.undoOrRedo.undo(this.list);
     }
 }
 
@@ -253,7 +264,64 @@ class ErrorCheck{
     }
 }
 
+class Log{
+    constructor(){
+        this.methodList = [];
+    }
+
+    copyTargetTask(targetTask){
+        const copyObj = {};
+        for(let key in targetTask){
+            if(targetTask.hasOwnProperty(key)){
+                copyObj[key] = targetTask[key];
+            }
+        }
+        return copyObj;
+    }
+
+    pushMethod(methodName, task, nextStatus){
+        const log = {
+            todoMethod: methodName,
+            task: task,
+            nextStatus: nextStatus 
+        };
+        if(this.methodList.length >= 3) this.methodList.shift();
+        this.methodList.push(log);
+    }
+}
+
+class UndoOrRedo{
+    constructor(log){
+        this.log = log;
+    }
+
+    undo(list){
+        const targetUndo = this.log.methodList.pop();
+        if(!targetUndo) {
+            console.log('undo는 3단계까지 지원합니다!');
+            return;
+        }
+    
+        if(targetUndo.todoMethod === 'add'){
+            list.pop();
+            console.log(`\"${targetUndo.task.id}, ${targetUndo.task.name}가 삭제됐습니다\"`);
+        }
+
+        if(targetUndo.todoMethod === 'update'){
+            list.filter(task => task.id === targetUndo.task.id)[0] = targetUndo.task;
+            console.log(`\"${targetUndo.task.id}항목이 ${targetUndo.nextStatus} => ${targetUndo.task.status} 상태로 변경됐습니다\"`);
+        }
+
+        if(targetUndo.todoMethod === 'remove'){
+            list.push(targetUndo.task);
+            console.log(`\"${targetUndo.task.id}항목 \'${targetUndo.task.name}\'가 삭제에서 ${targetUndo.task.status} 상태로 변경됐습니다\"`);
+        }
+    }
+}
+
 const errorCheck = new ErrorCheck;
 const getTodoObj = new GetTodoObj;
+const log = new Log;
+const undoOrRedo = new UndoOrRedo(log);
 const printTodo = new PrintTodo(getTodoObj);
-const todo = new Todo(printTodo, errorCheck);
+const todo = new Todo(printTodo, errorCheck, log, undoOrRedo);
