@@ -13,13 +13,13 @@ const todosList = {
         this.id++;
     },
     remove({id}){
-        let prev_data = this.getPrevData('remove', id);
+        let prev_data = getData.getPrevData('remove', id);
         this.todos = this.todos.filter((target)=>target.id !== id);
         todoMessage.showActiveMessage(prev_data);
     },
     update({id,  nextstatus}){
         nextstatus = nextstatus.toLowerCase();
-        let prev_data = this.getPrevData('update', id);
+        let prev_data = getData.getPrevData('update', id);
         for(let o of this.todos){
             if(o.id === id) {
                 o.status = nextstatus;
@@ -28,12 +28,67 @@ const todosList = {
         };
         todoMessage.showActiveMessage(prev_data, nextstatus);
     },
+};
+
+const todoMessage = {
+    showActiveMessage([activeType, id, name, status], update_status){
+        (activeType === 'add') ? console.log(`id: ${id} ${name}항목이 새로 추가되었습니다.`) :
+        (activeType === 'remove') ? console.log(`id:${id}, ${name} 삭제완료.`) :
+        (activeType === 'update') ? console.log(`id:${id},  "${name}" 항목이 ${status} => ${update_status} 상태로 업데이트 됐습니다.`) :
+        '';
+        let statusCount = getData.getCurrentStatus(todosList.todos, 'status');
+        console.log(`현재상태 :  todo:${statusCount.todo}개, doing:${statusCount.doing}개, done:${statusCount.done}개`);
+    },
+    showTag(tagName){
+        let requiredData = getData.getRequiredData(todosList.todos, 'status', 'tag', tagName);
+        getData.getPrintFormat(requiredData, 'status');
+    },
+    showTags(){
+        let requiredData = getData.getRequiredData(todosList.todos, 'tag');
+        getData.getPrintFormat(requiredData, 'tag');
+    },
+    show(status){
+        let requiredData = getData.getRequiredData(todosList.todos, 'tag', 'status', status);
+        getData.getPrintFormat(requiredData, status);
+    },
+    showAll(){
+        let requiredData = getData.getRequiredData(todosList.todos, 'status');
+        getData.getPrintFormat(requiredData, 'status', 'async');
+    },
+    showMessage(requiredValueObj, countObj, asyncCheck, index=0){
+        let todosListObj= [];
+
+        if(asyncCheck === 'async'){
+            for(let value in requiredValueObj){
+                todosListObj.push({
+                    title :`[ ${value} , 총${countObj[value]}개 ]`,
+                    list: `${requiredValueObj[value]}`,
+                    sec: `${(value==='todo')  ? 2000:
+                            (value==='doing') ? 3000:
+                            (value === 'done')? 2000: 0}`,
+                    value,
+                    number: countObj[value]
+                })
+            }
+            asyncObj.getAsyncData(todosListObj);
+        }
+        if(asyncCheck === 'async') return;
+        for(let value in requiredValueObj){
+            if(value !== 'undefined'){
+                console.log(`[ ${value} , 총${countObj[value]}개 ]`);
+            }
+            console.log(`${requiredValueObj[value]}`);
+        }
+    },
+}
+
+const getData = {
     getPrevData(funcName, id){
         let prev_data = {
             prevName: '', 
             idx: 0
         };
-        for(let o of this.todos){
+        for(let o of todosList.todos){
             if(o.id === id){
                 prev_data.prevName = o.name;
                 prev_data.prevStatus = o.status;
@@ -42,110 +97,76 @@ const todosList = {
         };
         return [funcName ,id ,prev_data.prevName, prev_data.prevStatus];
     },
-    getTags(todosList, valueType){
+    getCurrentStatus(data, valueType){
+        const countObj =  getData.getDefaultData(todosList.todos, valueType);
+        data.forEach((v)=> {
+            ++countObj[v[valueType]];
+        });
+        return countObj;
+    },
+    getDefaultData(todosList, valueType){
         let countObj = (valueType === 'status') ? {todo: 0, doing: 0, done: 0} : {};
         todosList.forEach((target)=> {
             countObj[target[valueType]] = 0;
         });
         return countObj;
     },
-    getsortData(countObj, criteria){
-        return countObj.sort((a,b) => {
-            return a[criteria] < b[criteria]; 
+    getRequiredData(data, sortElement, kind, value){
+        let requiredData = [];
+        let fixedData = (value)? data.filter((v) => v[kind] === value) : data;
+        fixedData.forEach((v) => {
+            requiredData.push(v);
         })
-    }
-};
-
-const todoMessage = {
-    getCurrentStatus(data, valueType){
-        const countObj =  todosList.getTags(todosList.todos, valueType);
-        data.forEach((v)=> {
-            ++countObj[v[valueType]];
-        });
-        return countObj;
+        return requiredData;
     },
-    showActiveMessage([activeType, id, name, status], update_status){
-        (activeType === 'add') ? console.log(`id: ${id} ${name}항목이 새로 추가되었습니다.`) :
-        (activeType === 'remove') ? console.log(`id:${id}, ${name} 삭제완료.`) :
-        (activeType === 'update') ? console.log(`id:${id},  "${name}" 항목이 ${status} => ${update_status} 상태로 업데이트 됐습니다.`) :
-        '';
-        let countObj = this.getCurrentStatus(todosList.todos, 'status');
-        console.log(`현재상태 :  todo:${countObj.todo}개, doing:${countObj.doing}개, done:${countObj.done}개`);
-    },
-    showTag(tagName){
-        let requiredData = this.getRequiredData(todosList.todos, 'status', 'tag', tagName);
-        this.showMessage(requiredData, 'status');
-    },
-    showTags(){
-        let requiredData = this.getRequiredData(todosList.todos, 'tag');
-        this.showMessage(requiredData, 'tag');
-    },
-    show(status){
-        let requiredData = this.getRequiredData(todosList.todos, 'tag', 'status', status);
-        this.showMessage(requiredData, status);
-    },
-    showAll(){
-        let requiredData = this.getRequiredData(todosList.todos, 'status');
-        this.showMessage(requiredData, 'status', 'showAll');
-    },
-    showMessage(inputData, key, checkAsync){
+    getPrintFormat(inputData, key, asyncCheck){
         let countObj = this.getCurrentStatus(inputData, key);
         let requiredValueObj = {};
         for(let value in countObj){
             requiredValueObj[value] = '';
         }
         inputData.reduce((acc, curr,i) => {
-            requiredValueObj[curr[key]] += `-${curr.id}번, ${curr.name} ${(curr.status === 'done')? curr.elapsedTime+' msec':''} \n`;
+            requiredValueObj[curr[key]] += 
+            `-${curr.id}번, ${curr.name} ${(curr.status === 'done')? curr.elapsedTime+' msec':''} \n`;
             return curr;
         }, requiredValueObj);
-        this.getAsyncTime(requiredValueObj);
-        if(checkAsync){ getRequiredData(requiredValueObj) }
-        for(let value in requiredValueObj){
-            if(value !== 'undefined'){
-                console.log(`[ ${value} , 총${countObj[value]}개 ]`);
-            }
-            console.log(`${requiredValueObj[value]}`);
+        todoMessage.showMessage(requiredValueObj, countObj, asyncCheck)
+    }
+}
+
+const asyncObj = {
+    getAsyncData(contents, index = 0){
+        let NumOfData = 0;
+        for(let value of contents){
+            NumOfData += +value.number;
         }
-    },
-    getRequiredData(data, sortElement, kind, value){
-        let requiredData = [];
-        let showTagValue = data;
-        if(value){
-            showTagValue = data.filter((v) => v[kind] === value);
-        }
-        showTagValue = todosList.getsortData(showTagValue, sortElement);
-        showTagValue.forEach((v,i) => {
-            requiredData.push(v);
-        })
-        console.log(requiredData)
-        return requiredData;
-    },
-    getAsyncTime(obj, statusCheckj){
-        const delayTime = {
-            todo: 2000, 
-            doing: 3000,
-            done: 2000
-        }
-        for(let statusCheck in obj){
-            console.log("world");
-            setTimeout(() => { 
-                console.log("hello");
-                this.getAsyncTime(obj, statusCheck);
-            }, delayTime[statusCheck]);
-        }
+        const notice = 
+        {todo: `총 ${NumOfData}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다.....`,
+        doing: `지금부터 3초뒤에 doing내역을 출력합니다....`,
+        done: `지금부터 2초뒤에 done내역을 출력합니다.....`};
+        (function playLoop() {
+            if(index > 2){return;}
+            console.log(notice[contents[index].value]);
+            setTimeout(function() {
+                console.log(contents[index].title);
+                console.log(contents[index].list);
+                index++; 
+                playLoop();
+            }, contents[index].sec);    
+        })();
     },
 }
 
 const stopWatch = {
     startTime : 0,
-    ElapsedTime : 0,
+    elapsedTime : 0,
     start(){
         this.startTime = new Date().getTime();
         return this.startTime;
     },
     stop(start){
-        this.ElapsedTime = new Date().getTime() - start;
-        return this.ElapsedTime
+        this.elapsedTime = new Date().getTime() - start;
+        return this.elapsedTime
     }
 }
 
@@ -156,18 +177,15 @@ todosList.add({name: "OS 공부하기", tag:"game"});
 todosList.update({id:2,  nextstatus:"done"});
 todosList.add({name: "OS 공부하기", tag:"programming"});
 todosList.update({id:3,  nextstatus:"doing"});
+todosList.remove({id:1});
 todosList.update({id:4,  nextstatus:"doing"});
 todosList.add({name: "여행가기", tag:"play"});
 todosList.add({name: "OS", tag:"programming"});
 todosList.update({id:3,  nextstatus:"done"});
 todosList.add({name: "ios", tag:"programming"});
+
+
 todoMessage.showTag("programming");
-// todoMessage.showTags();
-// todoMessage.show('done');
-// todoMessage.showAll();
-
-
-// 고려해야 할 점
-// 모든태그, 특정태그, 모든리스트, 특정상태리스트를 모두 고려해야 한다.
-// doing -> done까지 걸린 시간을 체크해야 한다.
-// 별도의 객체를 분리하여도 된다. 
+todoMessage.showTags();
+todoMessage.show('done');
+todoMessage.showAll();
