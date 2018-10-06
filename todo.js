@@ -41,17 +41,15 @@ const todosList = {
         return [funcName ,id ,prev_data.prevName, prev_data.prevStatus];
     },
     getTags(todosList, valueType){
-        // console.log(todosList);
-        let sortdata = this.getsortData(todosList, valueType);
         let countObj = (valueType === 'status') ? {todo: 0, doing: 0, done: 0} : {};
-        sortdata.forEach((target)=> {
+        todosList.forEach((target)=> {
             countObj[target[valueType]] = 0;
         });
         return countObj;
     },
     getsortData(countObj, criteria){
         return countObj.sort((a,b) => {
-            return b[criteria] > a[criteria];
+            return a[criteria] < b[criteria]; 
         })
     }
 };
@@ -73,37 +71,32 @@ let todoMessage = {
         console.log(`현재상태 :  todo:${countObj.todo}개, doing:${countObj.doing}개, done:${countObj.done}개`);
     },
     showTag(tagName){
-        let result_value = [];
-        let showTagValue = todosList.todos.filter((v) => v.tag === tagName);
-        showTagValue.forEach((v,i) => {
-            result_value.push(v);
-        })
-        this.showMessage(result_value);
+        let requiredData = this.getRequiredData(todosList.todos, 'status', 'tag', tagName);
+        this.showMessage(requiredData);
     },
     showTags(){
-        // 필요한 정보 : status, tag, tag.length, id, name
-        let result_value = [];
-        todosList.todos.forEach((v,i) => {
-            result_value.push(v);
-        })
-        this.showMessage2(result_value);
+        let requiredData = this.getRequiredData(todosList.todos, 'tag');
+        this.showMessage2(requiredData);
     },
     show(status){
-        // 필요한 정보 : id, name, time
-        let result_value = [];
-        let showTagValue = todosList.todos.filter((v) => v.status === status);
-        showTagValue.forEach((v,i) => {
-            result_value.push(v);
-        })
-        this.showMessage3(result_value, status);
+        let requiredData = this.getRequiredData(todosList.todos, 'tag', 'status', status);
+        this.showMessage3(requiredData, status);
     },
     showAll(){
-        // 필요한 정보 : status, status.length, id, name, time
-        let result_value = [];
-        todosList.todos.forEach((v,i) => {
-            result_value.push(v);
+        let requiredData = this.getRequiredData(todosList.todos, 'status');
+        this.showMessage4(requiredData, 'status');
+    },
+    getRequiredData(data, sortElement, kind, value){
+        let requiredData = [];
+        let showTagValue = data;
+        if(value){
+            showTagValue = data.filter((v) => v[kind] === value);
+        }
+        showTagValue = todosList.getsortData(showTagValue, sortElement);
+        showTagValue.forEach((v,i) => {
+            requiredData.push(v);
         })
-        this.showMessage4(result_value, 'status');
+        return requiredData;
     },
     showMessage(inputData){
         let countObj = this.getCurrentStatus(inputData, 'status');
@@ -166,9 +159,9 @@ todosList.add({name: "여행가기", tag:"play"});
 todosList.add({name: "OS", tag:"programming"});
 todosList.add({name: "ios", tag:"programming"});
 // todoMessage.showTag("programming");
-// todoMessage.showTags();
+todoMessage.showTags();
 // todoMessage.show('todo');
-todoMessage.showAll();
+// todoMessage.showAll();
 
 
 // 고려해야 할 점
