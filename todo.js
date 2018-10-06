@@ -63,8 +63,8 @@ const todoMessage = {
                 todosListObj.push({
                     title :`[ ${value} , 총${countObj[value]}개 ]`,
                     list: `${requiredValueObj[value]}`,
-                    sec: `${(value==='todo')?2000:
-                            (value==='doing')? 3000:
+                    sec: `${(value==='todo')  ? 2000:
+                            (value==='doing') ? 3000:
                             (value === 'done')? 2000: 0}`,
                     value,
                     number: countObj[value]
@@ -72,9 +72,9 @@ const todoMessage = {
             }
             asyncObj.getAsyncData(todosListObj);
         }
-        
+        if(asyncCheck)return;
         for(let value in requiredValueObj){
-            if(value !== 'undefined'&& !asyncCheck){
+            if(value !== 'undefined'){
                 console.log(`[ ${value} , 총${countObj[value]}개 ]`);
             }
             console.log(`${requiredValueObj[value]}`);
@@ -111,15 +111,9 @@ const getData = {
         });
         return countObj;
     },
-    getsortData(countObj, criteria){
-        return countObj.sort((a,b) => {
-            return a[criteria] < b[criteria]; 
-        })
-    },
-    getRequiredData(data, sortElement, kind, value){
+    getRequiredData(data, kind, value){
         let requiredData = [];
         let fixedData = (value)? data.filter((v) => v[kind] === value) : data;
-        fixedData = getData.getsortData(fixedData, sortElement);
         fixedData.forEach((v) => {
             requiredData.push(v);
         })
@@ -164,15 +158,11 @@ const asyncObj = {
 }
 
 const stopWatch = {
-    startTime : 0,
-    ElapsedTime : 0,
     start(){
-        this.startTime = new Date().getTime();
-        return this.startTime;
+        return new Date().getTime();
     },
     stop(start){
-        this.ElapsedTime = new Date().getTime() - start;
-        return this.ElapsedTime
+        return new Date().getTime() - start;
     }
 }
 
