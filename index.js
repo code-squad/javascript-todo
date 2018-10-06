@@ -4,11 +4,21 @@ class Todo {
         this.printTodo = printTodo;      
     }
     
-    add(task){
-        task.id = Date.now().toString(36);
-        task.status = 'todo';
-        this.list.push(task);
-        this.printTodo.commandResult(this.list, 'add', task);
+    add({name, tag}){
+        const newTask = {
+            id: Date.now().toString(36),
+            name: name,
+            status: 'todo',
+            tag: tag
+        }
+        const isSameTaskName = !!(this.list.filter(task => task.name === name)[0]);
+
+        if(isSameTaskName){
+            console.log('[error] todo에는 이미 같은 이름의 task가 존재합니다.');
+        } else{
+            this.list.push(newTask);
+            this.printTodo.commandResult(this.list, 'add', newTask);
+        } 
     }  
 
     update({id, nextstatus}){
