@@ -19,7 +19,7 @@ class Todo {
         }
         
         this.list.push(newTask);
-        this.log.pushMethod('add', this.log.copyTargetTask(newTask));
+        this.log.pushUndoLog('add', this.log.copyTargetTask(newTask));
         this.printTodo.commandResult(this.list, 'add', newTask);
     }  
 
@@ -37,7 +37,7 @@ class Todo {
         const prevStatus = targetTask.status;
         const isDoingDone = (prevStatus === 'doing' && nextStatus === 'done'); 
 
-        this.log.pushMethod('update', this.log.copyTargetTask(targetTask), nextStatus);
+        this.log.pushUndoLog('update', this.log.copyTargetTask(targetTask), nextStatus);
         
         if(nextStatus === 'doing'){
             targetTask.startTime = new Date(Date.now());
@@ -61,7 +61,7 @@ class Todo {
         const targetTask = this.list[targetIndex];
 
         this.list.splice(targetIndex, 1);
-        this.log.pushMethod('remove', this.log.copyTargetTask(targetTask)); 
+        this.log.pushUndoLog('remove', this.log.copyTargetTask(targetTask)); 
         this.printTodo.commandResult(this.list, 'remove', targetTask);
     }
 
@@ -84,6 +84,10 @@ class Todo {
 
     undo(){
         this.undoOrRedo.undo(this.list);
+    }
+
+    redo(){
+        this.undoOrRedo.redo(this.list);
     }
 }
 
@@ -266,7 +270,8 @@ class ErrorCheck{
 
 class Log{
     constructor(){
-        this.methodList = [];
+        this.undoLog = [];
+        this.redoLog = [];
     }
 
     copyTargetTask(targetTask){
@@ -279,14 +284,24 @@ class Log{
         return copyObj;
     }
 
-    pushMethod(methodName, task, nextStatus){
+    pushUndoLog(methodName, task, nextStatus){
         const log = {
             todoMethod: methodName,
             task: task,
             nextStatus: nextStatus 
         };
-        if(this.methodList.length >= 3) this.methodList.shift();
-        this.methodList.push(log);
+        if(this.undoLog.length >= 3) this.undoLog.shift();
+        this.undoLog.push(log);
+    }
+
+    pushRedoLog(target){
+        const log = {
+            todoMethod: target.todoMethod,
+            task: target.task,
+            nextStatus: target.nextStatus 
+        };
+        if(this.redoLog.length >= 3) this.redoLog.shift();
+        this.redoLog.push(log);
     }
 }
 
@@ -296,25 +311,46 @@ class UndoOrRedo{
     }
 
     undo(list){
-        const targetUndo = this.log.methodList.pop();
+        const targetUndo = this.log.undoLog.pop();
         if(!targetUndo) {
-            console.log('undo는 3단계까지 지원합니다!');
+            console.log('undo할 todo가 없습니다');
             return;
         }
     
         if(targetUndo.todoMethod === 'add'){
-            list.pop();
+            const undoTaskIndex = list.findIndex(task => task.id === targetUndo.task.id);
+            list.splice(undoTaskIndex, 1);
+            this.log.pushRedoLog(targetUndo);
             console.log(`\"${targetUndo.task.id}, ${targetUndo.task.name}가 삭제됐습니다\"`);
-        }
-
-        if(targetUndo.todoMethod === 'update'){
-            list.filter(task => task.id === targetUndo.task.id)[0] = targetUndo.task;
+        } 
+        else if(targetUndo.todoMethod === 'update'){
+            const undoTaskIndex = list.findIndex(task => task.id === targetUndo.task.id);
+            list[undoTaskIndex] = targetUndo.task;
+            this.log.pushRedoLog(targetUndo);
             console.log(`\"${targetUndo.task.id}항목이 ${targetUndo.nextStatus} => ${targetUndo.task.status} 상태로 변경됐습니다\"`);
         }
-
-        if(targetUndo.todoMethod === 'remove'){
-            list.push(targetUndo.task);
+        else if(targetUndo.todoMethod === 'remove'){
+            list.push(targetUndo.task);            
+            this.log.pushRedoLog(targetUndo);
             console.log(`\"${targetUndo.task.id}항목 \'${targetUndo.task.name}\'가 삭제에서 ${targetUndo.task.status} 상태로 변경됐습니다\"`);
+        }
+    }
+
+    redo(){
+        const targetRedo = this.log.redoLog.pop();
+        if(!targetRedo) {
+            console.log('redo할 todo가 없습니다');
+            return;
+        }
+    
+        if(targetRedo.todoMethod === 'add'){
+            todo.add({name: targetRedo.task.name, tag: targetRedo.task.tag});
+        }
+        else if(targetRedo.todoMethod === 'update'){
+            todo.update({id: targetRedo.task.id, nextstatus: targetRedo.nextStatus});
+        }
+        else if(targetRedo.todoMethod === 'remove'){          
+            todo.remove({id: targetRedo.task.id});
         }
     }
 }
