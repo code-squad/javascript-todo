@@ -63,8 +63,8 @@ const todoMessage = {
                 todosListObj.push({
                     title :`[ ${value} , 총${countObj[value]}개 ]`,
                     list: `${requiredValueObj[value]}`,
-                    sec: `${(value==='todo') ?2000:
-                            (value==='doing') ? 3000:
+                    sec: `${(value==='todo')?2000:
+                            (value==='doing')? 3000:
                             (value === 'done')? 2000: 0}`,
                     value,
                     number: countObj[value]
@@ -72,9 +72,9 @@ const todoMessage = {
             }
             asyncObj.getAsyncData(todosListObj);
         }
-        if(asyncCheck === 'async') return;
+        
         for(let value in requiredValueObj){
-            if(value !== 'undefined'){
+            if(value !== 'undefined'&& !asyncCheck){
                 console.log(`[ ${value} , 총${countObj[value]}개 ]`);
             }
             console.log(`${requiredValueObj[value]}`);
@@ -111,9 +111,15 @@ const getData = {
         });
         return countObj;
     },
+    getsortData(countObj, criteria){
+        return countObj.sort((a,b) => {
+            return a[criteria] < b[criteria]; 
+        })
+    },
     getRequiredData(data, sortElement, kind, value){
         let requiredData = [];
         let fixedData = (value)? data.filter((v) => v[kind] === value) : data;
+        fixedData = getData.getsortData(fixedData, sortElement);
         fixedData.forEach((v) => {
             requiredData.push(v);
         })
@@ -188,4 +194,4 @@ todosList.add({name: "ios", tag:"programming"});
 todoMessage.showTag("programming");
 todoMessage.showTags();
 todoMessage.show('done');
-todoMessage.showAll();
+// todoMessage.showAll();
