@@ -3,19 +3,18 @@
 const todo = {
     todoList : [],
     countOfStatus: {todo: 0, doing: 0, done: 0},
-    addTask({name: newTaskName, tag: newTaskTag = ''}, bRedo = false) {
+    addTask({name: newTaskName, tag: newTaskTag}, bRedo = false) {
         const taskId = this.todoList.length + 1;
-        const taskToAdd = {id: taskId, name: newTaskName, status: 'todo', tag: newTaskTag};
         
         const bNoErrors = todoErrorCheck.onTaskAddition(this.todoList, newTaskName);
         if(!bNoErrors) return false
         
-        this.todoList.push(taskToAdd);
+        this.todoList.push(new Task(taskId, newTaskName, 'todo', newTaskTag));
         this.updateStatusCount(['todo', +1]);
 
-        todoUndoRedo.updateActionHistory('add', bRedo, [...arguments], [this.todoList]);
+        todoUndoRedo.updateActionHistory('add', bRedo, [...arguments], [this.todoList, this.countOfStatus]);
 
-        todoPrint.printUpdateResult.call(this,'add', {taskId: taskId, taskName: newTaskName});
+        todoPrint.printUpdateResult.call(this,'add', new UpdateResult(taskId, newTaskName));
     },
     updateTask({id, nextStatus}, bRedo = false) {
         const newStatus = nextStatus.toLowerCase();
@@ -30,12 +29,14 @@ const todo = {
         targetTask.status = newStatus;
         this.updateStatusCount([currentStatus, -1], [newStatus, +1]);
 
-        todoUndoRedo.updateActionHistory('update', bRedo, [...arguments], [this.todoList[id-1], currentStatus]);
+        todoUndoRedo.updateActionHistory('update', bRedo, [...arguments], [this.todoList[id-1], currentStatus, this.countOfStatus]);
 
-        todoPrint.printUpdateResult.call(this,'update', {taskId: id, taskName: targetTaskName, prevStatus: currentStatus, nextStatus: newStatus});
+        todoPrint.printUpdateResult.call(this,'update', new UpdateResult(id, targetTaskName, currentStatus, newStatus));
+
+        if(newStatus === 'done') todoPrint.cheer(this.todoList)
     },
     removeTask({id}, bRedo = false) {
-        const targetTask = Object.assign({}, this.todoList[id-1] || {});
+        const targetTask = this.todoList[id-1] || new Task();
 
         const bNoErrors = todoErrorCheck.onTaskRemove(this.todoList, id);
         if(!bNoErrors) return false
@@ -43,9 +44,9 @@ const todo = {
         delete this.todoList[id-1];
         this.updateStatusCount([targetTask.status, -1]);
 
-        todoUndoRedo.updateActionHistory('remove', bRedo, [...arguments], [targetTask, this.todoList]);
+        todoUndoRedo.updateActionHistory('remove', bRedo, [...arguments], [targetTask, this.todoList, this.countOfStatus]);
 
-        todoPrint.printUpdateResult.call(this,'remove', {taskId: id, taskName: targetTask.name});
+        todoPrint.printUpdateResult.call(this,'remove', new UpdateResult(id, targetTask.name));
     },
     updateStatusCount(...args) { //[targetStatus, increment]
         args.forEach( ([targetStatus, increment]) => {
@@ -59,18 +60,11 @@ const todo = {
         }
         timestamp[newStatus]();
     },
-    removeTimestamp(targetTask, newStatus) {
-        const timestamp = {
-            doing : () => delete targetTask.startTime,
-            done : () => delete targetTask.endTime
-        }
-        timestamp[newStatus]();
-    },
     undo() {
         todoUndoRedo.undo();
     },
     redo() {
-        todoUndoRedo.redo();
+        todoUndoRedo.redo(this);
     },
     showTag(tag) {
         todoPrint.showTasksByTag(tag, this.todoList);
@@ -239,7 +233,46 @@ const todoPrint = {
             return groupedTasksObj[targetStatus].reduce( (workingStr, task) => workingStr + makeFormattedTaskString(workingStr, task) + this.addTimeSpent(targetStatus, task), ``);
         },
         addTimeSpent : (targetStatus, task) => {return (targetStatus === 'done') ? `, ` + todoPrint.applyPrintableTimeFormat(task.endTime - task.startTime) : ''}
-    }
+    },
+    cheer(todoList) {
+        const thisMonth = (new Date).getMonth() +1;
+        const lastMonth = (thisMonth -1) ? thisMonth -1 : 12;
+        const convertDateNumToMonth = (dateNum) => new Date(dateNum).getMonth() + 1;
+        const numOfTasksDoneThisMonth = todoList.filter( (task) => convertDateNumToMonth(task.endTime) === thisMonth ).length;
+        const numOfTasksDoneLastMonth = todoList.filter( (task) => convertDateNumToMonth(task.endTime) === lastMonth ).length;
+        
+        // Template string to make cheer message stands out
+        console.log(`\n====================\n해냈다, 해냈어!\n====================\n`);
+
+        // log # of tasks completed THIS & LAST month
+        console.log(`만세! 지금까지 ${numOfTasksDoneThisMonth} 개의 할 일을 마무리했습니다.`);
+        console.log(`지난 ${lastMonth}월에는 ${numOfTasksDoneLastMonth} 개의 할 일을 마무리했네요.`);
+        
+        // log completion ratio between THIS & LAST month
+        (numOfTasksDoneThisMonth >= numOfTasksDoneLastMonth) ? 
+            console.log(`지난달보다 ${numOfTasksDoneThisMonth - numOfTasksDoneLastMonth} 개 더 많은 일을 해내셨습니다.`)
+            : console.log(`지난달만큼 일감을 마무리하기까지 ${numOfTasksDoneLastMonth - numOfTasksDoneThisMonth} 개 남았습니다. 화이팅!`)
+        
+        // log random quote 
+        console.log(`\n=== 성공적인 이 달을 위한 오늘의 명언 ===\n${this.randomQuote(this.quoteArr)}\n\n`);
+    },
+    randomQuote(quoteArr) {
+        const quote = quoteArr[Math.floor(Math.random() * quoteArr.length)];
+        return `"${quote.message}" \n- ${quote.author}`
+    },
+    quoteArr: [
+        {message: `Anyone who has never made a mistake has never tried anything new`, author: `Albert Einstein`},
+        {message: `If you spend too much time thinking about a thing, you’ll never get it done`, author: `Bruce Lee`},
+        {message: `My general attitude to life is to enjoy every minute of every day. I never do anything with a feeling of, “Oh God, I’ve got to do this today"`, author: `Richard Branson`},
+        {message: `The way to get started is to quit talking and begin doing`, author: `Walt Disney`},
+        {message: `Remembering you are going to die is the best way I know to avoid the trap of thinking you have something to lose. You are already naked. There’s no reason not to follow your heart`, author: `Steve Jobs`},
+        {message: `Glory lies in the attempt to reach one’s goal and not in reaching it`, author: `Mahatma Ghandi`},
+        {message: `The secret of getting ahead is getting started`, author: `Mark Twain`},
+        {message: `It is no good getting furious if you get stuck. What I do is keep thinking about the problem but work on something else`, author: `Stephen Hawking`},
+        {message: `Don’t count the days. Make the days count`, author: `Muhammad Ali`},
+        {message: `You can, you should, and if you’re brave enough to start, you will`, author: `Steven King`},
+        {message: `Art is the elimination of the unnecessary`, author: `Pablo Picasso`}
+    ]
 };
 
 const todoErrorCheck = {
@@ -302,38 +335,44 @@ const todoUndoRedo = {
     history: [],
     undoHistory: [],
     undoLast: {
-        add(todoList) {
+        add(todoList, countOfStatus) {
             const targetTask = todoList.pop();
-            todo.updateStatusCount([targetTask.status, -1]);
+            countOfStatus[targetTask.status]--;
 
             console.log(`${targetTask.id}번, ${targetTask.name} 할일이 삭제됐습니다.`);
         },
-        update(targetTask, prevStatus) {
+        update(targetTask, prevStatus, countOfStatus) {
             const currentStatus = targetTask.status;
+            countOfStatus[targetTask.status]--;
+            countOfStatus[prevStatus]++;
+            
             targetTask.status = prevStatus
-            todo.updateStatusCount([currentStatus, -1], [prevStatus, +1]);
             
             // Remove start/endTime if they were added during the update
-            todo.removeTimestamp(targetTask, currentStatus);
+            if(currentStatus === 'doing') delete targetTask.startTime
+            if(currentStatus === 'done') delete targetTask.startTime
 
             console.log(`${targetTask.id}번, ${targetTask.name} 할일이 ${currentStatus} => ${prevStatus} 상태로 돌아갔습니다.`);
         },
-        remove(targetTask, todoList) {
+        remove(targetTask, todoList, countOfStatus) {
             todoList[targetTask.id-1] = targetTask;
-            todo.updateStatusCount([targetTask.status, +1]);
+            countOfStatus[targetTask.status]++;
 
             console.log(`${targetTask.id}번, ${targetTask.name} 할일이 삭제 => ${targetTask.status} 상태로 돌아갔습니다.`);
         }
     },
     redoLast: {
         add(...args) {
-            todo.addTask(...args);
+            const caller = this;
+            caller.addTask(...args);
         },
         update(...args) {
-            todo.updateTask(...args);
+            const caller = this;
+            caller.updateTask(...args);
         },
         remove(...args) {
-            todo.removeTask(...args);
+            const caller = this;
+            caller.removeTask(...args);
         }
     },
     undo() {
@@ -347,13 +386,13 @@ const todoUndoRedo = {
 
         this.updateUndoHistory(lastAction);
     },
-    redo() {
+    redo(caller) {
         if(!this.undoHistory[0]) {
             console.log(`모든 undo를 취소했습니다.`);
             return false
         }
         const lastUndo = this.undoHistory.pop();
-        this.redoLast[lastUndo.type](...lastUndo.args, true);
+        this.redoLast[lastUndo.type].bind(caller)(...lastUndo.args, true);
     },
     updateActionHistory(actionType, bRedo, args, actionData) {
         if(this.history.length >= 3) this.history.shift();
@@ -368,6 +407,42 @@ const todoUndoRedo = {
     }
 };
 
+class Task {
+    constructor (id, name, status, tag) {
+        this.id = id;
+        this.name = name;
+        this.status = status || 'todo';
+        this.tag = tag || '';
+    }
+    set startTime(timeDate) {
+        this.startedAt = timeDate;
+    }
+    get startTime() {
+        return this.startedAt
+    }
+    set endTime(timeDate) {
+        this.endedAt = timeDate;
+    }
+    get endTime() {
+        return this.endedAt
+    }
+}
+
+class UpdateResult {
+    constructor (taskId, taskName, prevStatus, nextStatus) {
+        this.taskId = taskId;
+        this.taskName = taskName;
+        this.prevStatus = prevStatus || null;
+        this.nextStatus = nextStatus || null;
+    }
+}
+
+class Quote {
+    constructor (message, author) {
+        this.message = message;
+        this.author = author;
+    }
+}
 
 //Test Cases
 todo.addTask({name: '자바스크립트 공부', tag: 'programming'});
@@ -401,7 +476,7 @@ todo.updateTask({id: 23, nextStatus: 'doing'});
 
 todo.removeTask({id: 23});
 //[error] 23 번 항목이 존재하지 않아 삭제하지 못했습니다.
-
+ 
 
 // ==== undo & redo Test cases
 console.log(`\n====되돌리기 / 다시 실행하기 살펴보기====\n`);
