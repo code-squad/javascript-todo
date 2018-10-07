@@ -15,6 +15,7 @@ const todo = {
     },
 
     update(idAndStatus) {
+        idAndStatus.nextstatus = idAndStatus.nextstatus.toLowerCase();
         const taskToUpdate = taskList.find(idAndStatus => idAndStatus.id === this.id);
         const before = taskToUpdate.status;
         const after = idAndStatus.nextstatus;
@@ -63,7 +64,7 @@ todo.add({
 
 todo.update({
     id: 2,
-    nextstatus: "done"
+    nextstatus: "DOING"
 });
 
 todo.remove({
