@@ -23,7 +23,7 @@ const todosList = {
             if(o.id === id) {
                 if(nextstatus === 'doing'){ o.startTime = stopWatch.start(); }
                 if(nextstatus === 'done' && o.startTime){ o.elapsedTime = stopWatch.stop(o.startTime); }
-                if(nextstatus === 'done' && !o.startTime)( console.log("해당 작업 완료 후 done을 입력할 수 있습니다. doing을 먼저 입력해주세요."))
+                if(nextstatus === 'done' && !o.startTime){ console.log("해당 작업 완료 후 done을 입력할 수 있습니다. doing을 먼저 입력해주세요."); }
                 else {o.status = nextstatus;}
             }
         };
@@ -52,29 +52,28 @@ const todoMessage = {
     showActiveMessage([activeType, id, name, status], update_status){
         (activeType === 'add') ? console.log(`id: ${id} ${name}항목이 새로 추가되었습니다.`) :
         (activeType === 'remove') ? console.log(`id:${id}, ${name} 삭제완료.`) :
-        (activeType === 'update') ? console.log(`id:${id},  "${name}" 항목이 ${status} => ${update_status} 상태로 업데이트 됐습니다.`) :
+        (activeType === 'update') ? console.log(`id:${id}, "${name}" 항목이 ${status} => ${update_status} 상태로 업데이트 됐습니다.`) :
         '';
         let statusCount = getData.getCurrentStatus(todosList.todos, 'status');
         console.log(`현재상태 :  todo:${statusCount.todo}개, doing:${statusCount.doing}개, done:${statusCount.done}개`);
     },
     showMessage(requiredValueObj, countObj, asyncCheck){
         let todosListObj= [];
-
         if(asyncCheck === 'async'){
             for(let value in requiredValueObj){
                 todosListObj.push({
                     title : `[ ${value} , 총${countObj[value]}개 ]`,
                     list  : `${requiredValueObj[value]}`,
-                    sec   : `${(value==='todo')  ? 2000:
-                               (value==='doing') ? 3000:
-                               (value === 'done')? 2000: 0}`,
+                    sec   : `${(value === 'todo')  ? 2000:
+                               (value === 'doing') ? 3000:
+                               (value === 'done')  ? 2000: 0}`,
                     value,
                     number: countObj[value]
                 })
             }
             this.showAsyncData(todosListObj);
+            return;
         }
-        if(asyncCheck)return;
         for(let value in requiredValueObj){
             if(value !== 'undefined'){
                 console.log(`[ ${value} , 총${countObj[value]}개 ]`);
@@ -174,7 +173,6 @@ todosList.update({id:1,  nextstatus:"done"});
 todosList.remove({id:1});
 todosList.add({name: "OS 공부하기", tag:"programming"});
 todosList.update({id:3,  nextstatus:"doing"});
-todosList.remove({id:1});
 todosList.update({id:4,  nextstatus:"done"});
 todosList.add({name: "여행가기", tag:"play"});
 todosList.add({name: "OS", tag:"programming"});
