@@ -12,8 +12,9 @@
 const todo = {
     task: [],
     
-    getTakeTime: function (doingTime, doneTime) {
-        let takenMsecTime = doneTime - doingTime
+    getTakeTime: function (doingTime, currentTime) {
+    let takenTime = ''
+        let takenMsecTime = currentTime - doingTime
         const msecPerMinute = 1000 * 60, msecPerHour = msecPerMinute * 60, msecPerDay = msecPerHour * 24
         const takenDays = Math.floor(takenMsecTime / msecPerDay)
         takenMsecTime = takenMsecTime - takenDays * msecPerDay
@@ -21,8 +22,9 @@ const todo = {
         takenMsecTime = takenMsecTime - takenHours * msecPerHour
         const takenMinutes = Math.floor(takenMsecTime / msecPerMinute)
         takenMsecTime = takenMsecTime - takenMinutes * msecPerMinute
-        console.log(`${takenDays}일 ${takenHours}시간 ${takenMinutes}분이 걸렸습니다.`)
-    },
+        takenTime += takenDays + '일, ' + takenHours + '시간, ' + takenMinutes + '분'
+        return takenTime;
+    },//걸린 시간을 계산해주는 함수
 
     getRanNum: function () {
         const ranNum = Math.floor(Math.random() * 5)
@@ -100,16 +102,20 @@ const todo = {
     },//상태 업데이트 함수//주어진 정보의 시간을 넣을 수 있도록 수정 요망
 
     updateDoingTime: function (objToUpdate) {
-        this.task.forEach(obj => {
-            if(obj.id === objToUpdate.id) {
-                obj.timeData = Date.now();
+        this.task.forEach(taskobj => {
+            if(taskobj.id === objToUpdate.id) {
+                taskobj.timeData = Date.now();
             }
         })
     },//업데이트할 객체를 인자로 받아 task내의 timeData값을 변경.
 
     updateTakeTime: function (objToUpdate) {
-        
-    },
+        this.task.forEach(taskobj => {
+            if(taskobj.id === objToUpdate.id) {
+                taskobj.timeData = this.getTakeTime(obj.timeData, Date.now())
+            }
+        })
+    },//업데이트할 객체를 인자로 받아 task내의 timeData의 값을 걸린 시간으로 변경.
 
     remove: function (objToRemove) {
         const notRemovedLength = todo.task.length
