@@ -30,6 +30,7 @@ const todo = {
         this.taskId++;
         info.taskId = this.taskId;
         info.status = "todo";
+        info.addedTime = new Date().getTime(); // 할일을 추가한 시간 기록
         this.todoList.push(info);
         console.log(`id: ${info.taskId}, "${info.name}" 항목이 새로 추가되었습니다.`);
         this.showStatus();
@@ -56,36 +57,45 @@ const todo = {
     // 업데이트 시 시작시간, 종료시간 기록
     recordTime(todo) { // doing, done 상태 변경시 경과시간을 계산하는 메소드
         if (todo.status === "doing") {
-            todo.startTime = new Date('10/3/2018 13:20:40').getTime(); // 시작시간 기록
+            todo.startTime = new Date().getTime(); // 시작시간 기록
         }
-        if (todo.status === "done") {
+        if (todo.status === "done" && !todo.startTime) { // todo => done으로 변경된 경우
             todo.endTime = new Date().getTime(); // 종료시간 기록
-            todo.runningTime = this.calRunningTime(todo.startTime, todo.endTime); // 경과시간 기록
+            todo.runningTime = `doing 없이 종료되었습니다. 할일을 추가한 지 ${this.calRunningTime(todo.addedTime, todo.endTime)}가 경과하였습니다.`;
+            // 시작시간이 없으므로 추가한 시간을 기준으로 경과시간 계산
+        }
+        if (todo.status === "done" && todo.startTime) { // doing => done으로 변경된 경우
+            todo.endTime = new Date().getTime(); // 종료시간 기록
+            todo.runningTime = this.calRunningTime(todo.startTime, todo.endTime);
         }
     },
 
     // 기록된 시간을 바탕으로 경과시간 계산(종료시간 - 시작시간)
-    calRunningTime(startTime, endTime) {
-        let interval = endTime - startTime;
+    calRunningTime(addedOrStartTime, endTime) {
+        let interval = endTime - addedOrStartTime;
         let days = Math.floor(interval / (1000 * 60 * 60 * 24)); // 경과시간 구하기(일) 
         interval -= days * (1000 * 60 * 60 * 24);
         let hours = Math.floor(interval / (1000 * 60 * 60)); // 경과시간 구하기(시간)
         interval -= hours * (1000 * 60 * 60);
         let minutes = Math.floor(interval / (1000 * 60)); // 경과시간 구하기(분)
-        return `${days != 0 ? `${days}일` : ""} ${hours != 0 ? `${hours} 시간` : ""} ${minutes != 0 ? `${minutes}분` : ""}`;
+        interval -= minutes * (1000 * 60);
+        let seconds = Math.floor(interval / 1000); // 경과시간 구하기(초)
+
+        return `${days != 0 ? `${days}일` : ""} ${hours != 0 ? `${hours}시간` : ""} ${minutes != 0 ? `${minutes}분` : ""} ${seconds != 0 ? `${seconds}초` : ""}`.trim();
     },
 
     // 할 일 삭제 메소드
     removeTodo(removeInfo) {
         const info = removeInfo;
-        let taskName;
-        this.todoList.forEach((val, idx) => {
-            if (val.taskId === info.id) {
-                taskName = val.name; // 콘솔 출력을 위해
-                this.todoList.splice(idx, 1);
-            }
-        });
-        console.log(`id: ${info.id}, "${taskName}" 삭제완료`);
+        let filterdTodo = this.todoList.filter((val) =>
+            val.taskId === info.id
+        );
+        if (filterdTodo.length === 0) console.log(`해당 아이디(${info.id}번)에 대한 할일을 찾을 수 없습니다.`);
+        if (filterdTodo.length !== 0) {
+            let taskName = filterdTodo[0].name;
+            this.todoList.splice(this.todoList.indexOf(filterdTodo[0]), 1);
+            console.log(`id: ${info.id}, "${taskName}" 삭제완료`);
+        }
         this.showStatus();
     },
 
@@ -97,10 +107,10 @@ const todo = {
             done: []
         }
         this.todoList.filter(val => val.tag === tagName)
-            .forEach(val => {
-                val.status === "todo" ? listObj.todo.push(val)
-                    : val.status === "doing" ? listObj.doing.push(val)
-                        : val.status === "done" ? listObj.done.push(val) : undefined;
+                     .forEach(val => {
+                        val.status === "todo" ? listObj.todo.push(val)
+                            : val.status === "doing" ? listObj.doing.push(val)
+                                : val.status === "done" ? listObj.done.push(val) : undefined;
             });
         this.sortByTaskId(listObj);
         this.printListByTag(listObj);
@@ -109,11 +119,11 @@ const todo = {
     // 모든 태그를 기준으로 할일 리스트 생성
     showListByAlltheTags() {
         const listObj = {}
-        this.todoList.filter(val => !!val.tag)
+        this.todoList.filter(val => val.tag)
             .forEach(val => {
                 if (!listObj[val.tag]) {
                     listObj[val.tag] = [val];
-                } else if (!!listObj[val.tag]) {
+                } else if (listObj[val.tag]) {
                     listObj[val.tag].push(val);
                 }
             });
@@ -124,7 +134,7 @@ const todo = {
     // 생성된 할일 리스트를 아이디 순서로 정렬
     sortByTaskId(listObj) {
         for (let key in listObj) {
-            listObj[key].sort((a, b) => a.taskId > b.taskId);
+            listObj[key].sort((a, b) => a.taskId - b.taskId);
         }
     },
 
@@ -155,7 +165,7 @@ const todo = {
     // 현재 상태에 따른 할일 리스트 생성 및 출력
     showListByStatus(status) {
         this.todoList.filter(val => val.status === status)
-            .sort((a, b) => a.taskId > b.taskId) // id 순으로 정렬
+            .sort((a, b) => a.taskId - b.taskId) // id 순으로 정렬
             .forEach(val =>
                 console.log(`- ${val.taskId}번, ${val.name}, [${val.tag}]${val.status === "done" ? `, 경과시간: ${val.runningTime}` : ""}`)
             )
@@ -181,21 +191,25 @@ const todo = {
     // 리스트 지연출력 설정
     generateSetTimeout(listObj) {
         console.log(`"총 ${this.taskTotalCount}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다....."`);
-        setTimeout(() => {
-            this.printListBySetTimeout(listObj, "todo");
-            console.log(`\n"지금부터 3초뒤에 doing내역을 출력합니다...."`);
+
+        let repeatCount = 0;
+        let milliSec = 2000;
+        let status = "todo";
+
+        function repeatSelf(listObj) {
             setTimeout(() => {
-                this.printListBySetTimeout(listObj, "doing");
-                console.log(`\n지금부터 2초뒤에 done내역을 출력합니다...."`);
-                setTimeout(() => {
-                    this.printListBySetTimeout(listObj, "done");
-                }
-                    , 2000);
-            }
-                , 3000);
+                todo.printListBySetTimeout(listObj, status);
+                if (repeatCount === 2) return; // 재귀 종료조건
+                repeatCount === 0 ? milliSec = 3000 : repeatCount === 1 ? milliSec = 2000 : "";
+                repeatCount === 0 ? status = "doing" : repeatCount === 1 ? status = "done" : "";
+                console.log(`\n"지금부터 ${milliSec / 1000}초뒤에 ${status}내역을 출력합니다...."`);
+                repeatCount += 1;
+                repeatSelf(listObj);
+            }, milliSec);
         }
-            , 2000);
+        repeatSelf(listObj);
     },
+
 
     // 설정된 지연시간에 따라 리스트 출력
     printListBySetTimeout(listObj, status) {
@@ -208,11 +222,13 @@ const todo = {
         listObj[status].forEach(val => {
             console.log(`- ${val.taskId}번, ${val.name}, [${val.tag}]${val.status === "done" ? `, 경과시간: ${val.runningTime}` : ""}`)
         });
-    }
+    },
 
-} // todo end
+} // end todo
 
 // 메소드 호출 및 실행 
+
+// 할일 추가
 todo.addTodo({ name: "자바스크립트 공부", tag: "programming" });
 todo.addTodo({ name: "알고리즘 문제", tag: "programming" });
 todo.addTodo({ name: "스켈레톤 코드 디자인", tag: "programming" });
@@ -228,29 +244,37 @@ todo.addTodo({ name: "친구약속(광화문)", tag: "life" });
 todo.addTodo({ name: "현대사 읽기", tag: "study" });
 
 
-todo.updateTodo({ id: 2, nextStatus: "DoinG" });
-todo.updateTodo({ id: 3, nextStatus: "DoinG" });
-todo.updateTodo({ id: 5, nextStatus: "DoinG" });
-todo.updateTodo({ id: 7, nextStatus: "dOiNg" });
-todo.updateTodo({ id: 8, nextStatus: "DoinG" });
-todo.updateTodo({ id: 9, nextStatus: "doInG" });
-todo.updateTodo({ id: 10, nextStatus: "DoinG" });
-todo.updateTodo({ id: 12, nextStatus: "doInG" });
+// 할일 업데이트
+// todo => doing
+// todo.updateTodo({ id: 2, nextStatus: "DoinG" });
+// todo.updateTodo({ id: 3, nextStatus: "DoinG" });
+// todo.updateTodo({ id: 5, nextStatus: "DoinG" });
+// todo.updateTodo({ id: 7, nextStatus: "dOiNg" });
 
-
+// doing => done
+// todo.updateTodo({ id: 2, nextStatus: "DoNe" });
 // todo.updateTodo({ id: 3, nextStatus: "DoNe" });
-// todo.updateTodo({ id: 5, nextStatus: "dOnE" });
-// todo.updateTodo({ id: 7, nextStatus: "done" });
+// todo.updateTodo({ id: 5, nextStatus: "DoNe" });
+// todo.updateTodo({ id: 7, nextStatus: "DoNe" });
+
+// todo = done
 // todo.updateTodo({ id: 9, nextStatus: "donE" });
 // todo.updateTodo({ id: 10, nextStatus: "doNE" });
-// todo.updateTodo({ id: 12, nextStatus: "DOne" });
 
-
+// 할일 삭제(및 중복 삭제)
 // todo.removeTodo({ id: 1 });
-// todo.removeTodo({ id: 4 });
-// todo.removeTodo({ id: 7 });
-// todo.removeTodo({ id: 9 });
+// todo.removeTodo({ id: 13 });
+// todo.removeTodo({ id: 1 });
 // todo.removeTodo({ id: 13 });
 
 
+// todo.showListByTag("programming"); 
+// todo.showListByTag("hobby"); 
+// todo.showListByTag("life"); 
+// todo.showListByTag("study"); 
 
+//todo.showListByStatus("todo");
+// todo.showListByStatus("doing");
+// todo.showListByStatus("done");
+
+todo.showAllListByStatus(); 
