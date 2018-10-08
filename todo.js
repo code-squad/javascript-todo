@@ -133,7 +133,14 @@ const todo = {
     },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수(수정필요)
 
     show: function (status) {
-        
+        this.task.forEach(taskObj => {
+            if(taskObj.status === 'done') {
+                console.log(`ID : ${taskObj.id}, ${taskObj.name}, [${taskObj.tag}], ${taskObj.timeData}`)
+                return
+            } else if(taskObj.status === status) {
+                console.log(`ID : ${taskObj.id}, ${taskObj.name}, [${taskObj.tag}]`)
+            } 
+        })
     },//인자로 입력받은 상태의 정보들을 출력해주는 함수
 
     showTag: function (tag) {
