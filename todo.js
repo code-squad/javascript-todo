@@ -8,12 +8,20 @@
 
 // showAll메서드는 모든리스트를 출력하며, 2초-> 3초 ->2초로 출력된다. (총7초 소요)
 // 개발과정에서 본인이 판단해서, 별도의 객체를 분리해야 할 것이면 그렇게 시도한다.
-
+// task:[{id: 0, name: "자바스크립트", status: "todo", tag: "programming", timeData: 0}
+// ,{id: 1, name: "C++", status: "todo", tag: "programming", timeData: 0}
+// ,{id: 2, name: "회식", status: "doing", tag: "회사", timeData: 1538982404810}
+// ,{id: 4, name: "노래연습", status: "todo", tag: "자기개발", timeData: 0}
+// ,{id: 3, name: "과장님업무", status: "done", tag: "회사", timeData: "0일, 0시간, 0분"}],
 const todo = {
-    task: [],
-    
+    task:[{id: 0, name: "자바스크립트", status: "todo", tag: "programming", timeData: 0}
+,{id: 1, name: "C++", status: "todo", tag: "programming", timeData: 0}
+,{id: 2, name: "회식", status: "doing", tag: "회사", timeData: 1538982404810}
+,{id: 4, name: "노래연습", status: "todo", tag: "자기개발", timeData: 0}
+,{id: 3, name: "과장님업무", status: "done", tag: "회사", timeData: "0일, 0시간, 0분"}],
+
     getTakeTime: function (doingTime, currentTime) {
-    let takenTime = ''
+        let takenTime = ''
         let takenMsecTime = currentTime - doingTime
         const msecPerMinute = 1000 * 60, msecPerHour = msecPerMinute * 60, msecPerDay = msecPerHour * 24
         const takenDays = Math.floor(takenMsecTime / msecPerDay)
@@ -78,9 +86,9 @@ const todo = {
 
     update: function (objToUpdate) {
         let beforeTaskStatus = []
-        if(objToUpdate.nextstatus === 'doing') {
+        if (objToUpdate.nextstatus === 'doing') {
             this.updateDoingTime(objToUpdate)
-        } else if(objToUpdate.nextstatus === 'done') {
+        } else if (objToUpdate.nextstatus === 'done') {
             this.updateTakeTime(objToUpdate)
         }
         this.task = this.task.map(taskObj => {
@@ -103,7 +111,7 @@ const todo = {
 
     updateDoingTime: function (objToUpdate) {
         this.task.forEach(taskObj => {
-            if(taskObj.id === objToUpdate.id) {
+            if (taskObj.id === objToUpdate.id) {
                 taskObj.timeData = Date.now();
             }
         })
@@ -111,7 +119,7 @@ const todo = {
 
     updateTakeTime: function (objToUpdate) {
         this.task.forEach(taskObj => {
-            if(taskObj.id === objToUpdate.id) {
+            if (taskObj.id === objToUpdate.id) {
                 taskObj.timeData = this.getTakeTime(taskObj.timeData, Date.now())
             }
         })
@@ -131,12 +139,12 @@ const todo = {
 
     show: function (status) {
         this.task.forEach(taskObj => {
-            if(status === 'done' && taskObj.status === 'done') {
+            if (status === 'done' && taskObj.status === 'done') {
                 console.log(`ID : ${taskObj.id}, ${taskObj.name}, [${taskObj.tag}], ${taskObj.timeData}`)
                 return
-            } else if(taskObj.status === status) {
+            } else if (taskObj.status === status) {
                 console.log(`ID : ${taskObj.id}, ${taskObj.name}, [${taskObj.tag}]`)
-            } 
+            }
         })
     },//인자로 입력받은 상태의 정보들을 출력해주는 함수
 
@@ -149,16 +157,16 @@ const todo = {
         console.log(`[done, 총${doneNum}개]`)
     },//수정필요, 여기에 showTags기능까지 넣어볼 것.
 
-    printByTag: function(tag, status) {
+    printByTag: function (tag, status) {
         let sameTagNum = 0
         this.task.forEach(taskObj => {
-            if(taskObj.tag === tag && taskObj.status === status) {
+            if (taskObj.tag === tag && taskObj.status === status) {
                 sameTagNum++
-                if(status === 'done') {
-                    console.log(`ID : ${taskObj.id}, ${taskObj.name}`)
+                if (status === 'done') {
+                    console.log(`ID : ${taskObj.id}, ${taskObj.name}, ${taskObj.timeData}`)
                     return;
                 }
-                console.log(`ID : ${taskObj.id}, ${taskObj.name}`)    
+                console.log(`ID : ${taskObj.id}, ${taskObj.name}`)
             }
         })
         return sameTagNum
@@ -167,9 +175,15 @@ const todo = {
 //map filter중복적으로 사용하지 말아보기.
 // 테스트
 
-todo.add({ name: '자바스크립트', tag: 'programming' });
-todo.add({ name: 'C++', tag: 'programming' });
-todo.add({ name: '회식', tag: '회사' });
-todo.add({ name: '노래연습', tag: '자기개발' });
-todo.add({ name: '과장님업무', tag: '회사' })
+// todo.add({ name: '자바스크립트', tag: 'programming' });
+// todo.add({ name: 'C++', tag: 'programming' });
+// todo.add({ name: '회식', tag: '회사' });
+// todo.add({ name: '노래연습', tag: '자기개발' });
+// todo.add({ name: '과장님업무', tag: '회사' })
+
+todo.update({ id: 3, nextstatus: 'doing' })
+todo.update({ id: 3, nextstatus: 'done' })
+todo.update({ id: 2, nextstatus: 'done' })
+todo.showTag('회사')
+todo.show('done')
 
