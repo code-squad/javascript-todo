@@ -1,4 +1,3 @@
-
 // 다양한 출력을 지원한다. (모든태그, 특정태그, 모든리스트, 특정상태리스트)
 // 만들어야 할 함수 todo.showTag, todo.show(status), todo.showAll()
 
@@ -9,11 +8,13 @@
 
 // showAll메서드는 모든리스트를 출력하며, 2초-> 3초 ->2초로 출력된다. (총7초 소요)
 // 개발과정에서 본인이 판단해서, 별도의 객체를 분리해야 할 것이면 그렇게 시도한다.
-const saveTimeObj = {
-    doingChangedTimeArrays: [],
-    doneChangedTimeArrays: [],
-    takenTimeArrays: [],
-    getTakeTime: function(doingTime, doneTime) {
+
+const todo = {
+    doingTimeArrays:[],
+    takenTimeArrays:[],
+    task: [],
+    
+    getTakeTime: function (doingTime, doneTime) {
         let takenMsecTime = doneTime - doingTime
         const msecPerMinute = 1000 * 60, msecPerHour = msecPerMinute * 60, msecPerDay = msecPerHour * 24
         const takenDays = Math.floor(takenMsecTime / msecPerDay)
@@ -23,16 +24,12 @@ const saveTimeObj = {
         const takenMinutes = Math.floor(takenMsecTime / msecPerMinute)
         takenMsecTime = takenMsecTime - takenMinutes * msecPerMinute
         console.log(`${takenDays}일 ${takenHours}시간 ${takenMinutes}분이 걸렸습니다.`)
-    }
-}//각각 의 시간 정보들을 저장해주는 obj
-
-const todo = {
-    task: [],
+    },
 
     getRanNum: function () {
         const ranNum = Math.floor(Math.random() * 5)
         const idArrays = this.task.map(obj => obj.id)
-        if(idArrays.includes(ranNum)) {
+        if (idArrays.includes(ranNum)) {
             return this.getRanNum()
         }
         return ranNum;
@@ -55,9 +52,9 @@ const todo = {
     },//상태를 출력해주는 함수
 
     printChangeThing: function (objToPrint, beforeTaskLength, beforeTaskStatus) {
-        if(this.task.length > beforeTaskLength) {
+        if (this.task.length > beforeTaskLength) {
             console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 항목이 추가되었습니다.`);
-        } else if(this.task.length < beforeTaskLength) {
+        } else if (this.task.length < beforeTaskLength) {
             console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 삭제 완료`)
         } else {
             console.log(`ID: ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 업데이트 되었습니다.`)
@@ -81,7 +78,7 @@ const todo = {
 
     update: function (objToUpdate) {
         let beforeTaskStatus = []
-        todo.updateTime(objToUpdate)
+        if(objToUpdate.nextstatus === )
         this.task = this.task.map(taskObj => {
             if (objToUpdate.id === taskObj.id) {
                 beforeTaskStatus.push(taskObj.status)
@@ -100,23 +97,13 @@ const todo = {
         this.printStatusNum(statusNum)
     },//상태 업데이트 함수//주어진 정보의 시간을 넣을 수 있도록 수정 요망
 
-    updateTime: function(objToUpdate) {
-        if(objToUpdate.nextstatus === 'doing') {
-            const doingTimeData = {
-                id: objToUpdate.id,
-                time: Date.now(),
-            }
-            saveTimeObj.doingChangedTimeArrays.push(doingTimeData)
-        } else if (objToUpdate.nextstatus === 'done') {
-            const doneTimeData = {
-                id: objToUpdate.id,
-                time: Date.now(),
-            }
-            saveTimeObj.doneChangedTimeArrays.push(doneTimeData)
-        }
+    updateDoingTime: function (objToUpdate) {
+        
     },//업데이트할 객체를 인자로 받아 id값과 업데이트될때의 시간 값을 saveTimeObj에 저장.
-    
-    
+
+    updateTakeTime: function (objToUpdate) {
+
+    },
 
     remove: function (objToRemove) {
         const notRemovedLength = todo.task.length
@@ -129,7 +116,7 @@ const todo = {
     showAll: function () {
         console.log(`입력된 할 일들`)
         this.task.forEach(obj => {
-            console.log(`ID : ${obj.id}, 이름 : ${obj.name}, 상태 : ${obj.status}, 태그 : ${obj.tag}`)
+            console.log(`ID : ${obj.id}, 이름 : ${obj.name}, 상태 : ${obj.status}, [${obj.tag}]`)
         })
     },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수(수정필요)
 
