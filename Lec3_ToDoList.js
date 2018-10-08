@@ -10,38 +10,39 @@ const todo = {
     },
 
     update(idAndStatus) {
-        for (const values of this.taskList){
-            if(values.id === idAndStatus.id){
+        for (const values of this.taskList) {
+            if (values.id === idAndStatus.id) {
                 idAndStatus.nextstatus = idAndStatus.nextstatus.toLowerCase();
                 console.log(`id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
                 values.status = idAndStatus.nextstatus;
                 let [todo, doing, done] = this.findStatus();
                 console.log(`현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
             }
-        } 
+        }
     },
 
     remove(id) {
-        const taskToRemove = this.taskList.find(id => id.id === id.id);
-        console.log(`id : ${id.id}, "${taskToRemove.name}" 삭제 완료.`);
-        this.taskList.splice(this.taskList.indexOf(taskToRemove), 1);
-        statusList.splice(statusList.indexOf(taskToRemove), 1);
-        idList.splice(idList.indexOf(taskToRemove), 1);
+        for (const values of this.taskList) {
+            if (values.id === id.id) {
+                console.log(`id : ${id.id}, "${values.name}" 삭제 완료.`);
+                this.taskList.splice(this.taskList.indexOf(values), 1);
+            }
+        }
     },
 
     findStatus() {
         let [todo, doing, done] = [0, 0, 0];
         for (const values of this.taskList) {
-                if (values.status === 'todo') {
-                    todo++;
-                }
-                if (values.status === 'doing') {
-                    doing++;
-                }
-                if (values.status === 'done') {
-                    done++;
-                }
+            if (values.status === 'todo') {
+                todo++;
             }
+            if (values.status === 'doing') {
+                doing++;
+            }
+            if (values.status === 'done') {
+                done++;
+            }
+        }
         return [todo, doing, done];
     }
 }
@@ -62,5 +63,5 @@ todo.update({
 });
 
 todo.remove({
-    id: 1
+    id: todo.taskList[0].id,
 });
