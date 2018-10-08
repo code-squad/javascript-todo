@@ -1,6 +1,7 @@
 let taskList = [];
 let idList = [];
 let statusList = [];
+
 const todo = {
     add(task) {
         this.id = idList.length + 1;
@@ -70,19 +71,3 @@ todo.update({
 todo.remove({
     id: 1
 });
-
-console.log(taskList)
-console.log(idList)
-console.log(statusList)
-/*
-> todo.add({name: "자바스크립트 공부하기", tag:"programming"});  // 태그를 입력받는다.
-id: 5,  "자바스크립트 공부하기" 항목이 새로 추가됐습니다. 
-현재상태 :  todo:1개, doing:2개, done:2개
-
-> todo.update({id:4,  nextstatus:"doNe"});  //대소문자 모두 잘 된다.
-id: 4,  "자바스크립트 공부하기" 항목이 todo => done 상태로 업데이트 됐습니다.
-현재상태 :  todo:1개, doing:1개, done:4개  
-
-> todo.remove({id:3});
-id:3, iOS공부하기 삭제완료. '
-*/
