@@ -22,14 +22,16 @@ const todosList = {
         let prev_data = getData.getPrevData('update', id);
         for(let o of this.todos){
             if(o.id === id) {
-                o.status = nextstatus;
-                (nextstatus === 'doing')? o.startTime = stopWatch.start() : o.elapsedTime = stopWatch.stop(o.startTime);
+                if(nextstatus === 'doing'){ o.startTime = stopWatch.start(); }
+                if(nextstatus === 'done' && o.startTime){ o.elapsedTime = stopWatch.stop(o.startTime); }
+                if(nextstatus === 'done' && !o.startTime)( console.log("해당 작업 완료 후 done을 입력할 수 있습니다. doing을 먼저 입력해주세요."))
+                else {o.status = nextstatus;}
             }
         };
         todoMessage.showActiveMessage(prev_data, nextstatus);
     },
     showTag(tagName){
-        let requiredData = getData.getRequiredData(this.todos, 'status', 'tag', tagName);
+        let requiredData = getData.getRequiredData(this.todos, 'tag', tagName);
         getData.getPrintFormat(requiredData, 'status');
     },
     showTags(){
@@ -42,7 +44,7 @@ const todosList = {
         getData.getPrintFormat(requiredData, status);
     },
     showAll(){
-        let requiredData = getData.getRequiredData(todosList.todos, 'status');
+        let requiredData = getData.getRequiredData(this.todos, 'status');
         getData.getPrintFormat(requiredData, 'status', 'async');
     },
 };
@@ -71,7 +73,7 @@ const todoMessage = {
                     number: countObj[value]
                 })
             }
-            asyncObj.getAsyncData(todosListObj);
+            this.showAsyncData(todosListObj);
         }
         if(asyncCheck)return;
         for(let value in requiredValueObj){
@@ -80,6 +82,26 @@ const todoMessage = {
             }
             console.log(`${requiredValueObj[value]}`);
         }
+    },
+    showAsyncData(contents, index = 0){
+        let NumOfData = 0;
+        for(let value of contents){
+            NumOfData += +value.number;
+        }
+        const notice = 
+        {todo: `총 ${NumOfData}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다.....`,
+        doing: `지금부터 3초뒤에 doing내역을 출력합니다....`,
+        done: `지금부터 2초뒤에 done내역을 출력합니다.....`};
+        (function playLoop() {
+            if(index > 2){return;}
+            console.log(notice[contents[index].value]);
+            setTimeout(function() {
+                console.log(contents[index].title);
+                console.log(contents[index].list);
+                index++; 
+                playLoop();
+            }, contents[index].sec);    
+        })();
     },
 }
 
@@ -135,29 +157,6 @@ const getData = {
     }
 }
 
-const asyncObj = {
-    getAsyncData(contents, index = 0){
-        let NumOfData = 0;
-        for(let value of contents){
-            NumOfData += +value.number;
-        }
-        const notice = 
-        {todo: `총 ${NumOfData}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다.....`,
-        doing: `지금부터 3초뒤에 doing내역을 출력합니다....`,
-        done: `지금부터 2초뒤에 done내역을 출력합니다.....`};
-        (function playLoop() {
-            if(index > 2){return;}
-            console.log(notice[contents[index].value]);
-            setTimeout(function() {
-                console.log(contents[index].title);
-                console.log(contents[index].list);
-                index++; 
-                playLoop();
-            }, contents[index].sec);    
-        })();
-    },
-}
-
 const stopWatch = {
     start(){
         return new Date().getTime();
@@ -169,22 +168,24 @@ const stopWatch = {
 
 todosList.add({name: "자바스크립트 공부하기", tag:"study"});
 todosList.add({name: "자료구조 공부하기", tag:"programming"});
-todosList.update({id:2,  nextstatus:"doing"});
-todosList.add({name: "OS 공부하기", tag:"game"});
-todosList.update({id:2,  nextstatus:"done"});
+todosList.update({id:1,  nextstatus:"done"});
+todosList.update({id:1,  nextstatus:"doing"});
+todosList.add({name: "OS 공부하기", tag:"programming"});
+todosList.update({id:1,  nextstatus:"done"});
+todosList.remove({id:1});
 todosList.add({name: "OS 공부하기", tag:"programming"});
 todosList.update({id:3,  nextstatus:"doing"});
-// todosList.remove({id:1});
-todosList.update({id:4,  nextstatus:"doing"});
+todosList.remove({id:1});
+todosList.update({id:4,  nextstatus:"done"});
 todosList.add({name: "여행가기", tag:"play"});
 todosList.add({name: "OS", tag:"programming"});
-// todosList.update({id:3,  nextstatus:"done"});
-// todosList.add({name: "ios", tag:"programming"});
+todosList.update({id:3,  nextstatus:"done"});
+todosList.add({name: "ios", tag:"programming"});
 
 
-// todosList.showTag("programming");
+todosList.showTag("programming");
 // todosList.showTags();
-todosList.show('done');
+// todosList.show('done');
 // todosList.showAll();
 
 
