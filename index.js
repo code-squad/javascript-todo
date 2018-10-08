@@ -1,14 +1,13 @@
 class Todo {
-    constructor(printTodo, errorCheck, log, undoOrRedo){
+    constructor(message, error, execution){
         this.list = [];
-        this.printTodo = printTodo;
-        this.errorCheck = errorCheck;
-        this.log = log;
-        this.undoOrRedo = undoOrRedo; 
+        this.message = message;
+        this.error = error;
+        this.execution = execution; 
     }
     
     add({name, tag}){
-        const bError = this.errorCheck.inCaseAdd(this.list, name);
+        const bError = this.error.inCaseAdd(this.list, name);
         if(bError) return;
         
         const newTask = {
@@ -19,8 +18,8 @@ class Todo {
         }
         
         this.list.push(newTask);
-        this.log.pushUndoLog('add', this.log.copyTargetTask(newTask));
-        this.printTodo.commandResult(this.list, 'add', newTask);
+        this.execution.record.pushUndoList('add', this.execution.record.copyTargetTask(newTask));
+        this.message.commandResult(this.list, 'add', newTask);
     }  
 
     update({id, nextstatus}){
@@ -31,13 +30,13 @@ class Todo {
         const targetTask = this.list.filter(task => task.id === id)[0];
         const nextStatus = nextstatus.toLowerCase();
 
-        const bError = this.errorCheck.inCaseUpdate(this.list, targetTask, id, nextStatus);
+        const bError = this.error.inCaseUpdate(this.list, targetTask, id, nextStatus);
         if(bError) return;
 
         const prevStatus = targetTask.status;
         const isDoingDone = (prevStatus === 'doing' && nextStatus === 'done'); 
 
-        this.log.pushUndoLog('update', this.log.copyTargetTask(targetTask), nextStatus);
+        this.execution.record.pushUndoList('update', this.execution.record.copyTargetTask(targetTask), nextStatus);
         
         if(nextStatus === 'doing'){
             targetTask.startTime = new Date(Date.now());
@@ -50,50 +49,50 @@ class Todo {
 
         targetTask.status = nextStatus;
 
-        this.printTodo.commandResult(this.list, 'update', targetTask, prevStatus);    
+        this.message.commandResult(this.list, 'update', targetTask, prevStatus);    
     }
 
     remove({id}){
-        const bError = this.errorCheck.inCaseRemove(this.list, id);
+        const bError = this.error.inCaseRemove(this.list, id);
         if(bError) return;
 
         const targetIndex = this.list.findIndex(task => task.id === id)
         const targetTask = this.list[targetIndex];
 
         this.list.splice(targetIndex, 1);
-        this.log.pushUndoLog('remove', this.log.copyTargetTask(targetTask)); 
-        this.printTodo.commandResult(this.list, 'remove', targetTask);
+        this.execution.record.pushUndoList('remove',this.execution.record.copyTargetTask(targetTask)); 
+        this.message.commandResult(this.list, 'remove', targetTask);
     }
 
     showTag(tag){
-        this.printTodo.listByTag(this.list, tag);
+        this.message.listByTag(this.list, tag);
     }
 
     showTags(){
-        this.printTodo.listByAllTags(this.list);
+        this.message.listByAllTags(this.list);
     }
 
     show(status){
-        this.printTodo.listByStatus(this.list, status);
+        this.message.listByStatus(this.list, status);
     }
 
     showAll(){
         const asynTime = [2000, 3000, 2000];
-        this.printTodo.listByAllStatus(this.list, asynTime);
+        this.message.listByAllStatus(this.list, asynTime);
     }
 
     undo(){
-        this.undoOrRedo.undo(this.list);
+        this.execution.undo(this.list);
     }
 
     redo(){
-        this.undoOrRedo.redo(this.list);
+        this.execution.redo(this.list);
     }
 }
 
-class PrintTodo{
-    constructor(getTodoObj){
-        this.getTodoObj = getTodoObj;
+class Message{
+    constructor(todoObj){
+        this.todoObj = todoObj;
     }
 
     commandResult(todoList, command, task, prevStatus){
@@ -117,7 +116,7 @@ class PrintTodo{
     }
 
     listByTag(todoList, tag){
-        const todoByTag = this.getTodoObj.tag(todoList, tag);
+        const todoByTag = this.todoObj.tag(todoList, tag);
 
         Object.keys(todoByTag).forEach(status => {
             if(!todoByTag[status]) return; 
@@ -132,7 +131,7 @@ class PrintTodo{
     }
 
     listByAllTags(todoList){
-        const todoByTags = this.getTodoObj.tags(todoList);
+        const todoByTags = this.todoObj.tags(todoList);
 
         Object.keys(todoByTags).forEach(tag => {
             const resultStr = 
@@ -156,7 +155,7 @@ class PrintTodo{
     }
 
     listByAllStatus(todoList, asynTime){
-        const todoByStatus = this.getTodoObj.status(todoList);
+        const todoByStatus = this.todoObj.status(todoList);
         const kindOfPrint = Object.keys(todoByStatus);
         const countOfCallback = kindOfPrint.length;
         let asynIndex = 0;
@@ -191,7 +190,7 @@ class PrintTodo{
     }
 }
 
-class GetTodoObj{
+class TodoObj{
     tag(todoList, tag){
         const todoObj = {todo: '', doing: '', done: ''};
         todoList
@@ -218,9 +217,9 @@ class GetTodoObj{
     }
 }
 
-class ErrorCheck{
+class Error{
     inCaseAdd(list, name){
-        const bSameName = this.isSameTaskName(list, name);
+        const bSameName = list.some(task => task.name === name);
         if(bSameName){
             console.log(`[error] todo에는 이미 같은 이름의 task가 존재합니다.`);
             return true;
@@ -229,13 +228,20 @@ class ErrorCheck{
     }
 
     inCaseUpdate(list, targetTask, id, status){
+        const commandList = ['todo', 'doing', 'done'];
+        const bRightCommand = commandList.some( command => command === status);
+        if( !bRightCommand ) {
+            console.log(`[error] Todo Command를 잘못 입력하였습니다`)
+            return true;
+        }
+
         const bSameId = this.isExist(list, id);
-        if(!bSameId){
+        if( !bSameId ){
             console.log(`[error] ${id} ID는 존재하지 않습니다.`);
             return true;
         } 
         
-        const bSameStatus = targetTask.status !== status;
+        const bSameStatus = ( targetTask.status !== status);
         if(!bSameStatus){
             console.log(`[error] ${targetTask.id}는 이미 ${status}입니다.`);
             return true;
@@ -259,59 +265,52 @@ class ErrorCheck{
         return false 
     }
 
-    isSameTaskName(list, name){
-        return list.some(task => task.name === name);
-    }
-
     isExist(list, id){
         return list.some(task => task.id === id);
     }
 }
 
-class Log{
+class Execution{
     constructor(){
-        this.undoLog = [];
-        this.redoLog = [];
-    }
-
-    copyTargetTask(targetTask){
-        const copyObj = {};
-        for(let key in targetTask){
-            if(targetTask.hasOwnProperty(key)){
-                copyObj[key] = targetTask[key];
+        this.record = 
+        {
+            undoList: [],
+            redoList: [],
+                
+            copyTargetTask(targetTask){
+                const copyObj = {};
+                for(let key in targetTask){
+                    if(targetTask.hasOwnProperty(key)){
+                        copyObj[key] = targetTask[key];
+                    }
+                }
+                return copyObj;
+            },
+            
+            pushUndoList(methodName, task, nextStatus){
+                const record = {
+                    todoMethod: methodName,
+                    task: task,
+                    nextStatus: nextStatus 
+                };
+                if(this.undoList.length >= 3) this.undoList.shift();
+                this.undoList.push(record);
+            },
+            
+            pushRedoList(target){
+                const record = {
+                    todoMethod: target.todoMethod,
+                    task: target.task,
+                    nextStatus: target.nextStatus 
+                };
+                if(this.redoList.length >= 3) this.redoList.shift();
+                this.redoList.push(record);
             }
         }
-        return copyObj;
-    }
-
-    pushUndoLog(methodName, task, nextStatus){
-        const log = {
-            todoMethod: methodName,
-            task: task,
-            nextStatus: nextStatus 
-        };
-        if(this.undoLog.length >= 3) this.undoLog.shift();
-        this.undoLog.push(log);
-    }
-
-    pushRedoLog(target){
-        const log = {
-            todoMethod: target.todoMethod,
-            task: target.task,
-            nextStatus: target.nextStatus 
-        };
-        if(this.redoLog.length >= 3) this.redoLog.shift();
-        this.redoLog.push(log);
-    }
-}
-
-class UndoOrRedo{
-    constructor(log){
-        this.log = log;
     }
 
     undo(list){
-        const targetUndo = this.log.undoLog.pop();
+        const targetUndo = this.record.undoList.pop();
         if(!targetUndo) {
             console.log('undo할 todo가 없습니다');
             return;
@@ -320,24 +319,24 @@ class UndoOrRedo{
         if(targetUndo.todoMethod === 'add'){
             const undoTaskIndex = list.findIndex(task => task.id === targetUndo.task.id);
             list.splice(undoTaskIndex, 1);
-            this.log.pushRedoLog(targetUndo);
+            this.record.pushRedoList(targetUndo);
             console.log(`\"${targetUndo.task.id}, ${targetUndo.task.name}가 삭제됐습니다\"`);
         } 
         else if(targetUndo.todoMethod === 'update'){
             const undoTaskIndex = list.findIndex(task => task.id === targetUndo.task.id);
             list[undoTaskIndex] = targetUndo.task;
-            this.log.pushRedoLog(targetUndo);
+            this.record.pushRedoList(targetUndo);
             console.log(`\"${targetUndo.task.id}항목이 ${targetUndo.nextStatus} => ${targetUndo.task.status} 상태로 변경됐습니다\"`);
         }
         else if(targetUndo.todoMethod === 'remove'){
             list.push(targetUndo.task);            
-            this.log.pushRedoLog(targetUndo);
+            this.record.pushRedoList(targetUndo);
             console.log(`\"${targetUndo.task.id}항목 \'${targetUndo.task.name}\'가 삭제에서 ${targetUndo.task.status} 상태로 변경됐습니다\"`);
         }
     }
 
     redo(){
-        const targetRedo = this.log.redoLog.pop();
+        const targetRedo = this.record.redoList.pop();
         if(!targetRedo) {
             console.log('redo할 todo가 없습니다');
             return;
@@ -355,9 +354,8 @@ class UndoOrRedo{
     }
 }
 
-const errorCheck = new ErrorCheck;
-const getTodoObj = new GetTodoObj;
-const log = new Log;
-const undoOrRedo = new UndoOrRedo(log);
-const printTodo = new PrintTodo(getTodoObj);
-const todo = new Todo(printTodo, errorCheck, log, undoOrRedo);
+const error = new Error;
+const todoObj = new TodoObj;
+const execution = new Execution;
+const message = new Message(todoObj);
+const todo = new Todo(message, error, execution);
