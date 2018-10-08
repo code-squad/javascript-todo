@@ -133,18 +133,28 @@ const todo = {
     },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수(수정필요)
 
     show: function (status) {
-
+        
     },//인자로 입력받은 상태의 정보들을 출력해주는 함수
 
     showTag: function (tag) {
-        console.log(`현재 ${tag} 태그를 가진 할 일들은 다음과 같습니다.`);
-        const tagSeparatedTask = this.task.filter(obj => {
-            return obj.tag === tag
-        })
-        tagSeparatedTask.forEach(obj => {
-            console.log(`ID : ${obj.id}, 이름 : ${obj.name}, 상태 : ${obj.status}`)
-        })
+        const todoNum = this.printByTag(tag, 'todo');
+        console.log(`[todo, 총${todoNum}개]`)
+        const doingNum = this.printByTag(tag, 'doing');
+        console.log(`[doing, 총${doingNum}개]`)
+        const doneNum = this.printByTag(tag, 'done');
+        console.log(`[done, 총${doneNum}개]`)
     },//수정필요, 여기에 showTags기능까지 넣어볼 것.
+
+    printByTag: function(tag, status) {
+        let sameTagNum = 0
+        this.task.forEach(taskobj => {
+            if(taskobj.tag === tag && taskobj.status === status) {
+                sameTagNum++
+                console.log(`ID : ${taskobj.id}, ${taskobj.name}`)
+            }
+        })
+        return sameTagNum
+    }//tag의 값과 상태의 값을 인자로 받아 출력해주는 함수
 }//해야 할일 객체
 //map filter중복적으로 사용하지 말아보기.
 // 테스트
