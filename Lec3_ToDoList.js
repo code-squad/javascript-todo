@@ -10,16 +10,15 @@ const todo = {
     },
 
     update(idAndStatus) {
-        idAndStatus.nextstatus = idAndStatus.nextstatus.toLowerCase();
-        const taskToUpdate = this.taskList.find(idAndStatus => idAndStatus.id === this.id);
-        const before = taskToUpdate.status;
-        const after = idAndStatus.nextstatus;
-        taskToUpdate.status = after;
-        statusList.splice(statusList.indexOf(taskToUpdate), 1);
-        statusList.push(after);
-        const [todo, doing, done] = this.findStatus(statusList);
-        console.log(`id : ${taskToUpdate.id}, "${taskToUpdate.name}" 항목이 (${before} => ${after}) 상태로 업데이트되었습니다. 
-현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
+        for (const values of this.taskList){
+            if(values.id === idAndStatus.id){
+                idAndStatus.nextstatus = idAndStatus.nextstatus.toLowerCase();
+                console.log(`id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
+                values.status = idAndStatus.nextstatus;
+                let [todo, doing, done] = this.findStatus();
+                console.log(`현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
+            }
+        } 
     },
 
     remove(id) {
@@ -58,7 +57,7 @@ todo.add({
 });
 
 todo.update({
-    id: 2,
+    id: todo.taskList[0].id,
     nextstatus: "DOING"
 });
 
