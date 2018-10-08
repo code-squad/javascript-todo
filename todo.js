@@ -10,8 +10,6 @@
 // 개발과정에서 본인이 판단해서, 별도의 객체를 분리해야 할 것이면 그렇게 시도한다.
 
 const todo = {
-    doingTimeArrays:[],
-    takenTimeArrays:[],
     task: [],
     
     getTakeTime: function (doingTime, doneTime) {
@@ -68,7 +66,7 @@ const todo = {
             name: objToAdd.name,
             status: 'todo',
             tag: objToAdd.tag,
-            takeTime: 0,
+            timeData: 0,
         }
         let statusNum = this.getStatusNum(this.task)
         this.task.push(newTodo)
@@ -78,7 +76,11 @@ const todo = {
 
     update: function (objToUpdate) {
         let beforeTaskStatus = []
-        if(objToUpdate.nextstatus === )
+        if(objToUpdate.nextstatus === 'doing') {
+            this.updateDoingTime(objToUpdate)
+        } else if(objToUpdate.nextstatus === 'done') {
+            this.updateTakeTime(objToUpdate)
+        }
         this.task = this.task.map(taskObj => {
             if (objToUpdate.id === taskObj.id) {
                 beforeTaskStatus.push(taskObj.status)
@@ -98,11 +100,15 @@ const todo = {
     },//상태 업데이트 함수//주어진 정보의 시간을 넣을 수 있도록 수정 요망
 
     updateDoingTime: function (objToUpdate) {
-        
-    },//업데이트할 객체를 인자로 받아 id값과 업데이트될때의 시간 값을 saveTimeObj에 저장.
+        this.task.forEach(obj => {
+            if(obj.id === objToUpdate.id) {
+                obj.timeData = Date.now();
+            }
+        })
+    },//업데이트할 객체를 인자로 받아 task내의 timeData값을 변경.
 
     updateTakeTime: function (objToUpdate) {
-
+        
     },
 
     remove: function (objToRemove) {
