@@ -28,6 +28,23 @@ const todosList = {
         };
         todoMessage.showActiveMessage(prev_data, nextstatus);
     },
+    showTag(tagName){
+        let requiredData = getData.getRequiredData(this.todos, 'status', 'tag', tagName);
+        getData.getPrintFormat(requiredData, 'status');
+    },
+    showTags(){
+        let requiredData = getData.getRequiredData(this.todos, 'tag');
+        getData.getPrintFormat(requiredData, 'tag');
+    },
+    show(status){
+        debugger;
+        let requiredData = getData.getRequiredData(this.todos, 'status', status);
+        getData.getPrintFormat(requiredData, status);
+    },
+    showAll(){
+        let requiredData = getData.getRequiredData(todosList.todos, 'status');
+        getData.getPrintFormat(requiredData, 'status', 'async');
+    },
 };
 
 const todoMessage = {
@@ -38,22 +55,6 @@ const todoMessage = {
         '';
         let statusCount = getData.getCurrentStatus(todosList.todos, 'status');
         console.log(`현재상태 :  todo:${statusCount.todo}개, doing:${statusCount.doing}개, done:${statusCount.done}개`);
-    },
-    showTag(tagName){
-        let requiredData = getData.getRequiredData(todosList.todos, 'status', 'tag', tagName);
-        getData.getPrintFormat(requiredData, 'status');
-    },
-    showTags(){
-        let requiredData = getData.getRequiredData(todosList.todos, 'tag');
-        getData.getPrintFormat(requiredData, 'tag');
-    },
-    show(status){
-        let requiredData = getData.getRequiredData(todosList.todos, 'tag', 'status', status);
-        getData.getPrintFormat(requiredData, status);
-    },
-    showAll(){
-        let requiredData = getData.getRequiredData(todosList.todos, 'status');
-        getData.getPrintFormat(requiredData, 'status', 'async');
     },
     showMessage(requiredValueObj, countObj, asyncCheck, index=0){
         let todosListObj= [];
@@ -173,15 +174,22 @@ todosList.add({name: "OS 공부하기", tag:"game"});
 todosList.update({id:2,  nextstatus:"done"});
 todosList.add({name: "OS 공부하기", tag:"programming"});
 todosList.update({id:3,  nextstatus:"doing"});
-todosList.remove({id:1});
+// todosList.remove({id:1});
 todosList.update({id:4,  nextstatus:"doing"});
 todosList.add({name: "여행가기", tag:"play"});
 todosList.add({name: "OS", tag:"programming"});
-todosList.update({id:3,  nextstatus:"done"});
-todosList.add({name: "ios", tag:"programming"});
+// todosList.update({id:3,  nextstatus:"done"});
+// todosList.add({name: "ios", tag:"programming"});
 
 
-todoMessage.showTag("programming");
-todoMessage.showTags();
-todoMessage.show('done');
-// todoMessage.showAll();
+// todosList.showTag("programming");
+// todosList.showTags();
+todosList.show('done');
+// todosList.showAll();
+
+
+
+//show 해결
+//doing 없이 done 오류
+//todoList를 기준으로 
+//async 객체 안으로 옮기기
