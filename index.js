@@ -1,7 +1,8 @@
 class Todo {
-    constructor(message, error, execution){
+    constructor(message, todoObj, error, execution){
         this.list = [];
         this.message = message;
+        this.todoObj = todoObj;
         this.error = error;
         this.execution = execution; 
     }
@@ -67,11 +68,11 @@ class Todo {
     }
 
     showTag(tag){
-        this.message.listByTag(this.list, tag);
+        this.message.listByTag(this.todoObj.tag(this.list, tag) );
     }
 
     showTags(){
-        this.message.listByAllTags(this.list);
+        this.message.listByAllTags(this.todoObj.tags(this.list));
     }
 
     show(status){
@@ -80,7 +81,7 @@ class Todo {
 
     showAll(){
         const asynTime = [2000, 3000, 2000];
-        this.message.listByAllStatus(this.list, asynTime);
+        this.message.listByAllStatus(this.todoObj.status(this.list), asynTime);
     }
 
     undo(){
@@ -93,10 +94,6 @@ class Todo {
 }
 
 class Message{
-    constructor(todoObj){
-        this.todoObj = todoObj;
-    }
-
     printCommandResult(todoList, command, task, prevStatus){
         const countTodoStatus = (status) => todoList.filter(task => task.status === status).length;
         switch(command){
@@ -114,9 +111,7 @@ class Message{
         }
     }
 
-    listByTag(todoList, tag){
-        const todoByTag = this.todoObj.tag(todoList, tag);
-
+    listByTag(todoByTag){
         Object.keys(todoByTag).forEach(status => {
             if(!todoByTag[status]) return; 
             const resultStr = 
@@ -129,9 +124,7 @@ class Message{
         })
     }
 
-    listByAllTags(todoList){
-        const todoByTags = this.todoObj.tags(todoList);
-
+    listByAllTags(todoByTags){
         Object.keys(todoByTags).forEach(tag => {
             const resultStr = 
                 todoByTags[tag].reduce((accStr, task) => {
@@ -153,8 +146,8 @@ class Message{
         console.log(resultStr);
     }
 
-    listByAllStatus(todoList, asynTime){
-        const todoByStatus = this.todoObj.status(todoList);
+    listByAllStatus(todoByStatus, asynTime){
+        const listLength = Object.values(todoByStatus).length;
         const kindOfPrint = Object.keys(todoByStatus);
         const countOfCallback = kindOfPrint.length;
         let asynIndex = 0;
@@ -167,7 +160,7 @@ class Message{
             if(asynIndex < countOfCallback) setTimeout(asynPrint, asynTime[asynIndex], kindOfPrint[asynIndex]);
         }
            
-        console.log(`\"총 ${todoList.length}개의 리스트를 가져왔습니다. ${asynTime[asynIndex]/1000}초뒤에 ${kindOfPrint[asynIndex]}내역을 출력합니다.....\"`)
+        console.log(`\"총 ${listLength}개의 리스트를 가져왔습니다. ${asynTime[asynIndex]/1000}초뒤에 ${kindOfPrint[asynIndex]}내역을 출력합니다.....\"`)
 
         setTimeout(asynPrint, asynTime[asynIndex], kindOfPrint[asynIndex])
     }
@@ -361,8 +354,9 @@ class Execution{
     }
 }
 
-const error = new Error;
+const message = new Message;
 const todoObj = new TodoObj;
+const error = new Error;
 const execution = new Execution;
-const message = new Message(todoObj);
-const todo = new Todo(message, error, execution);
+
+const todo = new Todo(message, todoObj, error, execution);
