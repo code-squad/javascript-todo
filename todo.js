@@ -102,17 +102,17 @@ const todo = {
     },//상태 업데이트 함수//주어진 정보의 시간을 넣을 수 있도록 수정 요망
 
     updateDoingTime: function (objToUpdate) {
-        this.task.forEach(taskobj => {
-            if(taskobj.id === objToUpdate.id) {
-                taskobj.timeData = Date.now();
+        this.task.forEach(taskObj => {
+            if(taskObj.id === objToUpdate.id) {
+                taskObj.timeData = Date.now();
             }
         })
     },//업데이트할 객체를 인자로 받아 task내의 timeData값을 변경.
 
     updateTakeTime: function (objToUpdate) {
-        this.task.forEach(taskobj => {
-            if(taskobj.id === objToUpdate.id) {
-                taskobj.timeData = this.getTakeTime(obj.timeData, Date.now())
+        this.task.forEach(taskObj => {
+            if(taskObj.id === objToUpdate.id) {
+                taskObj.timeData = this.getTakeTime(taskObj.timeData, Date.now())
             }
         })
     },//업데이트할 객체를 인자로 받아 task내의 timeData의 값을 걸린 시간으로 변경.
@@ -126,15 +126,12 @@ const todo = {
     },//할 일과 id값을 제거해주는 함수
 
     showAll: function () {
-        console.log(`입력된 할 일들`)
-        this.task.forEach(obj => {
-            console.log(`ID : ${obj.id}, 이름 : ${obj.name}, 상태 : ${obj.status}, [${obj.tag}]`)
-        })
+        
     },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수(수정필요)
 
     show: function (status) {
         this.task.forEach(taskObj => {
-            if(taskObj.status === 'done') {
+            if(status === 'done' && taskObj.status === 'done') {
                 console.log(`ID : ${taskObj.id}, ${taskObj.name}, [${taskObj.tag}], ${taskObj.timeData}`)
                 return
             } else if(taskObj.status === status) {
@@ -154,10 +151,14 @@ const todo = {
 
     printByTag: function(tag, status) {
         let sameTagNum = 0
-        this.task.forEach(taskobj => {
-            if(taskobj.tag === tag && taskobj.status === status) {
+        this.task.forEach(taskObj => {
+            if(taskObj.tag === tag && taskObj.status === status) {
                 sameTagNum++
-                console.log(`ID : ${taskobj.id}, ${taskobj.name}`)
+                if(status === 'done') {
+                    console.log(`ID : ${taskObj.id}, ${taskObj.name}`)
+                    return;
+                }
+                console.log(`ID : ${taskObj.id}, ${taskObj.name}`)    
             }
         })
         return sameTagNum
