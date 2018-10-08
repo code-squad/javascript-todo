@@ -14,11 +14,7 @@
 // ,{id: 4, name: "노래연습", status: "todo", tag: "자기개발", timeData: 0}
 // ,{id: 3, name: "과장님업무", status: "done", tag: "회사", timeData: "0일, 0시간, 0분"}],
 const todo = {
-    task:[{id: 0, name: "자바스크립트", status: "todo", tag: "programming", timeData: 0}
-,{id: 1, name: "C++", status: "todo", tag: "programming", timeData: 0}
-,{id: 2, name: "회식", status: "doing", tag: "회사", timeData: 1538982404810}
-,{id: 4, name: "노래연습", status: "todo", tag: "자기개발", timeData: 0}
-,{id: 3, name: "과장님업무", status: "done", tag: "회사", timeData: "0일, 0시간, 0분"}],
+    task: [],
 
     getTakeTime: function (doingTime, currentTime) {
         let takenTime = ''
@@ -134,14 +130,29 @@ const todo = {
     },//할 일과 id값을 제거해주는 함수
 
     showAll: function () {
-        
+        const statusNum = this.getStatusNum(this.task)
+        console.log(`총 ${this.task.length}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다...`)
+        setTimeout(function () {
+            console.log(`[todo, ${statusNum.todo}개]`);
+            this.show('todo')
+            console.log(`지금부터 3초뒤에 doing내역을 출력합니다.......`)
+            setTimeout(function () {
+                debugger;
+                console.log(`[doing, ${statusNum.doing}개]`)
+                this.show('doing')
+                console.log(`지금부터 2초뒤에 done내역을 출력합니다.......`)
+                setTimeout(function () {
+                    console.log(`[done, ${statusNum.done}개]`)
+                    this.show('done')
+                }.bind(todo), 2000)
+            }.bind(todo), 3000)
+        }.bind(todo), 2000)
     },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수(수정필요)
 
     show: function (status) {
         this.task.forEach(taskObj => {
             if (status === 'done' && taskObj.status === 'done') {
                 console.log(`ID : ${taskObj.id}, ${taskObj.name}, [${taskObj.tag}], ${taskObj.timeData}`)
-                return
             } else if (taskObj.status === status) {
                 console.log(`ID : ${taskObj.id}, ${taskObj.name}, [${taskObj.tag}]`)
             }
@@ -149,41 +160,48 @@ const todo = {
     },//인자로 입력받은 상태의 정보들을 출력해주는 함수
 
     showTag: function (tag) {
+        if(!tag) {
+            console.log(``)
+        }
         const todoNum = this.printByTag(tag, 'todo');
-        console.log(`[todo, 총${todoNum}개]`)
+        console.log(`[todo ${todoNum}개]`)
         const doingNum = this.printByTag(tag, 'doing');
-        console.log(`[doing, 총${doingNum}개]`)
+        console.log(`[doing ${doingNum}개]`)
         const doneNum = this.printByTag(tag, 'done');
-        console.log(`[done, 총${doneNum}개]`)
+        console.log(`[done ${doneNum}개]`)
     },//수정필요, 여기에 showTags기능까지 넣어볼 것.
 
     printByTag: function (tag, status) {
-        let sameTagNum = 0
+        sameTagNum = 0
         this.task.forEach(taskObj => {
             if (taskObj.tag === tag && taskObj.status === status) {
-                sameTagNum++
                 if (status === 'done') {
+                    sameTagNum++
                     console.log(`ID : ${taskObj.id}, ${taskObj.name}, ${taskObj.timeData}`)
                     return;
                 }
+                sameTagNum++
                 console.log(`ID : ${taskObj.id}, ${taskObj.name}`)
             }
         })
-        return sameTagNum
+        return sameTagNum;
     }//tag의 값과 상태의 값을 인자로 받아 출력해주는 함수
 }//해야 할일 객체
 //map filter중복적으로 사용하지 말아보기.
 // 테스트
 
-// todo.add({ name: '자바스크립트', tag: 'programming' });
-// todo.add({ name: 'C++', tag: 'programming' });
-// todo.add({ name: '회식', tag: '회사' });
-// todo.add({ name: '노래연습', tag: '자기개발' });
-// todo.add({ name: '과장님업무', tag: '회사' })
+todo.add({ name: '자바스크립트', tag: 'programming' });
+todo.add({ name: 'C++', tag: 'programming' });
+todo.add({ name: '회식', tag: '회사' });
+todo.add({ name: '노래연습', tag: '자기개발' });
+todo.add({ name: '과장님업무', tag: '회사' })
 
 todo.update({ id: 3, nextstatus: 'doing' })
 todo.update({ id: 3, nextstatus: 'done' })
 todo.update({ id: 2, nextstatus: 'done' })
+todo.remove({ id: 2})
+todo.showTag('programming')
 todo.showTag('회사')
-todo.show('done')
+todo.showTag('자기개발')
+todo.showAll();
 
