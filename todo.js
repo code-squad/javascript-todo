@@ -1,7 +1,6 @@
 const todosList = {
     todos : [],
     id : 1,
-    statusList : ['todo','done','doing'],
     add({name, tag}){
         this.todos.push({
             name: name,
@@ -58,17 +57,17 @@ const todoMessage = {
         let statusCount = getData.getCurrentStatus(todosList.todos, 'status');
         console.log(`현재상태 :  todo:${statusCount.todo}개, doing:${statusCount.doing}개, done:${statusCount.done}개`);
     },
-    showMessage(requiredValueObj, countObj, asyncCheck, index=0){
+    showMessage(requiredValueObj, countObj, asyncCheck){
         let todosListObj= [];
 
         if(asyncCheck === 'async'){
             for(let value in requiredValueObj){
                 todosListObj.push({
-                    title :`[ ${value} , 총${countObj[value]}개 ]`,
-                    list: `${requiredValueObj[value]}`,
-                    sec: `${(value==='todo')  ? 2000:
-                            (value==='doing') ? 3000:
-                            (value === 'done')? 2000: 0}`,
+                    title : `[ ${value} , 총${countObj[value]}개 ]`,
+                    list  : `${requiredValueObj[value]}`,
+                    sec   : `${(value==='todo')  ? 2000:
+                               (value==='doing') ? 3000:
+                               (value === 'done')? 2000: 0}`,
                     value,
                     number: countObj[value]
                 })
@@ -84,12 +83,12 @@ const todoMessage = {
         }
     },
     showAsyncData(contents, index = 0){
-        let NumOfData = 0;
+        let numOfData = 0;
         for(let value of contents){
-            NumOfData += +value.number;
+            numOfData += +value.number;
         }
         const notice = 
-        {todo: `총 ${NumOfData}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다.....`,
+        {todo: `총 ${numOfData}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다.....`,
         doing: `지금부터 3초뒤에 doing내역을 출력합니다....`,
         done: `지금부터 2초뒤에 done내역을 출력합니다.....`};
         (function playLoop() {
@@ -184,13 +183,6 @@ todosList.add({name: "ios", tag:"programming"});
 
 
 todosList.showTag("programming");
-// todosList.showTags();
-// todosList.show('done');
-// todosList.showAll();
-
-
-
-//show 해결
-//doing 없이 done 오류
-//todoList를 기준으로 
-//async 객체 안으로 옮기기
+todosList.showTags();
+todosList.show('todo');
+todosList.showAll();
