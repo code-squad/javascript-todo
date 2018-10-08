@@ -18,7 +18,7 @@ class Todo {
         }
         
         this.list.push(newTask);
-        this.execution.record.pushUndoList('add', this.execution.record.copyTargetTask(newTask));
+        this.execution.record.pushUndoList('add', newTask);
         this.message.printCommandResult(this.list, 'add', newTask);
     }  
 
@@ -36,7 +36,7 @@ class Todo {
         const prevStatus = targetTask.status;
         const isDoingDone = (prevStatus === 'doing' && nextStatus === 'done'); 
 
-        this.execution.record.pushUndoList('update', this.execution.record.copyTargetTask(targetTask), nextStatus);
+        this.execution.record.pushUndoList('update', targetTask, nextStatus);
         
         if(nextStatus === 'doing'){
             targetTask.startTime = new Date(Date.now());
@@ -62,7 +62,7 @@ class Todo {
         const targetTask = this.list[targetIndex];
 
         this.list.splice(targetIndex, 1);
-        this.execution.record.pushUndoList('remove',this.execution.record.copyTargetTask(targetTask)); 
+        this.execution.record.pushUndoList('remove', targetTask); 
         this.message.printCommandResult(this.list, 'remove', targetTask);
     }
 
@@ -229,6 +229,7 @@ class Error{
     }
 
     inCaseUpdate(list, targetTask, id, status){
+        // 잘못된 command 입력시 에러 출력
         const commandList = ['todo', 'doing', 'done'];
         const bRightCommand = commandList.some( command => command === status);
         if(!bRightCommand){
@@ -289,20 +290,22 @@ class Execution{
             },
             
             pushUndoList(methodName, task, nextStatus){
+                const copyedData = this.copyTargetTask(task);
                 const record = {
                     todoMethod: methodName,
-                    task: task,
+                    task: copyedData,
                     nextStatus: nextStatus 
                 };
                 if(this.undoList.length >= 3) this.undoList.shift();
                 this.undoList.push(record);
             },
             
-            pushRedoList(target){
+            pushRedoList(task){
+                const copyedData = this.copyTargetTask(task);
                 const record = {
-                    todoMethod: target.todoMethod,
-                    task: target.task,
-                    nextStatus: target.nextStatus 
+                    todoMethod: copyedData.todoMethod,
+                    task: copyedData.task,
+                    nextStatus: copyedData.nextStatus 
                 };
                 if(this.redoList.length >= 3) this.redoList.shift();
                 this.redoList.push(record);
@@ -321,17 +324,20 @@ class Execution{
             const undoTaskIndex = list.findIndex(task => task.id === targetUndo.task.id);
             list.splice(undoTaskIndex, 1);
             this.record.pushRedoList(targetUndo);
+
             console.log(`\"${targetUndo.task.id}, ${targetUndo.task.name}가 삭제됐습니다\"`);
         } 
         else if(targetUndo.todoMethod === 'update'){
             const undoTaskIndex = list.findIndex(task => task.id === targetUndo.task.id);
             list[undoTaskIndex] = targetUndo.task;
             this.record.pushRedoList(targetUndo);
+
             console.log(`\"${targetUndo.task.id}항목이 ${targetUndo.nextStatus} => ${targetUndo.task.status} 상태로 변경됐습니다\"`);
         }
         else if(targetUndo.todoMethod === 'remove'){
             list.push(targetUndo.task);            
             this.record.pushRedoList(targetUndo);
+
             console.log(`\"${targetUndo.task.id}항목 \'${targetUndo.task.name}\'가 삭제에서 ${targetUndo.task.status} 상태로 변경됐습니다\"`);
         }
     }
