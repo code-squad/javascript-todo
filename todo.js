@@ -74,8 +74,8 @@ const todo = {
             tag: objToAdd.tag,
             timeData: 0,
         }
-        let statusNum = this.getStatusNum(this.task)
         this.task.push(newTodo)
+        let statusNum = this.getStatusNum(this.task)
         this.printChangeThing(newTodo, notAddedLength)
         this.printStatusNum(statusNum)
     },//해야할일과 id값을 추가해주는 함수
@@ -131,18 +131,19 @@ const todo = {
 
     showAll: function () {
         const statusNum = this.getStatusNum(this.task)
-        console.log(`총 ${this.task.length}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다...`)
+        console.log(`총 ${this.task.length}개의 리스트를 가져왔습니다.
+지금부터 2초뒤에 todo내역을 출력합니다........`)
         setTimeout(function () {
-            console.log(`[todo, ${statusNum.todo}개]`);
+            console.log(`[todo, 총${statusNum.todo}개]`);
             this.show('todo')
             console.log(`지금부터 3초뒤에 doing내역을 출력합니다.......`)
             setTimeout(function () {
                 debugger;
-                console.log(`[doing, ${statusNum.doing}개]`)
+                console.log(`[doing, 총${statusNum.doing}개]`)
                 this.show('doing')
-                console.log(`지금부터 2초뒤에 done내역을 출력합니다.......`)
+                console.log(`지금부터 2초뒤에 done내역을 출력합니다........`)
                 setTimeout(function () {
-                    console.log(`[done, ${statusNum.done}개]`)
+                    console.log(`[done, 총${statusNum.done}개]`)
                     this.show('done')
                 }.bind(todo), 2000)
             }.bind(todo), 3000)
@@ -160,37 +161,49 @@ const todo = {
     },//인자로 입력받은 상태의 정보들을 출력해주는 함수
 
     showTag: function (tag) {
-        if(!tag) {
-            console.log(``)
-        }
-        const todoNum = this.printByTag(tag, 'todo');
+        const todoNum = this.getSameTagAndStatusNum(tag, 'todo')
         console.log(`[todo ${todoNum}개]`)
-        const doingNum = this.printByTag(tag, 'doing');
+        this.printByTag(tag, 'todo');
+        const doingNum = this.getSameTagAndStatusNum(tag, 'doing')
         console.log(`[doing ${doingNum}개]`)
-        const doneNum = this.printByTag(tag, 'done');
+        this.printByTag(tag, 'doing');
+        const doneNum = this.getSameTagAndStatusNum(tag, 'done')
         console.log(`[done ${doneNum}개]`)
-    },//수정필요, 여기에 showTags기능까지 넣어볼 것.
+        this.printByTag(tag, 'done');
+    },//수정필요, 여기에 showTags기능까지 넣어볼 것.//함수는 한가지의 일만 하는게 맞는듯
+
+    showTags: function() {
+        const taggedTask = this.task.filter(obj => {
+            return obj.tag !== undefined 
+        })
+    },
+
+    getSameTagAndStatusNum: function(tag, status) {
+        let sameTagNum = 0
+        this.task.forEach(taskObj => {
+            if(taskObj.tag === tag && taskObj.status === status) {
+                sameTagNum++
+            }
+        })
+        return sameTagNum
+    },
 
     printByTag: function (tag, status) {
-        sameTagNum = 0
         this.task.forEach(taskObj => {
             if (taskObj.tag === tag && taskObj.status === status) {
                 if (status === 'done') {
-                    sameTagNum++
                     console.log(`ID : ${taskObj.id}, ${taskObj.name}, ${taskObj.timeData}`)
                     return;
                 }
-                sameTagNum++
                 console.log(`ID : ${taskObj.id}, ${taskObj.name}`)
             }
         })
-        return sameTagNum;
-    }//tag의 값과 상태의 값을 인자로 받아 출력해주는 함수
+    },//tag의 값과 상태의 값을 인자로 받아 출력해주는 함수
 }//해야 할일 객체
 //map filter중복적으로 사용하지 말아보기.
 // 테스트
 
-todo.add({ name: '자바스크립트', tag: 'programming' });
+todo.add({ name: '자바스크립트'});
 todo.add({ name: 'C++', tag: 'programming' });
 todo.add({ name: '회식', tag: '회사' });
 todo.add({ name: '노래연습', tag: '자기개발' });
