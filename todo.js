@@ -152,7 +152,7 @@ const todo = {
                 }.bind(todo), 2000)
             }.bind(todo), 3000)
         }.bind(todo), 2000)
-    },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수(수정필요)
+    },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수
 
     show: function (status) {
         console.log(`[${status} 상태인 할 일들]`)
@@ -181,17 +181,40 @@ const todo = {
         const taggedTask = this.task.filter(obj => {
             return obj.tag !== undefined
         })
+        const sameTagArrays = this.getSameTagArrays(taggedTask);
+        sameTagArrays.forEach(tag => {
+            this.printSameTag(tag, taggedTask)
+        })
     },
-
-    getSameTagAndStatusNum: function (tag, status) {
-        let sameTagNum = 0
-        this.task.forEach(taskObj => {
-            if (taskObj.tag === tag && taskObj.status === status) {
-                sameTagNum++
+    
+    getSameTagArrays: function(taggedTask) {
+        const sameTagArrays = [];
+        taggedTask.forEach(taggedTaskObj => {
+            if(!sameTagArrays.includes(taggedTaskObj.tag)) {
+                sameTagArrays.push(taggedTaskObj.tag)
             }
         })
-        return sameTagNum
+        return sameTagArrays
     },
+
+    printSameTag: function(tag, taggedTask) {
+        console.log(`${tag}`)
+        taggedTask.forEach(taggedTaskObj => {
+            if(tag === taggedTaskObj.tag) {
+                console.log(`ID : ${taggedTaskObj.id}, ${taggedTaskObj.name}, [${taggedTaskObj.status}]`)
+            }
+        })
+    },
+    
+    getSameTagAndStatusNum: function (tag, status) {
+        let sameTagAndStatusNum = 0
+        this.task.forEach(taskObj => {
+            if (taskObj.tag === tag && taskObj.status === status) {
+                sameTagAndStatusNum++
+            }
+        })
+        return sameTagAndStatusNum
+    },//태그와 상태가 같은 것들의 개수를 세어주는 함수
 
     printByTag: function (tag, status) {
         this.task.forEach(taskObj => {
@@ -218,7 +241,8 @@ todo.update({ id: 3, nextstatus: 'doing' })
 todo.update({ id: 3, nextstatus: 'done' })
 todo.update({ id: 2, nextstatus: 'done' })
 todo.showTag('programming')
-todo.showTag('회사')
-todo.showTag('자기개발')
+
 todo.show('done')
+todo.showTags();
+
 
