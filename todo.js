@@ -22,7 +22,7 @@ const todo = {
     },//해야할일과 id값을 추가해주는 함수
     
     getRanNum: function () {
-        const ranNum = Math.floor(Math.random() * 5)
+        const ranNum = Math.floor(Math.random() * 100)
         const idArrays = this.task.map(obj => obj.id)
         if (idArrays.includes(ranNum)) {
             return this.getRanNum()
@@ -233,12 +233,11 @@ const todo = {
 // todo.add({ name: '노래연습', tag: '자기개발' });
 // todo.add({ name: '과장님업무', tag: '회사' })
 
-todo.update({ id: 3, nextstatus: 'doing' })
-todo.update({ id: 3, nextstatus: 'done' })
-todo.update({ id: 2, nextstatus: 'done' })
-todo.showTag('programming')
-
-todo.show('done')
-todo.showTags();
+// todo.update({ id: 3, nextstatus: 'doing' })
+// todo.update({ id: 3, nextstatus: 'done' })
+// todo.update({ id: 2, nextstatus: 'done' })
+// todo.showTag('programming')
+// todo.show('done')
+// todo.showTags();
 
 
