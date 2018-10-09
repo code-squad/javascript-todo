@@ -1,8 +1,3 @@
-// task:[{id: 0, name: "자바스크립트", status: "todo", tag: "programming", timeData: 0}
-// ,{id: 1, name: "C++", status: "todo", tag: "programming", timeData: 0}
-// ,{id: 2, name: "회식", status: "doing", tag: "회사", timeData: 1538982404810}
-// ,{id: 4, name: "노래연습", status: "todo", tag: "자기개발", timeData: 0}
-// ,{id: 3, name: "과장님업무", status: "done", tag: "회사", timeData: "0일, 0시간, 0분"}],
 const todo = {
     task: [],
     
@@ -168,7 +163,7 @@ const todo = {
         const taggedTask = this.task.filter(obj => {
             return obj.tag !== undefined
         })
-        const sameTagArrays = this.getSameTagArrays(taggedTask);
+        const sameTagArrays = this.getTagArrays(taggedTask);
         sameTagArrays.forEach(tag => {
             const sameTagNum = this.getSameTagNum(tag, taggedTask)
             this.printSameTag(tag, taggedTask)
@@ -227,17 +222,18 @@ const todo = {
 }//해야 할일 객체
 // 테스트
 
-// todo.add({ name: '자바스크립트', tag: 'programming'});
-// todo.add({ name: 'C++', tag: 'programming' });
-// todo.add({ name: '회식', tag: '회사' });
-// todo.add({ name: '노래연습', tag: '자기개발' });
-// todo.add({ name: '과장님업무', tag: '회사' })
+todo.add({ name: '자바스크립트', tag: 'programming'});
+todo.add({ name: 'C++', tag: 'programming' });
+todo.add({ name: '회식', tag: '회사' });
+todo.add({ name: '노래연습', tag: '자기개발' });
+todo.add({ name: '과장님업무', tag: '회사' })
 
 // todo.update({ id: 3, nextstatus: 'doing' })
 // todo.update({ id: 3, nextstatus: 'done' })
 // todo.update({ id: 2, nextstatus: 'done' })
-// todo.showTag('programming')
-// todo.show('done')
-// todo.showTags();
+todo.showTag('programming')
+todo.showTags();
+todo.show('todo')
+todo.showAll();
 
 
