@@ -14,7 +14,11 @@
 // ,{id: 4, name: "노래연습", status: "todo", tag: "자기개발", timeData: 0}
 // ,{id: 3, name: "과장님업무", status: "done", tag: "회사", timeData: "0일, 0시간, 0분"}],
 const todo = {
-    task: [],
+    task: [{ id: 0, name: "자바스크립트", status: "todo", tag: "programming", timeData: 0 }
+        , { id: 1, name: "C++", status: "todo", tag: "programming", timeData: 0 }
+        , { id: 2, name: "회식", status: "doing", tag: "회사", timeData: 1538982404810 }
+        , { id: 4, name: "노래연습", status: "todo", tag: "자기개발", timeData: 0 }
+        , { id: 3, name: "과장님업무", status: "done", tag: "회사", timeData: "0일, 0시간, 0분" }],
 
     getTakeTime: function (doingTime, currentTime) {
         let takenTime = ''
@@ -151,6 +155,7 @@ const todo = {
     },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수(수정필요)
 
     show: function (status) {
+        console.log(`[${status} 상태인 할 일들]`)
         this.task.forEach(taskObj => {
             if (status === 'done' && taskObj.status === 'done') {
                 console.log(`ID : ${taskObj.id}, ${taskObj.name}, [${taskObj.tag}], ${taskObj.timeData}`)
@@ -172,16 +177,16 @@ const todo = {
         this.printByTag(tag, 'done');
     },//수정필요, 여기에 showTags기능까지 넣어볼 것.//함수는 한가지의 일만 하는게 맞는듯
 
-    showTags: function() {
+    showTags: function () {
         const taggedTask = this.task.filter(obj => {
-            return obj.tag !== undefined 
+            return obj.tag !== undefined
         })
     },
 
-    getSameTagAndStatusNum: function(tag, status) {
+    getSameTagAndStatusNum: function (tag, status) {
         let sameTagNum = 0
         this.task.forEach(taskObj => {
-            if(taskObj.tag === tag && taskObj.status === status) {
+            if (taskObj.tag === tag && taskObj.status === status) {
                 sameTagNum++
             }
         })
@@ -203,18 +208,17 @@ const todo = {
 //map filter중복적으로 사용하지 말아보기.
 // 테스트
 
-todo.add({ name: '자바스크립트'});
-todo.add({ name: 'C++', tag: 'programming' });
-todo.add({ name: '회식', tag: '회사' });
-todo.add({ name: '노래연습', tag: '자기개발' });
-todo.add({ name: '과장님업무', tag: '회사' })
+// todo.add({ name: '자바스크립트', tag: 'programming'});
+// todo.add({ name: 'C++', tag: 'programming' });
+// todo.add({ name: '회식', tag: '회사' });
+// todo.add({ name: '노래연습', tag: '자기개발' });
+// todo.add({ name: '과장님업무', tag: '회사' })
 
 todo.update({ id: 3, nextstatus: 'doing' })
 todo.update({ id: 3, nextstatus: 'done' })
 todo.update({ id: 2, nextstatus: 'done' })
-todo.remove({ id: 2})
 todo.showTag('programming')
 todo.showTag('회사')
 todo.showTag('자기개발')
-todo.showAll();
+todo.show('done')
 
