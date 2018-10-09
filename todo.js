@@ -167,13 +167,13 @@ const todo = {
 
     showTag: function (tag) {
         const todoNum = this.getSameTagAndStatusNum(tag, 'todo')
-        console.log(`[todo ${todoNum}개]`)
+        console.log(`[todo, 총 ${todoNum}개]`)
         this.printByTag(tag, 'todo');
         const doingNum = this.getSameTagAndStatusNum(tag, 'doing')
-        console.log(`[doing ${doingNum}개]`)
+        console.log(`[doing, 총 ${doingNum}개]`)
         this.printByTag(tag, 'doing');
         const doneNum = this.getSameTagAndStatusNum(tag, 'done')
-        console.log(`[done ${doneNum}개]`)
+        console.log(`[done, 총 ${doneNum}개]`)
         this.printByTag(tag, 'done');
     },//수정필요, 여기에 showTags기능까지 넣어볼 것.//함수는 한가지의 일만 하는게 맞는듯
 
@@ -183,6 +183,7 @@ const todo = {
         })
         const sameTagArrays = this.getSameTagArrays(taggedTask);
         sameTagArrays.forEach(tag => {
+            const sameTagNum = this.getSameTagNum(tag, taggedTask)
             this.printSameTag(tag, taggedTask)
         })
     },
@@ -198,12 +199,22 @@ const todo = {
     },
 
     printSameTag: function(tag, taggedTask) {
-        console.log(`${tag}`)
+        console.log(`${tag}, 총 ${sameTagNum}개`)
         taggedTask.forEach(taggedTaskObj => {
             if(tag === taggedTaskObj.tag) {
                 console.log(`ID : ${taggedTaskObj.id}, ${taggedTaskObj.name}, [${taggedTaskObj.status}]`)
             }
         })
+    },
+
+    getSameTagNum: function(tag, taggedTask) {
+        sameTagNum = 0
+        taggedTask.forEach(taggedTaskObj => {
+            if(tag === taggedTaskObj.tag) {
+                sameTagNum++
+            }
+        })
+        return sameTagNum
     },
     
     getSameTagAndStatusNum: function (tag, status) {
