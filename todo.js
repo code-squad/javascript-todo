@@ -126,10 +126,11 @@ const getData = {
             `-${curr.id}번, ${curr.name} ${(curr.status === 'done')? curr.elapsedTime+' msec':''} \n`;
             return curr;
         }, requiredValueObj);
-        if(asyncCheck){this.showAsyncData(requiredValueObj, countObj, inputData)}
+        if(asyncCheck){this.getAsyncData(requiredValueObj, countObj, inputData)}
         else{todoMessage.showMessage(requiredValueObj, countObj)}
     },
-    showAsyncData(requiredValueObj, countObj){
+    getAsyncData(requiredValueObj, countObj){
+        let numOfData = this.getCounter();
         let noticeArr = []
         for(let value in requiredValueObj){
             noticeArr.push({
@@ -138,28 +139,31 @@ const getData = {
                 list  : `${requiredValueObj[value]}`,
             })
         }
-        this.getAsyncCounter(noticeArr, countObj);
+        this.getAsyncTime(noticeArr, numOfData);
     },
-    getAsyncCounter(noticeArr, countObj){
+    getCounter(countObj){
         let numOfData = 0;
         for(let value in countObj){
             numOfData += +countObj[value];
         }
-        this.getAsyncTime(noticeArr, numOfData);
+        return numOfData;
     },
     getAsyncTime(noticeArr, numOfData){
+        const valueAsyncTime = {
+            todo: 2000,
+            doing: 3000,
+            done: 2000
+        }
         for(let obj of noticeArr){
-            obj.sec =   (obj.value === 'todo') ? 2000:
-                        (obj.value === 'doing')? 3000:
-                        (obj.value === 'done') ? 2000: 0;
+            obj.sec =   valueAsyncTime[obj.value];
         }
         this.getAsyncNotice(noticeArr, numOfData)
     },
     getAsyncNotice(noticeArr, numOfData){
         for(let obj of noticeArr){
-            obj.notice =   (obj.value === 'todo') ? `총 ${numOfData}개의 리스트를 가져왔습니다. 2초뒤에 ${obj.value}내역을 출력합니다.....`:
-                           (obj.value === 'doing')? `지금부터 3초뒤에 ${obj.value}내역을 출력합니다....`:
-                           (obj.value === 'done') ? `지금부터 2초뒤에 ${obj.value}내역을 출력합니다.....`: '';
+            obj.notice =   (obj.value === 'todo') ? `총 ${numOfData}개의 리스트를 가져왔습니다. ${obj.sec/1000}초뒤에 ${obj.value}내역을 출력합니다.....`:
+                           (obj.value === 'doing')? `지금부터 ${obj.sec/1000}초뒤에 ${obj.value}내역을 출력합니다....`:
+                           (obj.value === 'done') ? `지금부터 ${obj.sec/1000}초뒤에 ${obj.value}내역을 출력합니다.....`: '';
         }
         todoMessage.showAsyncMessage(noticeArr)
     }
@@ -192,5 +196,5 @@ todosList.add({name: "ios", tag:"programming"});
 
 // todosList.showTag("programming");
 // todosList.showTags();
-// todosList.show('done');
+// todosList.show('todo');
 todosList.showAll();
