@@ -4,7 +4,7 @@ const todo = {
         task.status = 'todo';
         task.id = Date.now() + Math.random();
         this.taskList.push(task);
-        let [todo, doing, done] = this.findStatus();
+        let [todo, doing, done] = this.findStatus(this.taskList);
         console.log(`id : ${task.id}, "${task.name}" 항목이 새로 추가되었습니다.
 현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개 `);
     },
@@ -14,9 +14,9 @@ const todo = {
             if (values.id === idAndStatus.id) {
                 idAndStatus.nextstatus = idAndStatus.nextstatus.toLowerCase();
                 console.log(
-`id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
+                    `id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
                 values.status = idAndStatus.nextstatus;
-                let [todo, doing, done] = this.findStatus();
+                let [todo, doing, done] = this.findStatus(this.taskList);
                 console.log(`현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
             }
         }
@@ -31,9 +31,9 @@ const todo = {
         }
     },
 
-    findStatus() {
+    findStatus(taskList) {
         let [todo, doing, done] = [0, 0, 0];
-        for (const values of this.taskList) {
+        for (const values of taskList) {
             if (values.status === 'todo') {
                 todo++;
             }
@@ -45,9 +45,43 @@ const todo = {
             }
         }
         return [todo, doing, done];
-    }
-}
+    },
 
+    showTag(tag) {
+        let result = [];
+        for (const values of this.taskList) {
+            if (values.tag === tag) {
+                result.push(values);
+            }
+        }
+        let [todo, doing, done] = this.findStatus(result);
+        if (todo !== 0) {
+            console.log(`[todo, 총 ${todo}개]`)
+        }
+        for (const resultTasks of result) {
+            if (resultTasks.status === 'todo') {
+                console.log(`- ${resultTasks.id}번, ${ resultTasks.name } `);
+            }
+        }
+        if (doing !== 0) {
+            console.log(`[doing, 총 ${doing}개]`)
+        }
+        for (const resultTasks of result) {
+            if (resultTasks.status === 'doing') {
+                console.log(`- ${resultTasks.id}번, ${ resultTasks.name } `);
+            }
+        }
+        if (done !== 0) {
+            console.log(`[done, 총 ${done}개]`)
+        }
+        for (const resultTasks of result) {
+            if (resultTasks.status === 'done') {
+                console.log(`- ${resultTasks.id}번, ${ resultTasks.name } `);
+            }
+        }
+    },
+
+}
 //test
 todo.add({
     name: "자바스크립트 공부하기",
@@ -81,10 +115,12 @@ todo.add({
 
 
 todo.update({
-    id: todo.taskList[0].id,
+    id: todo.taskList[3].id,
     nextstatus: "DOING"
 });
 
 todo.remove({
     id: todo.taskList[0].id,
 });
+
+todo.showTag('health');
