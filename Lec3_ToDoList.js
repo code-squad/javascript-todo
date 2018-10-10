@@ -50,10 +50,10 @@ const todo = {
     findTags(taskList) {
         let tagList = {};
         for (const values of taskList) {
-            if(!tagList[values.tag]){
+            if (!tagList[values.tag]) {
                 tagList[values.tag] = 1;
-            } else if(tagList[values.tag])
-            tagList[values.tag] += 1;
+            } else if (tagList[values.tag])
+                tagList[values.tag] += 1;
         }
         return tagList;
     },
@@ -88,10 +88,12 @@ const todo = {
     showTags() {
         const result = this.taskList.filter(value => value.tag !== 0);
         const tagList = this.findTags(result);
-        for(i = 0; i < tagList.length; i++){
-            if(result.tag === tagList[i]){
-                console.log(`[${tagList[i]}, `)
-            }
+        for (const tag in tagList) {
+            console.log(`\n[${tag}, 총 ${tagList[tag]}개]`);
+            const sameTagTask = result.filter(result => result.tag === tag);
+            sameTagTask.forEach(function (task) {
+                console.log(`- ${task.id}번, ${task.name}, [${task.status}]`);
+            })
         }
     },
 
@@ -164,6 +166,6 @@ todo.remove({
 
 // todo.showTag('health');
 
-// todo.showTags();
+todo.showTags();
 
 // console.log(todo.findTags(todo.taskList))
