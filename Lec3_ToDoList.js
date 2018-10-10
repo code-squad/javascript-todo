@@ -49,6 +49,16 @@ const todo = {
 
     showTag(tag) {
         const result = this.taskList.filter(value => value.tag === tag);
+        console.log(`tag가 "${tag}"인 할 일: `);
+        this.countStatus(result);
+    },
+
+    showTags(){
+        const result = this.taskList.filter(value => value.tag !== 0);
+        this.countStatus(result);
+    },
+
+    countStatus(result){
         let [todo, doing, done] = this.findStatus(result);
         if (todo !== 0){
             console.log(`[todo, 총 ${todo}개]`);
@@ -71,7 +81,7 @@ const todo = {
                 console.log(`- ${task.id}번, ${task.name}`);
             })
         }
-    },
+    }
 }
 //test
 todo.add({
@@ -115,3 +125,5 @@ todo.remove({
 });
 
 todo.showTag('health');
+
+// todo.showTags();
