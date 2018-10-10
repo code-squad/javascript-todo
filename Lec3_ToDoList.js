@@ -10,7 +10,7 @@ const todo = {
     },
 
     update(idAndStatus) {
-        idAndStatus.nextstatus = idAndStatus.nextstatus.toLowerCase();
+        idAndStatus.nextstatus = idAndStatus.nextstatus.trim().toLowerCase();
         for (const values of this.taskList) {
             if (values.id === idAndStatus.id && idAndStatus.nextstatus === 'doing') {
                 values.doingTime = new Date().getTime();
@@ -21,7 +21,17 @@ const todo = {
                 console.log(`현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
             }
             if (values.id === idAndStatus.id && idAndStatus.nextstatus === 'done') {
-                values.takenTime = (new Date().getTime() - values.doingTime)/1000;
+                let takenTime = (new Date().getTime() - values.doingTime)/1000;
+                if (takenTime <= 60){
+                    values.takenTime = takenTime+'초';
+                } else if(takenTime <= 3600){
+                    values.takenTime = (takenTime/60).toFixed(0) + '분';
+                } else if(takenTime <= 86400){
+                    values.takenTime = (takenTime/3600).toFixed(0) + '시간';
+                } else if(takenTime > 86400){
+                    values.takenTime = (takenTime/86400).toFixed(0) + '일';
+                }
+                
                 delete values.doingTime;
                 console.log(
                     `id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
@@ -110,8 +120,11 @@ const todo = {
     show(status) {
         let showStatus = status.trim().toLowerCase();
         for (const values of this.taskList) {
-            if (values.status === showStatus) {
+            if (values.status === showStatus && showStatus !== 'done') {
                 console.log(`- ${values.id}번, ${values.name}, [${values.tag}]`);
+            }
+            if (values.status === showStatus && showStatus === 'done') {
+                console.log(`- ${values.id}번, ${values.name}, [${values.tag}], ${values.takenTime}`);
             }
         }
     }
@@ -193,4 +206,4 @@ todo.update({
 
 // console.log(todo.findTags(todo.taskList))
 
-todo.show("toDo ")
+todo.show("done ")
