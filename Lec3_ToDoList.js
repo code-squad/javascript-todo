@@ -21,17 +21,17 @@ const todo = {
                 console.log(`현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
             }
             if (values.id === idAndStatus.id && idAndStatus.nextstatus === 'done') {
-                let takenTime = (new Date().getTime() - values.doingTime)/1000;
-                if (takenTime <= 60){
-                    values.takenTime = takenTime+'초';
-                } else if(takenTime <= 3600){
-                    values.takenTime = (takenTime/60).toFixed(0) + '분';
-                } else if(takenTime <= 86400){
-                    values.takenTime = (takenTime/3600).toFixed(0) + '시간';
-                } else if(takenTime > 86400){
-                    values.takenTime = (takenTime/86400).toFixed(0) + '일';
+                let takenTime = (new Date().getTime() - values.doingTime) / 1000;
+                if (takenTime <= 60) {
+                    values.takenTime = takenTime + '초';
+                } else if (takenTime <= 3600) {
+                    values.takenTime = (takenTime / 60).toFixed(0) + '분';
+                } else if (takenTime <= 86400) {
+                    values.takenTime = (takenTime / 3600).toFixed(0) + '시간';
+                } else if (takenTime > 86400) {
+                    values.takenTime = (takenTime / 86400).toFixed(0) + '일';
                 }
-                
+
                 delete values.doingTime;
                 console.log(
                     `id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
@@ -127,6 +127,43 @@ const todo = {
                 console.log(`- ${values.id}번, ${values.name}, [${values.tag}], ${values.takenTime}`);
             }
         }
+    },
+
+    showAll() {
+        const [todo, doing, done] = this.findStatus(this.taskList);
+        console.log(`총 ${todo + doing + done}개의 리스트를 가져왔습니다. 2초 뒤에 todo 내역을 출력합니다...`);
+        let todoTasks = [];
+        let doingTasks = [];
+        let doneTasks = [];
+        for (const values of this.taskList) {
+            if (values.status === 'todo') {
+                todoTasks.push(values);
+            } else if (values.status === 'doing') {
+                doingTasks.push(values);
+            } else if (values.status === 'done') {
+                doneTasks.push(values);
+            }
+        }
+        setTimeout(function () {
+            console.log(`[todo, 총 ${todo}개]`)
+            todoTasks.forEach(function (task) {
+                console.log(`- ${task.id}번, ${task.name}, [${task.tag}]`);
+            })
+            console.log(`\n 지금부터 3초 뒤에 doing 내역을 출력합니다...`);
+        }, 2000);
+        setTimeout(function () {
+            console.log(`[doing, 총 ${doing}개]`)
+            doingTasks.forEach(function (task) {
+                console.log(`- ${task.id}번, ${task.name}, [${task.tag}]`);
+            })
+            console.log(`\n 지금부터 2초 뒤에 done 내역을 출력합니다...`);
+        }, 5000);
+        setTimeout(function () {
+            console.log(`[done, 총 ${done}개]`)
+            doneTasks.forEach(function (task) {
+                console.log(`- ${task.id}번, ${task.name}, [${task.tag}], ${task.takenTime}`);
+            })
+        }, 7000);
     }
     // countStatus(result) {
     //     let [todo, doing, done] = this.findStatus(result);
@@ -206,4 +243,6 @@ todo.update({
 
 // console.log(todo.findTags(todo.taskList))
 
-todo.show("done ")
+// todo.show("done ")
+
+todo.showAll();
