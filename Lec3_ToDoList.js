@@ -47,42 +47,80 @@ const todo = {
         return [todo, doing, done];
     },
 
+    findTags(taskList) {
+        let tagList = {};
+        for (const values of taskList) {
+            if(!tagList[values.tag]){
+                tagList[values.tag] = 1;
+            } else if(tagList[values.tag])
+            tagList[values.tag] += 1;
+        }
+        return tagList;
+    },
+
     showTag(tag) {
         const result = this.taskList.filter(value => value.tag === tag);
+        const [todo, doing, done] = this.findStatus(result);
         console.log(`tag가 "${tag}"인 할 일: `);
-        this.countStatus(result);
-    },
-
-    showTags(){
-        const result = this.taskList.filter(value => value.tag !== 0);
-        this.countStatus(result);
-    },
-
-    countStatus(result){
-        let [todo, doing, done] = this.findStatus(result);
-        if (todo !== 0){
+        if (todo !== 0) {
             console.log(`[todo, 총 ${todo}개]`);
-            const todoTasks =  result.filter(value => value.status === 'todo');
-            todoTasks.forEach(function(task){
+            const todoTasks = result.filter(value => value.status === 'todo');
+            todoTasks.forEach(function (task) {
                 console.log(`- ${task.id}번, ${task.name}`);
-            })
+            });
         }
-        if (doing !== 0){
+        if (doing !== 0) {
             console.log(`[doing, 총 ${doing}개]`);
-            const doingTasks =  result.filter(value => value.status === 'doing');
-            doingTasks.forEach(function(task){
+            const doingTasks = result.filter(value => value.status === 'doing');
+            doingTasks.forEach(function (task) {
                 console.log(`- ${task.id}번, ${task.name}`);
-            })
+            });
         }
-        if (done !== 0){
+        if (done !== 0) {
             console.log(`[done, 총 ${done}개]`);
-            const doneTasks =  result.filter(value => value.status === 'done');
-            doneTasks.forEach(function(task){
+            const doneTasks = result.filter(value => value.status === 'done');
+            doneTasks.forEach(function (task) {
                 console.log(`- ${task.id}번, ${task.name}`);
-            })
+            });
         }
-    }
+    },
+
+    showTags() {
+        const result = this.taskList.filter(value => value.tag !== 0);
+        const tagList = this.findTags(result);
+        for(i = 0; i < tagList.length; i++){
+            if(result.tag === tagList[i]){
+                console.log(`[${tagList[i]}, `)
+            }
+        }
+    },
+
+    // countStatus(result) {
+    //     let [todo, doing, done] = this.findStatus(result);
+    //     if (todo !== 0) {
+    //         console.log(`[todo, 총 ${todo}개]`);
+    //         const todoTasks = result.filter(value => value.status === 'todo');
+    //         todoTasks.forEach(function (task) {
+    //             console.log(`- ${task.id}번, ${task.name}`);
+    //         })
+    //     }
+    //     if (doing !== 0) {
+    //         console.log(`[doing, 총 ${doing}개]`);
+    //         const doingTasks = result.filter(value => value.status === 'doing');
+    //         doingTasks.forEach(function (task) {
+    //             console.log(`- ${task.id}번, ${task.name}`);
+    //         })
+    //     }
+    //     if (done !== 0) {
+    //         console.log(`[done, 총 ${done}개]`);
+    //         const doneTasks = result.filter(value => value.status === 'done');
+    //         doneTasks.forEach(function (task) {
+    //             console.log(`- ${task.id}번, ${task.name}`);
+    //         })
+    //     }
+    // }
 }
+
 //test
 todo.add({
     name: "자바스크립트 공부하기",
@@ -116,7 +154,7 @@ todo.add({
 
 
 todo.update({
-    id: todo.taskList[3].id,
+    id: todo.taskList[0].id,
     nextstatus: "DOING"
 });
 
@@ -124,6 +162,8 @@ todo.remove({
     id: todo.taskList[0].id,
 });
 
-todo.showTag('health');
+// todo.showTag('health');
 
 // todo.showTags();
+
+// console.log(todo.findTags(todo.taskList))
