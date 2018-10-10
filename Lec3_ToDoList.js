@@ -2,7 +2,7 @@ const todo = {
     taskList: [],
     add(task) {
         task.status = 'todo';
-        task.id = new Date().getUTCMilliseconds();
+        task.id = Date.now() + Math.random();
         this.taskList.push(task);
         let [todo, doing, done] = this.findStatus();
         console.log(`id : ${task.id}, "${task.name}" 항목이 새로 추가되었습니다.
@@ -55,9 +55,30 @@ todo.add({
 });
 
 todo.add({
-    name: "자바스크립트 공부하기2",
+    name: "알고리즘 공부하기",
     tag: "programming"
 });
+
+todo.add({
+    name: "요가하기",
+    tag: "health"
+});
+
+todo.add({
+    name: "명상하기",
+    tag: "health"
+});
+
+todo.add({
+    name: "독서하기",
+    tag: "reading"
+});
+
+todo.add({
+    name: "기타치기",
+    tag: "music"
+});
+
 
 todo.update({
     id: todo.taskList[0].id,
