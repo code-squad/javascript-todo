@@ -1,186 +1,413 @@
 class Todo {
-    constructor(){
-        this.list = [];
-        this.printTodo = new PrintTodo;      
-    }
-    
-    add(task){
-        task.id = Date.now().toString(36);
-        task.status = 'todo';
-        this.list.push(task);
-        this.printTodo.commandResult(this.list, 'add', task);
-    }  
+  constructor(message, todoObj, error, execution) {
+    this.list = [];
+    this.message = message;
+    this.todoObj = todoObj;
+    this.error = error;
+    this.execution = execution;
+  }
 
-    update({id, nextstatus}){
-        const targetTask = this.list.filter(task => task.id === id)[0];
-        const prevStatus = targetTask.status;
-        const nextStatus = nextstatus.toLowerCase();
-        const isDoingDone = (prevStatus === 'doing' && nextStatus === 'done');    
+  /* 
+    add({name: 'JS 공부', tag: 'programming', deadLine: '2018/10/12 14:00', alarm: '1h'});
+    -. deadLine을 기록가능
+    -. alarm 설정 가능, '1h'는 1시간 전을 의미합니다. 
+  */
+  add({ name, tag, deadLine, alarm }) {
+    const bError = this.error.inCaseAdd(this.list, name);
+    if (bError) return;
 
-        if(nextStatus === 'doing') targetTask.startTime = new Date(Date.now());
-        else if(isDoingDone) targetTask.spentTime = Date.now() - targetTask.startTime;
-        else if(targetTask.startTime || targetTask.spentTime){ 
-            delete targetTask.startTime;
-            delete targetTask.spentTime;
-        }
+    const newTask = {
+      id: Date.now().toString(36),
+      name: name,
+      status: "todo",
+      tag: tag,
+      deadLine: new Date(deadLine)
+    };
 
-        targetTask.status = nextStatus;
+    if (alarm) this.message.setAlarm(alarm, newTask);
 
-        this.printTodo.commandResult(this.list, 'update', targetTask, prevStatus);    
-    }
+    this.list.push(newTask);
+    this.execution.pushUndoList("add", newTask);
+    this.message.printCommandResult(this.list, "add", newTask);
+  }
 
-    remove({id}){
-        const targetIndex = this.list.findIndex(task => task.id === id)
-        const targetTask = this.list[targetIndex];
-
-        this.list.splice(targetIndex, 1); 
-        this.printTodo.commandResult(this.list, 'remove', targetTask);
-    }
-
-    showTag(tag){
-        this.printTodo.listByTag(this.list, tag);
+  update({ id, nextstatus }) {
+    if (typeof arguments[0] === "string") {
+      [id, nextstatus] = arguments[0].split("$").map(word => word.trim());
     }
 
-    showTags(){
-        this.printTodo.listByAllTags(this.list);
+    const targetTask = this.list.filter(task => task.id === id)[0];
+    const nextStatus = nextstatus.toLowerCase();
+
+    const bError = this.error.inCaseUpdate(this.list, targetTask, id, nextStatus);
+    if (bError) return;
+
+    const prevStatus = targetTask.status;
+    const isDoingDone = prevStatus === "doing" && nextStatus === "done";
+
+    this.execution.pushUndoList("update", targetTask, nextStatus);
+
+    if (nextStatus === "doing") {
+      targetTask.startTime = new Date(Date.now());
+    }
+    else if (isDoingDone) {
+      targetTask.spentTime = Date.now() - targetTask.startTime;
+    }
+    else if (targetTask.startTime || targetTask.spentTime) {
+      delete targetTask.startTime;
+      delete targetTask.spentTime;
     }
 
-    show(status){
-        this.printTodo.listByStatus(this.list, status);
-    }
+    targetTask.status = nextStatus;
 
-    showAll(){
-        this.printTodo.listByAllStatus(this.list);
-    }
+    this.message.printCommandResult(this.list, "update", targetTask, prevStatus);
+  }
+
+  remove({ id }) {
+    const bError = this.error.inCaseRemove(this.list, id);
+    if (bError) return;
+
+    const targetIndex = this.list.findIndex(task => task.id === id);
+    const targetTask = this.list[targetIndex];
+
+    this.list.splice(targetIndex, 1);
+    this.execution.pushUndoList("remove", targetTask);
+    this.message.printCommandResult(this.list, "remove", targetTask);
+  }
+
+  showTag(tag) {
+    this.message.listByTag(this.todoObj.tag(this.list, tag));
+  }
+
+  showTags() {
+    this.message.listByAllTags(this.todoObj.tags(this.list));
+  }
+
+  show(status) {
+    this.message.listByStatus(this.list, status);
+  }
+
+  showAll() {
+    const asynTime = [2000, 3000, 2000];
+    this.message.listByAllStatus(this.todoObj.status(this.list), this.list, asynTime);
+  }
+
+  showDeadLine() {
+    this.message.listByDeadLine(this.list);
+  }
+
+  undo() {
+    this.execution.undo(this.list);
+  }
+
+  redo() {
+    this.execution.redo(this.list);
+  }
 }
 
-class PrintTodo{
-    constructor(){
-        this.getTodoObj = new GetTodoObj;
+class Message {
+  printCommandResult(todoList, command, task, prevStatus) {
+    const countTodoStatus = status => todoList.filter(task => task.status === status).length;
+    switch (command) {
+      case "add":
+        console.log(`id: ${task.id}, \"${task.name}\" 항목이 새로 추가됐습니다. \n현재상태 : todo: ${countTodoStatus("todo")}, doing: ${countTodoStatus("doing")}, done: ${countTodoStatus("done")}`);
+        break;
+
+      case "update":
+        console.log(`id: ${task.id}, \"${task.name}\" 항목이 ${prevStatus} => ${task.status} 상태로 업데이트 됐습니다. \n현재상태 : todo: ${countTodoStatus("todo")}, doing: ${countTodoStatus("doing")}, done: ${countTodoStatus("done")}`);
+        break;
+
+      case "remove":
+        console.log(`id: ${task.id}, \"${task.name}\" 삭제완료`);
+        break;
+    }
+  }
+
+  listByTag(todoByTag) {
+    Object.keys(todoByTag).forEach(status => {
+      if (!todoByTag[status]) return;
+      const headMsg = `[ ${status} , 총${todoByTag[status].length}개 ]\n`;
+      const resultStr = todoByTag[status].reduce((accStr, task) => accStr += `${this.getMsg(task)}\n`, headMsg);
+
+      console.log(resultStr + "\n");
+    });
+  }
+
+  listByAllTags(todoByTags) {
+    Object.keys(todoByTags).forEach(tag => {
+      const headMsg = `[ ${tag} , 총${todoByTags[tag].length}개 ]\n`;
+      const resultStr = todoByTags[tag].reduce((accStr, task) => accStr += `${this.getMsg(task)}, [${task.status}]\n`, headMsg);
+
+      console.log(resultStr + "\n");
+    });
+  }
+
+  listByStatus(list, status) {
+    const filteredList = list.filter(task => task.status === status);
+    const resultStr = filteredList.reduce((accStr, task) => accStr += `${this.getMsg(task)}, [${task.tag}]\n`, '');
+
+    console.log(resultStr);
+  }
+
+  listByDeadLine(list) {
+    const filteredList = list.filter(task => task.deadLine).sort((task1, task2) => task1.deaLine - task2.deaLine);
+    const resultStr = filteredList.reduce((accStr, task) => accStr += `${this.getMsg(task)}, [${task.status}], [${task.tag}], [${this.getDate(task.deadLine)}]\n`, '');
+
+    console.log(resultStr);
+  }
+
+  listByAllStatus(todoByStatus, list, asynTime) {
+    const listLength = list.length;
+    const kindOfPrint = Object.keys(todoByStatus);
+    const countOfCallback = kindOfPrint.length;
+    let asynIndex = 0;
+
+    const asynPrint = status => {
+      asynIndex += 1;
+      console.log(`[ ${status} , 총${todoByStatus[status].length}개 ]`);
+      if (todoByStatus[status].length) todo.show(status);
+      if (kindOfPrint[asynIndex]) console.log(`\n\"지금부터 ${asynTime[asynIndex] / 1000}초뒤에 ${kindOfPrint[asynIndex]}내역을 출력합니다....\"`);
+      if (asynIndex < countOfCallback) setTimeout(asynPrint, asynTime[asynIndex], kindOfPrint[asynIndex]);
+    };
+
+    console.log(`\"총 ${listLength}개의 리스트를 가져왔습니다. ${asynTime[asynIndex] / 1000}초뒤에 ${kindOfPrint[asynIndex]}내역을 출력합니다.....\"`);
+
+    setTimeout(asynPrint, asynTime[asynIndex], kindOfPrint[asynIndex]);
+  }
+
+  setAlarm(alarm, task) {
+    const hours = /h/,
+      minutes = /m/,
+      seconds = /s/;
+    const timeLeft = task.deadLine - Date.now();
+    const numExtraction = alarm.replace(/[^0-9]/g, '');
+    let timeOut, timeMsg;
+
+    if (alarm.match(hours)) {
+      timeOut = timeLeft - (numExtraction * 3600000);
+      timeMsg = '시간';
+    }
+    else if (alarm.match(minutes)) {
+      timeOut = timeLeft - (numExtraction * 60000);
+      timeMsg = '분';
+    }
+    else if (alarm.match(seconds)) {
+      timeOut = timeLeft - (numExtraction * 1000);
+      timeMsg = '초';
     }
 
-    commandResult(todoList, command, task, prevStatus){
-        const countTodoStatus = (status) => todoList.filter(task => task.status === status).length;
-        switch(command){
-            case 'add':
-                console.log(`id: ${task.id}, \"${task.name}\" 항목이 새로 추가됐습니다. \n현재상태 : todo: ${countTodoStatus('todo')}, doing: ${countTodoStatus('doing')}, done: ${countTodoStatus('done')}`);
-                break;
+    this.alertMsg(numExtraction, timeOut, timeMsg);
+  }
 
-            case 'update':
-                console.log(`id: ${task.id}, \"${task.name}\" 항목이 ${prevStatus} => ${task.status} 상태로 업데이트 됐습니다. \n현재상태 : todo: ${countTodoStatus('todo')}, doing: ${countTodoStatus('doing')}, done: ${countTodoStatus('done')}`);
-                break;
+  alertMsg(numExtraction, timeOut, timeMsg) {
+    setTimeout(() => alert(`${numExtraction}${timeMsg} 전입니다!!`), timeOut);
+  }
 
-            case 'remove':
-                console.log(`id: ${task.id}, ${task.name} 삭제완료`);
-                break;
 
-            default:
-                console.log('command를 확인하세요.')
-        }
-    }
+  getMsg(task) {
+    if (task.spentTime) return `- ${task.id}, ${task.name}, ${this.getTime(task.spentTime)}`
+    return `- ${task.id}, ${task.name}`
+  }
 
-    listByTag(todoList, tag){
-        const todoByTag = this.getTodoObj.tag(todoList, tag);
+  getDate(date) {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hour = date.getHours();
+    const minute = date.getMinutes();
 
-        Object.keys(todoByTag).forEach(status => {
-            if(!todoByTag[status]) return; 
-            const resultStr = 
-                todoByTag[status].reduce((accStr, task) => {
-                    if(task.spentTime) return accStr += `- ${task.id}, ${task.name}, ${this.getTime(task.spentTime)}\n`;
-                    return accStr += `- ${task.id}, ${task.name}\n`;
-                }, `[ ${status} , 총${todoByTag[status].length}개 ]\n`)
-        
-            console.log(resultStr + '\n');
-        })
-    }
+    return `${year}년 ${month}월 ${day}일 ${hour}시 ${minute ? minute + '분' : ''} 까지`
+  }
 
-    listByAllTags(todoList){
-        const todoByTags = this.getTodoObj.tags(todoList);
+  getTime(spentTime) {
+    const days = parseInt(spentTime / 24 / 60 / 60 / 1000);
+    spentTime -= days * 24 * 60 * 60 * 1000;
+    const hours = parseInt(spentTime / 60 / 60 / 1000);
+    spentTime -= hours * 60 * 60 * 1000;
+    const mins = parseInt(spentTime / 60 / 1000);
+    spentTime -= mins * 60 * 1000;
+    const secs = parseInt(spentTime / 1000);
 
-        Object.keys(todoByTags).forEach(tag => {
-            const resultStr = 
-                todoByTags[tag].reduce((accStr, task) => {
-                    if(task.spentTime) return accStr += `- ${task.id}, ${task.name}, [${task.status}], ${this.getTime(task.spentTime)}\n`;
-                    return accStr += `- ${task.id}, ${task.name}, [${task.status}]\n`;
-                }, `[ ${tag} , 총${todoByTags[tag].length}개 ]\n`);
-            
-            console.log(resultStr + '\n');
-        });
-    }
+    let timeStr = ``;
+    if (days) timeStr += `${days}일 `;
+    if (hours) timeStr += `${hours}시간 `;
+    if (mins) timeStr += `${mins}분 `;
+    if (secs) timeStr += `${secs}초`;
 
-    listByStatus(list, status){
-        let resultStr = '';
-        list.filter(task => task.status === status)
-            .forEach(task => {
-                if(task.spentTime)  resultStr += `- ${task.id}, ${task.name}, [${task.tag}], ${this.getTime(task.spentTime)}\n`;
-                else resultStr += `- ${task.id}, ${task.name}${!task.tag ? '' : `, [${task.tag}]\n`}`;                  
-        });
-        console.log(resultStr);
-    }
-
-    listByAllStatus(todoList){
-        const todoByStatus = this.getTodoObj.status(todoList);
-
-        const kindOfPrint = Object.keys(todoByStatus);
-        const countOfCallback = kindOfPrint.length;
-        const asynTime = [2000, 3000, 2000];
-        let asynIndex = 0;
-
-        const asynPrint = (status) => {
-            asynIndex += 1;
-            console.log(`[ ${status} , 총${todoByStatus[status].length}개 ]`)
-            if(todoByStatus[status].length) todo.show(status);
-            if(kindOfPrint[asynIndex]) console.log(`\n\"지금부터 ${asynTime[asynIndex]/1000}초뒤에 ${kindOfPrint[asynIndex]}내역을 출력합니다....\"`);
-            if(asynIndex < countOfCallback) setTimeout(asynPrint, asynTime[asynIndex], kindOfPrint[asynIndex]);
-        }
-           
-        console.log(`\"총 ${todoList.length}개의 리스트를 가져왔습니다. ${asynTime[asynIndex]/1000}초뒤에 ${kindOfPrint[asynIndex]}내역을 출력합니다.....\"`)
-
-        setTimeout(asynPrint, asynTime[asynIndex], kindOfPrint[asynIndex])
-    }
-
-    getTime(spentTime){
-        const days = parseInt(spentTime/24/60/60/1000);
-        spentTime -= (days * 24 * 60 * 60 * 1000);
-        const hours = parseInt(spentTime/60/60/1000);
-        spentTime -= (hours * 60 * 60 * 1000);
-        const mins = parseInt(spentTime/60/1000);
-        
-        let timeStr = ``
-        
-        if(days) timeStr += `${days}일 `;
-        if(hours) timeStr += `${hours}시간 `;
-        if (mins) timeStr += `${mins}분`;
-     
-        return timeStr;
-    }
+    return timeStr;
+  }
 }
 
-class GetTodoObj{
-    tag(todoList, tag){
-        const todoObj = {todo: '', doing: '', done: ''};
-        todoList
-            .filter(task => task.tag === tag)
-            .forEach(task => !todoObj[task.status] ? todoObj[task.status] = [task] : todoObj[task.status].push(task));
+class TodoObj {
+  tag(todoList, tag) {
+    const todoObj = { todo: "", doing: "", done: "" };
+    todoList
+      .filter(task => task.tag === tag)
+      .forEach(task => !todoObj[task.status] ? (todoObj[task.status] = [task]) : todoObj[task.status].push(task));
 
-        return todoObj;
-    }
-    
-    tags(todoList){
-        const todoObj = {};
-        todoList
-            .filter(task => task.tag)
-            .forEach(task => !todoObj[task.tag] ? todoObj[task.tag] = [task] : todoObj[task.tag].push(task));
+    return todoObj;
+  }
 
-        return todoObj;
-    }
+  tags(todoList) {
+    const todoObj = {};
+    todoList
+      .filter(task => task.tag)
+      .forEach(task => !todoObj[task.tag] ? (todoObj[task.tag] = [task]) : todoObj[task.tag].push(task));
 
-    status(todoList){
-        const todoObj = {todo: '', doing: '', done: ''};
-        todoList.forEach(task => !todoObj[task.status] ? todoObj[task.status] = [task] : todoObj[task.status].push(task));
-        
-        return todoObj;
-    }
+    return todoObj;
+  }
+
+  status(todoList) {
+    const todoObj = { todo: "", doing: "", done: "" };
+    todoList.forEach(task => !todoObj[task.status] ? (todoObj[task.status] = [task]) : todoObj[task.status].push(task));
+
+    return todoObj;
+  }
 }
 
-const todo = new Todo();
+class Error {
+  inCaseAdd(list, name) {
+    const bSameName = list.some(task => task.name === name);
+    if (bSameName) {
+      console.log(`[error] todo에는 이미 같은 이름의 task가 존재합니다.`);
+      return true;
+    }
+    return false;
+  }
+
+  inCaseUpdate(list, targetTask, id, status) {
+    // 잘못된 command 입력시 에러 출력
+    const commandList = ["todo", "doing", "done"];
+    const bRightCommand = commandList.some(command => command === status);
+    if (!bRightCommand) {
+      console.log(`[error] Todo Command(todo/doing/done)를 잘못 입력하셨습니다`);
+      return true;
+    }
+
+    const bSameId = this.isExist(list, id);
+    if (!bSameId) {
+      console.log(`[error] ${id} ID는 존재하지 않습니다.`);
+      return true;
+    }
+
+    const bSameStatus = targetTask.status !== status;
+    if (!bSameStatus) {
+      console.log(`[error] ${targetTask.id}는 이미 ${status}입니다.`);
+      return true;
+    }
+
+    const bSameDone = targetTask.status !== "done";
+    if (!bSameDone) {
+      console.log(`[error] done 상태에서 ${status}상태로 갈 수 없습니다.`);
+      return true;
+    }
+    return false;
+  }
+
+  inCaseRemove(list, id) {
+    const bSameId = this.isExist(list, id);
+    if (!bSameId) {
+      console.log(`[error] ${id} ID는 존재하지 않습니다.`);
+      return true;
+    }
+    return false;
+  }
+
+  isExist(list, id) {
+    return list.some(task => task.id === id);
+  }
+}
+
+class Execution {
+  constructor() {
+    this.record = {
+      undoList: [],
+      redoList: []
+    }
+  }
+
+  copyTargetTask(targetTask) {
+    const copyObj = {};
+    for (let key in targetTask) {
+      if (targetTask.hasOwnProperty(key)) {
+        copyObj[key] = targetTask[key];
+      }
+    }
+    return copyObj;
+  }
+
+  pushUndoList(methodName, task, nextStatus) {
+    const copyedData = this.copyTargetTask(task);
+    const record = {
+      todoMethod: methodName,
+      task: copyedData,
+      nextStatus: nextStatus
+    };
+    if (this.record.undoList.length >= 3) this.record.undoList.shift();
+    this.record.undoList.push(record);
+  }
+
+  pushRedoList(task) {
+    const copyedData = this.copyTargetTask(task);
+    const record = {
+      todoMethod: copyedData.todoMethod,
+      task: copyedData.task,
+      nextStatus: copyedData.nextStatus
+    };
+    if (this.record.redoList.length >= 3) this.record.redoList.shift();
+    this.record.redoList.push(record);
+  }
+
+  undo(list) {
+    const targetUndo = this.record.undoList.pop();
+    if (!targetUndo) {
+      console.log("undo할 todo가 없습니다");
+      return;
+    }
+
+    if (targetUndo.todoMethod === "add") {
+      const undoTaskIndex = list.findIndex(task => task.id === targetUndo.task.id);
+      list.splice(undoTaskIndex, 1);
+      this.pushRedoList(targetUndo);
+
+      console.log(`\"${targetUndo.task.id}, ${targetUndo.task.name}가 삭제됐습니다\"`);
+    }
+    else if (targetUndo.todoMethod === "update") {
+      const undoTaskIndex = list.findIndex(task => task.id === targetUndo.task.id);
+      list[undoTaskIndex] = targetUndo.task;
+      this.pushRedoList(targetUndo);
+
+      console.log(`\"${targetUndo.task.id}항목이 ${targetUndo.nextStatus} => ${targetUndo.task.status} 상태로 변경됐습니다\"`);
+    }
+    else if (targetUndo.todoMethod === "remove") {
+      list.push(targetUndo.task);
+      this.pushRedoList(targetUndo);
+
+      console.log(`\"${targetUndo.task.id}항목 \'${targetUndo.task.name}\'가 삭제에서 ${targetUndo.task.status} 상태로 변경됐습니다\"`);
+    }
+  }
+
+  redo() {
+    const targetRedo = this.record.redoList.pop();
+    if (!targetRedo) {
+      console.log("redo할 todo가 없습니다");
+      return;
+    }
+
+    if (targetRedo.todoMethod === "add") {
+      todo.add({ name: targetRedo.task.name, tag: targetRedo.task.tag });
+    }
+    else if (targetRedo.todoMethod === "update") {
+      todo.update({ id: targetRedo.task.id, nextstatus: targetRedo.nextStatus });
+    }
+    else if (targetRedo.todoMethod === "remove") {
+      todo.remove({ id: targetRedo.task.id });
+    }
+  }
+}
+
+const message = new Message();
+const todoObj = new TodoObj();
+const error = new Error();
+const execution = new Execution();
+const todo = new Todo(message, todoObj, error, execution);
