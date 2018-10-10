@@ -2,7 +2,7 @@ const todosList = {
     todos : [],
     id : 1,
     add({name, tag}){
-        let error = this.errorCheck('add', [,name]);
+        let error = this.isAddError([name, 'name', this.todos]);
         if(error){
             console.log(error);
             return;
@@ -19,19 +19,19 @@ const todosList = {
     },
     remove({id}){
         let prev_data = getData.getPrevData('remove', id);
-        let error = this.errorCheck('remove', [id]);;
+        let error = this.isSameId('remove', id);
         if(error){
             console.log(error);
             return;
         }
         this.todos = this.todos.filter((target)=>target.id !== id);
-        todoMessage.showActiveMessage(prev_data);
+        todoMessage.showActiveMessage(['remove' ,id ,prev_data.name, prev_data.status]);
         getLog.makeLogList('remove', this.id);
     },
     update({id,  nextstatus}){
         let prev_data = getData.getPrevData('update', id);
             nextstatus = nextstatus.toLowerCase();
-        let error = this.errorCheck('update', [id,,nextstatus, prev_data]);
+        let error = this.isUpdateError(prev_data, nextstatus, id) || this.isSameId('update', id);
         if(error){
             console.log(error);
             return;
@@ -43,7 +43,7 @@ const todosList = {
                 o.status = nextstatus;
             }
         };
-        todoMessage.showActiveMessage(prev_data, nextstatus);
+        todoMessage.showActiveMessage(['update' ,id ,prev_data.name, prev_data.status], nextstatus);
         getLog.makeLogList('update', this.id);
     },
     showTag(tagName){
@@ -68,48 +68,52 @@ const todosList = {
     redo(){
 
     },
-    errorCheck(active, [id, name, nextStatus, prevStatus]){
-        let error = false,
-            add = [],
-            sameId = [],
-            sameStatus = [],
-            reverseStatus = [],
-            overStatus = [];
-
-        if(active === 'add'){
-            add = this.todos.filter((v) => v.name === name);
+    isAddError([name, key, arr, status]){
+        let error_check = [];
+        error_check = arr.filter((v) => v[key] === name);
+        return this.getErrorMessage('add', error_check.pop());
+    },
+    isUpdateError(prevData, nextStatus, id){
+        let error_check;
+        if(prevData.status === nextStatus){
+            error_check = 'same';
         }
+        if(prevData.status === 'done' && nextStatus === 'doing'){
+            error_check = 'reverse';
+        }
+        if(prevData.status === 'todo' && nextStatus === 'done'){
+            error_check = 'jump';
+        }
+        return this.getErrorMessage('update', error_check, id, prevData, nextStatus);
+    },
+    isSameId(active, id){
+        let error_check = false;
+        let sameId = [];
         if(active === 'remove' || active === 'update'){
             sameId = this.todos.filter((v) => v.id === id).pop();
         }
-        if(active === 'update'){
-            sameStatus = prevStatus.filter((v) => v === nextStatus);
+        if(!sameId){
+            error_check = true;
         }
-        if(nextStatus === 'doing'){
-            reverseStatus = prevStatus.filter((v) => v === 'done');
-        }
-        if(nextStatus === 'done'){
-            overStatus = prevStatus.filter((v) => v === 'todo');
-        }
-
-        if(add.pop()){ 
+        return this.getErrorMessage('remove', error_check, id);
+    },
+    getErrorMessage(active, error_check, id, prevData, nextStatus){
+        
+        let error = '';
+        if(active === 'add' && error_check){ 
             error = '[error] todo에는 이미 같은 이름의 task가 존재합니다. ';
         }
-        if(sameStatus.pop()){
-            error = `[error] ${id}번은 이미 ${nextStatus}입니다.`;
+        if(active === 'remove' && error_check|| active === 'update' && error_check){
+            error = `[error] ${id} 아이디는 존재하지 않습니다.`;
         }
-        if(reverseStatus.pop()){
-            error = `[error] ${nextStatus} 상태에서 ${prevStatus[3]}상태로 갈 수 없습니다. `;
+        if(active === 'update'){
+            error = (error_check === 'same')? `[error] ${id}번은 이미 ${nextStatus}입니다.`:
+                    (error_check === 'reverse')? `[error] ${prevData.status} 상태에서 ${nextStatus}상태로 갈 수 없습니다. `:
+                    (error_check === 'jump')? `[error] ${prevData.status}상태에서 바로 ${nextStatus}를 실행할 수 없습니다.`:'';
         }
-        if(overStatus.pop()){
-            error = `[error] ${prevStatus[3]} 상태에서 ${nextStatus}상태로 갈 수 없습니다. `;
-        }
-        if(!sameId){
-            error = `[error] ${id}번 아이디는 존재하지 않습니다.`;
-        }
-        
         return error;
-    }
+    },
+    
 };
 
 const todoMessage = {
@@ -147,16 +151,16 @@ const getData = {
     getPrevData(funcName, id){
         let prev_data = {
             prevName: '', 
-            idx: 0
+            id: 0
         };
         for(let o of todosList.todos){
             if(o.id === id){
-                prev_data.prevName = o.name;
-                prev_data.prevStatus = o.status;
-                prev_data.idx = o.id;
+                prev_data.name = o.name;
+                prev_data.status = o.status;
+                prev_data.id = o.id;
             }
         };
-        return [funcName ,id ,prev_data.prevName, prev_data.prevStatus];
+        return prev_data;
     },
     getCurrentStatus(data, valueType){
         const countObj =  getData.getDefaultData(todosList.todos, valueType);
@@ -257,14 +261,14 @@ const stopWatch = {
     }
 }
 
-todosList.add({name: "자바스크립트 공부하기", tag:"study"});
-todosList.add({name: "자바스크립트", tag:"programming"});
-// todosList.remove({id:1});
-// todosList.remove({id:1});
+todosList.add({name: "자바스크립트", tag:"study"});
+// todosList.add({name: "자바스크립트", tag:"programming"});
+todosList.remove({id:1});
+todosList.remove({id:1});
 todosList.update({id:1,  nextstatus:"doing"});
 todosList.update({id:1,  nextstatus:"done"});
 todosList.update({id:1,  nextstatus:"doing"});
-todosList.update({id:2,  nextstatus:"done"});
+// todosList.update({id:2,  nextstatus:"done"});
 // todosList.update({id:1,  nextstatus:"doing"});
 
 
