@@ -97,6 +97,14 @@ const todo = {
         }
     },
 
+    show(status) {
+        let showStatus = status.trim().toLowerCase();
+        for (const values of this.taskList) {
+            if (values.status === showStatus) {
+                console.log(`- ${values.id}번, ${values.name}, [${values.tag}]`);
+            }
+        }
+    }
     // countStatus(result) {
     //     let [todo, doing, done] = this.findStatus(result);
     //     if (todo !== 0) {
@@ -166,6 +174,8 @@ todo.remove({
 
 // todo.showTag('health');
 
-todo.showTags();
+// todo.showTags();
 
 // console.log(todo.findTags(todo.taskList))
+
+todo.show("toDo ")
