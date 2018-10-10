@@ -1,8 +1,9 @@
 const todosList = {
     todos : [],
     id : 1,
-    add({name, tag}){
-        let error = this.isAddError([name, 'name', this.todos]);
+    add({name, tag}, id){
+        let error = errorCheck.isAddError(name, 'name'),
+            lastData;
         if(error){
             console.log(error);
             return;
@@ -10,28 +11,29 @@ const todosList = {
         this.todos.push({
             name: name,
             tag: tag,
-            id: this.id,
+            id: id || this.id,
             status : 'todo'
         });
-        todoMessage.showActiveMessage(['add', this.id, name]);
+        lastData = this.todos.slice(-1).pop();
+        todoMessage.showActiveMessage(['add', lastData.id, name]);
+        getLog.makeLogList({active: 'add', id: lastData.id, tag: lastData.tag});
         this.id++;
-        getLog.makeLogList('add', this.id);
     },
     remove({id}){
         let prev_data = getData.getPrevData('remove', id);
-        let error = this.isSameId('remove', id);
+        let error = errorCheck.isSameId('remove', id);
         if(error){
             console.log(error);
             return;
         }
         this.todos = this.todos.filter((target)=>target.id !== id);
         todoMessage.showActiveMessage(['remove' ,id ,prev_data.name, prev_data.status]);
-        getLog.makeLogList('remove', this.id);
+        getLog.makeLogList({active : 'remove', id : id, name: prev_data.name, tag: prev_data.tag});
     },
     update({id,  nextstatus}){
         let prev_data = getData.getPrevData('update', id);
             nextstatus = nextstatus.toLowerCase();
-        let error = this.isUpdateError(prev_data, nextstatus, id) || this.isSameId('update', id);
+        let error = errorCheck.isUpdateError(prev_data, nextstatus, id) || errorCheck.isSameId('update', id);
         if(error){
             console.log(error);
             return;
@@ -44,7 +46,7 @@ const todosList = {
             }
         };
         todoMessage.showActiveMessage(['update' ,id ,prev_data.name, prev_data.status], nextstatus);
-        getLog.makeLogList('update', this.id);
+        getLog.makeLogList({active : 'update', id : id, name: prev_data.name, tag: prev_data.tag, prevStatus: prev_data.status, nextStatus: nextstatus});
     },
     showTag(tagName){
         let requiredData = getData.getRequiredData(this.todos, 'tag', tagName);
@@ -63,14 +65,26 @@ const todosList = {
         getData.getPrintFormat(requiredData, 'status', 'async');
     },
     undo(){
-        
+        let lastData = getLog.log.pop();
+        if(lastData.active === 'add'){
+            this.remove({id : lastData.id});
+        }
+        if(lastData.active === 'remove'){
+            this.add({name : lastData.name, tag : lastData.tag}, lastData.id);
+        }
+        if(lastData.active === 'update'){
+            this.update({id : lastData.id, nextstatus : lastData.prevStatus});
+        }
     },
     redo(){
 
-    },
-    isAddError([name, key, arr, status]){
+    },  
+};
+
+const errorCheck = {
+    isAddError(name, key){
         let error_check = [];
-        error_check = arr.filter((v) => v[key] === name);
+        error_check = todosList.todos.filter((v) => v[key] === name);
         return this.getErrorMessage('add', error_check.pop());
     },
     isUpdateError(prevData, nextStatus, id){
@@ -90,7 +104,7 @@ const todosList = {
         let error_check = false;
         let sameId = [];
         if(active === 'remove' || active === 'update'){
-            sameId = this.todos.filter((v) => v.id === id).pop();
+            sameId = todosList.todos.filter((v) => v.id === id).pop();
         }
         if(!sameId){
             error_check = true;
@@ -113,8 +127,7 @@ const todosList = {
         }
         return error;
     },
-    
-};
+}
 
 const todoMessage = {
     showActiveMessage([activeType, id, name, status], update_status){
@@ -150,7 +163,21 @@ const todoMessage = {
 const getData = {
     getPrevData(funcName, id){
         let prev_data = {
-            prevName: '', 
+            name: '', 
+            id: 0
+        };
+        for(let o of todosList.todos){
+            if(o.id === id){
+                prev_data.name = o.name;
+                prev_data.status = o.status;
+                prev_data.id = o.id;
+            }
+        };
+        return prev_data;
+    },
+    getCurrentData(funcName, id){
+        let prev_data = {
+            name: '', 
             id: 0
         };
         for(let o of todosList.todos){
@@ -238,16 +265,21 @@ const getData = {
                            (obj.value === 'doing')? `지금부터 ${obj.sec/1000}초뒤에 ${obj.value}내역을 출력합니다....`:
                            (obj.value === 'done') ? `지금부터 ${obj.sec/1000}초뒤에 ${obj.value}내역을 출력합니다.....`: '';
         }
-        todoMessage.showAsyncMessage(noticeArr)
+        todoMessage.showAsyncMessage(noticeArr);
     }
 }
 
 const getLog  = {
     log : [],
-    makeLogList(active, id){
+    makeLogList({active, id, name, tag,status, prevStatus, nextStatus}){
         this.log.push({
             active,
-            id
+            id,
+            name,
+            status,
+            tag,
+            prevStatus, 
+            nextStatus
         })
     }
 }
@@ -262,12 +294,17 @@ const stopWatch = {
 }
 
 todosList.add({name: "자바스크립트", tag:"study"});
-// todosList.add({name: "자바스크립트", tag:"programming"});
+todosList.add({name: "자바스크립트 공부하기", tag:"study"});
+todosList.add({name: "ios 공부하기", tag:"programming"});
+todosList.undo();
 todosList.remove({id:1});
-todosList.remove({id:1});
+todosList.undo();
+// todosList.remove({id:1});
 todosList.update({id:1,  nextstatus:"doing"});
-todosList.update({id:1,  nextstatus:"done"});
-todosList.update({id:1,  nextstatus:"doing"});
+todosList.undo();
+// todosList.update({id:1,  nextstatus:"done"});
+// todosList.update({id:1,  nextstatus:"doing"});
+
 // todosList.update({id:2,  nextstatus:"done"});
 // todosList.update({id:1,  nextstatus:"doing"});
 
