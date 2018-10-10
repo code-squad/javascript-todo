@@ -48,39 +48,30 @@ const todo = {
     },
 
     showTag(tag) {
-        let result = [];
-        for (const values of this.taskList) {
-            if (values.tag === tag) {
-                result.push(values);
-            }
-        }
+        const result = this.taskList.filter(value => value.tag === tag);
         let [todo, doing, done] = this.findStatus(result);
-        if (todo !== 0) {
-            console.log(`[todo, 총 ${todo}개]`)
+        if (todo !== 0){
+            console.log(`[todo, 총 ${todo}개]`);
+            const todoTasks =  result.filter(value => value.status === 'todo');
+            todoTasks.forEach(function(task){
+                console.log(`- ${task.id}번, ${task.name}`);
+            })
         }
-        for (const resultTasks of result) {
-            if (resultTasks.status === 'todo') {
-                console.log(`- ${resultTasks.id}번, ${ resultTasks.name } `);
-            }
+        if (doing !== 0){
+            console.log(`[doing, 총 ${doing}개]`);
+            const doingTasks =  result.filter(value => value.status === 'doing');
+            doingTasks.forEach(function(task){
+                console.log(`- ${task.id}번, ${task.name}`);
+            })
         }
-        if (doing !== 0) {
-            console.log(`[doing, 총 ${doing}개]`)
-        }
-        for (const resultTasks of result) {
-            if (resultTasks.status === 'doing') {
-                console.log(`- ${resultTasks.id}번, ${ resultTasks.name } `);
-            }
-        }
-        if (done !== 0) {
-            console.log(`[done, 총 ${done}개]`)
-        }
-        for (const resultTasks of result) {
-            if (resultTasks.status === 'done') {
-                console.log(`- ${resultTasks.id}번, ${ resultTasks.name } `);
-            }
+        if (done !== 0){
+            console.log(`[done, 총 ${done}개]`);
+            const doneTasks =  result.filter(value => value.status === 'done');
+            doneTasks.forEach(function(task){
+                console.log(`- ${task.id}번, ${task.name}`);
+            })
         }
     },
-
 }
 //test
 todo.add({
