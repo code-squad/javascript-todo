@@ -10,9 +10,19 @@ const todo = {
     },
 
     update(idAndStatus) {
+        idAndStatus.nextstatus = idAndStatus.nextstatus.toLowerCase();
         for (const values of this.taskList) {
-            if (values.id === idAndStatus.id) {
-                idAndStatus.nextstatus = idAndStatus.nextstatus.toLowerCase();
+            if (values.id === idAndStatus.id && idAndStatus.nextstatus === 'doing') {
+                values.doingTime = new Date().getTime();
+                console.log(
+                    `id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
+                values.status = idAndStatus.nextstatus;
+                let [todo, doing, done] = this.findStatus(this.taskList);
+                console.log(`현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
+            }
+            if (values.id === idAndStatus.id && idAndStatus.nextstatus === 'done') {
+                values.takenTime = (new Date().getTime() - values.doingTime)/1000;
+                delete values.doingTime;
                 console.log(
                     `id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
                 values.status = idAndStatus.nextstatus;
@@ -168,9 +178,14 @@ todo.update({
     nextstatus: "DOING"
 });
 
-todo.remove({
+todo.update({
     id: todo.taskList[0].id,
+    nextstatus: "done"
 });
+
+// todo.remove({
+//     id: todo.taskList[0].id,
+// });
 
 // todo.showTag('health');
 
