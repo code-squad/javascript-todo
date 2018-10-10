@@ -7,12 +7,7 @@ class Todo {
     this.execution = execution;
   }
 
-  /* 
-    add({name: 'JS 공부', tag: 'programming', deadLine: '2018/10/12 14:00', alarm: '1h'});
-    -. deadLine을 기록가능
-    -. alarm 설정 가능, '1h'는 1시간 전을 의미합니다. 
-  */
-  add({ name, tag, deadLine, alarm }) {
+  add({ name, tag }) {
     const bError = this.error.inCaseAdd(this.list, name);
     if (bError) return;
 
@@ -20,14 +15,11 @@ class Todo {
       id: Date.now().toString(36),
       name: name,
       status: "todo",
-      tag: tag,
-      deadLine: new Date(deadLine)
+      tag: tag
     };
 
-    if (alarm) this.message.setAlarm(alarm, newTask);
-
     this.list.push(newTask);
-    this.execution.pushUndoList("add", newTask);
+    this.execution.record.pushUndoList("add", newTask);
     this.message.printCommandResult(this.list, "add", newTask);
   }
 
@@ -45,7 +37,7 @@ class Todo {
     const prevStatus = targetTask.status;
     const isDoingDone = prevStatus === "doing" && nextStatus === "done";
 
-    this.execution.pushUndoList("update", targetTask, nextStatus);
+    this.execution.record.pushUndoList("update", targetTask, nextStatus);
 
     if (nextStatus === "doing") {
       targetTask.startTime = new Date(Date.now());
@@ -71,7 +63,7 @@ class Todo {
     const targetTask = this.list[targetIndex];
 
     this.list.splice(targetIndex, 1);
-    this.execution.pushUndoList("remove", targetTask);
+    this.execution.record.pushUndoList("remove", targetTask);
     this.message.printCommandResult(this.list, "remove", targetTask);
   }
 
@@ -90,10 +82,6 @@ class Todo {
   showAll() {
     const asynTime = [2000, 3000, 2000];
     this.message.listByAllStatus(this.todoObj.status(this.list), this.list, asynTime);
-  }
-
-  showDeadLine() {
-    this.message.listByDeadLine(this.list);
   }
 
   undo() {
@@ -149,11 +137,9 @@ class Message {
     console.log(resultStr);
   }
 
-  listByDeadLine(list) {
-    const filteredList = list.filter(task => task.deadLine).sort((task1, task2) => task1.deaLine - task2.deaLine);
-    const resultStr = filteredList.reduce((accStr, task) => accStr += `${this.getMsg(task)}, [${task.status}], [${task.tag}], [${this.getDate(task.deadLine)}]\n`, '');
-
-    console.log(resultStr);
+  getMsg(task) {
+    if (task.spentTime) return `- ${task.id}, ${task.name}, ${this.getTime(task.spentTime)}`
+    return `- ${task.id}, ${task.name}`
   }
 
   listByAllStatus(todoByStatus, list, asynTime) {
@@ -173,50 +159,6 @@ class Message {
     console.log(`\"총 ${listLength}개의 리스트를 가져왔습니다. ${asynTime[asynIndex] / 1000}초뒤에 ${kindOfPrint[asynIndex]}내역을 출력합니다.....\"`);
 
     setTimeout(asynPrint, asynTime[asynIndex], kindOfPrint[asynIndex]);
-  }
-
-  setAlarm(alarm, task) {
-    const hours = /h/,
-      minutes = /m/,
-      seconds = /s/;
-    const timeLeft = task.deadLine - Date.now();
-    const numExtraction = alarm.replace(/[^0-9]/g, '');
-    let timeOut, timeMsg;
-
-    if (alarm.match(hours)) {
-      timeOut = timeLeft - (numExtraction * 3600000);
-      timeMsg = '시간';
-    }
-    else if (alarm.match(minutes)) {
-      timeOut = timeLeft - (numExtraction * 60000);
-      timeMsg = '분';
-    }
-    else if (alarm.match(seconds)) {
-      timeOut = timeLeft - (numExtraction * 1000);
-      timeMsg = '초';
-    }
-
-    this.alertMsg(numExtraction, timeOut, timeMsg);
-  }
-
-  alertMsg(numExtraction, timeOut, timeMsg) {
-    setTimeout(() => alert(`${numExtraction}${timeMsg} 전입니다!!`), timeOut);
-  }
-
-
-  getMsg(task) {
-    if (task.spentTime) return `- ${task.id}, ${task.name}, ${this.getTime(task.spentTime)}`
-    return `- ${task.id}, ${task.name}`
-  }
-
-  getDate(date) {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const hour = date.getHours();
-    const minute = date.getMinutes();
-
-    return `${year}년 ${month}월 ${day}일 ${hour}시 ${minute ? minute + '분' : ''} 까지`
   }
 
   getTime(spentTime) {
@@ -322,40 +264,40 @@ class Execution {
   constructor() {
     this.record = {
       undoList: [],
-      redoList: []
-    }
-  }
+      redoList: [],
 
-  copyTargetTask(targetTask) {
-    const copyObj = {};
-    for (let key in targetTask) {
-      if (targetTask.hasOwnProperty(key)) {
-        copyObj[key] = targetTask[key];
+      copyTargetTask(targetTask) {
+        const copyObj = {};
+        for (let key in targetTask) {
+          if (targetTask.hasOwnProperty(key)) {
+            copyObj[key] = targetTask[key];
+          }
+        }
+        return copyObj;
+      },
+
+      pushUndoList(methodName, task, nextStatus) {
+        const copyedData = this.copyTargetTask(task);
+        const record = {
+          todoMethod: methodName,
+          task: copyedData,
+          nextStatus: nextStatus
+        };
+        if (this.undoList.length >= 3) this.undoList.shift();
+        this.undoList.push(record);
+      },
+
+      pushRedoList(task) {
+        const copyedData = this.copyTargetTask(task);
+        const record = {
+          todoMethod: copyedData.todoMethod,
+          task: copyedData.task,
+          nextStatus: copyedData.nextStatus
+        };
+        if (this.redoList.length >= 3) this.redoList.shift();
+        this.redoList.push(record);
       }
-    }
-    return copyObj;
-  }
-
-  pushUndoList(methodName, task, nextStatus) {
-    const copyedData = this.copyTargetTask(task);
-    const record = {
-      todoMethod: methodName,
-      task: copyedData,
-      nextStatus: nextStatus
     };
-    if (this.record.undoList.length >= 3) this.record.undoList.shift();
-    this.record.undoList.push(record);
-  }
-
-  pushRedoList(task) {
-    const copyedData = this.copyTargetTask(task);
-    const record = {
-      todoMethod: copyedData.todoMethod,
-      task: copyedData.task,
-      nextStatus: copyedData.nextStatus
-    };
-    if (this.record.redoList.length >= 3) this.record.redoList.shift();
-    this.record.redoList.push(record);
   }
 
   undo(list) {
@@ -368,20 +310,20 @@ class Execution {
     if (targetUndo.todoMethod === "add") {
       const undoTaskIndex = list.findIndex(task => task.id === targetUndo.task.id);
       list.splice(undoTaskIndex, 1);
-      this.pushRedoList(targetUndo);
+      this.record.pushRedoList(targetUndo);
 
       console.log(`\"${targetUndo.task.id}, ${targetUndo.task.name}가 삭제됐습니다\"`);
     }
     else if (targetUndo.todoMethod === "update") {
       const undoTaskIndex = list.findIndex(task => task.id === targetUndo.task.id);
       list[undoTaskIndex] = targetUndo.task;
-      this.pushRedoList(targetUndo);
+      this.record.pushRedoList(targetUndo);
 
       console.log(`\"${targetUndo.task.id}항목이 ${targetUndo.nextStatus} => ${targetUndo.task.status} 상태로 변경됐습니다\"`);
     }
     else if (targetUndo.todoMethod === "remove") {
       list.push(targetUndo.task);
-      this.pushRedoList(targetUndo);
+      this.record.pushRedoList(targetUndo);
 
       console.log(`\"${targetUndo.task.id}항목 \'${targetUndo.task.name}\'가 삭제에서 ${targetUndo.task.status} 상태로 변경됐습니다\"`);
     }
