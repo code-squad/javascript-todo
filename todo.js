@@ -2,12 +2,57 @@
 //this.statusNum = {}구현하기v
 //showall()메서드 재귀호출로 구현하기v
 
-//아니면 step3에서 구현하는 에러메세지만 모아두는 객체를 만들까? ooo
+//아니면 step3에서 구현하는 에러메세지만 모아두는 객체를 만들까? xxx
 //undo redo기능은 어떻게 구현할까?
 //기능완성도를 위해서 동료에게 테스트 부탁하기
+const checkError = {
+    initedTask: [],//todo.task값을 항상 최신화해서 가져온 값
+    
+    add(initedTask) {
+    },
+    
+    update(initedTask) {
+    },
+
+    remove(initedTask) {
+    },
+    //메서드마다 에러를 출력하는것을 결정.
+};                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+
+const addFunc = {
+    initedTask: [],
+
+};//add메서드 내에 들어가는 메서드들을 따로 모아서 처리하는 객체.
+
+const removeFunc = {
+    initedTask: [],
+
+}//remove메서드 내에 들어가는 메서드 들을 따로 모아서 처리
+
+const updateFunc = {
+    initedTask: [],
+}//update메서드 내에 들어가는 메서드 들을 따로 모아서 처리
+
+const showTagfunc = {
+    initedTask: [],
+}//showTagfunc메서드 내에 들어가는 메서드들을 따로 모아서 처리
+
+const showTagsfunc = {
+    initedTask: [],
+}//showTagsfunc메서드 내에 들어가는 메서드들을 따로 모아서 처리
+
+const commonFunc = {
+    initedTask: [],
+}//중복되어 사용되는 메서드들을 따로 모아서 처리
+
+
 
 const todo = {
     task: [],
+
+    initAllTask() {
+        checkError.initedTask = this.task
+    },
 
     add(objToAdd) {
         const notAddedLength = this.task.length
@@ -33,12 +78,18 @@ const todo = {
         return ranNum;
     },//중복되지 않는 랜덤한 숫자를뽑아내는 함수
 
+    statusNum: {
+        todo: 0,
+        doing: 0,
+        done: 0
+    },
+
     getStatusNum(accumulatedTask) {
         this.initStatusNum();
         accumulatedTask.forEach(obj => {
             this.statusNum[obj.status]++
         })
-    },//상태를 초기화 시켜주는 함수
+    },//
 
     initStatusNum() {
         this.statusNum.todo = 0;
@@ -46,13 +97,8 @@ const todo = {
         this.statusNum.done = 0;
     },//statusNum 객체를 초기화 시켜주는 함수
 
-    statusNum: {
-        todo: 0,
-        doing: 0,
-        done: 0
-    },
 
-    printStatusNum(statusNum) {
+    printStatusNum() {
         console.log(`현재상태 todo : ${this.statusNum.todo}, doing: ${this.statusNum.doing}, done : ${this.statusNum.done}`)
     },//상태를 출력해주는 함수
 
@@ -247,7 +293,14 @@ todo.add({ name: 'C++', tag: 'programming' });
 todo.add({ name: '회식', tag: '회사' });
 todo.add({ name: '노래연습', tag: '자기개발' });
 todo.add({ name: '과장님업무', tag: '회사' })
-
+// 쓰는 기능
+todo.add();
+todo.remove();
+todo.update();
+todo.showTag();
+todo.showTags();
+todo.show();
+todo.showAll();
 // todo.update({ id: 3, nextstatus: 'doing' })
 // todo.update({ id: 3, nextstatus: 'done' })
 // todo.update({ id: 2, nextstatus: 'done' })
