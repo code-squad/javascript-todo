@@ -20,6 +20,7 @@ const todo = {
                 let [todo, doing, done] = this.findStatus(this.taskList);
                 console.log(`현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
             }
+
             if (values.id === idAndStatus.id && idAndStatus.nextstatus === 'done') {
                 let takenTime = (new Date().getTime() - values.doingTime) / 1000;
                 if (takenTime <= 60) {
@@ -30,8 +31,7 @@ const todo = {
                     values.takenTime = (takenTime / 3600).toFixed(0) + '시간';
                 } else if (takenTime > 86400) {
                     values.takenTime = (takenTime / 86400).toFixed(0) + '일';
-                }
-
+                };
                 delete values.doingTime;
                 console.log(
                     `id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
@@ -113,7 +113,7 @@ const todo = {
             const sameTagTask = result.filter(result => result.tag === tag);
             sameTagTask.forEach(function (task) {
                 console.log(`- ${task.id}번, ${task.name}, [${task.status}]`);
-            })
+            });
         }
     },
 
@@ -131,7 +131,7 @@ const todo = {
 
     showAll() {
         const [todo, doing, done] = this.findStatus(this.taskList);
-        console.log(`총 ${todo+doing+done}개의 리스트를 가져왔습니다. 2초 뒤에 todo 내역을 출력합니다...`);
+        console.log(`총 ${todo + doing + done}개의 리스트를 가져왔습니다. 2초 뒤에 todo 내역을 출력합니다...`);
         let todoTasks = [];
         let doingTasks = [];
         let doneTasks = [];
@@ -151,6 +151,7 @@ const todo = {
             })
             console.log(`\n 지금부터 3초 뒤에 doing 내역을 출력합니다...`);
         }, 2000);
+
         setTimeout(function () {
             console.log(`[doing, 총 ${doing}개]`)
             doingTasks.forEach(function (task) {
@@ -158,40 +159,15 @@ const todo = {
             })
             console.log(`\n 지금부터 2초 뒤에 done 내역을 출력합니다...`);
         }, 5000);
+
         setTimeout(function () {
             console.log(`[done, 총 ${done}개]`)
             doneTasks.forEach(function (task) {
-                console.log(`- ${task.id}번, ${task.name}, [${task.tag}], ${task.takenTime}]
-                `);
+                console.log(`- ${task.id}번, ${task.name}, [${task.tag}], ${task.takenTime}`);
             })
         }, 7000);
     }
-    // countStatus(result) {
-    //     let [todo, doing, done] = this.findStatus(result);
-    //     if (todo !== 0) {
-    //         console.log(`[todo, 총 ${todo}개]`);
-    //         const todoTasks = result.filter(value => value.status === 'todo');
-    //         todoTasks.forEach(function (task) {
-    //             console.log(`- ${task.id}번, ${task.name}`);
-    //         })
-    //     }
-    //     if (doing !== 0) {
-    //         console.log(`[doing, 총 ${doing}개]`);
-    //         const doingTasks = result.filter(value => value.status === 'doing');
-    //         doingTasks.forEach(function (task) {
-    //             console.log(`- ${task.id}번, ${task.name}`);
-    //         })
-    //     }
-    //     if (done !== 0) {
-    //         console.log(`[done, 총 ${done}개]`);
-    //         const doneTasks = result.filter(value => value.status === 'done');
-    //         doneTasks.forEach(function (task) {
-    //             console.log(`- ${task.id}번, ${task.name}`);
-    //         })
-    //     }
-    // }
 }
-
 
 //test
 todo.add({
@@ -235,16 +211,14 @@ todo.update({
     nextstatus: "done"
 });
 
-// todo.remove({
-//     id: todo.taskList[0].id,
-// });
+todo.remove({
+    id: todo.taskList[0].id,
+});
 
-// todo.showTag('health');
+todo.showTag('health');
 
-// todo.showTags();
+todo.showTags();
 
-// console.log(todo.findTags(todo.taskList))
-
-// todo.show("done ")
+todo.show("done ")
 
 todo.showAll();
