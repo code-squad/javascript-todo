@@ -2,12 +2,9 @@
 //this.statusNum = {}구현하기
 //showall()메서드 재귀호출로 구현하기
 
-//기능별로 사용하는 메서드들을 객체로 나누어버릴까? OOO
-//아니면 step3에서 구현하는 에러메세지만 모아두는 객체를 만들까?  XXX
+//아니면 step3에서 구현하는 에러메세지만 모아두는 객체를 만들까? ooo
 //undo redo기능은 어떻게 구현할까?
 //기능완성도를 위해서 동료에게 테스트 부탁하기
-
-
 
 const todo = {
     task: [],
@@ -22,9 +19,9 @@ const todo = {
             timeData: 0,
         }
         this.task.push(newTodo)
-        let statusNum = this.getStatusNum(this.task)
+        this.getStatusNum(this.task)
         this.printChangeThing(newTodo, notAddedLength)
-        this.printStatusNum(statusNum)
+        this.printStatusNum()
     },//해야할일과 id값을 추가해주는 함수
 
     getRanNum() {
@@ -37,19 +34,26 @@ const todo = {
     },//중복되지 않는 랜덤한 숫자를뽑아내는 함수
 
     getStatusNum(accumulatedTask) {
-        const statusNum = {
-            todo: 0,
-            doing: 0,
-            done: 0
-        }
+        this.initStatusNum();
         accumulatedTask.forEach(obj => {
-            statusNum[obj.status]++
+            this.statusNum[obj.status]++
         })
-        return statusNum
     },//상태를 초기화 시켜주는 함수
 
+    initStatusNum() {
+        this.statusNum.todo = 0;
+        this.statusNum.doing = 0;
+        this.statusNum.done = 0;
+    },//statusNum 객체를 초기화 시켜주는 함수
+
+    statusNum: {
+        todo: 0,
+        doing: 0,
+        done: 0
+    },
+
     printStatusNum(statusNum) {
-        console.log(`현재상태 todo : ${statusNum.todo}, doing: ${statusNum.doing}, done : ${statusNum.done}`)
+        console.log(`현재상태 todo : ${this.statusNum.todo}, doing: ${this.statusNum.doing}, done : ${this.statusNum.done}`)
     },//상태를 출력해주는 함수
 
     printChangeThing(objToPrint, beforeTaskLength, beforeTaskStatus) {
@@ -82,9 +86,9 @@ const todo = {
                 return taskObj
             }
         })
-        let statusNum = this.getStatusNum(this.task)
+        this.getStatusNum(this.task)
         this.printChangeThing(changedTask[0], this.task.length, beforeTaskStatus[0])
-        this.printStatusNum(statusNum)
+        this.printStatusNum()
     },//상태 업데이트 함수//주어진 정보의 시간을 넣을 수 있도록 수정 요망
 
     updateDoingTime(objToUpdate) {
@@ -118,7 +122,7 @@ const todo = {
     },//걸린 시간을 계산해주는 함수
 
     remove(objToRemove) {
-        const notRemovedLength = todo.task.length
+        const notRemovedLength = this.task.length
         let filteredTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
         let removedTask = this.task.filter(taskObj => taskObj.id !== objToRemove.id)
         this.task = removedTask
@@ -210,24 +214,29 @@ const todo = {
         return sameTagNum
     },//같은 태그의 개수를 세어주는 함수
 
-    showAll() {
-        const statusNum = this.getStatusNum(this.task)
-        console.log(`총 ${this.task.length}개의 리스트를 가져왔습니다.
-    지금부터 2초뒤에 todo내역을 출력합니다........`)
+    showAll(status) {
+        if (status === undefined) {
+            this.getStatusNum(this.task);
+            console.log(`총 ${this.task.length}개의 리스트를 가져왔습니다.`);
+            this.showAll('todo')
+            return;
+        }
+        console.log(`지금부터 2초뒤에 ${status}내역을 출력합니다.`)
+        if(status === 'done') {
+            setTimeout(function() {
+                this.show('done')
+            }.bind(todo), 2000)
+            return;
+        }
         setTimeout(function () {
-            console.log(`[todo, 총${statusNum.todo}개]`);
-            this.show('todo')
-            console.log(`지금부터 3초뒤에 doing내역을 출력합니다.......`)
-            setTimeout(function () {
-                debugger;
-                console.log(`[doing, 총${statusNum.doing}개]`)
-                this.show('doing')
-                console.log(`지금부터 2초뒤에 done내역을 출력합니다........`)
-                setTimeout(function () {
-                    console.log(`[done, 총${statusNum.done}개]`)
-                    this.show('done')
-                }.bind(todo), 2000)
-            }.bind(todo), 3000)
+            this.show(status)
+            if(status === 'todo') {
+                status = 'doing'
+                this.showAll(status)
+            } else if (status === 'doing') {
+                status = 'done'
+                this.showAll(status)
+            }
         }.bind(todo), 2000)
     },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수, 재귀적으로 표현해볼것.
 }//해야 할일 객체
