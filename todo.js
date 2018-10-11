@@ -5,120 +5,28 @@
 //아니면 step3에서 구현하는 에러메세지만 모아두는 객체를 만들까? xxx
 //undo redo기능은 어떻게 구현할까?
 //기능완성도를 위해서 동료에게 테스트 부탁하기
-const checkError = {
-    initedTask: [],//todo.task값을 항상 최신화해서 가져온 값
-    
-    add(initedTask) {
-    },
-    
-    update(initedTask) {
-    },
-
-    remove(initedTask) {
-    },
-    //메서드마다 에러를 출력하는것을 결정.
-};                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
-
-const addFunc = {
-    initedTask: [],
-
-};//add메서드 내에 들어가는 메서드들을 따로 모아서 처리하는 객체.
-
-const removeFunc = {
-    initedTask: [],
-
-}//remove메서드 내에 들어가는 메서드 들을 따로 모아서 처리
-
-const updateFunc = {
-    initedTask: [],
-}//update메서드 내에 들어가는 메서드 들을 따로 모아서 처리
-
-const showTagfunc = {
-    initedTask: [],
-}//showTagfunc메서드 내에 들어가는 메서드들을 따로 모아서 처리
-
-const showTagsfunc = {
-    initedTask: [],
-}//showTagsfunc메서드 내에 들어가는 메서드들을 따로 모아서 처리
-
-const commonFunc = {
-    initedTask: [],
-}//중복되어 사용되는 메서드들을 따로 모아서 처리
-
-
-
 const todo = {
     task: [],
-
-    initAllTask() {
-        checkError.initedTask = this.task
-    },
 
     add(objToAdd) {
         const notAddedLength = this.task.length
         const newTodo = {
-            id: this.getRanNum(),
+            id: addFunc.getRanNum(this.task),
             name: objToAdd.name,
             status: 'todo',
             tag: objToAdd.tag,
             timeData: 0,
         }
         this.task.push(newTodo)
-        this.getStatusNum(this.task)
-        this.printChangeThing(newTodo, notAddedLength)
-        this.printStatusNum()
+        const addedLength = this.task.length
+        commonFunc.getStatusNum(this.task)
+        commonFunc.printChangeThing(newTodo,addedLength, notAddedLength)
+        commonFunc.printStatusNum()
     },//해야할일과 id값을 추가해주는 함수
-
-    getRanNum() {
-        const ranNum = Math.floor(Math.random() * 100)
-        const idArrays = this.task.map(obj => obj.id)
-        if (idArrays.includes(ranNum)) {
-            return this.getRanNum()
-        }
-        return ranNum;
-    },//중복되지 않는 랜덤한 숫자를뽑아내는 함수
-
-    statusNum: {
-        todo: 0,
-        doing: 0,
-        done: 0
-    },
-
-    getStatusNum(accumulatedTask) {
-        this.initStatusNum();
-        accumulatedTask.forEach(obj => {
-            this.statusNum[obj.status]++
-        })
-    },//
-
-    initStatusNum() {
-        this.statusNum.todo = 0;
-        this.statusNum.doing = 0;
-        this.statusNum.done = 0;
-    },//statusNum 객체를 초기화 시켜주는 함수
-
-
-    printStatusNum() {
-        console.log(`현재상태 todo : ${this.statusNum.todo}, doing: ${this.statusNum.doing}, done : ${this.statusNum.done}`)
-    },//상태를 출력해주는 함수
-
-    printChangeThing(objToPrint, beforeTaskLength, beforeTaskStatus) {
-        if (this.task.length > beforeTaskLength) {
-            console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 항목이 추가되었습니다.`);
-        } else if (this.task.length < beforeTaskLength) {
-            console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 삭제 완료`)
-        } else {
-            console.log(`ID: ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 업데이트 되었습니다.`)
-        }
-    },//할일이 추가되거나 제거되거나 업데이트 될 때 적합한 내용을 출력해 주는 함수
-
+    
     update(objToUpdate) {
         let beforeTaskStatus = []
-        if (objToUpdate.nextstatus === 'doing') {
-            this.updateDoingTime(objToUpdate)
-        } else if (objToUpdate.nextstatus === 'done') {
-            this.updateTakeTime(objToUpdate)
-        }
+        updateFunc.checkUpdateStatus(objToUpdate);
         this.task = this.task.map(taskObj => {
             if (objToUpdate.id === taskObj.id) {
                 beforeTaskStatus.push(taskObj.status)
@@ -136,36 +44,7 @@ const todo = {
         this.printChangeThing(changedTask[0], this.task.length, beforeTaskStatus[0])
         this.printStatusNum()
     },//상태 업데이트 함수//주어진 정보의 시간을 넣을 수 있도록 수정 요망
-
-    updateDoingTime(objToUpdate) {
-        this.task.forEach(taskObj => {
-            if (taskObj.id === objToUpdate.id) {
-                taskObj.timeData = Date.now();
-            }
-        })
-    },//업데이트할 객체를 인자로 받아 task내의 timeData값을 변경.
-
-    updateTakeTime(objToUpdate) {
-        this.task.forEach(taskObj => {
-            if (taskObj.id === objToUpdate.id) {
-                taskObj.timeData = this.getTakeTime(taskObj.timeData, Date.now())
-            }
-        })
-    },//업데이트할 객체를 인자로 받아 task내의 timeData의 값을 걸린 시간으로 변경.
-
-    getTakeTime(doingTime, currentTime) {
-        let takenTime = ''
-        let takenMsecTime = currentTime - doingTime
-        const msecPerMinute = 1000 * 60, msecPerHour = msecPerMinute * 60, msecPerDay = msecPerHour * 24
-        const takenDays = Math.floor(takenMsecTime / msecPerDay)
-        takenMsecTime = takenMsecTime - takenDays * msecPerDay
-        const takenHours = Math.floor(takenMsecTime / msecPerHour)
-        takenMsecTime = takenMsecTime - takenHours * msecPerHour
-        const takenMinutes = Math.floor(takenMsecTime / msecPerMinute)
-        takenMsecTime = takenMsecTime - takenMinutes * msecPerMinute
-        takenTime += takenDays + '일, ' + takenHours + '시간, ' + takenMinutes + '분'
-        return takenTime;
-    },//걸린 시간을 계산해주는 함수
+    
 
     remove(objToRemove) {
         const notRemovedLength = this.task.length
@@ -174,7 +53,7 @@ const todo = {
         this.task = removedTask
         this.printChangeThing(filteredTask[0], notRemovedLength)
     },//할 일과 id값을 제거해주는 함수
-
+    
     show(status) {
         console.log(`[${status} 상태인 할 일들]`)
         this.task.forEach(taskObj => {
@@ -185,7 +64,7 @@ const todo = {
             }
         })
     },//인자로 입력받은 상태의 정보들을 출력해주는 함수
-
+    
     showTag(tag) {
         const todoNum = this.getSameTagAndStatusNum(tag, 'todo')
         console.log(`[todo, 총 ${todoNum}개]`)
@@ -197,7 +76,7 @@ const todo = {
         console.log(`[done, 총 ${doneNum}개]`)
         this.printByTag(tag, 'done');
     },//수정필요, 여기에 showTags기능까지 넣어볼 것.//함수는 한가지의 일만 하는게 맞는듯
-
+    
     printByTag(tag, status) {
         this.task.forEach(taskObj => {
             if (taskObj.tag === tag && taskObj.status === status) {
@@ -286,6 +165,115 @@ const todo = {
         }.bind(todo), 2000)
     },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수, 재귀적으로 표현해볼것.
 }//해야 할일 객체
+
+const addFunc = {
+    getRanNum(task) {
+        const ranNum = Math.floor(Math.random() * 100)
+        const idArrays = task.map(obj => obj.id)
+        if (idArrays.includes(ranNum)) {
+            return this.getRanNum()
+        }
+        return ranNum;
+    },//중복되지 않는 랜덤한 숫자를뽑아내는 함수
+};//add메서드 내에 들어가는 메서드들을 따로 모아서 처리하는 객체.
+
+const updateFunc = {
+    checkUpdateStatus(objToUpdate) {
+        if(objToUpdate.nextstatus === 'doing') {
+            this.updateDoingTime(objToUpdate, this.task)
+        } else if (objToUpdate.nextStatus === 'done') {
+            this.updateTakeTime(objToUpdate, this.task)
+        }
+    },
+
+    updateDoingTime(objToUpdate, todoTask) {
+        todoTask.forEach(taskObj => {
+            if (taskObj.id === objToUpdate.id) {
+                taskObj.timeData = Date.now();
+            }
+        })
+    },//업데이트할 객체를 인자로 받아 task내의 timeData값을 변경.
+    
+    updateTakeTime(objToUpdate, todoTask) {
+        todoTask.forEach(taskObj => {
+            if (taskObj.id === objToUpdate.id) {
+                taskObj.timeData = this.getTakeTime(taskObj.timeData, Date.now())
+            }
+        })
+    },//업데이트할 객체를 인자로 받아 task내의 timeData의 값을 걸린 시간으로 변경.
+    
+    getTakeTime(doingTime, currentTime) {
+        let takenTime = ''
+        let takenMsecTime = currentTime - doingTime
+        const msecPerMinute = 1000 * 60, msecPerHour = msecPerMinute * 60, msecPerDay = msecPerHour * 24
+        const takenDays = Math.floor(takenMsecTime / msecPerDay)
+        takenMsecTime = takenMsecTime - takenDays * msecPerDay
+        const takenHours = Math.floor(takenMsecTime / msecPerHour)
+        takenMsecTime = takenMsecTime - takenHours * msecPerHour
+        const takenMinutes = Math.floor(takenMsecTime / msecPerMinute)
+        takenMsecTime = takenMsecTime - takenMinutes * msecPerMinute
+        takenTime += takenDays + '일, ' + takenHours + '시간, ' + takenMinutes + '분'
+        return takenTime;
+    },//걸린 시간을 계산해주는 함수
+}//update메서드 내에 들어가는 메서드 들을 따로 모아서 처리
+
+const showTagfunc = {
+    initedTask: [],
+}//showTagfunc메서드 내에 들어가는 메서드들을 따로 모아서 처리
+
+const showTagsfunc = {
+    initedTask: [],
+}//showTagsfunc메서드 내에 들어가는 메서드들을 따로 모아서 처리
+
+const commonFunc = {
+    statusNum: {
+        todo: 0,
+        doing: 0,
+        done: 0
+    },
+
+    initStatusNum() {
+        this.statusNum.todo = 0;
+        this.statusNum.doing = 0;
+        this.statusNum.done = 0;
+    },//statusNum 객체를 초기화 시켜주는 함수
+    
+    getStatusNum(accumulatedTask) {
+        this.initStatusNum();
+        accumulatedTask.forEach(obj => {
+            this.statusNum[obj.status]++
+        })
+    },//
+    
+    printStatusNum() {
+        console.log(`현재상태 todo : ${this.statusNum.todo}, doing: ${this.statusNum.doing}, done : ${this.statusNum.done}`)
+    },//상태를 출력해주는 함수
+    
+    printChangeThing(objToPrint, currentTaskLength, beforeTaskLength, beforeTaskStatus) {
+        if (currentTaskLength > beforeTaskLength) {
+            console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 항목이 추가되었습니다.`);
+        } else if (currentTaskLength < beforeTaskLength) {
+            console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 삭제 완료`)
+        } else {
+            console.log(`ID: ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 업데이트 되었습니다.`)
+        }
+    },//할일이 추가되거나 제거되거나 업데이트 될 때 적합한 내용을 출력해 주는 함수
+}//중복되어 사용되는 메서드들을 따로 모아서 처리
+
+const checkError = {
+    initedTask: [],//todo.task값을 항상 최신화해서 가져온 값
+    
+    add(initedTask) {
+    },
+    
+    update(initedTask) {
+    },
+    
+    remove(initedTask) {
+    },
+    //메서드마다 에러를 출력하는것을 결정.
+};     
+
 // 테스트
 
 todo.add({ name: '자바스크립트', tag: 'programming' });
