@@ -2,7 +2,8 @@ const todosList = {
     todos : [],
     id : 1,
     add({name, tag}, id, undo){
-        let error = errorCheck.isAddError(name, 'name'), lastData;
+        let error = errorCheck.isAddError(name, 'name', undo), 
+            lastData;
         if(error){
             console.log(error);
             return;
@@ -13,53 +14,34 @@ const todosList = {
             id: id || this.id,
             status : 'todo'
         });
+        
         lastData = this.todos.slice(-1).pop();
         todoMessage.showActiveMessage(['add', lastData.id, name]);
         
-        if(undo) {
-            getLog.undoLogList({
-                active: 'add',
-                id: lastData.id,
-                tag: lastData.tag
-            });
-        } else {
-            getLog.makeLogList({
-                active: 'add', 
-                id: lastData.id, 
-                tag: lastData.tag
-            });
-        }
+        (undo === 'undo')?
+        getData.getLogObject(['add', lastData.id, , lastData.tag, , ], 'undo'): 
+        getData.getLogObject(['add', lastData.id, , lastData.tag, , ]);
+        
         this.id++;
     },
     remove({id}, undo){
         let prev_data = getData.getPrevData(id),
-            error = errorCheck.isSameId('remove', id);
+            error = errorCheck.isSameId('remove', id, undo);
         if(error){
             console.log(error);
             return;
         }
+
         this.todos = this.todos.filter((target)=>target.id !== id);
         todoMessage.showActiveMessage(['remove' ,id , prev_data.name, prev_data.status], undo);
         
-        if(undo){
-            getLog.undoLogList({
-                active : 'remove',
-                id : id,
-                name: prev_data.name,
-                tag: prev_data.tag
-            });
-        } else {
-            getLog.makeLogList({
-                active : 'remove', 
-                id : id, 
-                name: prev_data.name, 
-                tag: prev_data.tag
-            });
-        }
+        (undo === 'undo')?
+        getData.getLogObject(['remove', id, prev_data.name, prev_data.tag, , ], 'undo'):
+        getData.getLogObject(['remove', id, prev_data.name, prev_data.tag, , ]);
     },
     update({id,  nextstatus}, undo){
         let prev_data = getData.getPrevData(id),
-            error = errorCheck.isUpdateError(prev_data, nextstatus, id) || errorCheck.isSameId('update', id);
+            error = errorCheck.isUpdateError(prev_data, nextstatus, id, undo) || errorCheck.isSameId('update', id, undo);
             nextstatus = nextstatus.toLowerCase();
         if(error){
             console.log(error);
@@ -74,25 +56,9 @@ const todosList = {
         };
         todoMessage.showActiveMessage(['update' ,id ,prev_data.name, prev_data.status, nextstatus]);
         
-        if(undo){
-            getLog.undoLogList({
-                active : 'update',
-                id : id,
-                name: prev_data.name,
-                tag: prev_data.tag,
-                prevStatus: prev_data.status,
-                nextStatus: nextstatus
-            });
-        } else {
-            getLog.makeLogList({
-                active : 'update',
-                id : id,
-                name: prev_data.name,
-                tag: prev_data.tag,
-                prevStatus: prev_data.status,
-                nextStatus: nextstatus
-            });
-        }
+        (undo === 'undo')?
+        getData.getLogObject(['update', id, prev_data.name, prev_data.tag, prev_data.status, nextstatus], 'undo'):
+        getData.getLogObject(['update', id, prev_data.name, prev_data.tag, prev_data.status, nextstatus]);
     },
     showTag(tagName){
         let requiredData = getData.getRequiredData(this.todos, 'tag', tagName);
@@ -111,50 +77,49 @@ const todosList = {
         getData.getPrintFormat(requiredData, 'status', 'async');
     },
     undo(){
-        if(getLog.undoCounter > 2){
+        if(getLog.undoCounter > 2 ){
             console.log('undo는 최대 3회 할 수 있습니다.');
             return;
         }
-        getLog.increaseUndoLogCounter();
-        let lastData = getLog.todoslog.pop();
-        console.log(lastData);
-        if(lastData.active === 'add'){
-            this.remove({id : lastData.id}, 'undo');
-        }
-        if(lastData.active === 'remove'){
-            this.add({name : lastData.name, tag : lastData.tag}, lastData.id, 'undo');
-        }
-        if(lastData.active === 'update'){
-            this.update({id : lastData.id, nextstatus : lastData.prevStatus}, 'undo');
-        }
-    },
-    redo(){
-        if(getLog.undoCounter < 1){
-            console.log('undo가 한 번도 실행되지 않았습니다.');
+        if(getLog.todosCounter === 0){
+            console.log('undo를 할 수 있는 실행과정이 없습니다.');
             return;
         }
-        getLog.decreaseUndoLogCounter();
+        let lastData = getLog.todosLog.pop();
+        (lastData.active === 'add')   ?
+            this.remove({id : lastData.id}, 'undo'):
+        (lastData.active === 'remove')?
+            this.add({name : lastData.name, tag : lastData.tag}, lastData.id, 'undo'):
+        (lastData.active === 'update')?
+            this.update({id : lastData.id, nextstatus : lastData.prevStatus}, 'undo'): '';
+        getLog.decreaseTodosLogCounter();
+    },
+    redo(){
+        if(getLog.undoCounter === 0){
+            console.log('실행된 undo가 없습니다.');
+            return;
+        }
         let lastData = getLog.undoLog.pop();
 
-        if(lastData.active === 'add'){
-            this.remove({id : lastData.id});
-        }
-        if(lastData.active === 'remove'){
-            this.add({name : lastData.name, tag : lastData.tag}, lastData.id);
-        }
-        if(lastData.active === 'update'){
-            this.update({id : lastData.id, nextstatus : lastData.prevStatus});
-        }
+        (lastData.active === 'add')   ?
+            this.remove({id : lastData.id}, 'redo'):
+        (lastData.active === 'remove')?
+            this.add({name : lastData.name, tag : lastData.tag}, lastData.id, 'redo'):
+        (lastData.active === 'update')?
+            this.update({id : lastData.id, nextstatus : lastData.prevStatus}, 'redo'): '';
+        getLog.decreaseUndoLogCounter();
+        getLog.decreaseRedoLogCounter();
     },  
+    
 };
 
 const errorCheck = {
-    isAddError(name, key){
+    isAddError(name, key, undo){
         let error_check = [];
         error_check = todosList.todos.filter((v) => v[key] === name);
-        return this.getErrorMessage('add', error_check.pop());
+        return this.getErrorMessage(['add', error_check.pop()], undo);
     },
-    isUpdateError(prevData, nextStatus, id){
+    isUpdateError(prevData, nextStatus, id, undo){
         let error_check;
         if(prevData.status === nextStatus){
             error_check = 'same';
@@ -165,9 +130,9 @@ const errorCheck = {
         if(prevData.status === 'todo' && nextStatus === 'done'){
             error_check = 'jump';
         }
-        return this.getErrorMessage('update', error_check, id, prevData, nextStatus);
+        return this.getErrorMessage(['update', error_check, id, prevData, nextStatus], undo);
     },
-    isSameId(active, id){
+    isSameId(active, id, undo){
         let error_check = false;
         let sameId = [];
         if(active === 'remove' || active === 'update'){
@@ -176,21 +141,21 @@ const errorCheck = {
         if(!sameId){
             error_check = true;
         }
-        return this.getErrorMessage('remove', error_check, id);
+        return this.getErrorMessage(['remove', error_check, id], undo);
     },
-    getErrorMessage(active, error_check, id, prevData, nextStatus){
-        
+    getErrorMessage([active, error_check, id, prevData, nextStatus], undo){
+
         let error = '';
         if(active === 'add' && error_check){ 
-            error = '[error] todo에는 이미 같은 이름의 task가 존재합니다. ';
+            error = `${(!!undo)? '[redoError]': '[error]'} todo에는 이미 같은 이름의 task가 존재합니다. `;
         }
         if(active === 'remove' && error_check|| active === 'update' && error_check){
-            error = `[error] ${id} 아이디는 존재하지 않습니다.`;
+            error = `${(!!undo)? '[redoError]': '[error]'} ${id} 아이디는 존재하지 않습니다.`;
         }
         if(active === 'update'){
-            error = (error_check === 'same')? `[error] ${id}번은 이미 ${nextStatus}입니다.`:
-                    (error_check === 'reverse')? `[error] ${prevData.status} 상태에서 ${nextStatus}상태로 갈 수 없습니다. `:
-                    (error_check === 'jump')? `[error] ${prevData.status}상태에서 바로 ${nextStatus}를 실행할 수 없습니다.`:'';
+            error = (error_check === 'same')? `${(!!undo)? '[redoError]': '[error]'} ${id}번은 이미 ${nextStatus}입니다. `:
+                    (error_check === 'reverse')? `${(!!undo)? '[redoError]': '[error]'} ${prevData.status} 상태에서 ${nextStatus}상태로 갈 수 없습니다.`:
+                    (error_check === 'jump')? `${(!!undo)? '[redoError]': '[error]'} ${prevData.status}상태에서 바로 ${nextStatus}를 실행할 수 없습니다.`:'';
         }
         return error;
     },
@@ -335,16 +300,38 @@ const getData = {
                            (obj.value === 'done') ? `지금부터 ${obj.sec/1000}초뒤에 ${obj.value}내역을 출력합니다.....`: '';
         }
         todoMessage.showAsyncMessage(noticeArr);
+    },
+    getLogObject([active, id, name, tag, prevStatus, nextStatus], undo){
+        if(undo === 'undo'){
+            getLog.undoLogList({
+                active,
+                id,
+                name,
+                tag,
+                prevStatus,
+                nextStatus,
+            });
+        } else {
+            getLog.makeLogList({
+                active,
+                id,
+                name,
+                tag,
+                prevStatus,
+                nextStatus,
+            });
+        }
     }
 }
 
 const getLog  = {
+    todosCounter : 0,
     undoCounter : 0,
     redoCounter : 0,
-    todoslog : [],
+    todosLog : [],
     undoLog  : [],
     makeLogList({active, id, name, tag,status, prevStatus, nextStatus}){
-        this.todoslog.push({
+        this.todosLog.push({
             active,
             id,
             name,
@@ -353,6 +340,7 @@ const getLog  = {
             prevStatus,
             nextStatus
         })
+        this.todosCounter++;
     },
     undoLogList({active, id, name, tag,status, prevStatus, nextStatus}){
         this.undoLog.push({
@@ -364,12 +352,20 @@ const getLog  = {
             prevStatus,
             nextStatus
         })
+        this.undoCounter++;
+        this.redoCounter++;
+    },
+    decreaseTodosLogCounter(){
+        this.todosCounter--;
     },
     increaseUndoLogCounter(){
         this.undoCounter++;
     },
     decreaseUndoLogCounter(){
         this.undoCounter--;
+    },
+    decreaseRedoLogCounter(){
+        this.redoCounter--;
     },
 }
 
@@ -382,47 +378,43 @@ const stopWatch = {
     }
 }
 
-todosList.add({name: "자바스크립트", tag:"study"});
+
+// undo &b redo test
+console.log("-undo, redo 기본 사용");
+console.log();
 todosList.add({name: "자바스크립트 공부하기", tag:"study"});
-todosList.add({name: "ios 공부하기", tag:"programming"});
-// todosList.remove({id:1});
+todosList.undo();
+todosList.redo();
+console.log();
+console.log("-1회 이상 사용시");
+console.log();
+todosList.add({name: "ios 공부하기", tag:"study"});
+todosList.undo();
+todosList.redo();
+todosList.undo();
+todosList.redo();
+console.log();
+console.log("-3회 이상 사용시 오류& undo을 실행하지 않고 redo 실행시 오류");
+console.log();
+todosList.add({name: "알고리즘 공부하기", tag:"study"});
+todosList.undo();
 todosList.undo();
 todosList.undo();
 todosList.undo();
 todosList.redo();
 todosList.redo();
 todosList.redo();
-
-// todosList.remove({id:1});
-// todosList.update({id:1,  nextstatus:"doing"});
-// todosList.undo();
-// todosList.update({id:1,  nextstatus:"done"});
-// todosList.update({id:1,  nextstatus:"doing"});
-
-// todosList.update({id:2,  nextstatus:"done"});
-// todosList.update({id:1,  nextstatus:"doing"});
-
-
-
-// todosList.add({name: "OS 공부하기", tag:"programming"});
-// todosList.update({id:1,  nextstatus:"done"});
-// todosList.remove({id:1});
-// todosList.add({name: "OS 공부하기", tag:"programming"});
-// todosList.update({id:3,  nextstatus:"doing"});
-// todosList.update({id:4,  nextstatus:"done"});
-// todosList.add({name: "여행가기", tag:"play"});
-// todosList.add({name: "OS", tag:"programming"});
-// todosList.update({id:3,  nextstatus:"done"});
-// todosList.add({name: "ios", tag:"programming"});
+todosList.redo();
+console.log();
+console.log("-undo의 데이터 변경으로 인한 redo 실행오류: [undoError]를 오류 메세지 앞에 붙여 명시적으로 redo 오류임을 나타냄.");
+console.log();
+todosList.update({id:1,  nextstatus:"doing"});
+todosList.undo();
+todosList.remove({id:1});
+todosList.redo();
 
 
 // todosList.showTag("programming");
 // todosList.showTags();
 // todosList.show('todo');
 // todosList.showAll();
-
-
-// 잘못된 입력을 분석해서 에러메시지를 출력해서 올바른 값을 사용할 수 있게 돕는다.
-// 실행한 값을 되돌려주는 undo/redo를 지원한다.
-// undo/redo는 3단계까지 지원한다. (undo -> undo -> undo -> redo -> redo -> redo)
-// 객체를 역할별로 추가해서 만들고, 객체간의 협력을 하도록 구현한다.
