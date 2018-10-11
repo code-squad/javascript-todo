@@ -68,82 +68,32 @@ const todo = {
     },//인자로 입력받은 상태의 정보들을 출력해주는 함수
     
     showTag(tag) {
-        const todoNum = this.getSameTagAndStatusNum(tag, 'todo')
+        const todoNum = showTagFunc.getSameTagAndStatusNum(tag, 'todo', this.task)
         console.log(`[todo, 총 ${todoNum}개]`)
-        this.printByTag(tag, 'todo');
-        const doingNum = this.getSameTagAndStatusNum(tag, 'doing')
+        showTagFunc.printByTag(tag, 'todo', this.task);
+        const doingNum = showTagFunc.getSameTagAndStatusNum(tag, 'doing', this.task)
         console.log(`[doing, 총 ${doingNum}개]`)
-        this.printByTag(tag, 'doing');
-        const doneNum = this.getSameTagAndStatusNum(tag, 'done')
+        showTagFunc.printByTag(tag, 'doing', this.task);
+        const doneNum = showTagFunc.getSameTagAndStatusNum(tag, 'done', this.task)
         console.log(`[done, 총 ${doneNum}개]`)
-        this.printByTag(tag, 'done');
-    },//수정필요, 여기에 showTags기능까지 넣어볼 것.//함수는 한가지의 일만 하는게 맞는듯
-    
-    printByTag(tag, status) {
-        this.task.forEach(taskObj => {
-            if (taskObj.tag === tag && taskObj.status === status) {
-                if (status === 'done') {
-                    console.log(`ID : ${taskObj.id}, ${taskObj.name}, ${taskObj.timeData}`)
-                    return;
-                }
-                console.log(`ID : ${taskObj.id}, ${taskObj.name}`)
-            }
-        })
-    },//tag의 값과 상태의 값을 인자로 받아 출력해주는 함수
-
-    getSameTagAndStatusNum(tag, status) {
-        let sameTagAndStatusNum = 0
-        this.task.forEach(taskObj => {
-            if (taskObj.tag === tag && taskObj.status === status) {
-                sameTagAndStatusNum++
-            }
-        })
-        return sameTagAndStatusNum
-    },//태그와 상태가 같은 것들의 개수를 세어주는 함수
+        showTagFunc.printByTag(tag, 'done', this.task);
+    },//수정필요,//함수는 한가지의 일만 하도록
 
     showTags() {
         const taggedTask = this.task.filter(obj => {
             return obj.tag !== undefined
         })
-        const sameTagArrays = this.getTagArrays(taggedTask);
+        const sameTagArrays = showTagsFunc.getTagArrays(taggedTask);
         sameTagArrays.forEach(tag => {
-            const sameTagNum = this.getSameTagNum(tag, taggedTask)
-            this.printSameTag(tag, taggedTask)
+            const sameTagNum = showTagsFunc.getSameTagNum(tag, taggedTask)
+            showTagsFunc.printSameTag(tag, taggedTask, sameTagNum)
         })
     },//태그에 따라 모든 값을 출력해주는 함수
 
-    getTagArrays(taggedTask) {
-        const sameTagArrays = [];
-        taggedTask.forEach(taggedTaskObj => {
-            if (!sameTagArrays.includes(taggedTaskObj.tag)) {
-                sameTagArrays.push(taggedTaskObj.tag)
-            }
-        })
-        return sameTagArrays
-    },//현재 task배열 내에있는 모든 tag값들을 중복 없이 따로 모아놓는 배열을 만드는 함수
-
-    printSameTag(tag, taggedTask) {
-        console.log(`${tag}, 총 ${sameTagNum}개`)
-        taggedTask.forEach(taggedTaskObj => {
-            if (tag === taggedTaskObj.tag) {
-                console.log(`ID : ${taggedTaskObj.id}, ${taggedTaskObj.name}, [${taggedTaskObj.status}]`)
-            }
-        })
-    },//tag의 값에 따라서 출력해주는 함수
-
-    getSameTagNum(tag, taggedTask) {
-        sameTagNum = 0
-        taggedTask.forEach(taggedTaskObj => {
-            if (tag === taggedTaskObj.tag) {
-                sameTagNum++
-            }
-        })
-        return sameTagNum
-    },//같은 태그의 개수를 세어주는 함수
-
+    
     showAll(status) {
         if (status === undefined) {
-            this.getStatusNum(this.task);
+            commonFunc.getStatusNum(this.task);
             console.log(`총 ${this.task.length}개의 리스트를 가져왔습니다.`);
             this.showAll('todo')
             return;
@@ -170,11 +120,11 @@ const todo = {
 
 
 const addFunc = {
-    getRanNum(task) {
+    getRanNum(todoTask) {
         const ranNum = Math.floor(Math.random() * 100)
-        const idArrays = task.map(obj => obj.id)
+        const idArrays = todoTask.map(obj => obj.id)
         if (idArrays.includes(ranNum)) {
-            return this.getRanNum()
+            return this.getRanNum(todoTask)
         }
         return ranNum;
     },//중복되지 않는 랜덤한 숫자를뽑아내는 함수
@@ -190,7 +140,7 @@ const updateFunc = {
         }
         
     },
-
+    
     updateDoingTime(objToUpdate, todoTask) {
         todoTask.forEach(taskObj => {
             if (taskObj.id === objToUpdate.id) {
@@ -225,13 +175,60 @@ const updateFunc = {
 }//update메서드 내에 들어가는 메서드 들을 따로 모아서 처리
 
 
-const showTagfunc = {
-    initedTask: [],
+const showTagFunc = {
+    printByTag(tag, status, todoTask) {
+        todoTask.forEach(taskObj => {
+            if (taskObj.tag === tag && taskObj.status === status) {
+                if (status === 'done') {
+                    console.log(`ID : ${taskObj.id}, ${taskObj.name}, ${taskObj.timeData}`)
+                    return;
+                }
+                console.log(`ID : ${taskObj.id}, ${taskObj.name}`)
+            }
+        })
+    },//tag의 값과 상태의 값을 인자로 받아 출력해주는 함수
+    
+    getSameTagAndStatusNum(tag, status, todoTask) {
+        let sameTagAndStatusNum = 0
+        todoTask.forEach(taskObj => {
+            if (taskObj.tag === tag && taskObj.status === status) {
+                sameTagAndStatusNum++
+            }
+        })
+        return sameTagAndStatusNum
+    },//태그와 상태가 같은 것들의 개수를 세어주는 함수
 }//showTagfunc메서드 내에 들어가는 메서드들을 따로 모아서 처리
 
 
-const showTagsfunc = {
-    initedTask: [],
+const showTagsFunc = {
+    getTagArrays(taggedTask) {
+        const sameTagArrays = [];
+        taggedTask.forEach(taggedTaskObj => {
+            if (!sameTagArrays.includes(taggedTaskObj.tag)) {
+                sameTagArrays.push(taggedTaskObj.tag)
+            }
+        })
+        return sameTagArrays
+    },//현재 task배열 내에있는 모든 tag값들을 중복 없이 따로 모아놓는 배열을 만드는 함수
+    
+    printSameTag(tag, taggedTask, sameTagNum) {
+        console.log(`${tag}, 총 ${sameTagNum}개`)
+        taggedTask.forEach(taggedTaskObj => {
+            if (tag === taggedTaskObj.tag) {
+                console.log(`ID : ${taggedTaskObj.id}, ${taggedTaskObj.name}, [${taggedTaskObj.status}]`)
+            }
+        })
+    },//tag의 값에 따라서 출력해주는 함수
+    
+    getSameTagNum(tag, taggedTask) {
+        sameTagNum = 0
+        taggedTask.forEach(taggedTaskObj => {
+            if (tag === taggedTaskObj.tag) {
+                sameTagNum++
+            }
+        })
+        return sameTagNum
+    },//같은 태그의 개수를 세어주는 함수
 }//showTagsfunc메서드 내에 들어가는 메서드들을 따로 모아서 처리
 
 
@@ -293,13 +290,6 @@ todo.add({ name: '회식', tag: '회사' });
 todo.add({ name: '노래연습', tag: '자기개발' });
 todo.add({ name: '과장님업무', tag: '회사' })
 // 쓰는 기능
-todo.add();
-todo.remove();
-todo.update();
-todo.showTag();
-todo.showTags();
-todo.show();
-todo.showAll();
 // todo.update({ id: 3, nextstatus: 'doing' })
 // todo.update({ id: 3, nextstatus: 'done' })
 // todo.update({ id: 2, nextstatus: 'done' })
