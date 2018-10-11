@@ -1,6 +1,6 @@
 //스켈레톤 코드로 한번 짜보자
-//this.statusNum = {}구현하기
-//showall()메서드 재귀호출로 구현하기
+//this.statusNum = {}구현하기v
+//showall()메서드 재귀호출로 구현하기v
 
 //아니면 step3에서 구현하는 에러메세지만 모아두는 객체를 만들까? ooo
 //undo redo기능은 어떻게 구현할까?
