@@ -131,7 +131,7 @@ const todo = {
 
     showAll() {
         const [todo, doing, done] = this.findStatus(this.taskList);
-        console.log(`총 ${todo + doing + done}개의 리스트를 가져왔습니다. 2초 뒤에 todo 내역을 출력합니다...`);
+        console.log(`총 ${todo+doing+done}개의 리스트를 가져왔습니다. 2초 뒤에 todo 내역을 출력합니다...`);
         let todoTasks = [];
         let doingTasks = [];
         let doneTasks = [];
@@ -161,7 +161,8 @@ const todo = {
         setTimeout(function () {
             console.log(`[done, 총 ${done}개]`)
             doneTasks.forEach(function (task) {
-                console.log(`- ${task.id}번, ${task.name}, [${task.tag}], ${task.takenTime}`);
+                console.log(`- ${task.id}번, ${task.name}, [${task.tag}], ${task.takenTime}]
+                `);
             })
         }, 7000);
     }
@@ -190,6 +191,7 @@ const todo = {
     //     }
     // }
 }
+
 
 //test
 todo.add({
