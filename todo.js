@@ -2,19 +2,15 @@ const todosList = {
     todos : [],
     id : 1,
     add({name, tag}, id, undo){
-        let error = errorCheck.isAddError(name, 'name', undo), 
-            lastData;
-        if(error){
-            console.log(error);
-            return;
-        }
+        let error = errorCheck.isAddError(name, 'name', undo), lastData;
+        if(error){ console.log(error); return;}
         this.todos.push({
             name: name,
             tag: tag,
             id: id || this.id,
             status : 'todo'
         });
-        
+
         lastData = this.todos.slice(-1).pop();
         todoMessage.showActiveMessage(['add', lastData.id, name]);
         
@@ -22,43 +18,43 @@ const todosList = {
         getData.getLogObject(['add', lastData.id, , lastData.tag, , ], 'undo'): 
         getData.getLogObject(['add', lastData.id, , lastData.tag, , ]);
         
-        this.id++;
+        if(!id){this.id++};
     },
     remove({id}, undo){
-        let prev_data = getData.getPrevData(id),
+        let prevData = getData.getPrevData(id),
             error = errorCheck.isSameId('remove', id, undo);
-        if(error){
-            console.log(error);
-            return;
-        }
+        if(error){ console.log(error); return; }
 
         this.todos = this.todos.filter((target)=>target.id !== id);
-        todoMessage.showActiveMessage(['remove' ,id , prev_data.name, prev_data.status], undo);
-        
+
+        todoMessage.showActiveMessage(['remove' ,id , prevData.name, prevData.status], undo);
         (undo === 'undo')?
-        getData.getLogObject(['remove', id, prev_data.name, prev_data.tag, , ], 'undo'):
-        getData.getLogObject(['remove', id, prev_data.name, prev_data.tag, , ]);
+        getData.getLogObject(['remove', id, prevData.name, prevData.tag, , ], 'undo'):
+        getData.getLogObject(['remove', id, prevData.name, prevData.tag, , ]);
     },
-    update({id,  nextstatus}, undo){
-        let prev_data = getData.getPrevData(id),
-            error = errorCheck.isUpdateError(prev_data, nextstatus, id, undo) || errorCheck.isSameId('update', id, undo);
-            nextstatus = nextstatus.toLowerCase();
-        if(error){
-            console.log(error);
-            return;
+    update({id,  nextStatus}, undo){
+        if(typeof(Object.values(arguments)[0]) === 'string'){
+            parseArr = getData.getStringCheck(arguments);
+            id = +parseArr[0]; nextStatus = parseArr[1];
         }
-        for(let o of this.todos){
-            if(o.id === id) {
-                if(nextstatus === 'doing'){ o.startTime = stopWatch.start(); }
-                if(nextstatus === 'done' && o.startTime){ o.elapsedTime = stopWatch.stop(o.startTime); }
-                o.status = nextstatus;
-            }
-        };
-        todoMessage.showActiveMessage(['update' ,id ,prev_data.name, prev_data.status, nextstatus]);
+        let prevData = getData.getPrevData(id),
+            error = errorCheck.isUpdateError(prevData, nextStatus, id, undo) || errorCheck.isSameId('update', id, undo);
+            nextStatus = nextStatus.toLowerCase();
+        
+        if(error){ console.log(error); return; }
+
+        this.todos.filter((v)=> v.id === id)
+                  .forEach((v)=>{
+                    if(nextStatus === 'doing'){ v.startTime = stopWatch.start(); }
+                    if(nextStatus === 'done' && v.startTime){ v.elapsedTime = stopWatch.stop(v.startTime); }
+                    v.status = nextStatus;      
+                  });
+
+        todoMessage.showActiveMessage(['update' ,id ,prevData.name, prevData.status, nextStatus]);
         
         (undo === 'undo')?
-        getData.getLogObject(['update', id, prev_data.name, prev_data.tag, prev_data.status, nextstatus], 'undo'):
-        getData.getLogObject(['update', id, prev_data.name, prev_data.tag, prev_data.status, nextstatus]);
+        getData.getLogObject(['update', id, prevData.name, prevData.tag, prevData.status, nextStatus], 'undo'):
+        getData.getLogObject(['update', id, prevData.name, prevData.tag, prevData.status, nextStatus]);
     },
     showTag(tagName){
         let requiredData = getData.getRequiredData(this.todos, 'tag', tagName);
@@ -77,38 +73,21 @@ const todosList = {
         getData.getPrintFormat(requiredData, 'status', 'async');
     },
     undo(){
-        if(getLog.undoCounter > 2 ){
-            console.log('undo는 최대 3회 할 수 있습니다.');
-            return;
-        }
-        if(getLog.todosCounter === 0){
-            console.log('undo를 할 수 있는 실행과정이 없습니다.');
-            return;
-        }
-        let lastData = getLog.todosLog.pop();
-        (lastData.active === 'add')   ?
-            this.remove({id : lastData.id}, 'undo'):
-        (lastData.active === 'remove')?
-            this.add({name : lastData.name, tag : lastData.tag}, lastData.id, 'undo'):
-        (lastData.active === 'update')?
-            this.update({id : lastData.id, nextstatus : lastData.prevStatus}, 'undo'): '';
-        getLog.decreaseTodosLogCounter();
+        let error = errorCheck.getProcessingError('undo');
+        if(!!error){ console.log(error); return; }
+        
+        let lastData = log.todosLog.pop();
+        getData.getProcessingData(lastData, 'undo');
+        log.decreaseTodosLogCounter();
     },
     redo(){
-        if(getLog.undoCounter === 0){
-            console.log('실행된 undo가 없습니다.');
-            return;
-        }
-        let lastData = getLog.undoLog.pop();
+        let error = errorCheck.getProcessingError('redo');
+        if(!!error){ console.log(error); return; }
 
-        (lastData.active === 'add')   ?
-            this.remove({id : lastData.id}, 'redo'):
-        (lastData.active === 'remove')?
-            this.add({name : lastData.name, tag : lastData.tag}, lastData.id, 'redo'):
-        (lastData.active === 'update')?
-            this.update({id : lastData.id, nextstatus : lastData.prevStatus}, 'redo'): '';
-        getLog.decreaseUndoLogCounter();
-        getLog.decreaseRedoLogCounter();
+        let lastData = log.undoLog.pop();
+        getData.getProcessingData(lastData, 'redo');
+        log.decreaseUndoLogCounter();
+        log.decreaseRedoLogCounter();
     },  
     
 };
@@ -142,6 +121,20 @@ const errorCheck = {
             error_check = true;
         }
         return this.getErrorMessage(['remove', error_check, id], undo);
+    },
+    getProcessingError(processingType){
+        if(processingType === 'undo'){
+            if(log.undoCounter > 2 ){
+                return 'undo는 최대 3회 할 수 있습니다.';
+            }
+            if(log.todosCounter === 0){
+                return 'undo를 할 수 있는 실행과정이 없습니다.';
+            }
+        } else if(processingType === 'redo') {
+            if(log.undoCounter === 0){
+                return '실행된 undo가 없습니다.';
+            }
+        }
     },
     getErrorMessage([active, error_check, id, prevData, nextStatus], undo){
 
@@ -180,7 +173,7 @@ const todoMessage = {
         }
     },
     showAsyncMessage(noticeArr, index=0){
-            (function playLoop() {
+        (function playLoop() {
             if(index > 2) return;
             console.log(noticeArr[index].notice);
             setTimeout(function() {
@@ -195,33 +188,20 @@ const todoMessage = {
 
 const getData = {
     getPrevData(id){
-        let prev_data = {
+        let prevData = {
             name: '', 
             id: 0
         };
-        for(let o of todosList.todos){
-            if(o.id === id){
-                prev_data.name = o.name;
-                prev_data.status = o.status;
-                prev_data.id = o.id;
-            }
-        };
+       todosList.todos
+                .filter((v) => v.id === id)
+                .forEach((v)=> {
+                    prevData.name = v.name;
+                    prevData.status = v.status;
+                    prevData.id = v.id;
+                    prevData.tag = v.tag;
+                })
         
-        return prev_data;
-    },
-    getCurrentData(id){
-        let prev_data = {
-            name: '', 
-            id: 0
-        };
-        for(let o of todosList.todos){
-            if(o.id === id){
-                prev_data.name = o.name;
-                prev_data.status = o.status;
-                prev_data.id = o.id;
-            }
-        };
-        return prev_data;
+        return prevData;
     },
     getCurrentStatus(data, valueType){
         const countObj =  getData.getDefaultData(todosList.todos, valueType);
@@ -240,9 +220,7 @@ const getData = {
     getRequiredData(data, kind, value){
         let requiredData = [];
         let fixedData = (value)? data.filter((v) => v[kind] === value) : data;
-        fixedData.forEach((v) => {
-            requiredData.push(v);
-        })
+        fixedData.forEach((v) => { requiredData.push(v); })
         return requiredData;
     },
     getPrintList(inputData, key ,requiredValueObj){
@@ -260,11 +238,11 @@ const getData = {
             requiredValueObj[value] = '';
         }
         requiredValueObj = this.getPrintList(inputData, key, requiredValueObj)
-        if(asyncCheck){this.getAsyncData(requiredValueObj, countObj, inputData)}
-        else{todoMessage.showMessage(requiredValueObj, countObj)}
+        if(asyncCheck) {this.getAsyncData(requiredValueObj, countObj, inputData)}
+        else { todoMessage.showMessage(requiredValueObj, countObj) };
     },
     getAsyncData(requiredValueObj, countObj){
-        let numOfData = this.getCounter();
+        let numOfData = this.getCounter(countObj);
         let noticeArr = []
         for(let value in requiredValueObj){
             noticeArr.push({
@@ -303,28 +281,34 @@ const getData = {
     },
     getLogObject([active, id, name, tag, prevStatus, nextStatus], undo){
         if(undo === 'undo'){
-            getLog.undoLogList({
-                active,
-                id,
-                name,
-                tag,
-                prevStatus,
-                nextStatus,
+            log.undoLogList({
+                active, id, name, tag, prevStatus, nextStatus,
             });
         } else {
-            getLog.makeLogList({
-                active,
-                id,
-                name,
-                tag,
-                prevStatus,
-                nextStatus,
+            log.makeLogList({
+                active, id, name, tag, prevStatus, nextStatus,
             });
         }
+    },
+    getProcessingData(lastData, undo){
+        (lastData.active === 'add')   ?
+            todosList.remove({id : lastData.id}, undo):
+        (lastData.active === 'remove')?
+            todosList.add({name : lastData.name, tag : lastData.tag}, lastData.id, undo):
+        (lastData.active === 'update')?
+            todosList.update({id : lastData.id, nextStatus : lastData.prevStatus}, undo): '';
+    },
+    getStringCheck(arg){
+        if(typeof(Object.values(arg)[0]) === 'string'){
+            let str = Object.values(arg)[0];
+                arr = str.replace(/\s/g,'')
+                         .split("$");
+        }
+        return arr;
     }
 }
 
-const getLog  = {
+const log  = {
     todosCounter : 0,
     undoCounter : 0,
     redoCounter : 0,
@@ -332,25 +316,13 @@ const getLog  = {
     undoLog  : [],
     makeLogList({active, id, name, tag,status, prevStatus, nextStatus}){
         this.todosLog.push({
-            active,
-            id,
-            name,
-            status,
-            tag,
-            prevStatus,
-            nextStatus
+            active, id, name, status, tag, prevStatus, nextStatus
         })
         this.todosCounter++;
     },
     undoLogList({active, id, name, tag,status, prevStatus, nextStatus}){
         this.undoLog.push({
-            active,
-            id,
-            name,
-            status,
-            tag,
-            prevStatus,
-            nextStatus
+            active, id, name, status, tag, prevStatus, nextStatus
         })
         this.undoCounter++;
         this.redoCounter++;
@@ -380,41 +352,70 @@ const stopWatch = {
 
 
 // undo &b redo test
-console.log("-undo, redo 기본 사용");
+console.log("- undo, redo 기본 사용");
 console.log();
-todosList.add({name: "자바스크립트 공부하기", tag:"study"});
+todosList.add({name: "자바스크립트 공부하기", tag:"programming"});
 todosList.undo();
 todosList.redo();
 console.log();
-console.log("-1회 이상 사용시");
+console.log("- 1회 이상 사용시");
 console.log();
-todosList.add({name: "ios 공부하기", tag:"study"});
+todosList.add({name: "ios 공부하기", tag:"programming"});
 todosList.undo();
 todosList.redo();
 todosList.undo();
-todosList.redo();
-console.log();
-console.log("-3회 이상 사용시 오류& undo을 실행하지 않고 redo 실행시 오류");
-console.log();
-todosList.add({name: "알고리즘 공부하기", tag:"study"});
-todosList.undo();
-todosList.undo();
-todosList.undo();
-todosList.undo();
-todosList.redo();
-todosList.redo();
-todosList.redo();
 todosList.redo();
 console.log();
-console.log("-undo의 데이터 변경으로 인한 redo 실행오류: [undoError]를 오류 메세지 앞에 붙여 명시적으로 redo 오류임을 나타냄.");
+console.log("- update 파라미터로 문자열을 넣었을 시");
 console.log();
-todosList.update({id:1,  nextstatus:"doing"});
+todosList.update("2$doing");
+
+console.log();
+console.log("- 3회 이상 사용시 오류& undo을 실행하지 않고 redo 실행시 오류");
+console.log();
+todosList.add({name: "알고리즘 공부하기", tag:"programming"});
+todosList.undo();
+todosList.undo();
+todosList.undo();
+todosList.undo();
+todosList.redo();
+todosList.redo();
+todosList.redo();
+todosList.redo();
+console.log();
+console.log("- undo의 데이터 변경으로 인한 redo 실행오류: [undoError]를 오류 메세지 앞에 붙여 명시적으로 redo 오류임을 나타냄.");
+console.log();
+todosList.update({id:1,  nextStatus:"doing"});
 todosList.undo();
 todosList.remove({id:1});
 todosList.redo();
+console.log();
+console.log();
+todosList.add({name: "영어 공부하기", tag:"study"});
+todosList.add({name: "점심 먹기", tag:"eat"});
+todosList.add({name: "영어 공부하기", tag:"study"});
+todosList.add({name: "저녁 먹기", tag:"eat"});
+console.log();
+console.log();
+todosList.update({id:2,  nextStatus:"doing"});
+todosList.undo();
+todosList.redo();
+todosList.update({id:2,  nextStatus:"done"});
+todosList.update({id:4,  nextStatus:"doing"});
 
-
-// todosList.showTag("programming");
-// todosList.showTags();
-// todosList.show('todo');
-// todosList.showAll();
+console.log();
+console.log("- tag에 따른 결과값");
+console.log();
+todosList.showTag("study");
+console.log();
+console.log("- 모든 data tag에 따라 출력");
+console.log();
+todosList.showTags();
+console.log();
+console.log("- status 상태에 따른 리스트 출력");
+console.log();
+todosList.show('done');
+console.log();
+console.log("- 데이터 비동기 출력");
+console.log();
+todosList.showAll();
