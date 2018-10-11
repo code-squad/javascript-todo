@@ -26,11 +26,12 @@ const todo = {
     
     update(objToUpdate) {
         let beforeTaskStatus = []
-        updateFunc.checkUpdateStatus(objToUpdate);
+        this.task = updateFunc.checkUpdateStatus(objToUpdate, this.task);
         this.task = this.task.map(taskObj => {
             if (objToUpdate.id === taskObj.id) {
                 beforeTaskStatus.push(taskObj.status)
                 taskObj.status = objToUpdate.nextstatus.toLowerCase();
+                // changedTask.push(taskObj)실험대상
                 return taskObj
             }
             return taskObj
@@ -40,10 +41,10 @@ const todo = {
                 return taskObj
             }
         })
-        this.getStatusNum(this.task)
-        this.printChangeThing(changedTask[0], this.task.length, beforeTaskStatus[0])
-        this.printStatusNum()
-    },//상태 업데이트 함수//주어진 정보의 시간을 넣을 수 있도록 수정 요망
+        commonFunc.getStatusNum(this.task)
+        commonFunc.printChangeThing(changedTask[0], this.task.length, this.task.length, beforeTaskStatus[0])
+        commonFunc.printStatusNum()
+    },//상태 업데이트 함수
     
 
     remove(objToRemove) {
@@ -51,7 +52,8 @@ const todo = {
         let filteredTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
         let removedTask = this.task.filter(taskObj => taskObj.id !== objToRemove.id)
         this.task = removedTask
-        this.printChangeThing(filteredTask[0], notRemovedLength)
+        const removedLength = this.task.length
+        commonFunc.printChangeThing(filteredTask[0], removedLength, notRemovedLength)
     },//할 일과 id값을 제거해주는 함수
     
     show(status) {
@@ -166,6 +168,7 @@ const todo = {
     },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수, 재귀적으로 표현해볼것.
 }//해야 할일 객체
 
+
 const addFunc = {
     getRanNum(task) {
         const ranNum = Math.floor(Math.random() * 100)
@@ -177,13 +180,15 @@ const addFunc = {
     },//중복되지 않는 랜덤한 숫자를뽑아내는 함수
 };//add메서드 내에 들어가는 메서드들을 따로 모아서 처리하는 객체.
 
+
 const updateFunc = {
-    checkUpdateStatus(objToUpdate) {
+    checkUpdateStatus(objToUpdate, todoTask) {
         if(objToUpdate.nextstatus === 'doing') {
-            this.updateDoingTime(objToUpdate, this.task)
+            return this.updateDoingTime(objToUpdate, todoTask)
         } else if (objToUpdate.nextStatus === 'done') {
-            this.updateTakeTime(objToUpdate, this.task)
+            return this.updateTakeTime(objToUpdate, todoTask)
         }
+        
     },
 
     updateDoingTime(objToUpdate, todoTask) {
@@ -192,6 +197,7 @@ const updateFunc = {
                 taskObj.timeData = Date.now();
             }
         })
+        return todoTask
     },//업데이트할 객체를 인자로 받아 task내의 timeData값을 변경.
     
     updateTakeTime(objToUpdate, todoTask) {
@@ -200,6 +206,7 @@ const updateFunc = {
                 taskObj.timeData = this.getTakeTime(taskObj.timeData, Date.now())
             }
         })
+        return todoTask
     },//업데이트할 객체를 인자로 받아 task내의 timeData의 값을 걸린 시간으로 변경.
     
     getTakeTime(doingTime, currentTime) {
@@ -217,13 +224,16 @@ const updateFunc = {
     },//걸린 시간을 계산해주는 함수
 }//update메서드 내에 들어가는 메서드 들을 따로 모아서 처리
 
+
 const showTagfunc = {
     initedTask: [],
 }//showTagfunc메서드 내에 들어가는 메서드들을 따로 모아서 처리
 
+
 const showTagsfunc = {
     initedTask: [],
 }//showTagsfunc메서드 내에 들어가는 메서드들을 따로 모아서 처리
+
 
 const commonFunc = {
     statusNum: {
@@ -258,7 +268,8 @@ const commonFunc = {
             console.log(`ID: ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 업데이트 되었습니다.`)
         }
     },//할일이 추가되거나 제거되거나 업데이트 될 때 적합한 내용을 출력해 주는 함수
-}//중복되어 사용되는 메서드들을 따로 모아서 처리
+};//todo의 메서드들이 중복적으로 사용하는 메서드들을 따로 모아서 처리
+
 
 const checkError = {
     initedTask: [],//todo.task값을 항상 최신화해서 가져온 값
