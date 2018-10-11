@@ -1,17 +1,13 @@
+// 할일관리 애플리케이션 todo의 주요 기능을 구현하는 class
 class Todo {
-  constructor(message, todoObj, error, execution) {
+  constructor(message, dataTransformation, error, undoRedoEvent) {
     this.list = [];
     this.message = message;
-    this.todoObj = todoObj;
+    this.dataTransformation = dataTransformation;
     this.error = error;
-    this.execution = execution;
+    this.undoRedoEvent = undoRedoEvent;
   }
 
-  /* 
-    add({name: 'JS 공부', tag: 'programming', deadLine: '2018/10/12 14:00', alarm: '1h'});
-    -. deadLine을 기록가능
-    -. alarm 설정 가능, '1h'는 1시간 전을 의미합니다. 
-  */
   add({ name, tag, deadLine, alarm }) {
     const bError = this.error.inCaseAdd(this.list, name);
     if (bError) return;
@@ -27,7 +23,7 @@ class Todo {
     if (alarm) this.message.setAlarm(alarm, newTask);
 
     this.list.push(newTask);
-    this.execution.pushUndoList("add", newTask);
+    this.undoRedoEvent.pushUndoList("add", newTask);
     this.message.printCommandResult(this.list, "add", newTask);
   }
 
@@ -45,7 +41,7 @@ class Todo {
     const prevStatus = targetTask.status;
     const isDoingDone = prevStatus === "doing" && nextStatus === "done";
 
-    this.execution.pushUndoList("update", targetTask, nextStatus);
+    this.undoRedoEvent.pushUndoList("update", targetTask, nextStatus);
 
     if (nextStatus === "doing") {
       targetTask.startTime = new Date(Date.now());
@@ -71,16 +67,16 @@ class Todo {
     const targetTask = this.list[targetIndex];
 
     this.list.splice(targetIndex, 1);
-    this.execution.pushUndoList("remove", targetTask);
+    this.undoRedoEvent.pushUndoList("remove", targetTask);
     this.message.printCommandResult(this.list, "remove", targetTask);
   }
 
   showTag(tag) {
-    this.message.listByTag(this.todoObj.tag(this.list, tag));
+    this.message.listByTag(this.dataTransformation.tag(this.list, tag));
   }
 
   showTags() {
-    this.message.listByAllTags(this.todoObj.tags(this.list));
+    this.message.listByAllTags(this.dataTransformation.tags(this.list));
   }
 
   show(status) {
@@ -89,7 +85,7 @@ class Todo {
 
   showAll() {
     const asynTime = [2000, 3000, 2000];
-    this.message.listByAllStatus(this.todoObj.status(this.list), this.list, asynTime);
+    this.message.listByAllStatus(this.dataTransformation.status(this.list), this.list, asynTime);
   }
 
   showDeadLine() {
@@ -97,14 +93,15 @@ class Todo {
   }
 
   undo() {
-    this.execution.undo(this.list);
+    this.undoRedoEvent.undo(this.list);
   }
 
   redo() {
-    this.execution.redo(this.list);
+    this.undoRedoEvent.redo(this.list);
   }
 }
 
+// todo객체의 show method와 관련해 출력메세지를 반환하는 class
 class Message {
   printCommandResult(todoList, command, task, prevStatus) {
     const countTodoStatus = status => todoList.filter(task => task.status === status).length;
@@ -127,33 +124,43 @@ class Message {
     Object.keys(todoByTag).forEach(status => {
       if (!todoByTag[status]) return;
       const headMsg = `[ ${status} , 총${todoByTag[status].length}개 ]\n`;
-      const resultStr = todoByTag[status].reduce((accStr, task) => accStr += `${this.getMsg(task)}\n`, headMsg);
+      const returnMsg = this.makeMsg(todoByTag[status], headMsg);
 
-      console.log(resultStr + "\n");
+      console.log(returnMsg + '\n');
     });
   }
 
   listByAllTags(todoByTags) {
     Object.keys(todoByTags).forEach(tag => {
       const headMsg = `[ ${tag} , 총${todoByTags[tag].length}개 ]\n`;
-      const resultStr = todoByTags[tag].reduce((accStr, task) => accStr += `${this.getMsg(task)}, [${task.status}]\n`, headMsg);
+      const returnMsg = this.makeMsg(todoByTags[tag], headMsg, 'tag');
 
-      console.log(resultStr + "\n");
+      console.log(returnMsg + '\n');
     });
   }
 
   listByStatus(list, status) {
     const filteredList = list.filter(task => task.status === status);
-    const resultStr = filteredList.reduce((accStr, task) => accStr += `${this.getMsg(task)}, [${task.tag}]\n`, '');
+    const headMsg = ``;
+    const returnMsg = this.makeMsg(filteredList, headMsg, 'status');
 
-    console.log(resultStr);
+    console.log(returnMsg);
   }
 
   listByDeadLine(list) {
     const filteredList = list.filter(task => task.deadLine).sort((task1, task2) => task1.deaLine - task2.deaLine);
-    const resultStr = filteredList.reduce((accStr, task) => accStr += `${this.getMsg(task)}, [${task.status}], [${task.tag}], [${this.getDate(task.deadLine)}]\n`, '');
+    const headMsg = ``;
+    const returnMsg = this.makeMsg(filteredList, headMsg);
 
-    console.log(resultStr);
+    console.log(returnMsg);
+  }
+
+  makeMsg(list, msg, condition) {
+    let returnMsg = msg;
+    for (let task of list) {
+      returnMsg += `${this.getMsg(task, condition)}`
+    }
+    return returnMsg;
   }
 
   listByAllStatus(todoByStatus, list, asynTime) {
@@ -204,9 +211,14 @@ class Message {
   }
 
 
-  getMsg(task) {
-    if (task.spentTime) return `- ${task.id}, ${task.name}, ${this.getTime(task.spentTime)}`
-    return `- ${task.id}, ${task.name}`
+  getMsg(task, condition) {
+    const idNameMsg = `- ${task.id}, ${task.name}`
+
+    if (task.spentTime) return `${idNameMsg}, ${this.getTime(task.spentTime)}`
+    else if (condition === 'tag') return `${idNameMsg}, [${task.status}]\n`
+    else if (condition === 'status') return `${idNameMsg}, [${task.tag}]\n`
+    else if (task.deadLine) return `${idNameMsg}, [${task.status}], [${task.tag}], [${this.getDate(task.deadLine)}]\n`
+    return `${idNameMsg}`;
   }
 
   getDate(date) {
@@ -238,7 +250,8 @@ class Message {
   }
 }
 
-class TodoObj {
+// 조건에 따른 data의 형태를 바꾸는 class(여기서는 배열을 객체로)
+class DataTransformation {
   tag(todoList, tag) {
     const todoObj = { todo: "", doing: "", done: "" };
     todoList
@@ -265,6 +278,7 @@ class TodoObj {
   }
 }
 
+// 사용자 입력에 의해 발생할 수 있는 여러 에러 조건을 확인하는 class
 class Error {
   inCaseAdd(list, name) {
     const bSameName = list.some(task => task.name === name);
@@ -318,7 +332,8 @@ class Error {
   }
 }
 
-class Execution {
+// undo/redo 기록 및 기능구현 class
+class UndoRedoEvent {
   constructor() {
     this.record = {
       undoList: [],
@@ -327,13 +342,13 @@ class Execution {
   }
 
   copyTargetTask(targetTask) {
-    const copyObj = {};
+    const copy = {};
     for (let key in targetTask) {
       if (targetTask.hasOwnProperty(key)) {
-        copyObj[key] = targetTask[key];
+        copy[key] = targetTask[key];
       }
     }
-    return copyObj;
+    return copy;
   }
 
   pushUndoList(methodName, task, nextStatus) {
@@ -407,7 +422,7 @@ class Execution {
 }
 
 const message = new Message();
-const todoObj = new TodoObj();
+const dataTransformation = new DataTransformation();
 const error = new Error();
-const execution = new Execution();
-const todo = new Todo(message, todoObj, error, execution);
+const undoRedoEvent = new UndoRedoEvent();
+const todo = new Todo(message, dataTransformation, error, undoRedoEvent);
