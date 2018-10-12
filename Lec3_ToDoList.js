@@ -10,19 +10,20 @@ const todo = {
     },
 
     //idAndstatus 는 객체임으로, 이름을 o로 시작하거나, ht로 시작하거나, 아니면 이름끝네 object 라는 걸 넣어주어도 좋을 듯. 헝가리안표기법이 무엇인지도 좀 봐보세요~
-    update(idAndStatus) { //설명드린대로, 하위 함수 36개로 분리해보세요!
-        idAndStatus.nextstatus = idAndStatus.nextstatus.trim().toLowerCase();
+    update(updateObj) { //설명드린대로, 하위 함수 36개로 분리해보세요!
+        const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
+        const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
         for (const values of this.taskList) {
-            if (values.id === idAndStatus.id && idAndStatus.nextstatus === 'doing') {
+            if (values.id === updateObj.id && status === 'doing') {
                 values.doingTime = new Date().getTime();
                 console.log(
                     `id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
-                values.status = idAndStatus.nextstatus;
+                values.status = updateObj.nextstatus;
                 let [todo, doing, done] = this.CountStatus(this.taskList);
                 console.log(`현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
             }
 
-            if (values.id === idAndStatus.id && idAndStatus.nextstatus === 'done') {
+            if (values.id === updateObj.id && updateObj.nextstatus === 'done') {
                 const takenTime = (new Date().getTime() - values.doingTime) / 1000;
                 const timeUnit = {minute: 60, hour: 3600, day: 86400};
                 //3600은 뭐고, 86400은 뭔지 변수에 이름을 저정해두는 건 어때요? ex. const min = 60;
@@ -38,11 +39,23 @@ const todo = {
                 delete values.doingTime;
                 console.log(
                     `id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
-                values.status = idAndStatus.nextstatus;
-                let [todo, doing, done] = this.CountStatus(this.taskList);
-                console.log(`현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
+                values.status = updateObj.nextstatus;
+                let [todoCount, doingCount, doneCount] = this.CountStatus(this.taskList);
+                console.log(`현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개`);
             }
         }
+    },
+
+
+    findTaskToUpdate(updateObj){
+        let taskToUpdate = {};
+        const statusToUpdate = updateObj.nextstatus.trim().toLowerCase();
+        for (const values of this.taskList) {
+            if(values.id === updateObj.id){
+                taskToUpdate = values;
+            }
+        }
+        return [taskToUpdate, statusToUpdate];
     },
 
     remove(id) {
@@ -218,10 +231,10 @@ todo.update({
     nextstatus: "DOING"
 });
 
-// todo.update({
-//     id: todo.taskList[0].id,
-//     nextstatus: "done"
-// });
+todo.update({
+    id: todo.taskList[0].id,
+    nextstatus: "done"
+});
 
 // // todo.remove({
 // //     id: todo.taskList[0].id,
@@ -229,7 +242,7 @@ todo.update({
 
 // todo.showTag('health');
 
-// // todo.showTags();
+// todo.showTags();
 
 // todo.show("done ")
 
