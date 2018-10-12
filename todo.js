@@ -7,6 +7,23 @@
 //아니면 step3에서 구현하는 에러메세지만 모아두는 객체를 만들까? XXX
 //undo redo기능은 어떻게 구현할까?
 //기능완성도를 위해서 동료에게 테스트 부탁하기
+const BeforeTodo = {
+    task:[],
+
+    makeBeforeTodo() {
+        return status
+    },
+
+    redoChangeThing(status) {
+        return
+    },
+
+    undoChangeThing(status) {
+
+    },
+}
+
+
 const todo = {
     task: [],
 
