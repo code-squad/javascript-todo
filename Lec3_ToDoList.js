@@ -9,8 +9,7 @@ const todo = {
 현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개 `);
     },
 
-    //idAndstatus 는 객체임으로, 이름을 o로 시작하거나, ht로 시작하거나, 아니면 이름끝네 object 라는 걸 넣어주어도 좋을 듯. 헝가리안표기법이 무엇인지도 좀 봐보세요~
-    update(updateObj) { //설명드린대로, 하위 함수 36개로 분리해보세요!
+    update(updateObj) { 
         const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
         const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
             if (statusToUpdate === 'doing') {
@@ -70,7 +69,7 @@ const todo = {
         }
     },
 
-    CountStatus(taskList) { //find 이름이 부적절~
+    CountStatus(taskList) {
         let [todo, doing, done] = [0, 0, 0];
         for (const values of taskList) {
             if (values.status === 'todo') {
@@ -87,21 +86,20 @@ const todo = {
     },
 
     findTags(taskList) {
-        let tagList = {};
+        let tagObj = {};
         for (const values of taskList) {
-            if (!tagList[values.tag]) {
-                tagList[values.tag] = 1;
-            } else if (tagList[values.tag])
-                tagList[values.tag] += 1;
+            if (!tagObj[values.tag]) {
+                tagObj[values.tag] = 1;
+            } else if (tagObj[values.tag])
+                tagObj[values.tag] += 1;
         }
-        return tagList;
+        return tagObj;
     },
 
     showTag(tag) {
         const result = this.taskList.filter(value => value.tag === tag);
         const [todoCount, doingCount, doneCount] = this.CountStatus(result);
         console.log(`tag가 "${tag}"인 할 일: `);
-        //showTag의 조건문아래 코드부분은 약간씩 다르고 중복코드같은데요. 좀 어려울수도 있지만, 함수하나로 모아서 할수도 있을까요? (고민해보세요) (중복코드는 항상 제거하려고 해야해요)
         if (todoCount !== 0) {
             this.showTagPrint('todo', result, todoCount);
         }
@@ -123,11 +121,11 @@ const todo = {
 
     showTags() {
         const result = this.taskList.filter(value => value.tag !== 0);
-        const tagList = this.findTags(result);
-        for (const tag in tagList) {
-            console.log(`\n[${tag}, 총 ${tagList[tag]}개]`);
-            const sameTagTask = result.filter(result => result.tag === tag);
-            sameTagTask.forEach(function (task) {
+        const tagObj = this.findTags(result);
+        for (const tag in tagObj) {
+            console.log(`\n[${tag}, 총 ${tagObj[tag]}개]`);
+            const tasksWithSameObj = result.filter(result => result.tag === tag);
+            tasksWithSameObj.forEach(function (task) {
                 console.log(`- ${task.id}번, ${task.name}, [${task.status}]`);
             });
         }
