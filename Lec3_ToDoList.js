@@ -9,7 +9,8 @@ const todo = {
 현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개 `);
     },
 
-    update(idAndStatus) {
+    //idAndstatus 는 객체임으로, 이름을 o로 시작하거나, ht로 시작하거나, 아니면 이름끝네 object 라는 걸 넣어주어도 좋을 듯. 헝가리안표기법이 무엇인지도 좀 봐보세요~
+    update(idAndStatus) { //설명드린대로, 하위 함수 36개로 분리해보세요!
         idAndStatus.nextstatus = idAndStatus.nextstatus.trim().toLowerCase();
         for (const values of this.taskList) {
             if (values.id === idAndStatus.id && idAndStatus.nextstatus === 'doing') {
@@ -23,6 +24,7 @@ const todo = {
 
             if (values.id === idAndStatus.id && idAndStatus.nextstatus === 'done') {
                 let takenTime = (new Date().getTime() - values.doingTime) / 1000;
+                //3600은 뭐고, 86400은 뭔지 변수에 이름을 저정해두는 건 어때요? ex. const min = 60;
                 if (takenTime <= 60) {
                     values.takenTime = takenTime + '초';
                 } else if (takenTime <= 3600) {
@@ -51,7 +53,7 @@ const todo = {
         }
     },
 
-    findStatus(taskList) {
+    findStatus(taskList) { //find 이름이 부적절~
         let [todo, doing, done] = [0, 0, 0];
         for (const values of taskList) {
             if (values.status === 'todo') {
@@ -82,6 +84,7 @@ const todo = {
         const result = this.taskList.filter(value => value.tag === tag);
         const [todo, doing, done] = this.findStatus(result);
         console.log(`tag가 "${tag}"인 할 일: `);
+        //showTag의 조건문아래 코드부분은 약간씩 다르고 중복코드같은데요. 좀 어려울수도 있지만, 함수하나로 모아서 할수도 있을까요? (고민해보세요) (중복코드는 항상 제거하려고 해야해요)
         if (todo !== 0) {
             console.log(`[todo, 총 ${todo}개]`);
             const todoTasks = result.filter(value => value.status === 'todo');
@@ -132,40 +135,52 @@ const todo = {
     showAll() {
         const [todo, doing, done] = this.findStatus(this.taskList);
         console.log(`총 ${todo + doing + done}개의 리스트를 가져왔습니다. 2초 뒤에 todo 내역을 출력합니다...`);
-        let todoTasks = [];
-        let doingTasks = [];
-        let doneTasks = [];
+
+        setTimeout(function () {
+            console.log(`[todo, 총 ${todo}개]`);
+            let todoTasks = this.sortTaskByStatus('todo');
+            this.showAllPrint(todoTasks);
+            console.log(`\n 지금부터 3초 뒤에 doing 내역을 출력합니다...`);
+
+            setTimeout(function () {
+                console.log(`[doing, 총 ${doing}개]`);
+                let doingTasks = this.sortTaskByStatus('doing');
+                this.showAllPrint(doingTasks);
+                console.log(`\n 지금부터 2초 뒤에 done 내역을 출력합니다...`);
+
+                setTimeout(function () {
+                    console.log(`[done, 총 ${done}개]`);
+                    let doneTasks = this.sortTaskByStatus('done');
+                    this.showAllPrint(doneTasks);
+
+                }.bind(this), 2000);
+
+            }.bind(this), 3000);
+
+        }.bind(this), 2000);
+
+
+
+    },
+
+    sortTaskByStatus(status) {
+        let tasks = [];
         for (const values of this.taskList) {
-            if (values.status === 'todo') {
-                todoTasks.push(values);
-            } else if (values.status === 'doing') {
-                doingTasks.push(values);
-            } else if (values.status === 'done') {
-                doneTasks.push(values);
+            if (values.status === status) {
+                tasks.push(values);
             }
         }
-        setTimeout(function () {
-            console.log(`[todo, 총 ${todo}개]`)
-            todoTasks.forEach(function (task) {
-                console.log(`- ${task.id}번, ${task.name}, [${task.tag}]`);
-            })
-            console.log(`\n 지금부터 3초 뒤에 doing 내역을 출력합니다...`);
-        }, 2000);
+        return tasks;
+    },
 
-        setTimeout(function () {
-            console.log(`[doing, 총 ${doing}개]`)
-            doingTasks.forEach(function (task) {
+    showAllPrint(arr) {
+        arr.forEach(function (task) {
+            if (!!!task.takenTime) {
                 console.log(`- ${task.id}번, ${task.name}, [${task.tag}]`);
-            })
-            console.log(`\n 지금부터 2초 뒤에 done 내역을 출력합니다...`);
-        }, 5000);
-
-        setTimeout(function () {
-            console.log(`[done, 총 ${done}개]`)
-            doneTasks.forEach(function (task) {
-                console.log(`- ${task.id}번, ${task.name}, [${task.tag}], ${task.takenTime}`);
-            })
-        }, 7000);
+            } else if (task.takenTime) {
+                console.log(`- ${task.id}번, ${task.name}, [${task.tag}], ${task.takenTime}`)
+            };
+        });
     }
 }
 
@@ -211,14 +226,16 @@ todo.update({
     nextstatus: "done"
 });
 
-todo.remove({
-    id: todo.taskList[0].id,
-});
+// todo.remove({
+//     id: todo.taskList[0].id,
+// });
 
-todo.showTag('health');
+// todo.showTag('health');
 
-todo.showTags();
+// todo.showTags();
 
-todo.show("done ")
+// todo.show("done ")
 
 todo.showAll();
+
+// todo.showAllPrint(todo.taskList)
