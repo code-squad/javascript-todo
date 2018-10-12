@@ -14,12 +14,15 @@ const todo = {
         const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
         const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
             if (statusToUpdate === 'doing') {
+                let doingTime = new Date().getTime();
+                taskToUpdate.doingTime = doingTime;
                 this.printUpdate(taskToUpdate,statusToUpdate);
             }
 
             if (statusToUpdate === 'done') {
                 let takenTime = (new Date().getTime() - taskToUpdate.doingTime) / 1000;
                 takenTime = this.showTimeTaken(takenTime);
+                taskToUpdate.takenTime = takenTime;
                 delete taskToUpdate.doingTime;
                 this.printUpdate(taskToUpdate,statusToUpdate);
             }
@@ -227,25 +230,25 @@ todo.add({
 
 
 todo.update({
-    id: todo.taskList[0].id,
+    id: todo.taskList[1].id,
     nextstatus: "DOING"
 });
 
 todo.update({
-    id: todo.taskList[0].id,
+    id: todo.taskList[1].id,
     nextstatus: "done"
 });
 
-// // todo.remove({
-// //     id: todo.taskList[0].id,
-// // });
+todo.remove({
+    id: todo.taskList[0].id,
+});
 
-// todo.showTag('health');
+todo.showTag('health');
 
-// todo.showTags();
+todo.showTags();
 
-// todo.show("done ")
+todo.show("done ")
 
-// todo.showAll();
+todo.showAll();
 
-// todo.showAllPrint(todo.taskList)
+todo.showAllPrint(todo.taskList);
