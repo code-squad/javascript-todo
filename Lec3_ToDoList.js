@@ -23,15 +23,16 @@ const todo = {
             }
 
             if (values.id === idAndStatus.id && idAndStatus.nextstatus === 'done') {
-                let takenTime = (new Date().getTime() - values.doingTime) / 1000;
+                const takenTime = (new Date().getTime() - values.doingTime) / 1000;
+                const timeUnit = {minute: 60, hour: 3600, day: 86400};
                 //3600은 뭐고, 86400은 뭔지 변수에 이름을 저정해두는 건 어때요? ex. const min = 60;
-                if (takenTime <= 60) {
+                if (takenTime <= timeUnit.minute) {
                     values.takenTime = takenTime + '초';
-                } else if (takenTime <= 3600) {
+                } else if (takenTime <= timeUnit.hour) {
                     values.takenTime = (takenTime / 60).toFixed(0) + '분';
-                } else if (takenTime <= 86400) {
+                } else if (takenTime <= timeUnit.day) {
                     values.takenTime = (takenTime / 3600).toFixed(0) + '시간';
-                } else if (takenTime > 86400) {
+                } else if (takenTime > timeUnit.day) {
                     values.takenTime = (takenTime / 86400).toFixed(0) + '일';
                 };
                 delete values.doingTime;
@@ -217,18 +218,18 @@ todo.update({
     nextstatus: "DOING"
 });
 
-todo.update({
-    id: todo.taskList[0].id,
-    nextstatus: "done"
-});
-
-// todo.remove({
+// todo.update({
 //     id: todo.taskList[0].id,
+//     nextstatus: "done"
 // });
 
-todo.showTag('health');
+// // todo.remove({
+// //     id: todo.taskList[0].id,
+// // });
 
-// todo.showTags();
+// todo.showTag('health');
+
+// // todo.showTags();
 
 // todo.show("done ")
 
