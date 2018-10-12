@@ -28,20 +28,16 @@ const todo = {
     
     update(objToUpdate) {
         let beforeTaskStatus = []
+        let changedTask = []
         this.task = updateFunc.checkUpdateStatus(objToUpdate, this.task);
         this.task = this.task.map(taskObj => {
             if (objToUpdate.id === taskObj.id) {
                 beforeTaskStatus.push(taskObj.status)
                 taskObj.status = objToUpdate.nextstatus.toLowerCase();
-                // changedTask.push(taskObj)실험대상
+                changedTask.push(taskObj)
                 return taskObj
             }
             return taskObj
-        })
-        const changedTask = this.task.filter(taskObj => {
-            if (objToUpdate.id === taskObj.id) {
-                return taskObj
-            }
         })
         commonFunc.getStatusNum(this.task)
         commonFunc.printChangeThing(changedTask[0], this.task.length, this.task.length, beforeTaskStatus[0])
@@ -94,7 +90,7 @@ const todo = {
 
     
     showAll(status) {
-        if (status === undefined) {
+        if (!arguments[0]) {
             commonFunc.getStatusNum(this.task);
             console.log(`총 ${this.task.length}개의 리스트를 가져왔습니다.`);
             this.showAll('todo')
@@ -123,7 +119,7 @@ const todo = {
 
 const addFunc = {
     getRanNum(todoTask) {
-        const ranNum = Math.floor(Math.random() * 100)
+        const ranNum = Math.floor(Math.random() * 5)
         const idArrays = todoTask.map(obj => obj.id)
         if (idArrays.includes(ranNum)) {
             return this.getRanNum(todoTask)
@@ -137,10 +133,10 @@ const updateFunc = {
     checkUpdateStatus(objToUpdate, todoTask) {
         if(objToUpdate.nextstatus === 'doing') {
             return this.updateDoingTime(objToUpdate, todoTask)
-        } else if (objToUpdate.nextStatus === 'done') {
+        } else if (objToUpdate.nextstatus === 'done') {
             return this.updateTakeTime(objToUpdate, todoTask)
         }
-        
+        return todoTask
     },
     
     updateDoingTime(objToUpdate, todoTask) {
@@ -274,12 +270,15 @@ const checkError = {
     initedTask: [],//todo.task값을 항상 최신화해서 가져온 값
     
     add(initedTask) {
+        
     },
     
     update(initedTask) {
+
     },
     
     remove(initedTask) {
+
     },
     //메서드마다 에러를 출력하는것을 결정.
 };     
@@ -292,12 +291,9 @@ todo.add({ name: '회식', tag: '회사' });
 todo.add({ name: '노래연습', tag: '자기개발' });
 todo.add({ name: '과장님업무', tag: '회사' })
 // 쓰는 기능
-// todo.update({ id: 3, nextstatus: 'doing' })
-// todo.update({ id: 3, nextstatus: 'done' })
-// todo.update({ id: 2, nextstatus: 'done' })
-todo.showTag('programming')
-todo.showTags();
-todo.show('todo')
+
 todo.showAll();
+
+
 
 
