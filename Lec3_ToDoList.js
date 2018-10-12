@@ -4,7 +4,7 @@ const todo = {
         task.status = 'todo';
         task.id = Date.now() + Math.random();
         this.taskList.push(task);
-        let [todo, doing, done] = this.findStatus(this.taskList);
+        let [todo, doing, done] = this.CountStatus(this.taskList);
         console.log(`id : ${task.id}, "${task.name}" 항목이 새로 추가되었습니다.
 현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개 `);
     },
@@ -18,7 +18,7 @@ const todo = {
                 console.log(
                     `id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
                 values.status = idAndStatus.nextstatus;
-                let [todo, doing, done] = this.findStatus(this.taskList);
+                let [todo, doing, done] = this.CountStatus(this.taskList);
                 console.log(`현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
             }
 
@@ -38,7 +38,7 @@ const todo = {
                 console.log(
                     `id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
                 values.status = idAndStatus.nextstatus;
-                let [todo, doing, done] = this.findStatus(this.taskList);
+                let [todo, doing, done] = this.CountStatus(this.taskList);
                 console.log(`현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
             }
         }
@@ -53,7 +53,7 @@ const todo = {
         }
     },
 
-    findStatus(taskList) { //find 이름이 부적절~
+    CountStatus(taskList) { //find 이름이 부적절~
         let [todo, doing, done] = [0, 0, 0];
         for (const values of taskList) {
             if (values.status === 'todo') {
@@ -82,30 +82,26 @@ const todo = {
 
     showTag(tag) {
         const result = this.taskList.filter(value => value.tag === tag);
-        const [todo, doing, done] = this.findStatus(result);
+        const [todoCount, doingCount, doneCount] = this.CountStatus(result);
         console.log(`tag가 "${tag}"인 할 일: `);
         //showTag의 조건문아래 코드부분은 약간씩 다르고 중복코드같은데요. 좀 어려울수도 있지만, 함수하나로 모아서 할수도 있을까요? (고민해보세요) (중복코드는 항상 제거하려고 해야해요)
-        if (todo !== 0) {
-            console.log(`[todo, 총 ${todo}개]`);
-            const todoTasks = result.filter(value => value.status === 'todo');
-            todoTasks.forEach(function (task) {
-                console.log(`- ${task.id}번, ${task.name}`);
-            });
+        if (todoCount !== 0) {
+            this.showTagPrint('todo', result, todoCount);
         }
-        if (doing !== 0) {
-            console.log(`[doing, 총 ${doing}개]`);
-            const doingTasks = result.filter(value => value.status === 'doing');
-            doingTasks.forEach(function (task) {
-                console.log(`- ${task.id}번, ${task.name}`);
-            });
+        if (doingCount !== 0) {
+            this.showTagPrint('doing', result, doingCount);
         }
-        if (done !== 0) {
-            console.log(`[done, 총 ${done}개]`);
-            const doneTasks = result.filter(value => value.status === 'done');
-            doneTasks.forEach(function (task) {
-                console.log(`- ${task.id}번, ${task.name}`);
-            });
+        if (doneCount !== 0) {
+            this.showTagPrint('done', result, doneCount);
         }
+    },
+
+    showTagPrint(status, result, statusCount){
+        console.log(`[${status}, 총 ${statusCount}개]`);
+        const taskWithSameStatus = result.filter(value => value.status === status);
+        taskWithSameStatus.forEach(function (task) {
+            console.log(`- ${task.id}번, ${task.name}`);
+        });
     },
 
     showTags() {
@@ -133,23 +129,23 @@ const todo = {
     },
 
     showAll() {
-        const [todo, doing, done] = this.findStatus(this.taskList);
-        console.log(`총 ${todo + doing + done}개의 리스트를 가져왔습니다. 2초 뒤에 todo 내역을 출력합니다...`);
+        const [todoCount, doingCount, doneCount] = this.CountStatus(this.taskList);
+        console.log(`총 ${todoCount + doingCount + doneCount}개의 리스트를 가져왔습니다. 2초 뒤에 todo 내역을 출력합니다...`);
 
         setTimeout(function () {
-            console.log(`[todo, 총 ${todo}개]`);
+            console.log(`[todo, 총 ${todoCount}개]`);
             let todoTasks = this.sortTaskByStatus('todo');
             this.showAllPrint(todoTasks);
             console.log(`\n 지금부터 3초 뒤에 doing 내역을 출력합니다...`);
 
             setTimeout(function () {
-                console.log(`[doing, 총 ${doing}개]`);
+                console.log(`[doing, 총 ${doingCount}개]`);
                 let doingTasks = this.sortTaskByStatus('doing');
                 this.showAllPrint(doingTasks);
                 console.log(`\n 지금부터 2초 뒤에 done 내역을 출력합니다...`);
 
                 setTimeout(function () {
-                    console.log(`[done, 총 ${done}개]`);
+                    console.log(`[done, 총 ${doneCount}개]`);
                     let doneTasks = this.sortTaskByStatus('done');
                     this.showAllPrint(doneTasks);
 
@@ -230,12 +226,12 @@ todo.update({
 //     id: todo.taskList[0].id,
 // });
 
-// todo.showTag('health');
+todo.showTag('health');
 
 // todo.showTags();
 
 // todo.show("done ")
 
-todo.showAll();
+// todo.showAll();
 
 // todo.showAllPrint(todo.taskList)
