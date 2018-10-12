@@ -24,18 +24,8 @@ const todo = {
             }
 
             if (values.id === updateObj.id && updateObj.nextstatus === 'done') {
-                const takenTime = (new Date().getTime() - values.doingTime) / 1000;
-                const timeUnit = {minute: 60, hour: 3600, day: 86400};
-                //3600은 뭐고, 86400은 뭔지 변수에 이름을 저정해두는 건 어때요? ex. const min = 60;
-                if (takenTime <= timeUnit.minute) {
-                    values.takenTime = takenTime + '초';
-                } else if (takenTime <= timeUnit.hour) {
-                    values.takenTime = (takenTime / 60).toFixed(0) + '분';
-                } else if (takenTime <= timeUnit.day) {
-                    values.takenTime = (takenTime / 3600).toFixed(0) + '시간';
-                } else if (takenTime > timeUnit.day) {
-                    values.takenTime = (takenTime / 86400).toFixed(0) + '일';
-                };
+                let takenTime = (new Date().getTime() - values.doingTime) / 1000;
+                takenTime = this.showTimeTaken(takenTime);
                 delete values.doingTime;
                 console.log(
                     `id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
@@ -46,7 +36,6 @@ const todo = {
         }
     },
 
-
     findTaskToUpdate(updateObj){
         let taskToUpdate = {};
         const statusToUpdate = updateObj.nextstatus.trim().toLowerCase();
@@ -56,6 +45,20 @@ const todo = {
             }
         }
         return [taskToUpdate, statusToUpdate];
+    },
+
+    showTimeTaken(takenTime){
+        const timeUnit = {minute: 60, hour: 3600, day: 86400};
+        if (takenTime <= timeUnit.minute) {
+            takenTime = takenTime + '초';
+        } else if (takenTime <= timeUnit.hour) {
+            takenTime = (takenTime / 60).toFixed(0) + '분';
+        } else if (takenTime <= timeUnit.day) {
+            takenTime = (takenTime / 3600).toFixed(0) + '시간';
+        } else if (takenTime > timeUnit.day) {
+            takenTime = (takenTime / 86400).toFixed(0) + '일';
+        };
+        return takenTime;
     },
 
     remove(id) {
