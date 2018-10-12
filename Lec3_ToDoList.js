@@ -13,27 +13,16 @@ const todo = {
     update(updateObj) { //설명드린대로, 하위 함수 36개로 분리해보세요!
         const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
         const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
-        for (const values of this.taskList) {
-            if (values.id === updateObj.id && status === 'doing') {
-                values.doingTime = new Date().getTime();
-                console.log(
-                    `id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
-                values.status = updateObj.nextstatus;
-                let [todo, doing, done] = this.CountStatus(this.taskList);
-                console.log(`현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개`);
+            if (statusToUpdate === 'doing') {
+                this.printUpdate(taskToUpdate,statusToUpdate);
             }
 
-            if (values.id === updateObj.id && updateObj.nextstatus === 'done') {
-                let takenTime = (new Date().getTime() - values.doingTime) / 1000;
+            if (statusToUpdate === 'done') {
+                let takenTime = (new Date().getTime() - taskToUpdate.doingTime) / 1000;
                 takenTime = this.showTimeTaken(takenTime);
-                delete values.doingTime;
-                console.log(
-                    `id : ${values.id}, "${values.name}" 항목이 (${values.status} => ${idAndStatus.nextstatus}) 상태로 업데이트되었습니다.`);
-                values.status = updateObj.nextstatus;
-                let [todoCount, doingCount, doneCount] = this.CountStatus(this.taskList);
-                console.log(`현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개`);
+                delete taskToUpdate.doingTime;
+                this.printUpdate(taskToUpdate,statusToUpdate);
             }
-        }
     },
 
     findTaskToUpdate(updateObj){
@@ -59,6 +48,14 @@ const todo = {
             takenTime = (takenTime / 86400).toFixed(0) + '일';
         };
         return takenTime;
+    },
+
+    printUpdate(taskToUpdate, statusToUpdate){
+        console.log(
+            `id : ${taskToUpdate.id}, "${taskToUpdate.name}" 항목이 (${taskToUpdate.status} => ${statusToUpdate}) 상태로 업데이트되었습니다.`);
+        taskToUpdate.status = statusToUpdate;
+        let [todoCount, doingCount, doneCount] = this.CountStatus(this.taskList);
+        console.log(`현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개`);
     },
 
     remove(id) {
