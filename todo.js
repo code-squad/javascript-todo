@@ -381,5 +381,5 @@ todo.add({ name: 'test5', tag: 'test5' });
 todo.show('doing');
 todo.show('nothingei')
 todo.show('todo')
-
+todo.showAll();
 
