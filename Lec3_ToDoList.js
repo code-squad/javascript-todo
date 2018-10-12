@@ -4,42 +4,46 @@ const todo = {
         task.status = 'todo';
         task.id = Date.now() + Math.random();
         this.taskList.push(task);
-        let [todo, doing, done] = this.CountStatus(this.taskList);
+        let [todoCount, doingCount, doneCount] = this.CountStatus(this.taskList);
         console.log(`id : ${task.id}, "${task.name}" 항목이 새로 추가되었습니다.
-현재 상태 - todo: ${todo}개, doing: ${doing}개, done: ${done}개 `);
+현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
     },
 
-    update(updateObj) { 
+    update(updateObj) {
         const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
         const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
-            if (statusToUpdate === 'doing') {
-                let doingTime = new Date().getTime();
-                taskToUpdate.doingTime = doingTime;
-                this.printUpdate(taskToUpdate,statusToUpdate);
-            }
+        if (statusToUpdate === 'doing') {
+            let doingTime = new Date().getTime();
+            taskToUpdate.doingTime = doingTime;
+            this.printUpdate(taskToUpdate, statusToUpdate);
+        }
 
-            if (statusToUpdate === 'done') {
-                let takenTime = (new Date().getTime() - taskToUpdate.doingTime) / 1000;
-                takenTime = this.showTimeTaken(takenTime);
-                taskToUpdate.takenTime = takenTime;
-                delete taskToUpdate.doingTime;
-                this.printUpdate(taskToUpdate,statusToUpdate);
-            }
+        if (statusToUpdate === 'done') {
+            let takenTime = (new Date().getTime() - taskToUpdate.doingTime) / 1000;
+            takenTime = this.getTakenTimeWithUnit(takenTime);
+            taskToUpdate.takenTime = takenTime;
+            delete taskToUpdate.doingTime;
+            this.printUpdate(taskToUpdate, statusToUpdate);
+        }
     },
 
-    findTaskToUpdate(updateObj){
+    findTaskToUpdate(updateObj) {
         let taskToUpdate = {};
         const statusToUpdate = updateObj.nextstatus.trim().toLowerCase();
         for (const values of this.taskList) {
-            if(values.id === updateObj.id){
+            if (values.id === updateObj.id) {
                 taskToUpdate = values;
             }
         }
         return [taskToUpdate, statusToUpdate];
     },
 
-    showTimeTaken(takenTime){
-        const timeUnit = {minute: 60, hour: 3600, day: 86400};
+    getTakenTimeWithUnit(takenTime) {
+        const timeUnit = {
+            minute: 60,
+            hour: 3600,
+            day: 86400
+        };
         if (takenTime <= timeUnit.minute) {
             takenTime = takenTime + '초';
         } else if (takenTime <= timeUnit.hour) {
@@ -52,7 +56,7 @@ const todo = {
         return takenTime;
     },
 
-    printUpdate(taskToUpdate, statusToUpdate){
+    printUpdate(taskToUpdate, statusToUpdate) {
         console.log(
             `id : ${taskToUpdate.id}, "${taskToUpdate.name}" 항목이 (${taskToUpdate.status} => ${statusToUpdate}) 상태로 업데이트되었습니다.`);
         taskToUpdate.status = statusToUpdate;
@@ -111,7 +115,7 @@ const todo = {
         }
     },
 
-    showTagPrint(status, result, statusCount){
+    showTagPrint(status, result, statusCount) {
         console.log(`[${status}, 총 ${statusCount}개]`);
         const taskWithSameStatus = result.filter(value => value.status === status);
         taskWithSameStatus.forEach(function (task) {
