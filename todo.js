@@ -5,32 +5,28 @@
 
 //error를 구현해보자.v
 //아니면 step3에서 구현하는 에러메세지만 모아두는 객체를 만들까? XXX
-//undo redo기능은 어떻게 구현할까?
-//기능완성도를 위해서 동료에게 테스트 부탁하기
-const BeforeTodo = {
+//undo redo기능구현
+const beforeTodo = {
     task:[],
-
-    makeBeforeTodo() {
-        return status
-    },
-
-    redoChangeThing(status) {
-        return
-    },
-
-    undoChangeThing(status) {
-
-    },
 }
 
 
 const todo = {
     task: [],
 
+    redo() {
+
+    },
+
+    undo() {
+
+    },
+
     add(objToAdd) {
         if (!addFunc.checkError(objToAdd, this.task)) {
             return
         }
+        BeforeTodo.task = this.task
         const notAddedLength = this.task.length
         const newTodo = {
             id: addFunc.getRanNum(this.task),
@@ -51,6 +47,7 @@ const todo = {
         if (!updateFunc.checkError(objToUpdate, this.task)) {
             return;
         }
+        beforeTodo.task = this.task
         let beforeTaskStatus = []
         let changedTask = []
         this.task = updateFunc.checkUpdateStatus(objToUpdate, this.task);
@@ -73,6 +70,7 @@ const todo = {
         if (!removeFunc.checkError(objToRemove, this.task)) {
             return;
         }
+        beforeTodo.task = this.task
         const notRemovedLength = this.task.length
         let filteredTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
         let removedTask = this.task.filter(taskObj => taskObj.id !== objToRemove.id)
