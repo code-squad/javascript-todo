@@ -10,20 +10,40 @@ const redoFunc = {
 
 }
 
-const undoFunc = {
 
+const undoFunc = {
 }
+
 
 const todo = {
     task: [],
     lastDoArrays: [],
+    saveRemovedDataArrays: [],
+    saveUpdatedDataArrays: [],
 
     redo() {
-        
+
     },
 
     undo() {
-
+        const lastFunction = this.lastDoArrays.pop()
+        if (lastFunction === 'add') {
+            const addedData = this.task.pop()
+            console.log(`ID : ${addedData.id}, ${addedData.name}이 다시 삭제되었습니다.`)
+        } else if (lastFunction === 'remove') {
+            const removedData = saveDataArrays.pop()
+            task.push(removedData)
+            console.log(`ID : ${removedData.id}, ${removedData.name}이 다시 추가되었습니다.`)
+        } else if (lastFunction === 'update') {
+            const updatedData = this.saveUpdatedDataArrays.pop()
+            console.log(updatedData)
+            this.task.forEach(taskObj => {
+                if (taskObj.id === updatedData.id) {
+                    console.log(`ID : ${taskObj.id}항목이 ${taskObj.status} => ${updatedData.status}로 변경되었습니다.`)
+                    taskObj = updatedData
+                }
+            })
+        }
     },
 
     add(objToAdd) {
@@ -44,16 +64,27 @@ const todo = {
         commonFunc.getStatusNum(this.task)
         commonFunc.printChangeThing(newTodo, addedLength, notAddedLength)
         commonFunc.printStatusNum()
-        lastDoArrays.push('add')
+        this.lastDoArrays.push('add')
     },//해야할일과 id값을 추가해주는 함수
 
     update(objToUpdate) {
+        this.task.forEach(taskObj => {
+            if (taskObj.id === objToUpdate.id) {
+                const beforeTask = {
+                    id: taskObj.id,
+                    name: taskObj.name,
+                    status: taskObj.status,
+                    tag: taskObj.tag,
+                    timeData: taskObj.timeData
+                }
+                this.saveUpdatedDataArrays.push(beforeTask)
+            }
+        })
         if (!updateFunc.checkError(objToUpdate, this.task)) {
             return;
         }
         let beforeTaskStatus = []
         let changedTask = []
-        this.task = updateFunc.checkUpdateStatus(objToUpdate, this.task);
         this.task = this.task.map(taskObj => {
             if (objToUpdate.id === taskObj.id) {
                 beforeTaskStatus.push(taskObj.status)
@@ -63,12 +94,12 @@ const todo = {
             }
             return taskObj
         })
+        this.task = updateFunc.checkUpdateStatus(objToUpdate, this.task);
         commonFunc.getStatusNum(this.task)
         commonFunc.printChangeThing(changedTask[0], this.task.length, this.task.length, beforeTaskStatus[0])
         commonFunc.printStatusNum()
         this.lastDoArrays.push('update')
     },//상태 업데이트 함수
-
 
     remove(objToRemove) {
         if (!removeFunc.checkError(objToRemove, this.task)) {
@@ -81,6 +112,7 @@ const todo = {
         const removedLength = this.task.length
         commonFunc.printChangeThing(filteredTask[0], removedLength, notRemovedLength)
         this.lastDoArrays.push('remove')
+        this.saveDataArrays.push(filteredTask)
     },//할 일과 id값을 제거해주는 함수
 
     show(status) {
@@ -117,7 +149,6 @@ const todo = {
             showTagsFunc.printSameTag(tag, taggedTask, sameTagNum)
         })
     },//태그에 따라 모든 값을 출력해주는 함수
-
 
     showAll(status) {
         if (!arguments[0]) {
@@ -372,7 +403,7 @@ const commonFunc = {
         } else if (currentTaskLength < beforeTaskLength) {
             console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 삭제 완료`)
         } else {
-            console.log(`ID: ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 업데이트 되었습니다.`)
+            console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 업데이트 되었습니다.`)
         }
     },//할일이 추가되거나 제거되거나 업데이트 될 때 적합한 내용을 출력해 주는 함수
 };//todo의 메서드들이 중복적으로 사용하는 메서드들을 따로 모아서 처리
@@ -397,8 +428,19 @@ todo.add({ name: 'test5', tag: 'test5' });
 // todo.show('nothing')
 // todo.showTag('awfe');
 // todo.showTag();
-todo.show('doing');
-todo.show('nothingei')
-todo.show('todo')
-todo.showAll();
+// todo.show('doing');
+// todo.show('nothingei')
+// todo.show('todo')
+// todo.showAll();
+todo.update({id:3, nextstatus:'doing'})
+console.log(todo.lastDoArrays)
+todo.undo();
+console.log(todo.lastDoArrays)
+todo.undo();
+todo.undo();
+todo.undo();
+
+
+
+
 
