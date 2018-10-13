@@ -6,16 +6,20 @@
 //error를 구현해보자.v
 //아니면 step3에서 구현하는 에러메세지만 모아두는 객체를 만들까? XXX
 //undo redo기능구현
-const beforeTodo = {
-    task:[],
+const redoFunc = {
+
 }
 
+const undoFunc = {
+
+}
 
 const todo = {
     task: [],
+    lastDoArrays: [],
 
     redo() {
-
+        
     },
 
     undo() {
@@ -26,7 +30,6 @@ const todo = {
         if (!addFunc.checkError(objToAdd, this.task)) {
             return
         }
-        BeforeTodo.task = this.task
         const notAddedLength = this.task.length
         const newTodo = {
             id: addFunc.getRanNum(this.task),
@@ -41,13 +44,13 @@ const todo = {
         commonFunc.getStatusNum(this.task)
         commonFunc.printChangeThing(newTodo, addedLength, notAddedLength)
         commonFunc.printStatusNum()
+        lastDoArrays.push('add')
     },//해야할일과 id값을 추가해주는 함수
 
     update(objToUpdate) {
         if (!updateFunc.checkError(objToUpdate, this.task)) {
             return;
         }
-        beforeTodo.task = this.task
         let beforeTaskStatus = []
         let changedTask = []
         this.task = updateFunc.checkUpdateStatus(objToUpdate, this.task);
@@ -63,6 +66,7 @@ const todo = {
         commonFunc.getStatusNum(this.task)
         commonFunc.printChangeThing(changedTask[0], this.task.length, this.task.length, beforeTaskStatus[0])
         commonFunc.printStatusNum()
+        this.lastDoArrays.push('update')
     },//상태 업데이트 함수
 
 
@@ -70,13 +74,13 @@ const todo = {
         if (!removeFunc.checkError(objToRemove, this.task)) {
             return;
         }
-        beforeTodo.task = this.task
         const notRemovedLength = this.task.length
         let filteredTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
         let removedTask = this.task.filter(taskObj => taskObj.id !== objToRemove.id)
         this.task = removedTask
         const removedLength = this.task.length
         commonFunc.printChangeThing(filteredTask[0], removedLength, notRemovedLength)
+        this.lastDoArrays.push('remove')
     },//할 일과 id값을 제거해주는 함수
 
     show(status) {
@@ -139,14 +143,6 @@ const todo = {
             }
         }.bind(todo), 2000)
     },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수, 재귀적으로 표현해볼것.
-
-    redo() {
-
-    },
-
-    undo() {
-
-    },
 }//해야 할일 객체
 
 
