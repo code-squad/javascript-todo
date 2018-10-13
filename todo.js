@@ -45,6 +45,8 @@ const todo = {
             })
         }
     },
+    //기능마다 함수로 나눌것,
+    //배열들을 어디에 저장할 지 한번 더 생각 해 볼것.
 
     add(objToAdd) {
         if (!addFunc.checkError(objToAdd, this.task)) {
@@ -432,13 +434,7 @@ todo.add({ name: 'test5', tag: 'test5' });
 // todo.show('nothingei')
 // todo.show('todo')
 // todo.showAll();
-todo.update({id:3, nextstatus:'doing'})
-console.log(todo.lastDoArrays)
-todo.undo();
-console.log(todo.lastDoArrays)
-todo.undo();
-todo.undo();
-todo.undo();
+
 
 
 
