@@ -13,61 +13,13 @@ const redoFunc = {
 
 
 const undoFunc = {
-    saveRemovedDataArrays: [],
-    saveUpdatedDataArrays: [],
-    add(todoTask) {
-        const addedData = todoTask.pop()
-        console.log(`ID : ${addedData.id}, ${addedData.name}이(가) 다시 삭제되었습니다.`)
-        return todoTask
-    },
 
-    remove(todoTask) {
-        const removedData = this.saveRemovedDataArrays.pop()
-        todoTask.push(removedData)
-        console.log(`ID : ${removedData.id}, ${removedData.name}이(가) 다시 추가되었습니다.`)
-        return todoTask
-    },
-
-    update(todoTask) {
-        const updatedData = this.saveUpdatedDataArrays.pop()
-        todoTask.forEach(taskObj => {
-            if (taskObj.id === updatedData.id) {
-                console.log(`ID : ${taskObj.id}항목이 ${taskObj.status} => ${updatedData.status}로 변경되었습니다.`)
-                taskObj.status = updatedData.status
-                taskObj.timeData = updatedData.timeData
-            }
-        })
-        console.log(todoTask)
-        return todoTask
-    }
 }
 
 
 const todo = {
     task: [],
     lastDoArrays: [],
-
-    redo() {
-
-    },
-
-    undo() {
-        while(this.lastDoArrays.length > 3) {
-            this.lastDoArrays.shift()
-        }
-        const lastFunction = this.lastDoArrays.pop()
-        if (lastFunction === 'add') {
-            this.task = undoFunc.add(this.task)
-        } else if (lastFunction === 'remove') {
-            this.task = undoFunc.remove(this.task)
-        } else if (lastFunction === 'update') {
-            this.task = undoFunc.update(this.task)
-        } else {
-            console.log(`되돌일 일이 없거나 3번이상 undo를 사용하셨습니다.`)
-        }
-    },
-    //기능마다 함수로 나눌것,
-    //배열들을 어디에 저장할 지 한번 더 생각 해 볼것.
 
     add(objToAdd) {
         if (!addFunc.checkError(objToAdd, this.task)) {
@@ -87,22 +39,9 @@ const todo = {
         commonFunc.getStatusNum(this.task)
         commonFunc.printChangeThing(newTodo, addedLength, notAddedLength)
         commonFunc.printStatusNum()
-        this.lastDoArrays.push('add')
     },//해야할일과 id값을 추가해주는 함수
 
     update(objToUpdate) {
-        this.task.forEach(taskObj => {
-            if (taskObj.id === objToUpdate.id) {
-                const beforeTask = {
-                    id: taskObj.id,
-                    name: taskObj.name,
-                    status: taskObj.status,
-                    tag: taskObj.tag,
-                    timeData: taskObj.timeData
-                }
-                undoFunc.saveUpdatedDataArrays.push(beforeTask)
-            }
-        })
         if (!updateFunc.checkError(objToUpdate, this.task)) {
             return;
         }
@@ -121,7 +60,6 @@ const todo = {
         commonFunc.getStatusNum(this.task)
         commonFunc.printChangeThing(changedTask[0], this.task.length, this.task.length, beforeTaskStatus[0])
         commonFunc.printStatusNum()
-        this.lastDoArrays.push('update')
     },//상태 업데이트 함수
 
     remove(objToRemove) {
@@ -134,8 +72,6 @@ const todo = {
         this.task = removedTask
         const removedLength = this.task.length
         commonFunc.printChangeThing(filteredTask[0], removedLength, notRemovedLength)
-        this.lastDoArrays.push('remove')
-        undoFunc.saveRemovedDataArrays.push(filteredTask[0])
     },//할 일과 id값을 제거해주는 함수
 
     show(status) {
@@ -444,10 +380,11 @@ todo.add({ name: 'test3' });
 todo.add({ name: 'test4', tag: 'test4' });
 todo.add({ name: 'test5', tag: 'test5' });
 todo.remove({id:3})
-todo.undo()
-todo.undo()
-todo.undo()
-console.log(todo.task)
+todo.update({id:4, nextstatus:'doing'})
+todo.showTag();
+todo.showTags();
+todo.show("doing");
+
 // todo.update({ id: 3, nextstatus: 'doing' })
 // todo.update({ id: 3, nextstatus: 'doing' })
 // todo.update({ id: 3, nextstatus: 'done' })
