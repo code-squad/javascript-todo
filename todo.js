@@ -8,18 +8,45 @@
 //4. undo와 redo의 밀접한 관계를 위해서 undo만을 위한 새로운 배열이 필요
 //5. 혼자서라도 내 코드를 괴롭혀 보기. 
 const redoFunc = {
+    undidTaskArrays: [],
 
-}
+    returnValue(todoTask) {
+        todoTask = undidTaskArrays.pop()
+        return todoTask
+    },
+};
 
 
 const undoFunc = {
+    lastTaskArrays: [], //이전의 todo.Task상태를 저장해줌
 
-}
+    returnValue(todoTask) {
+        todoTask = lastTaskArrays.pop()
+        return todoTask
+    },
+};
 
 
 const todo = {
     task: [],
-    lastDoArrays: [],
+    lastDoArrays: [],//이전에 했던 상태 3개 저장
+
+    undo() {
+        const lastDo = lastDoArrays.pop()
+        if(lastDo = 'add') {
+            //할때마다 배열에 추가 
+        } else if (lastDo = 'remove') {
+
+        } else if (lastDo = 'update') {
+
+        } else {
+            //lastDoArrays가 비어있을 때
+        }
+    },
+
+    redo() {
+        redoFunc.returnValue(this.task)
+    },
 
     add(objToAdd) {
         if (!addFunc.checkError(objToAdd, this.task)) {
