@@ -12,11 +12,15 @@ const todo = {
     update(updateObj) {
         const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
         const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
-        if (statusToUpdate === 'doing') {this.executeUpdate(taskToUpdate, statusToUpdate);}
-        if (statusToUpdate === 'done') {this.executeUpdate(taskToUpdate, statusToUpdate);}
+        if (statusToUpdate === 'doing') {
+            this.executeUpdate(taskToUpdate, statusToUpdate);
+        }
+        if (statusToUpdate === 'done') {
+            this.executeUpdate(taskToUpdate, statusToUpdate);
+        }
     },
 
-    executeUpdate(taskToUpdate, statusToUpdate){
+    executeUpdate(taskToUpdate, statusToUpdate) {
         if (statusToUpdate === 'doing') {
             let doingTime = new Date().getTime();
             taskToUpdate.doingTime = doingTime;
@@ -141,13 +145,10 @@ const todo = {
     },
 
     show(status) {
-        let showStatus = status.replace(/ /g,"").toLowerCase();
+        let showStatus = status.replace(/ /g, "").toLowerCase();
         console.log(`상태가 ${showStatus}인 task(s):`);
         for (const values of this.taskList) {
             if (values.status !== showStatus) continue;
-            if (showStatus === 'done') {
-                this.printShow(values, showStatus);
-            };
             this.printShow(values, showStatus);
         }
     },
@@ -155,8 +156,9 @@ const todo = {
     printShow(values, showStatus) {
         if (showStatus === 'done') {
             console.log(`- ${values.id}번, ${values.name}, [${values.tag}], ${values.takenTime}`)
-        };
-        console.log(`- ${values.id}번, ${values.name}, [${values.tag}]`);
+        } else if (showStatus === 'doing' || showStatus === 'todo') {
+            console.log(`- ${values.id}번, ${values.name}, [${values.tag}]`);
+        }
     },
 
     showAll() {
@@ -188,8 +190,8 @@ const todo = {
     },
 
 
-    showAllTime(){
-        
+    showAllTime() {
+
     },
     sortTaskByStatus(status) {
         let tasks = [];
