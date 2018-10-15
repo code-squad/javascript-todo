@@ -13,7 +13,7 @@ const todo = {
         const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
         const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
         if (statusToUpdate === 'doing') {
-            let doingTime = new Date().getTime();
+            let doingTime = new Date().getTime();                                                                                                                                  
             taskToUpdate.doingTime = doingTime;
             this.printUpdate(taskToUpdate, statusToUpdate);
         }
@@ -21,7 +21,7 @@ const todo = {
         if (statusToUpdate === 'done') {
             let takenTime = (new Date().getTime() - taskToUpdate.doingTime) / 1000;
             takenTime = this.getTakenTimeWithUnit(takenTime);
-            taskToUpdate.takenTime = takenTime;
+            taskToUpdate.takenTime = takenTime; 
             delete taskToUpdate.doingTime;
             this.printUpdate(taskToUpdate, statusToUpdate);
         }
@@ -39,19 +39,19 @@ const todo = {
     },
 
     getTakenTimeWithUnit(takenTime) {
-        const timeUnit = {
-            minute: 60,
-            hour: 3600,
-            day: 86400
+        const t = {
+            min: 60,
+            hr: 3600,
+            d: 86400
         };
-        if (takenTime <= timeUnit.minute) {
+        if (takenTime <= t.min) {
             takenTime = takenTime + '초';
-        } else if (takenTime <= timeUnit.hour) {
-            takenTime = (takenTime / 60).toFixed(0) + '분';
-        } else if (takenTime <= timeUnit.day) {
-            takenTime = (takenTime / 3600).toFixed(0) + '시간';
-        } else if (takenTime > timeUnit.day) {
-            takenTime = (takenTime / 86400).toFixed(0) + '일';
+        } else if (takenTime <= t.hr) {
+            takenTime = (takenTime / min).toFixed(0) + '분';
+        } else if (takenTime <= t.d) {
+            takenTime = (takenTime / hr).toFixed(0) + '시간';
+        } else if (takenTime > t.d) {
+            takenTime = (takenTime / d).toFixed(0) + '일';
         };
         return takenTime;
     },
@@ -190,7 +190,7 @@ const todo = {
 
     showAllPrint(arr) {
         arr.forEach(function (task) {
-            if (!!!task.takenTime) {
+            if (!task.takenTime) {
                 console.log(`- ${task.id}번, ${task.name}, [${task.tag}]`);
             } else if (task.takenTime) {
                 console.log(`- ${task.id}번, ${task.name}, [${task.tag}], ${task.takenTime}`)
