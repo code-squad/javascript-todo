@@ -1,18 +1,23 @@
-//undo redo기능구현
-//메서드를 사용할때마다 그 이전의 todo.task값을 저장하면 어떨까?
-//메서드를 부르기 전의 todo.task값을 저장해놓고, undo를 부르면 그값을 
-//배출, 데이터를 3개이상 저장하지 못하게 만들기도 해야겠지.
-//1. 이전의 todo.task배열을 저장해주는 공간이 필요함.
-//2. 우선 내가 정한 기준은 '메서드 마다 객체로' 이다. 잊지말것.
-//3. undo는 redo를 불렀을때만 사용할 수 있도록 하자.
-//4. undo와 redo의 밀접한 관계를 위해서 undo만을 위한 새로운 배열이 필요
-//5. 혼자서라도 내 코드를 괴롭혀 보기. 
+
 const redoFunc = {
     undidTaskArrays: [],//undo된 task의 상태들 저장.물론 3개까지
 
-    returnValue(todoTask) {
-        todoTask = undidTaskArrays.pop()
-        return todoTask
+    getUndidTaskArrays(todoTask) {
+        const beforeTask = [];
+        todoTask.forEach(taskObj => {
+            beforeValue = {
+                id: taskObj.id,
+                name: taskObj.name,
+                status: taskObj.status,
+                tag: taskObj.tag,
+                timeData: taskObj.timeData,
+            }
+            beforeTask.push(beforeValue)
+        })
+        this.undidTaskArrays.push(beforeTask);
+        if(this.undidTaskArrays.length > 3) {
+            this.undidTaskArrays.shift();
+        }
     },
 };
 
@@ -20,12 +25,7 @@ const redoFunc = {
 const undoFunc = {
     lastTaskArrays: [], //이전의 todo.Task상태를 저장해줌
 
-    returnValue(todoTask) {
-        todoTask = lastTaskArrays.pop()
-        return todoTask
-    },
-
-    getBeforeValue(todoTask) {
+    getLastTaskArrays(todoTask) {
         const beforeTask = [];
         todoTask.forEach(taskObj => {
             beforeValue = {
@@ -56,11 +56,13 @@ const todo = {
         }
         let lastDo = this.lastDoArrays.pop()
         if (lastDo === 'add') {
+            redoFunc.getUndidTaskArrays(this.task)
             const beforeTask = undoFunc.lastTaskArrays.pop()
             const addedTask = this.task[beforeTask.length]
             console.log(`ID : ${addedTask.id}, ${addedTask.name}가 다시 제거되었습니다.`);
             this.task = beforeTask
         } else if (lastDo === 'remove') {
+            redoFunc.getUndidTaskArrays(this.task)
             const beforeTask = undoFunc.lastTaskArrays.pop()
             const taskIdArrays = [];
             this.task.forEach(obj => {
@@ -72,6 +74,7 @@ const todo = {
             console.log(`ID : ${removedTask[0].id}, ${removedTask[0].name}이 다시 추가되었습니다.`)
             this.task = beforeTask
         } else if (lastDo === 'update') {
+            redoFunc.getUndidTaskArrays(this.task)
             const beforeTask = undoFunc.lastTaskArrays.pop()
             const notUpdatedTask = beforeTask.filter((obj, index) => {
                 return beforeTask[index].status !== this.task[index].status
@@ -82,12 +85,13 @@ const todo = {
             console.log(`ID : ${updatedTask[0].id}, ${updatedTask[0].name}의 상태가 다시 ${updatedTask[0].status} => ${notUpdatedTask[0].status}로 다시 변경되었습니다.`)
             this.task = beforeTask
         } else {
-            
+            console.log(`undo는 3번이 한계입니다. 한계라구요..`)
         }
     },
 
     redo() {
-        redoFunc.returnValue(this.task)
+        this.task = redoFunc.undidTaskArrays.pop()
+        console.log(`undo된 일을 되돌렸습니다.`)
     },
 
     add(objToAdd) {
@@ -95,7 +99,8 @@ const todo = {
             return
         }
         this.lastDoArrays.push('add')
-        undoFunc.getBeforeValue(this.task)
+        // undoFunc.getLastTaskArrays(this.task)
+        // immutable개념, spread operator 
         const notAddedLength = this.task.length
         const newTodo = {
             id: addFunc.getRanNum(this.task),
@@ -117,7 +122,7 @@ const todo = {
             return;
         }
         this.lastDoArrays.push('update')
-        undoFunc.getBeforeValue(this.task)
+        undoFunc.getLastTaskArrays(this.task)
         let beforeTaskStatus = []
         let changedTask = []
         this.task = this.task.map(taskObj => {
@@ -140,7 +145,7 @@ const todo = {
             return;
         }
         this.lastDoArrays.push('remove');
-        undoFunc.getBeforeValue(this.task);
+        undoFunc.getLastTaskArrays(this.task);
         const notRemovedLength = this.task.length
         let filteredTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
         let removedTask = this.task.filter(taskObj => taskObj.id !== objToRemove.id)
@@ -465,6 +470,9 @@ todo.add({ name: 'javascript', tag: 'programming' })
 todo.add({name: 'java', tag:'programming'})
 todo.update({id:0, nextstatus:'done'})
 todo.undo();
+todo.undo();
+todo.redo();
+todo.redo();
 console.log(todo.task)
 
 
