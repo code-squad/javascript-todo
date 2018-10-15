@@ -419,4 +419,8 @@ todosList.show('done');
 console.log();
 console.log("- 데이터 비동기 출력");
 console.log();
+
+// todosList.showTag("programming");
+// todosList.showTags();
+// todosList.show('todo');
 todosList.showAll();
