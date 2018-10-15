@@ -10,6 +10,7 @@ const taskProgram = {
         this.taskArray.push(newTodo);
         return [console.log(`id : ${newTodo.id}, "${obj.name}" 항목이 추가 되었습니다.`), taskProgram.showState()];
     },
+    // 태그값이 없을시 초기값부여
     checkTag(obj) {
         if (obj.tag === undefined) obj.tag = '';
     },
@@ -22,6 +23,7 @@ const taskProgram = {
         [todo, doing, done] = [filteredArray[0].length, filteredArray[1].length, filteredArray[2].length];
         return console.log(`현재상태 :  todo : ${todo}, doing : ${doing}, done : ${done} `);
     },
+    // status 종류별로 filter메서드
     filteringStates(array) {
         const stateTodo = array.filter(v => v.state === 'todo');
         const stateDoing = array.filter(v => v.state === 'doing');
@@ -34,14 +36,15 @@ const taskProgram = {
         console.log(`총 ${this.taskCount}개의 스케줄이 있습니다. 2초뒤 Todo출력...`)
         this.settime(0, [todo, doing, done], this.setTimeArray);
     },
+    // 초기값 n = 0 으로 받아 loopConsoleLog를 시간차로 실행
     settime(n, statesArray, setTimeArray) {
         let time = (setTimeArray[n + 1] - setTimeArray[n] ) / 1000;
         if (n > 2) return;
         else {
             setTimeout(() => {
                 this.loopConsoleLog(statesArray[n]);
-                (n >= 2) ? false :
-                    console.log(`지금부터 ${time}초뒤 ${statesArray[n][0].state}출력....`);
+                if (n >= 2) return;
+                console.log(`지금부터 ${time}초뒤 ${statesArray[n][0].state}출력....`);
             }, setTimeArray[n]);
             return this.settime(n + 1, statesArray, setTimeArray)
         }
@@ -104,7 +107,7 @@ const taskProgram = {
             const classifiedArray = this.classifyArgument(string);
             const filteredArray = this.filteringStates(classifiedArray);
             let todo, doning, done
-            [todo, doning, done] = [filteredArray[0], filteredArray[1], filteredArray[2]];
+            [todo, doning, done] = filteredArray;
             this.loopConsoleLog(todo);
             this.loopConsoleLog(doning);
             this.loopConsoleLog(done);
@@ -116,7 +119,7 @@ const taskProgram = {
         if (filteredArray.length !== 0) return filteredArray;
     },
     loopConsoleLog(array) {
-        if (array.length === 0) return console.log('항목이 없습니다.')
+        if (array.length === 0) console.log('항목이 없습니다.')
         array.name = array[0].state;
         console.log(`[ ${array.name}, 총 ${array.length}개 ]`);
         if (array.name === 'done') return this.doneArrayConsolelog(array);
@@ -223,7 +226,7 @@ taskProgram.update({ id: 2, nextstatus: 'done' })
 // taskProgram.update({ id: 2, nextstatus: 'donE' })
 // taskProgram.remove({ id: 0 });
 // taskProgram.showTag('workinG');
-// taskProgram.showTags();
+taskProgram.showTags();
 // taskProgram.show('   done      ');
 taskProgram.showAll();
 
