@@ -1,4 +1,3 @@
-
 const redoFunc = {
     undidTaskArrays: [],//undo된 task의 상태들 저장.물론 3개까지
 
@@ -15,7 +14,7 @@ const redoFunc = {
             beforeTask.push(beforeValue)
         })
         this.undidTaskArrays.push(beforeTask);
-        if(this.undidTaskArrays.length > 3) {
+        if (this.undidTaskArrays.length > 3) {
             this.undidTaskArrays.shift();
         }
     },
@@ -38,7 +37,7 @@ const undoFunc = {
             beforeTask.push(beforeValue)
         })
         this.lastTaskArrays.push(beforeTask);
-        if(this.lastTaskArrays.length > 3) {
+        if (this.lastTaskArrays.length > 3) {
             this.lastTaskArrays.shift();
         }
     }
@@ -51,7 +50,7 @@ const todo = {
     lastDoArrays: [],//이전에 했던 상태 3개 저장
 
     undo() {
-        while(this.lastDoArrays.length > 3) {
+        while (this.lastDoArrays.length > 3) {
             this.lastDoArrays.shift()
         }
         let lastDo = this.lastDoArrays.pop()
@@ -95,32 +94,22 @@ const todo = {
     },
 
     add(objToAdd) {
-        if (!addFunc.checkError(objToAdd, this.task)) {
-            return
-        }
-        this.lastDoArrays.push('add')
-        // undoFunc.getLastTaskArrays(this.task)
-        // immutable개념, spread operator 
-        const notAddedLength = this.task.length
-        const newTodo = {
-            id: addFunc.getRanNum(this.task),
-            name: objToAdd.name,
-            status: 'todo',
-            tag: objToAdd.tag,
-            timeData: 0,
-        }
-        this.task.push(newTodo)
-        this.task = addFunc.initTag(this.task)
-        const addedLength = this.task.length
-        commonFunc.getStatusNum(this.task)
-        commonFunc.printChangeThing(newTodo, addedLength, notAddedLength)
-        commonFunc.printStatusNum()
+        if (!addUtility.checkError(objToAdd, this.task)) return;
+        this.task = addUtility.add(this.task, objToAdd)
     },//해야할일과 id값을 추가해주는 함수
 
+    
+    remove(objToRemove) {
+        if (!removeFunc.checkError(objToRemove, this.task)) return;
+        let filteredTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
+        let removedTask = this.task.filter(taskObj => taskObj.id !== objToRemove.id)
+        this.task = removedTask
+        const removedLength = this.task.length
+        commonFunc.printChangeThing(filteredTask[0], removedLength, notRemovedLength)
+    },//할 일과 id값을 제거해주는 함수
+    
     update(objToUpdate) {
-        if (!updateFunc.checkError(objToUpdate, this.task)) {
-            return;
-        }
+        if (!updateFunc.checkError(objToUpdate, this.task)) return;
         this.lastDoArrays.push('update')
         undoFunc.getLastTaskArrays(this.task)
         let beforeTaskStatus = []
@@ -139,20 +128,6 @@ const todo = {
         commonFunc.printChangeThing(changedTask[0], this.task.length, this.task.length, beforeTaskStatus[0])
         commonFunc.printStatusNum()
     },//상태 업데이트 함수
-
-    remove(objToRemove) {
-        if (!removeFunc.checkError(objToRemove, this.task)) {
-            return;
-        }
-        this.lastDoArrays.push('remove');
-        undoFunc.getLastTaskArrays(this.task);
-        const notRemovedLength = this.task.length
-        let filteredTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
-        let removedTask = this.task.filter(taskObj => taskObj.id !== objToRemove.id)
-        this.task = removedTask
-        const removedLength = this.task.length
-        commonFunc.printChangeThing(filteredTask[0], removedLength, notRemovedLength)
-    },//할 일과 id값을 제거해주는 함수
 
     show(status) {
         if (!showFunc.checkError(status)) {
@@ -216,7 +191,21 @@ const todo = {
 }//해야 할일 객체
 
 
-const addFunc = {
+const addUtility = {
+    add(todoTask, objToAdd) {
+        const newTodo = {
+            id: this.getRanNum(todoTask),
+            name: objToAdd.name,
+            status: 'todo',
+            tag: objToAdd.tag,
+            timeData: 0,
+        }
+        todoTask.push(this.checkTag(newTodo))
+        commonUtility.printChangeThing(newTodo, 'add')
+        commonUtility.printStatusNum(todoTask)
+        return todoTask
+    },
+
     getRanNum(todoTask) {
         const ranNum = Math.floor(Math.random() * 5)
         const idArrays = todoTask.map(obj => obj.id)
@@ -237,18 +226,11 @@ const addFunc = {
         return (checkFalse === 0)
     },
 
-    initTag(todoTask) {
-        todoTask.forEach(taskObj => {
-            if (taskObj.tag === undefined) {
-                taskObj.tag = 'nothing'
-            }
-        })
-        return todoTask
-    },
-
-    getBeforeTask(todoTask) {
-        const beforeTask = todoTask
-        return beforeTask
+    checkTag(newTask) {
+        if(newTask.tag === undefined) {
+            newTask.tag = 'nothing'
+        }
+        return newTask
     },
 };//add메서드 내에 들어가는 메서드들을 따로 모아서 처리하는 객체.
 
@@ -333,7 +315,7 @@ const updateFunc = {
                 }
             }
         })
-        if(!idArrays.includes(objToUpdate.id)) {
+        if (!idArrays.includes(objToUpdate.id)) {
             console.log(`[error] 입력하신 id는 존재하지 않습니다. (입력하신 id : ${objToUpdate.id})`);
             checkFalse++
         }
@@ -423,7 +405,7 @@ const showFunc = {
 }
 
 
-const commonFunc = {
+const commonUtility = {
     statusNum: {
         todo: 0,
         doing: 0,
@@ -443,14 +425,15 @@ const commonFunc = {
         })
     },//
 
-    printStatusNum() {
+    printStatusNum(accumulatedTask) {
+        this.getStatusNum(accumulatedTask)
         console.log(`현재상태 todo : ${this.statusNum.todo}, doing: ${this.statusNum.doing}, done : ${this.statusNum.done}`)
     },//상태를 출력해주는 함수
 
-    printChangeThing(objToPrint, currentTaskLength, beforeTaskLength, beforeTaskStatus) {
-        if (currentTaskLength > beforeTaskLength) {
+    printChangeThing(objToPrint, calledMethod, beforeTaskStatus) {
+        if (calledMethod === 'add') {
             console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 항목이 추가되었습니다.`);
-        } else if (currentTaskLength < beforeTaskLength) {
+        } else if (calledMethod === 'remove') {
             console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 삭제 완료`)
         } else {
             console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 업데이트 되었습니다.`)
@@ -467,8 +450,8 @@ const commonFunc = {
 todo.add({ name: 'c++', tag: 'programming' });
 todo.add({ name: 'OOP', tag: 'programming' })
 todo.add({ name: 'javascript', tag: 'programming' })
-todo.add({name: 'java', tag:'programming'})
-todo.update({id:0, nextstatus:'done'})
+todo.add({ name: 'java', tag: 'programming' })
+todo.update({ id: 0, nextstatus: 'done' })
 todo.undo();
 todo.undo();
 todo.redo();
