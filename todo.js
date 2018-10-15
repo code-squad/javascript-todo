@@ -2,7 +2,7 @@ const todosList = {
     todos : [],
     id : 1,
     add({name, tag}, id, undo){
-        let error = errorCheck.isAddError(name, 'name', undo), lastData;
+        let error = errorCheck.isAddError(this.todos, name, 'name', undo), lastData;
         if(error){ console.log(error); return;}
         this.todos.push({
             name: name,
@@ -12,90 +12,98 @@ const todosList = {
         });
 
         lastData = this.todos.slice(-1).pop();
-        todoMessage.showActiveMessage(['add', lastData.id, name]);
+        dataProcessing.showActiveMessage(this.todos, ['add', lastData.id, name]);
         
         (undo === 'undo')?
-        getData.getLogObject(['add', lastData.id, , lastData.tag, , ], 'undo'): 
-        getData.getLogObject(['add', lastData.id, , lastData.tag, , ]);
+        dataProcessing.makeLogObject(log, ['add', lastData.id, , lastData.tag, , ], 'undo'): 
+        dataProcessing.makeLogObject(log, ['add', lastData.id, , lastData.tag, , ]);
         
         if(!id){this.id++};
     },
     remove({id}, undo){
-        let prevData = getData.getPrevData(id),
-            error = errorCheck.isSameId('remove', id, undo);
+        let prevData = dataProcessing.getPrevData(this.todos, id),
+            error = errorCheck.isSameId(this.todos, 'remove', id, undo);
         if(error){ console.log(error); return; }
 
         this.todos = this.todos.filter((target)=>target.id !== id);
 
-        todoMessage.showActiveMessage(['remove' ,id , prevData.name, prevData.status], undo);
+        dataProcessing.showActiveMessage(this.todos, ['remove' ,id , prevData.name, prevData.status], undo);
         (undo === 'undo')?
-        getData.getLogObject(['remove', id, prevData.name, prevData.tag, , ], 'undo'):
-        getData.getLogObject(['remove', id, prevData.name, prevData.tag, , ]);
+        dataProcessing.makeLogObject(log, ['remove', id, prevData.name, prevData.tag, , ], 'undo'):
+        dataProcessing.makeLogObject(log, ['remove', id, prevData.name, prevData.tag, , ]);
     },
     update({id,  nextStatus}, undo){
-        if(typeof(Object.values(arguments)[0]) === 'string'){
-            parseArr = getData.getStringCheck(arguments);
-            id = +parseArr[0]; nextStatus = parseArr[1];
+        if(typeof arguments[0] === 'string'){
+            parseArr = dataProcessing.getStringCheck(arguments[0]);
+            id = +parseArr[0]; 
+            nextStatus = parseArr[1];
         }
-        let prevData = getData.getPrevData(id),
-            error = errorCheck.isUpdateError(prevData, nextStatus, id, undo) || errorCheck.isSameId('update', id, undo);
+        let prevData = dataProcessing.getPrevData(this.todos, id),
+            error = errorCheck.isUpdateError(prevData, nextStatus, id, undo) || errorCheck.isSameId(this.todos, 'update', id, undo);
             nextStatus = nextStatus.toLowerCase();
         
         if(error){ console.log(error); return; }
 
         this.todos.filter((v)=> v.id === id)
                   .forEach((v)=>{
-                    if(nextStatus === 'doing'){ v.startTime = stopWatch.start(); }
-                    if(nextStatus === 'done' && v.startTime){ v.elapsedTime = stopWatch.stop(v.startTime); }
-                    v.status = nextStatus;      
+                      stopWatch.record(nextStatus, v);
                   });
 
-        todoMessage.showActiveMessage(['update' ,id ,prevData.name, prevData.status, nextStatus]);
+        dataProcessing.showActiveMessage(this.todos, ['update' ,id ,prevData.name, prevData.status, nextStatus]);
         
         (undo === 'undo')?
-        getData.getLogObject(['update', id, prevData.name, prevData.tag, prevData.status, nextStatus], 'undo'):
-        getData.getLogObject(['update', id, prevData.name, prevData.tag, prevData.status, nextStatus]);
+        dataProcessing.makeLogObject(log, ['update', id, prevData.name, prevData.tag, prevData.status, nextStatus], 'undo'):
+        dataProcessing.makeLogObject(log, ['update', id, prevData.name, prevData.tag, prevData.status, nextStatus]);
     },
     showTag(tagName){
-        let requiredData = getData.getRequiredData(this.todos, 'tag', tagName);
-        getData.getPrintFormat(requiredData, 'status');
+        let requiredData = dataProcessing.getRequiredData(this.todos, 'tag', tagName);
+        dataProcessing.printFormat(requiredData, 'status');
     },
     showTags(){
-        let requiredData = getData.getRequiredData(this.todos, 'tag');
-        getData.getPrintFormat(requiredData, 'tag');
+        let requiredData = dataProcessing.getRequiredData(this.todos, 'tag');
+        dataProcessing.printFormat(requiredData, 'tag');
     },
     show(status){
-        let requiredData = getData.getRequiredData(this.todos, 'status', status);
-        getData.getPrintFormat(requiredData, status);
+        let requiredData = dataProcessing.getRequiredData(this.todos, 'status', status);
+        dataProcessing.printFormat(requiredData, status);
     },
     showAll(){
-        let requiredData = getData.getRequiredData(this.todos, 'status');
-        getData.getPrintFormat(requiredData, 'status', 'async');
+        let requiredData = dataProcessing.getRequiredData(this.todos, 'status');
+        dataProcessing.printFormat(requiredData, 'status', 'async');
     },
     undo(){
-        let error = errorCheck.getProcessingError('undo');
-        if(!!error){ console.log(error); return; }
-        
-        let lastData = log.todosLog.pop();
-        getData.getProcessingData(lastData, 'undo');
+        let counter = log.counter;
+        let error = errorCheck.getProcessingError('undo', counter);
+        if(error){ console.log(error); return; }
+
+        let lastData = log.list.todos.pop();
+        this.processData(lastData, 'undo');
         log.decreaseTodosLogCounter();
     },
     redo(){
-        let error = errorCheck.getProcessingError('redo');
-        if(!!error){ console.log(error); return; }
+        let counter = log.counter;
+        let error = errorCheck.getProcessingError('redo', counter);
+        if(error){ console.log(error); return; }
 
-        let lastData = log.undoLog.pop();
-        getData.getProcessingData(lastData, 'redo');
+        let lastData = log.list.undo.pop();
+        this.processData(lastData, 'redo');
         log.decreaseUndoLogCounter();
         log.decreaseRedoLogCounter();
     },  
-    
+    processData(lastData, undo){
+        (lastData.active === 'add')   ?
+            this.remove({id : lastData.id}, undo):
+        (lastData.active === 'remove')?
+            this.add({name : lastData.name, tag : lastData.tag}, lastData.id, undo):
+        (lastData.active === 'update')?
+            this.update({id : lastData.id, nextStatus : lastData.prevStatus}, undo): '';
+    },
 };
 
 const errorCheck = {
-    isAddError(name, key, undo){
+    isAddError(data, name, key, undo){
         let error_check = [];
-        error_check = todosList.todos.filter((v) => v[key] === name);
+        error_check = data.filter((v) => v[key] === name);
         return this.getErrorMessage(['add', error_check.pop()], undo);
     },
     isUpdateError(prevData, nextStatus, id, undo){
@@ -111,27 +119,27 @@ const errorCheck = {
         }
         return this.getErrorMessage(['update', error_check, id, prevData, nextStatus], undo);
     },
-    isSameId(active, id, undo){
+    isSameId(data, active, id, undo){
         let error_check = false;
         let sameId = [];
         if(active === 'remove' || active === 'update'){
-            sameId = todosList.todos.filter((v) => v.id === id).pop();
+            sameId = data.filter((v) => v.id === id).pop();
         }
         if(!sameId){
             error_check = true;
         }
         return this.getErrorMessage(['remove', error_check, id], undo);
     },
-    getProcessingError(processingType){
+    getProcessingError(processingType, counter){
         if(processingType === 'undo'){
-            if(log.undoCounter > 2 ){
+            if(counter.undo > 2 ){
                 return 'undo는 최대 3회 할 수 있습니다.';
             }
-            if(log.todosCounter === 0){
+            if(counter.todos === 0){
                 return 'undo를 할 수 있는 실행과정이 없습니다.';
             }
         } else if(processingType === 'redo') {
-            if(log.undoCounter === 0){
+            if(counter.undo === 0){
                 return '실행된 undo가 없습니다.';
             }
         }
@@ -140,79 +148,46 @@ const errorCheck = {
 
         let error = '';
         if(active === 'add' && error_check){ 
-            error = `${(!!undo)? '[redoError]': '[error]'} todo에는 이미 같은 이름의 task가 존재합니다. `;
+            error = `${(undo)? '[redoError]': '[error]'} todo에는 이미 같은 이름의 task가 존재합니다. `;
         }
         if(active === 'remove' && error_check|| active === 'update' && error_check){
-            error = `${(!!undo)? '[redoError]': '[error]'} ${id} 아이디는 존재하지 않습니다.`;
+            error = `${(undo)? '[redoError]': '[error]'} ${id} 아이디는 존재하지 않습니다.`;
         }
         if(active === 'update'){
-            error = (error_check === 'same')? `${(!!undo)? '[redoError]': '[error]'} ${id}번은 이미 ${nextStatus}입니다. `:
-                    (error_check === 'reverse')? `${(!!undo)? '[redoError]': '[error]'} ${prevData.status} 상태에서 ${nextStatus}상태로 갈 수 없습니다.`:
-                    (error_check === 'jump')? `${(!!undo)? '[redoError]': '[error]'} ${prevData.status}상태에서 바로 ${nextStatus}를 실행할 수 없습니다.`:'';
+            error = (error_check === 'same')? `${(undo)? '[redoError]': '[error]'} ${id}번은 이미 ${nextStatus}입니다. `:
+                    (error_check === 'reverse')? `${(undo)? '[redoError]': '[error]'} ${prevData.status} 상태에서 ${nextStatus}상태로 갈 수 없습니다.`:
+                    (error_check === 'jump')? `${(undo)? '[redoError]': '[error]'} ${prevData.status}상태에서 바로 ${nextStatus}를 실행할 수 없습니다.`:'';
         }
         return error;
     },
 }
 
-const todoMessage = {
-    showActiveMessage([activeType, id, name, status,update_status], undo){
-        (activeType === 'add') ? console.log(`id: ${id} ${name}항목이 새로 추가되었습니다.`) :
-        (activeType === 'remove' && !undo) ? console.log(`id:${id}, ${name} 삭제완료.`) :
-        (activeType === 'remove' && undo) ? console.log(`${id}번, ${name}가 삭제됐습니다`) :
-        (activeType === 'update') ? console.log(`id:${id}, "${name}" 항목이 ${status} => ${update_status} 상태로 업데이트 됐습니다.`) :
-        '';
-        let statusCount = getData.getCurrentStatus(todosList.todos, 'status');
-        console.log(`현재상태 :  todo:${statusCount.todo}개, doing:${statusCount.doing}개, done:${statusCount.done}개`);
-    },
-    showMessage(requiredValueObj, countObj){
-        for(let value in requiredValueObj){
-            if(value !== 'undefined'){
-                console.log(`[ ${value} , 총${countObj[value]}개 ]`);
-            }
-            console.log(`${requiredValueObj[value]}`);
-        }
-    },
-    showAsyncMessage(noticeArr, index=0){
-        (function playLoop() {
-            if(index > 2) return;
-            console.log(noticeArr[index].notice);
-            setTimeout(function() {
-                console.log(noticeArr[index].title);
-                console.log(noticeArr[index].list);
-                index++; 
-                playLoop();
-            }, noticeArr[index].sec);    
-        })();
-    },
-}
-
-const getData = {
-    getPrevData(id){
+const dataProcessing = {
+    getPrevData(data, id){
         let prevData = {
             name: '', 
             id: 0
         };
-       todosList.todos
-                .filter((v) => v.id === id)
-                .forEach((v)=> {
-                    prevData.name = v.name;
-                    prevData.status = v.status;
-                    prevData.id = v.id;
-                    prevData.tag = v.tag;
-                })
+        data.filter((v) => v.id === id)
+            .forEach((v)=> {
+                prevData.name = v.name;
+                prevData.status = v.status;
+                prevData.id = v.id;
+                prevData.tag = v.tag;
+            })
         
         return prevData;
     },
     getCurrentStatus(data, valueType){
-        const countObj =  getData.getDefaultData(todosList.todos, valueType);
+        const countObj =  this.getDefaultData(data, valueType);
         data.forEach((v)=> {
             ++countObj[v[valueType]];
         });
         return countObj;
     },
-    getDefaultData(todosList, valueType){
+    getDefaultData(data, valueType){
         let countObj = (valueType === 'status') ? {todo: 0, doing: 0, done: 0} : {};
-        todosList.forEach((target)=> {
+        data.forEach((target)=> {
             countObj[target[valueType]] = 0;
         });
         return countObj;
@@ -231,7 +206,7 @@ const getData = {
         }, requiredValueObj);
         return requiredValueObj;
     },
-    getPrintFormat(inputData, key, asyncCheck){
+    printFormat(inputData, key, asyncCheck){
         let countObj = this.getCurrentStatus(inputData, key);
         let requiredValueObj = {};
         for(let value in countObj){
@@ -239,7 +214,7 @@ const getData = {
         }
         requiredValueObj = this.getPrintList(inputData, key, requiredValueObj)
         if(asyncCheck) {this.getAsyncData(requiredValueObj, countObj, inputData)}
-        else { todoMessage.showMessage(requiredValueObj, countObj) };
+        else { this.showMessage(requiredValueObj, countObj) };
     },
     getAsyncData(requiredValueObj, countObj){
         let numOfData = this.getCounter(countObj);
@@ -277,67 +252,89 @@ const getData = {
                            (obj.value === 'doing')? `지금부터 ${obj.sec/1000}초뒤에 ${obj.value}내역을 출력합니다....`:
                            (obj.value === 'done') ? `지금부터 ${obj.sec/1000}초뒤에 ${obj.value}내역을 출력합니다.....`: '';
         }
-        todoMessage.showAsyncMessage(noticeArr);
+        this.showAsyncMessage(noticeArr);
     },
-    getLogObject([active, id, name, tag, prevStatus, nextStatus], undo){
+    makeLogObject(logObj, [active, id, name, tag, prevStatus, nextStatus], undo){
         if(undo === 'undo'){
-            log.undoLogList({
+            logObj.undoLogList({
                 active, id, name, tag, prevStatus, nextStatus,
             });
         } else {
-            log.makeLogList({
+            logObj.makeLogList({
                 active, id, name, tag, prevStatus, nextStatus,
             });
         }
     },
-    getProcessingData(lastData, undo){
-        (lastData.active === 'add')   ?
-            todosList.remove({id : lastData.id}, undo):
-        (lastData.active === 'remove')?
-            todosList.add({name : lastData.name, tag : lastData.tag}, lastData.id, undo):
-        (lastData.active === 'update')?
-            todosList.update({id : lastData.id, nextStatus : lastData.prevStatus}, undo): '';
-    },
     getStringCheck(arg){
-        if(typeof(Object.values(arg)[0]) === 'string'){
-            let str = Object.values(arg)[0];
+        if(typeof(arg) === 'string'){
+            let str = arg;
                 arr = str.replace(/\s/g,'')
                          .split("$");
         }
         return arr;
-    }
+    },
+    showActiveMessage(data, [activeType, id, name, status,update_status], undo){
+        (activeType === 'add') ? console.log(`id: ${id} ${name}항목이 새로 추가되었습니다.`) :
+        (activeType === 'remove' && !undo) ? console.log(`id:${id}, ${name} 삭제완료.`) :
+        (activeType === 'remove' && undo) ? console.log(`${id}번, ${name}가 삭제됐습니다`) :
+        (activeType === 'update') ? console.log(`id:${id}, "${name}" 항목이 ${status} => ${update_status} 상태로 업데이트 됐습니다.`) :
+        '';
+        let statusCount = this.getCurrentStatus(data, 'status');
+        console.log(`현재상태 :  todo:${statusCount.todo}개, doing:${statusCount.doing}개, done:${statusCount.done}개`);
+    },
+    showMessage(requiredValueObj, countObj){
+        for(let value in requiredValueObj){
+            if(value !== 'undefined'){
+                console.log(`[ ${value} , 총${countObj[value]}개 ]`);
+            }
+            console.log(`${requiredValueObj[value]}`);
+        }
+    },
+    showAsyncMessage(noticeArr, index=0){
+        (function playLoop() {
+            if(index > 2) return;
+            console.log(noticeArr[index].notice);
+            setTimeout(function() {
+                console.log(noticeArr[index].title);
+                console.log(noticeArr[index].list);
+                index++; 
+                playLoop();
+            }, noticeArr[index].sec);    
+        })();
+    },
 }
 
 const log  = {
-    todosCounter : 0,
-    undoCounter : 0,
-    redoCounter : 0,
-    todosLog : [],
-    undoLog  : [],
+    counter: {
+        todos: 0,
+        undo: 0,
+        redo: 0
+    },
+    list: {
+        todos: [],
+        undo: []
+    },
     makeLogList({active, id, name, tag,status, prevStatus, nextStatus}){
-        this.todosLog.push({
+        this.list.todos.push({
             active, id, name, status, tag, prevStatus, nextStatus
         })
-        this.todosCounter++;
+        this.counter.todos++;
     },
     undoLogList({active, id, name, tag,status, prevStatus, nextStatus}){
-        this.undoLog.push({
+        this.list.undo.push({
             active, id, name, status, tag, prevStatus, nextStatus
         })
-        this.undoCounter++;
-        this.redoCounter++;
+        this.counter.undo++;
+        this.counter.redo++;
     },
     decreaseTodosLogCounter(){
-        this.todosCounter--;
-    },
-    increaseUndoLogCounter(){
-        this.undoCounter++;
+        this.counter.todos--;
     },
     decreaseUndoLogCounter(){
-        this.undoCounter--;
+        this.counter.undo--;
     },
     decreaseRedoLogCounter(){
-        this.redoCounter--;
+        this.counter.redo--;
     },
 }
 
@@ -347,6 +344,11 @@ const stopWatch = {
     },
     stop(start){
         return new Date().getTime() - start;
+    },
+    record(nextStatus, value){
+        if(nextStatus === 'doing'){ value.startTime = stopWatch.start(); }
+        if(nextStatus === 'done' && value.startTime){ value.elapsedTime = stopWatch.stop(value.startTime); }
+        value.status = nextStatus;
     }
 }
 
@@ -406,7 +408,7 @@ todosList.update({id:4,  nextStatus:"doing"});
 console.log();
 console.log("- tag에 따른 결과값");
 console.log();
-todosList.showTag("study");
+todosList.showTag("programming");
 console.log();
 console.log("- 모든 data tag에 따라 출력");
 console.log();
@@ -418,4 +420,4 @@ todosList.show('done');
 console.log();
 console.log("- 데이터 비동기 출력");
 console.log();
-todosList.showAll();
+// todosList.showAll();
