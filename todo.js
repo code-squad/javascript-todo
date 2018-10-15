@@ -8,7 +8,7 @@
 //4. undo와 redo의 밀접한 관계를 위해서 undo만을 위한 새로운 배열이 필요
 //5. 혼자서라도 내 코드를 괴롭혀 보기. 
 const redoFunc = {
-    undidTaskArrays: [],
+    undidTaskArrays: [],//undo된 task의 상태들 저장.물론 3개까지
 
     returnValue(todoTask) {
         todoTask = undidTaskArrays.pop()
@@ -24,16 +24,35 @@ const undoFunc = {
         todoTask = lastTaskArrays.pop()
         return todoTask
     },
+
+    getBeforeValue(todoTask) {
+        const beforeTask = [];
+        todoTask.forEach(taskObj => {
+            beforeValue = {
+                id: taskObj.id,
+                name: taskObj.name,
+                status: taskObj.status,
+                tag: taskObj.tag,
+                timeData: taskObj.timeData,
+            }
+            beforeTask.push(beforeValue)
+        })
+        this.lastTaskArrays.push(beforeTask);
+        if(this.lastTaskArrays.length > 3) {
+            this.lastTaskArrays.shift();
+        }
+    }
 };
 
 
 const todo = {
     task: [],
+
     lastDoArrays: [],//이전에 했던 상태 3개 저장
 
     undo() {
         const lastDo = lastDoArrays.pop()
-        if(lastDo = 'add') {
+        if (lastDo = 'add') {
             //할때마다 배열에 추가 
         } else if (lastDo = 'remove') {
 
@@ -52,6 +71,8 @@ const todo = {
         if (!addFunc.checkError(objToAdd, this.task)) {
             return
         }
+        this.lastDoArrays.push('add')
+        undoFunc.getBeforeValue(this.task)
         const notAddedLength = this.task.length
         const newTodo = {
             id: addFunc.getRanNum(this.task),
@@ -72,6 +93,8 @@ const todo = {
         if (!updateFunc.checkError(objToUpdate, this.task)) {
             return;
         }
+        this.lastDoArrays.push('update')
+        undoFunc.getBeforeValue(this.task)
         let beforeTaskStatus = []
         let changedTask = []
         this.task = this.task.map(taskObj => {
@@ -93,6 +116,8 @@ const todo = {
         if (!removeFunc.checkError(objToRemove, this.task)) {
             return;
         }
+        this.lastDoArrays.push('remove');
+        undoFunc.getBeforeValue(this.task);
         const notRemovedLength = this.task.length
         let filteredTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
         let removedTask = this.task.filter(taskObj => taskObj.id !== objToRemove.id)
@@ -191,7 +216,12 @@ const addFunc = {
             }
         })
         return todoTask
-    }
+    },
+
+    getBeforeTask(todoTask) {
+        const beforeTask = todoTask
+        return beforeTask
+    },
 };//add메서드 내에 들어가는 메서드들을 따로 모아서 처리하는 객체.
 
 
@@ -401,16 +431,12 @@ const commonFunc = {
 
 
 todo.add({ name: 'c++', tag: 'programming' });
-todo.add({ name: 'test11', tag: 'test' });
-todo.add({ name: 'test11', tag: 'test' });
-todo.add({ name: 'test3' });
-todo.add({ name: 'test4', tag: 'test4' });
-todo.add({ name: 'test5', tag: 'test5' });
-todo.remove({id:3})
-todo.update({id:4, nextstatus:'doing'})
-todo.showTag();
-todo.showTags();
-todo.show("doing");
+todo.add({ name: 'OOP', tag: 'programming' })
+todo.add({ name: 'javascript', tag: 'programming' })
+todo.add({name: 'java', tag:'programming'})
+todo.remove({id : 3})
+console.log(undoFunc.lastTaskArrays)
+console.log(todo.task)
 
 // todo.update({ id: 3, nextstatus: 'doing' })
 // todo.update({ id: 3, nextstatus: 'doing' })
