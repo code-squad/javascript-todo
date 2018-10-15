@@ -13,7 +13,7 @@ const todo = {
         const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
         const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
         if (statusToUpdate === 'doing') {
-            let doingTime = new Date().getTime();                                                                                                                                  
+            let doingTime = new Date().getTime();
             taskToUpdate.doingTime = doingTime;
             this.printUpdate(taskToUpdate, statusToUpdate);
         }
@@ -21,7 +21,7 @@ const todo = {
         if (statusToUpdate === 'done') {
             let takenTime = (new Date().getTime() - taskToUpdate.doingTime) / 1000;
             takenTime = this.getTakenTimeWithUnit(takenTime);
-            taskToUpdate.takenTime = takenTime; 
+            taskToUpdate.takenTime = takenTime;
             delete taskToUpdate.doingTime;
             this.printUpdate(taskToUpdate, statusToUpdate);
         }
@@ -136,15 +136,22 @@ const todo = {
     },
 
     show(status) {
-        let showStatus = status.trim().toLowerCase();
+        let showStatus = status.replace(/ /g,"").toLowerCase();
+        console.log(`상태가 ${showStatus}인 task(s):`);
         for (const values of this.taskList) {
-            if (values.status === showStatus && showStatus !== 'done') {
-                console.log(`- ${values.id}번, ${values.name}, [${values.tag}]`);
-            }
-            if (values.status === showStatus && showStatus === 'done') {
-                console.log(`- ${values.id}번, ${values.name}, [${values.tag}], ${values.takenTime}`);
-            }
+            if (values.status !== showStatus) continue;
+            if (showStatus === 'done') {
+                this.printShow(values, showStatus);
+            };
+            this.printShow(values, showStatus);
         }
+    },
+
+    printShow(values, showStatus) {
+        if (showStatus === 'done') {
+            console.log(`- ${values.id}번, ${values.name}, [${values.tag}], ${values.takenTime}`)
+        };
+        console.log(`- ${values.id}번, ${values.name}, [${values.tag}]`);
     },
 
     showAll() {
@@ -236,21 +243,21 @@ todo.update({
     nextstatus: "DOING"
 });
 
-todo.update({
-    id: todo.taskList[1].id,
-    nextstatus: "done"
-});
+// todo.update({
+//     id: todo.taskList[1].id,
+//     nextstatus: "done"
+// });
 
-todo.remove({
-    id: todo.taskList[0].id,
-});
+// todo.remove({
+//     id: todo.taskList[0].id,
+// });
 
-todo.showTag('health');
+// todo.showTag('health');
 
-todo.showTags();
+// todo.showTags();
 
-todo.show("done ")
+todo.show("   do i ng")
 
-todo.showAll();
+// todo.showAll();
 
-todo.showAllPrint(todo.taskList);
+// todo.showAllPrint(todo.taskList);
