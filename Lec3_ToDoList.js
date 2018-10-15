@@ -1,10 +1,11 @@
 const todo = {
     taskList: [],
+    
     add(task) {
         task.status = 'todo';
         task.id = Date.now() + Math.random();
         this.taskList.push(task);
-        let [todoCount, doingCount, doneCount] = this.CountStatus(this.taskList);
+        let [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
         console.log(`id : ${task.id}, "${task.name}" 항목이 새로 추가되었습니다.
 현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
     },
@@ -69,7 +70,7 @@ const todo = {
         console.log(
             `id : ${taskToUpdate.id}, "${taskToUpdate.name}" 항목이 (${taskToUpdate.status} => ${statusToUpdate}) 상태로 업데이트되었습니다.`);
         taskToUpdate.status = statusToUpdate;
-        let [todoCount, doingCount, doneCount] = this.CountStatus(this.taskList);
+        let [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
         console.log(`현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개`);
     },
 
@@ -82,7 +83,7 @@ const todo = {
         }
     },
 
-    CountStatus(taskList) {
+    countStatus(taskList) {
         let [todo, doing, done] = [0, 0, 0];
         for (const values of taskList) {
             if (values.status === 'todo') {
@@ -111,20 +112,20 @@ const todo = {
 
     showTag(tag) {
         const result = this.taskList.filter(value => value.tag === tag);
-        const [todoCount, doingCount, doneCount] = this.CountStatus(result);
+        const [todoCount, doingCount, doneCount] = this.countStatus(result);
         console.log(`tag가 "${tag}"인 할 일: `);
         if (todoCount !== 0) {
-            this.showTagPrint('todo', result, todoCount);
+            this.printShowTag('todo', result, todoCount);
         }
         if (doingCount !== 0) {
-            this.showTagPrint('doing', result, doingCount);
+            this.printShowTag('doing', result, doingCount);
         }
         if (doneCount !== 0) {
-            this.showTagPrint('done', result, doneCount);
+            this.printShowTag('done', result, doneCount);
         }
     },
 
-    showTagPrint(status, result, statusCount) {
+    printShowTag(status, result, statusCount) {
         console.log(`[${status}, 총 ${statusCount}개]`);
         const taskWithSameStatus = result.filter(value => value.status === status);
         taskWithSameStatus.forEach(function (task) {
@@ -162,25 +163,25 @@ const todo = {
     },
 
     showAll() {
-        const [todoCount, doingCount, doneCount] = this.CountStatus(this.taskList);
+        const [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
         console.log(`총 ${todoCount + doingCount + doneCount}개의 리스트를 가져왔습니다. 2초 뒤에 todo 내역을 출력합니다...`);
         const statusOrder = ['todo', 'doing', 'done'];
-        const CountOrder = [todoCount, doingCount, doneCount];
+        const countOrder = [todoCount, doingCount, doneCount];
         const timeOrder = [2000, 3000, 2000]
-        this.setTime(statusOrder, CountOrder, timeOrder, 0);
+        this.setTime(statusOrder, countOrder, timeOrder, 0);
     },
 
-    setTime(statusOrder, CountOrder, timeOrder, n) {
+    setTime(statusOrder, countOrder, timeOrder, n) {
         setTimeout(function () {
             if (n > 2) {
                 return;
             }
-            console.log(`[${statusOrder[n]}, 총 ${CountOrder[n]}개]`);
-            this.showAllPrint(this.sortTaskByStatus(statusOrder[n]));
+            console.log(`[${statusOrder[n]}, 총 ${countOrder[n]}개]`);
+            this.printShowAll(this.sortTaskByStatus(statusOrder[n]));
             if (n < 2) {
                 console.log(`\n 지금부터 ${timeOrder[n+1]/1000}초 뒤에 ${statusOrder[n+1]} 내역을 출력합니다...`);
             }
-            this.setTime(statusOrder, CountOrder, timeOrder, n + 1)
+            this.setTime(statusOrder, countOrder, timeOrder, n + 1)
         }.bind(this), timeOrder[n]);
     },
 
@@ -194,7 +195,7 @@ const todo = {
         return tasks;
     },
 
-    showAllPrint(arr) {
+    printShowAll(arr) {
         arr.forEach(function (task) {
             if (!task.takenTime) {
                 console.log(`- ${task.id}번, ${task.name}, [${task.tag}]`);
@@ -247,16 +248,16 @@ todo.update({
     nextstatus: "done"
 });
 
-// todo.remove({
-//     id: todo.taskList[0].id,
-// });
+todo.remove({
+    id: todo.taskList[0].id,
+});
 
-// todo.showTag('health');
+todo.showTag('health');
 
-// todo.showTags();
+todo.showTags();
 
-// todo.show("DONE")
+todo.show("DONE")
 
 todo.showAll();
 
-// todo.showAllPrint(todo.taskList);
+todo.printShowAll(todo.taskList);
