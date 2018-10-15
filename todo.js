@@ -15,9 +15,8 @@ const todosList = {
         dataProcessing.showActiveMessage(this.todos, ['add', lastData.id, name]);
         
         (undo === 'undo')?
-        dataProcessing.makeLogObject(log, ['add', lastData.id, , lastData.tag, , ], 'undo'): 
-        dataProcessing.makeLogObject(log, ['add', lastData.id, , lastData.tag, , ]);
-        
+        dataProcessing.makeLogObject(log, {active:'add', id:lastData.id, tag:lastData.tag}, 'undo'): 
+        dataProcessing.makeLogObject(log, {active:'add', id:lastData.id, tag:lastData.tag});
         if(!id){this.id++};
     },
     remove({id}, undo){
@@ -29,8 +28,8 @@ const todosList = {
 
         dataProcessing.showActiveMessage(this.todos, ['remove' ,id , prevData.name, prevData.status], undo);
         (undo === 'undo')?
-        dataProcessing.makeLogObject(log, ['remove', id, prevData.name, prevData.tag, , ], 'undo'):
-        dataProcessing.makeLogObject(log, ['remove', id, prevData.name, prevData.tag, , ]);
+        dataProcessing.makeLogObject(log, {active:'remove', id, name:prevData.name, tag:prevData.tag}, 'undo'):
+        dataProcessing.makeLogObject(log, {active:'remove', id, name:prevData.name, tag:prevData.tag});
     },
     update({id,  nextStatus}, undo){
         if(typeof arguments[0] === 'string'){
@@ -52,8 +51,8 @@ const todosList = {
         dataProcessing.showActiveMessage(this.todos, ['update' ,id ,prevData.name, prevData.status, nextStatus]);
         
         (undo === 'undo')?
-        dataProcessing.makeLogObject(log, ['update', id, prevData.name, prevData.tag, prevData.status, nextStatus], 'undo'):
-        dataProcessing.makeLogObject(log, ['update', id, prevData.name, prevData.tag, prevData.status, nextStatus]);
+        dataProcessing.makeLogObject(log, {active:'update', id, name:prevData.name, tag:prevData.tag, prevStatus:prevData.status, nextStatus}, 'undo'):
+        dataProcessing.makeLogObject(log, {active:'update', id, name:prevData.name, tag:prevData.tag, prevStatus:prevData.status, nextStatus});
     },
     showTag(tagName){
         let requiredData = dataProcessing.getRequiredData(this.todos, 'tag', tagName);
@@ -254,7 +253,7 @@ const dataProcessing = {
         }
         this.showAsyncMessage(noticeArr);
     },
-    makeLogObject(logObj, [active, id, name, tag, prevStatus, nextStatus], undo){
+    makeLogObject(logObj, {active, id, name, tag, prevStatus, nextStatus}, undo){
         if(undo === 'undo'){
             logObj.undoLogList({
                 active, id, name, tag, prevStatus, nextStatus,
@@ -420,4 +419,4 @@ todosList.show('done');
 console.log();
 console.log("- 데이터 비동기 출력");
 console.log();
-// todosList.showAll();
+todosList.showAll();
