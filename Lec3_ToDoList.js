@@ -164,35 +164,26 @@ const todo = {
     showAll() {
         const [todoCount, doingCount, doneCount] = this.CountStatus(this.taskList);
         console.log(`총 ${todoCount + doingCount + doneCount}개의 리스트를 가져왔습니다. 2초 뒤에 todo 내역을 출력합니다...`);
+        const statusOrder = ['todo', 'doing', 'done'];
+        const CountOrder = [todoCount, doingCount, doneCount];
+        const timeOrder = [2000, 3000, 2000]
+        this.setTime(statusOrder, CountOrder, timeOrder, 0);
+    },
 
+    setTime(statusOrder, CountOrder, timeOrder, n) {
         setTimeout(function () {
-            console.log(`[todo, 총 ${todoCount}개]`);
-            let todoTasks = this.sortTaskByStatus('todo');
-            this.showAllPrint(todoTasks);
-            console.log(`\n 지금부터 3초 뒤에 doing 내역을 출력합니다...`);
-
-            setTimeout(function () {
-                console.log(`[doing, 총 ${doingCount}개]`);
-                let doingTasks = this.sortTaskByStatus('doing');
-                this.showAllPrint(doingTasks);
-                console.log(`\n 지금부터 2초 뒤에 done 내역을 출력합니다...`);
-
-                setTimeout(function () {
-                    console.log(`[done, 총 ${doneCount}개]`);
-                    let doneTasks = this.sortTaskByStatus('done');
-                    this.showAllPrint(doneTasks);
-
-                }.bind(this), 2000);
-
-            }.bind(this), 3000);
-
-        }.bind(this), 2000);
+            if (n > 2) {
+                return;
+            }
+            console.log(`[${statusOrder[n]}, 총 ${CountOrder[n]}개]`);
+            this.showAllPrint(this.sortTaskByStatus(statusOrder[n]));
+            if (n < 2) {
+                console.log(`\n 지금부터 ${timeOrder[n+1]/1000}초 뒤에 ${statusOrder[n+1]} 내역을 출력합니다...`);
+            }
+            this.setTime(statusOrder, CountOrder, timeOrder, n + 1)
+        }.bind(this), timeOrder[n]);
     },
 
-
-    showAllTime() {
-
-    },
     sortTaskByStatus(status) {
         let tasks = [];
         for (const values of this.taskList) {
@@ -264,8 +255,8 @@ todo.update({
 
 // todo.showTags();
 
-todo.show("DONE")
+// todo.show("DONE")
 
-// todo.showAll();
+todo.showAll();
 
 // todo.showAllPrint(todo.taskList);
