@@ -1,47 +1,47 @@
 const todoData = {
     task: [],
-    
-    lastDoArrays: [],//이전에 했던 상태 3개 저장
-    
-    redo() {
 
+    lastDoArrays: [],//이전에 했던 상태 3개 저장
+
+    redo() {
+        this.task = redoUtility.redo(this.task, undoUtility.undidTaskArrays.pop())
     },
 
     undo() {
         this.task = undoUtility.undo(this.task, this.lastDoArrays.pop())
     },
-    
+
     add(objToAdd) {
         if (!errorCheck.add(objToAdd, this.task)) return;
         this.task = addUtility.add(this.task, objToAdd)
         this.lastDoArrays = lastDoData.lastDoDataArrays
     },//해야할일과 id값을 추가해주는 함수
-    
+
     remove(objToRemove) {
         if (!errorCheck.remove(objToRemove, this.task)) return;
         this.task = removeUtility.remove(this.task, objToRemove)
         this.lastDoArrays = lastDoData.lastDoDataArrays
     },//할 일과 id값을 제거해주는 함수
-    
+
     update(objToUpdate) {
         if (!errorCheck.update(objToUpdate, this.task)) return;
         this.task = updateUtility.update(this.task, objToUpdate)
         this.lastDoArrays = lastDoData.lastDoDataArrays
     },//상태 업데이트 함수
-    
+
     show(status) {
         if (!errorCheck.show(status)) return;
         showUtility.show(this.task, status)
     },//인자로 입력받은 상태의 정보들을 출력해주는 함수
-    
+
     showTag(tag) {
         showTagUtility.showTag(this.task, tag)
     },//입력받은 태그의 정보들을 출력해주는 기능
-    
+
     showTags() {
         showTagsUtility.showTags(this.task)
     },//태그에 따라 모든 값을 출력해주는 기능
-    
+
     showAll() {
         showUtility.showAll(this.task)
     },//입력된 정보들의 상태에 따라 시간차로 출력해주는 기능
@@ -49,14 +49,67 @@ const todoData = {
 
 
 const redoUtility = {
-    
+    redo(todoTask, undidTask) {
+        if (undidTask !== undefined) {
+            todoTask = undidTask
+            console.log(`이전 undo값이 없던 일이 되었습니다.`)
+            return todoTask
+        } else {
+            console.log(`undo한 값이 없습니다.`)
+        }
+    }
 };
 
 
 const undoUtility = {
-    undo(todoTask, lastDo) {
+    undidTaskArrays: [],
 
-    }
+    undo(todoTask, lastDo) {
+        if (lastDo.method === 'add') {
+            this.undidTaskArrays.push(todoTask)
+            return this.undoAdd(todoTask, lastDo)
+        } else if (lastDo.method === 'remove') {
+            this.undidTaskArrays.push(todoTask)
+            return this.undoRemove(todoTask, lastDo)
+        } else if (lastDo.method === 'update') {
+            this.undidTaskArrays.push(todoTask)
+            return this.undoUpdate(todoTask, lastDo)
+        } else {
+            console.log(`undo는 3번까지만 가능합니다.`)
+        }
+    },
+
+    undoAdd(todoTask, lastDo) {
+        commonUtility.printChangeThing(lastDo.addedData, 'remove')
+        todoTask = removeUtility.getRemovedTask(todoTask, { id: lastDo.addedData.id })
+        return todoTask
+    },
+
+    undoRemove(todoTask, lastDo) {
+        todoTask.push(lastDo.removedData)
+        commonUtility.printChangeThing(lastDo.removedData, 'add')
+        this.undidTaskArrays.push(todoTask)
+        return todoTask
+    },
+
+    undoUpdate(todoTask, lastDo) {
+        todoTask = this.resetUpdate(todoTask, lastDo)
+        commonUtility.printChangeThing(lastDo.beforeTask, 'update', lastDo.currentStatus)
+        this.undidTaskArrays.push(todoTask)
+        return todoTask
+    },
+
+    resetUpdate(todoTask, beforeTask) {
+        todoTask = todoTask.map(taskObj => {
+            if (beforeTask.id === taskObj.id) {
+                taskObj.status = beforeTask.status
+                taskObj.timeData = beforeTask.timeData
+                return taskObj
+            }
+            return taskObj
+        })
+        return todoTask
+    },
 };
 
 
@@ -72,7 +125,7 @@ const addUtility = {
         todoTask.push(this.checkTag(newTodo))
         commonUtility.printChangeThing(newTodo, 'add')
         commonUtility.printStatusNum(todoTask)
-        lastDoData.getStatusData(newTodo.id, 'add')
+        lastDoData.getAddedData(newTodo.id, newTodo)
         return todoTask
     },
 
@@ -97,8 +150,8 @@ const addUtility = {
 const removeUtility = {
     remove(todoTask, objToRemove) {
         commonUtility.printChangeThing(this.getFilteredTask(todoTask, objToRemove)[0], 'remove')
+        lastDoData.getRemovedData(objToRemove.id, this.getFilteredTask(todoTask, objToRemove)[0])
         todoTask = this.getRemovedTask(todoTask, objToRemove)
-        lastDoData.getRemove(objToRemove.id, 'remove')
         return todoTask
     },
 
@@ -118,11 +171,11 @@ const removeUtility = {
 
 const updateUtility = {
     update(todoTask, objToUpdate) {
-        let beforeTaskStatus = [];
+        let beforeTaskData = [];
         let changedTask = [];
         todoTask = todoTask.map(taskObj => {
             if (objToUpdate.id === taskObj.id) {
-                beforeTaskStatus.push(taskObj.status)
+                beforeTaskData.push({ id: taskObj.id, name: taskObj.name, status: taskObj.status, timeData: taskObj.timeData })
                 taskObj.status = objToUpdate.nextstatus.toLowerCase().replace(/ /gi, "")
                 changedTask.push(taskObj)
                 return taskObj
@@ -131,8 +184,8 @@ const updateUtility = {
         })
         todoTask = this.checkUpdateStatus(objToUpdate, todoTask)
         commonUtility.printStatusNum(todoTask)
-        commonUtility.printChangeThing(changedTask[0], 'update', beforeTaskStatus[0])
-        lastDoData.getUpdate(objToUpdate.id, 'update')
+        commonUtility.printChangeThing(changedTask[0], 'update', beforeTaskData[0].status)
+        lastDoData.getUpdatedData(objToUpdate.id, beforeTaskData[0], changedTask[0].status)
         return todoTask
     },
 
@@ -210,7 +263,7 @@ const showTagUtility = {
     printByTag(tag, status, todoTask) {
         const filteredTask = todoTask.filter(taskObj => taskObj.tag === tag && taskObj.status === status)
         filteredTask.forEach(filteredObj => {
-            if(status === 'done') {
+            if (status === 'done') {
                 console.log(`ID : ${filteredObj.id}, ${filteredObj.name}, ${filteredObj.timeData}`)
                 return;
             }
@@ -347,7 +400,7 @@ const commonUtility = {
 
 const errorCheck = {
     add(objToAdd, todoTask) {
-        if((todoTask.filter(taskObj => taskObj.name === objToAdd.name)).length !== 0){
+        if ((todoTask.filter(taskObj => taskObj.name === objToAdd.name)).length !== 0) {
             console.log(`[error] 할 일 리스트에 같은 이름의 할 일이 존재합니다.`)
             return false
         };
@@ -389,14 +442,24 @@ const errorCheck = {
 }//문제상황이 발생했을 때 에러를 반환하는 메서드들의 모음
 
 const lastDoData = {
-    lastDoDataArrays:[],
-    getStatusData(idValue, status) {
-        this.lastDoDataArrays.push({id:idValue, status:status})
-        this.lastDoDataArrays = this.checkArraysLength(this.lastDoDataArrays)
+    lastDoDataArrays: [],
+    getAddedData(idValue, addedData) {
+        this.lastDoDataArrays.push({ id: idValue, method: 'add', addedData: addedData });
+        this.lastDoDataArrays = this.checkArraysLength(this.lastDoDataArrays);
+    },
+
+    getRemovedData(idValue, removedData) {
+        this.lastDoDataArrays.push({ id: idValue, method: 'remove', removedData: removedData });
+        this.lastDoDataArrays = this.checkArraysLength(this.lastDoDataArrays);
+    },
+
+    getUpdatedData(idValue, beforeTask, currentStatus) {
+        this.lastDoDataArrays.push({ id: idValue, method: 'update', beforeTask: beforeTask, currentStatus: currentStatus })
+        this.lastDoDataArrays = this.checkArraysLength(this.lastDoDataArrays);
     },
 
     checkArraysLength(array) {
-        if(array.length > 3) {
+        if (array.length > 3) {
             array.shift()
         }
         return array
@@ -407,24 +470,15 @@ const lastDoData = {
 
 
 
-todoData.add({ name: 'c++', tag: 'programming' });
-todoData.add({ name: 'c++', tag: 'programming' })
-todoData.add({ name: 'javascript', tag: 'programming' })
-todoData.add({ name: 'java' })
-todoData.remove({ id: 0 })
-
-
-todoData.update({ id: 15, nextstatus: 'doing' })
-todoData.update({ id: 3, nextstatus: 'doing' })
-todoData.update({ id: 3, nextstatus: 'done' })
-todoData.remove({ id: 15 });
-todoData.show('done')
-todoData.show('nothing')
-todoData.showTag('awfe');
-todoData.showTag();
-todoData.show('doing');
-todoData.show('nothingei')
-todoData.show('todo')
+todoData.add({ name: 't1', tag: 'programming' });
+todoData.add({ name: 't2', tag: 'programming' })
+todoData.add({ name: 't3', tag: 'programming' })
+todoData.add({ name: 't4' })
+todoData.add({ name: 't5' })
+todoData.undo();
+todoData.undo();
+todoData.redo();
+console.log(todoData.task)
 
 
 
