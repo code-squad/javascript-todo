@@ -178,7 +178,7 @@ const todo = {
             console.log(`[${statusOrder[n]}, 총 ${CountOrder[n]}개]`);
             this.showAllPrint(this.sortTaskByStatus(statusOrder[n]));
             if (n < 2) {
-                console.log(`\n 지금부터 ${timeOrder[n+1]/1000}초 뒤에 ${statusOrder[n+1]} 내역을 출력합니다...`);
+                console.log(`\n 지금부터 ${timeOrder[n + 1] / 1000}초 뒤에 ${statusOrder[n + 1]} 내역을 출력합니다...`);
             }
             this.setTime(statusOrder, CountOrder, timeOrder, n + 1)
         }.bind(this), timeOrder[n]);
@@ -196,11 +196,11 @@ const todo = {
 
     showAllPrint(arr) {
         arr.forEach(function (task) {
-            if (!task.takenTime) {
-                console.log(`- ${task.id}번, ${task.name}, [${task.tag}]`);
-            } else if (task.takenTime) {
+            if (task.takenTime) {
                 console.log(`- ${task.id}번, ${task.name}, [${task.tag}], ${task.takenTime}`)
-            };
+            } else if (!task.takenTime) {
+                console.log(`- ${task.id}번, ${task.name}, [${task.tag}]`);
+            }
         });
     }
 }
@@ -247,16 +247,16 @@ todo.update({
     nextstatus: "done"
 });
 
-// todo.remove({
-//     id: todo.taskList[0].id,
-// });
+todo.remove({
+    id: todo.taskList[0].id,
+});
 
-// todo.showTag('health');
+todo.showTag('health');
 
-// todo.showTags();
+todo.showTags();
 
-// todo.show("DONE")
+todo.show("DONE")
 
 todo.showAll();
 
-// todo.showAllPrint(todo.taskList);
+todo.showAllPrint(todo.taskList);
