@@ -49,61 +49,16 @@ const todo = {
 
     lastDoArrays: [],//이전에 했던 상태 3개 저장
 
-    undo() {
-        while (this.lastDoArrays.length > 3) {
-            this.lastDoArrays.shift()
-        }
-        let lastDo = this.lastDoArrays.pop()
-        if (lastDo === 'add') {
-            redoFunc.getUndidTaskArrays(this.task)
-            const beforeTask = undoFunc.lastTaskArrays.pop()
-            const addedTask = this.task[beforeTask.length]
-            console.log(`ID : ${addedTask.id}, ${addedTask.name}가 다시 제거되었습니다.`);
-            this.task = beforeTask
-        } else if (lastDo === 'remove') {
-            redoFunc.getUndidTaskArrays(this.task)
-            const beforeTask = undoFunc.lastTaskArrays.pop()
-            const taskIdArrays = [];
-            this.task.forEach(obj => {
-                taskIdArrays.push(obj.id)
-            })
-            const removedTask = beforeTask.filter((obj, index) => {
-                return obj.id !== taskIdArrays[index]
-            })
-            console.log(`ID : ${removedTask[0].id}, ${removedTask[0].name}이 다시 추가되었습니다.`)
-            this.task = beforeTask
-        } else if (lastDo === 'update') {
-            redoFunc.getUndidTaskArrays(this.task)
-            const beforeTask = undoFunc.lastTaskArrays.pop()
-            const notUpdatedTask = beforeTask.filter((obj, index) => {
-                return beforeTask[index].status !== this.task[index].status
-            })
-            const updatedTask = this.task.filter((obj, index) => {
-                return this.task[index].status !== beforeTask[index].status
-            })
-            console.log(`ID : ${updatedTask[0].id}, ${updatedTask[0].name}의 상태가 다시 ${updatedTask[0].status} => ${notUpdatedTask[0].status}로 다시 변경되었습니다.`)
-            this.task = beforeTask
-        } else {
-            console.log(`undo는 3번이 한계입니다. 한계라구요..`)
-        }
-    },
-
-    redo() {
-        this.task = redoFunc.undidTaskArrays.pop()
-        console.log(`undo된 일을 되돌렸습니다.`)
-    },
-
     add(objToAdd) {
         if (!checkError.add(objToAdd, this.task)) return;
         this.task = addUtility.add(this.task, objToAdd)
     },//해야할일과 id값을 추가해주는 함수
 
-    
     remove(objToRemove) {
         if (!checkError.remove(objToRemove, this.task)) return;
         this.task = removeUtility.remove(this.task, objToRemove)
     },//할 일과 id값을 제거해주는 함수
-    
+
     update(objToUpdate) {
         if (!checkError.update(objToUpdate, this.task)) return;
         this.task = updateUtility.update(this.task, objToUpdate)
@@ -115,7 +70,7 @@ const todo = {
     },//인자로 입력받은 상태의 정보들을 출력해주는 함수
 
     showTag(tag) {
-        showTagUtility.showTag(tag, this.task)
+        showTagUtility.showTag(this.task, tag)
     },
 
     showTags() {
@@ -153,7 +108,7 @@ const addUtility = {
     },//중복되지 않는 랜덤한 숫자를뽑아내는 함수
 
     checkTag(newTask) {
-        if(newTask.tag === undefined) {
+        if (newTask.tag === undefined) {
             newTask.tag = 'nothing'
         }
         return newTask
@@ -167,7 +122,7 @@ const removeUtility = {
         todoTask = this.getRemovedTask(todoTask, objToRemove)
         return todoTask
     },
-    
+
     getRemovedTask(todoTask, objToRemove) {
         return todoTask.filter(taskObj => {
             return taskObj.id !== objToRemove.id
@@ -178,8 +133,8 @@ const removeUtility = {
         return todoTask.filter(taskObj => {
             return taskObj.id === objToRemove.id
         })
-    }
-}
+    },
+}//remove메서드 내에 들어가는 메서드들을 따로 모아서 처리하는 객체
 
 
 const updateUtility = {
@@ -187,9 +142,9 @@ const updateUtility = {
         let beforeTaskStatus = [];
         let changedTask = [];
         todoTask = todoTask.map(taskObj => {
-            if(objToUpdate.id === taskObj.id) {
+            if (objToUpdate.id === taskObj.id) {
                 beforeTaskStatus.push(taskObj.status)
-                taskObj.status = objToUpdate.nextstatus.toLowerCase().replace(/ /gi,"")
+                taskObj.status = objToUpdate.nextstatus.toLowerCase().replace(/ /gi, "")
                 changedTask.push(taskObj)
                 return taskObj
             }
@@ -250,15 +205,15 @@ const updateUtility = {
 
 const showTagUtility = {
     showTag(todoTask, tag) {
-        if(tag !== undefined) {
-            console.log(`태그가 [${tag}]인 할 일들`)
+        if (tag !== undefined) {
+            console.log(`--태그가 [${tag}]인 할 일들--`)
             this.printResult(tag, todoTask)
             return;
         }
-        console.log(`태그가 없는 할 일들`)
+        console.log(`--태그가 없는 할 일들--`)
         this.printResult('nothing', todoTask)
     },
-    
+
     printResult(tag, todoTask) {
         const todoNum = this.getSameTagAndStatusNum(tag, 'todo', todoTask)
         console.log(`[todo, 총 ${todoNum}개]`)
@@ -268,21 +223,20 @@ const showTagUtility = {
         this.printByTag(tag, 'doing', todoTask);
         const doneNum = this.getSameTagAndStatusNum(tag, 'done', todoTask)
         console.log(`[done, 총 ${doneNum}개]`)
-        showTagFunc.printByTag(tag, 'done', todoTask);
+        this.printByTag(tag, 'done', todoTask);
         return;
     },
 
     printByTag(tag, status, todoTask) {
-        todoTask.forEach(taskObj => {
-            if (taskObj.tag === tag && taskObj.status === status) {
-                if (status === 'done') {
-                    console.log(`ID : ${taskObj.id}, ${taskObj.name}, ${taskObj.timeData}`)
-                    return;
-                }
-                console.log(`ID : ${taskObj.id}, ${taskObj.name}`)
+        const filteredTask = todoTask.filter(taskObj => taskObj.tag === tag && taskObj.status === status)
+        filteredTask.forEach(filteredObj => {
+            if(status === 'done') {
+                console.log(`ID : ${filteredObj.id}, ${filteredObj.name}, ${filteredObj.timeData}`)
+                return;
             }
+            console.log(`ID : ${filteredObj.id}, ${filteredObj.name}`)
         })
-    },//tag의 값과 상태의 값을 인자로 받아 출력해주는 함수
+    },
 
     getSameTagAndStatusNum(tag, status, todoTask) {
         let sameTagAndStatusNum = 0
@@ -320,7 +274,7 @@ const showTagsUtility = {
     },//현재 task배열 내에있는 모든 tag값들을 중복 없이 따로 모아놓는 배열을 만드는 함수
 
     printSameTag(tag, taggedTask, sameTagNum) {
-        console.log(`${tag}, 총 ${sameTagNum}개`)
+        console.log(`--[${tag}], 총 ${sameTagNum}개--`)
         taggedTask.forEach(taggedTaskObj => {
             if (tag === taggedTaskObj.tag) {
                 console.log(`ID : ${taggedTaskObj.id}, ${taggedTaskObj.name}, [${taggedTaskObj.status}]`)
@@ -342,9 +296,9 @@ const showTagsUtility = {
 
 const showUtility = {
     show(todoTask, status) {
-        console.log(`[${status} 상태인 할 일들]`);
+        console.log(`--${status} 상태인 할 일들--`);
         todoTask.forEach(taskObj => {
-            if(status === 'done' && taskObj.status === 'done') {
+            if (status === 'done' && taskObj.status === 'done') {
                 console.log(`ID : ${taskObj.id}, ${taskObj.name}, [${taskObj.tag}], ${taskObj.timeData}`)
             } else if (taskObj.status === status) {
                 console.log(`ID : ${taskObj.id}, ${taskObj.name}, [${taskObj.tag}]`)
@@ -357,11 +311,11 @@ const showUtility = {
         console.log(`총 ${todoTask.length}개의 리스트를 가져왔습니다.`)
         this.setTime(todoTask, 'todo')
     },
-    
+
     setTime(todoTask, status) {
-        setTimeout(function() {
+        setTimeout(function () {
             this.show(todoTask, status)
-            if(status === 'todo') {
+            if (status === 'todo') {
                 status = 'doing'
                 this.setTime(todoTask, status)
             } else if (status === 'doing') {
@@ -408,54 +362,50 @@ const commonUtility = {
             console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 업데이트 되었습니다.`)
         }
     },//할일이 추가되거나 제거되거나 업데이트 될 때 적합한 내용을 출력해 주는 함수
-};//todo의 메서드들이 중복적으로 사용하는 메서드들을 따로 모아서 처리
+};//Utility에서 공통적으로 사용되는 메서드들의 모음
 
 const checkError = {
     add(objToAdd, todoTask) {
-        let checkFalse = 0
-        todoTask.forEach(taskObj => {
-            if (taskObj.name === objToAdd.name) {
-                console.log(`[error] 할 일 리스트에 같은 이름의 할 일이 존재합니다.`)
-                checkFalse++
-            }
-        })
-        return (checkFalse === 0)
+        if((todoTask.filter(taskObj => taskObj.name === objToAdd.name)).length !== 0){
+            console.log(`[error] 할 일 리스트에 같은 이름의 할 일이 존재합니다.`)
+            return false
+        };
+        return true
     },
 
     remove(objToRemove, todoTask) {
-        let checkFalse = 0
-        if(!todoTask.map(taskObj => taskObj.id).includes(objToRemove.id)) {
+        if (!todoTask.map(taskObj => taskObj.id).includes(objToRemove.id)) {
             console.log(`[error] 입력하신 id는 존재하지 않습니다. (입력하신 id : ${objToRemove.id})`);
-            checkFalse++
-        }
-        return (checkFalse === 0)
-    },
-
-    update(objToUpdate, todoTask) {
-        let checkFalse = 0
-        const compareTask = todoTask.filter(taskObj => objToUpdate.id === taskObj.id)
-        if(compareTask[0].status === objToUpdate.nextstatus) {
-            console.log(`[error] 이미 ${objToUpdate.nextstatus}인 상태입니다.`)
-            checkFalse++
-        } else if(compareTask[0].status === 'done' && objToUpdate.nextstatus === 'doing') {
-            console.log(`[error] ${compareTask[0].status}상태에서 ${objToUpdate.nextstatus}상태로 되돌아갈 수 없습니다.`)
-            checkFalse++
-        }
-        if(!todoTask.map(taskObj => taskObj.id).includes(objToUpdate.id)) {
-            console.log(`[error] 입력하신 id는 존재하지 않습니다. (입력하신 id : ${objToUpdate.id})`);
-            checkFalse++
-        }
-        return (checkFalse === 0)
-    },
-
-    show(status) {
-        if (status !== 'doing' && status !== 'done' && status !== 'todo') {
-            console.log(`[error] 할 일 들의 상태는 todo나 doing이나 done이어야만 합니다.`)
             return false
         }
         return true
     },
-}
+
+    update(objToUpdate, todoTask) {
+        const compareTask = todoTask.filter(taskObj => objToUpdate.id === taskObj.id)
+        if (!todoTask.map(taskObj => taskObj.id).includes(objToUpdate.id)) {
+            console.log(`[error] 입력하신 id는 존재하지 않습니다. (입력하신 id : ${objToUpdate.id})`);
+            return false
+        }
+        if (compareTask[0].status === objToUpdate.nextstatus) {
+            console.log(`[error] 이미 ${objToUpdate.nextstatus}인 상태입니다.`)
+            return false
+        } else if (compareTask[0].status === 'done' && objToUpdate.nextstatus === 'doing') {
+            console.log(`[error] ${compareTask[0].status}상태에서 ${objToUpdate.nextstatus}상태로 되돌아갈 수 없습니다.`)
+            return false
+        }
+        return true
+    },
+
+    show(status) {
+        if (status !== 'doing' && status !== 'done' && status !== 'todo') {
+            console.log(`[error] 할 일 들의 상태는 todo나 doing이나 done이어야만 합니다.
+모든 일들을 보고싶다면 todo.showAll()을 입력해 주세요.`);
+            return false
+        }
+        return true
+    },
+}//문제상황이 발생했을 때 에러를 반환하는 메서드들의 모음
 
 
 // 테스트
@@ -466,23 +416,22 @@ const checkError = {
 todo.add({ name: 'c++', tag: 'programming' });
 todo.add({ name: 'c++', tag: 'programming' })
 todo.add({ name: 'javascript', tag: 'programming' })
-todo.add({ name: 'java', tag: 'programming' })
-todo.update({ id: 0, nextstatus: 'done' })
-todo.remove({id:3})
-todo.showAll();
+todo.add({ name: 'java' })
+todo.remove({ id: 0 })
 
-// todo.update({ id: 3, nextstatus: 'doing' })
-// todo.update({ id: 3, nextstatus: 'doing' })
-// todo.update({ id: 3, nextstatus: 'done' })
-// todo.remove({ id: 15 });
-// todo.show('done')
-// todo.show('nothing')
-// todo.showTag('awfe');
-// todo.showTag();
-// todo.show('doing');
-// todo.show('nothingei')
-// todo.show('todo')
-// todo.showAll();
+
+todo.update({ id: 15, nextstatus: 'doing' })
+todo.update({ id: 3, nextstatus: 'doing' })
+todo.update({ id: 3, nextstatus: 'done' })
+todo.remove({ id: 15 });
+todo.show('done')
+todo.show('nothing')
+todo.showTag('awfe');
+todo.showTag();
+todo.show('doing');
+todo.show('nothingei')
+todo.show('todo')
+
 
 
 
