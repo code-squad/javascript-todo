@@ -12,12 +12,7 @@ const todo = {
     update(updateObj) {
         const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
         const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
-        if (statusToUpdate === 'doing') {
-            this.executeUpdate(taskToUpdate, statusToUpdate);
-        }
-        if (statusToUpdate === 'done') {
-            this.executeUpdate(taskToUpdate, statusToUpdate);
-        }
+        this.executeUpdate(taskToUpdate, statusToUpdate);
     },
 
     executeUpdate(taskToUpdate, statusToUpdate) {
