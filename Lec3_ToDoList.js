@@ -1,12 +1,14 @@
 const todo = {
     taskList: [],
     add(task) {
-        task.status = 'todo';
-        task.id = Date.now() + Math.random();
-        this.taskList.push(task);
-        let [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
-        console.log(`id : ${task.id}, "${task.name}" 항목이 새로 추가되었습니다.
+        if (errorCheck.add(task)) {
+            task.status = 'todo';
+            task.id = Date.now() + Math.random();
+            this.taskList.push(task);
+            let [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
+            console.log(`id : ${task.id}, "${task.name}" 항목이 새로 추가되었습니다.
 현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
+        }
     },
 
     update(updateObj) {
@@ -200,7 +202,24 @@ const todo = {
     }
 }
 
+
+const errorCheck = {
+    add(task) {
+        for (const values of todo.taskList) {
+            if (values.name === task.name) {
+                console.log(`[error] 이미 같은 이름에 task가 존재합니다.`);
+                return false;
+            }
+        }
+        return true;
+    }
+}
 //test
+todo.add({
+    name: "자바스크립트 공부하기",
+    tag: "programming"
+});
+
 todo.add({
     name: "자바스크립트 공부하기",
     tag: "programming"
@@ -211,25 +230,25 @@ todo.add({
     tag: "programming"
 });
 
-todo.add({
-    name: "요가하기",
-    tag: "health"
-});
+// todo.add({
+//     name: "요가하기",
+//     tag: "health"
+// });
 
-todo.add({
-    name: "명상하기",
-    tag: "health"
-});
+// todo.add({
+//     name: "명상하기",
+//     tag: "health"
+// });
 
-todo.add({
-    name: "독서하기",
-    tag: "reading"
-});
+// todo.add({
+//     name: "독서하기",
+//     tag: "reading"
+// });
 
-todo.add({
-    name: "기타치기",
-    tag: "music"
-});
+// todo.add({
+//     name: "기타치기",
+//     tag: "music"
+// });
 
 
 todo.update({
@@ -246,12 +265,12 @@ todo.remove({
     id: todo.taskList[0].id,
 });
 
-todo.showTag('health');
+// todo.showTag('health');
 
-todo.showTags();
+// todo.showTags();
 
-todo.show("DONE")
+// todo.show("DONE")
 
-todo.showAll();
+// todo.showAll();
 
-todo.printShowAll(todo.taskList);
+// todo.printShowAll(todo.taskList);
