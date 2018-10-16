@@ -77,7 +77,7 @@ const todo = {
         }
     },
 
-    CountStatus(taskList) {
+    countStatus(taskList) {
         let [todo, doing, done] = [0, 0, 0];
         for (const values of taskList) {
             if (values.status === 'todo') {
