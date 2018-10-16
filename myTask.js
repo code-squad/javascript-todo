@@ -1,7 +1,7 @@
 
-// 할 일 관리 어플리케이션 step2 
+// 할일 관리 애플리케이션 step3 modified2
 
-// 네임 스페이스
+// 할일 추가, 업데이트, 삭제 기능 객체
 const todo = {
 
     // 할일 목록
@@ -12,7 +12,6 @@ const todo = {
 
     // 현재 상태 출력
     showStatus() {
-        const result = {};
         const countMap = {
             todo: 0,
             doing: 0,
@@ -21,37 +20,62 @@ const todo = {
         this.todoList.forEach(val => {
             countMap[val.status] === 0 ? countMap[val.status] = 1 : countMap[val.status]++
         });
-        console.log(`현재상태 : todo:${countMap.todo}개, doing:${countMap.doing}개, done:${countMap.done}개\n\n`);
+        console.log(`"현재상태 : todo:${countMap.todo}개, doing:${countMap.doing}개, done:${countMap.done}개"\n\n`);
     },
 
     // 할일 추가
     addTodo(todoInfo) {
+        if (checkError.checkIsSameName.call(this, todoInfo)) return; // 에러 검출 메소드 호출
         const info = todoInfo;
+        let recentHistory; // 변경 후 내역(할일 추가)
         this.taskId++;
+
         info.taskId = this.taskId;
         info.status = "todo";
-        info.addedTime = new Date().getTime(); // 할일을 추가한 시간 기록
+        info.addedTime = new Date().getTime(); // 할일 추가 시간 기록
+
         this.todoList.push(info);
-        console.log(`id: ${info.taskId}, "${info.name}" 항목이 새로 추가되었습니다.`);
+        for (let val in info) {
+            recentHistory = {
+                taskId: info.taskId, name: info.name, tag: info.tag, status: info.status,
+                addedTime: info.addedTime, startTime: info.startTime, endTime: info.endTime, runningTime: info.runningTime
+            };
+        }
+        printMsgTodo.printAddTodo(info.taskId, info.name); // 메시지 출력
+        manageStack.moveUndoStack(info.taskId, "added", null, recentHistory); // 할일 추가시 undo 스택에 내역 전달 
         this.showStatus();
     },
 
     // 할일 업데이트
     updateTodo(updateInfo) {
-        const info = updateInfo;
-        let prevStatus;
-        let taskName;
-        info.nextStatus = info.nextStatus.toLowerCase(); // 상태를 소문자로 변경하고 대치
-        this.todoList.filter(val => val.taskId === info.id)   // 인자로 넘겨받은 아이디와 할일리스트의 아이디가 같은 것을 필터링
-            .forEach(val => {
-                taskName = val.name;  // 할일리스트의 이름 다른 변수에 저장(콘솔 출력을 위해)
-                prevStatus = val.status; // 할일리스트의 상태를 이전 상태 변수에 저장
-                val.status = info.nextStatus; // 인자로 넘겨받은 상태를 할일리스트의 상태 변수에 저장
-                this.recordTime(val); // 경과시간 계산 메소드 호출
-            });
-        console.log(`id: ${info.id}, "${taskName}" 항목이 ${prevStatus} => ${info.nextStatus} 상태로 업데이트 됐습니다.`
-        );
+        this.info = updateInfo;
+        this.info.nextStatus = this.info.nextStatus.toLowerCase(); // 상태를 소문자로 변경하고 대치
+
+        // 에러 검출 메소드 호출
+        if (checkError.checkNotFoundId.call(this, this.info)) return;
+        if (checkError.checkIsSameStatus.call(this, this.info)) return;
+        if (checkError.checkInvalidUpdate.call(this, this.info)) return;
+
+        this.todoList.filter(val => val.taskId === this.info.id)
+            .forEach(this.updateTaskCb.bind(this));
+        printMsgTodo.printUpdateTodo(this.info.id, this.taskName, this.prevStatus, this.info.nextStatus); // 메시지 출력 
+        manageStack.moveUndoStack(this.info.id, "updated", this.prevHistory, this.recentHistory); // 할일 업데이트 시 undo 스택에 내역 전달 
         this.showStatus();
+    },
+
+    updateTaskCb(val) {
+        this.taskName = val.name;
+        this.prevHistory = {
+            name: val.name, tag: val.tag, taskId: val.taskId, status: val.status,
+            addedTime: val.addedTime, startTime: val.startTime, endTime: val.endTime, runningTime: val.runningTime
+        };
+        this.prevStatus = val.status;
+        val.status = this.info.nextStatus; // 상태 업데이트
+        this.recordTime(val); // 경과시간 계산 메소드 호출
+        this.recentHistory = {
+            name: val.name, tag: val.tag, taskId: val.taskId, status: val.status,
+            addedTime: val.addedTime, startTime: val.startTime, endTime: val.endTime, runningTime: val.runningTime
+        };
     },
 
     // 업데이트 시 시작시간, 종료시간 기록
@@ -73,30 +97,105 @@ const todo = {
     // 기록된 시간을 바탕으로 경과시간 계산(종료시간 - 시작시간)
     calRunningTime(addedOrStartTime, endTime) {
         let interval = endTime - addedOrStartTime;
-        let days = Math.floor(interval / (1000 * 60 * 60 * 24)); // 경과시간 구하기(일) 
+        let days = Math.floor(interval / (1000 * 60 * 60 * 24)); // 경과시간 계산(일) 
         interval -= days * (1000 * 60 * 60 * 24);
-        let hours = Math.floor(interval / (1000 * 60 * 60)); // 경과시간 구하기(시간)
+        let hours = Math.floor(interval / (1000 * 60 * 60)); // 경과시간 계산(시간)
         interval -= hours * (1000 * 60 * 60);
-        let minutes = Math.floor(interval / (1000 * 60)); // 경과시간 구하기(분)
+        let minutes = Math.floor(interval / (1000 * 60)); // 경과시간 계산(분)
         interval -= minutes * (1000 * 60);
-        let seconds = Math.floor(interval / 1000); // 경과시간 구하기(초)
+        let seconds = Math.floor(interval / 1000); // 경과시간 계산(초)
 
         return `${days != 0 ? `${days}일` : ""} ${hours != 0 ? `${hours}시간` : ""} ${minutes != 0 ? `${minutes}분` : ""} ${seconds != 0 ? `${seconds}초` : ""}`.trim();
     },
 
-    // 할 일 삭제 메소드
+    // 할 일 삭제
     removeTodo(removeInfo) {
+        if (checkError.checkNotFoundId.call(this, removeInfo)) return;
         const info = removeInfo;
+        const prevHistory = this.todoList.filter(val => val.taskId === info.id)[0];
         let filterdTodo = this.todoList.filter((val) =>
             val.taskId === info.id
         );
-        if (filterdTodo.length === 0) console.log(`해당 아이디(${info.id}번)에 대한 할일을 찾을 수 없습니다.`);
-        if (filterdTodo.length !== 0) {
-            let taskName = filterdTodo[0].name;
-            this.todoList.splice(this.todoList.indexOf(filterdTodo[0]), 1);
-            console.log(`id: ${info.id}, "${taskName}" 삭제완료`);
-        }
+        let taskName = filterdTodo[0].name;
+        this.todoList.splice(this.todoList.indexOf(filterdTodo[0]), 1);
+        printMsgTodo.printRemoveTodo(info.id, taskName); // 메시지 출력
+        manageStack.moveUndoStack(info.id, "removed", prevHistory, null); // 삭제 내역 기록
         this.showStatus();
+    },
+
+    // (스택)undo 기능 
+    undo() { // 변경 후 상태를 변경 전 상태로 대치 
+        this.endIndex = manageStack.undoStack.length - 1
+        if (manageStack.undoStack.length != 0) { // 스택이 차지 않았을 경우 코드 실행
+            this.searchId = manageStack.undoStack[this.endIndex].taskId; // 해당 ID 찾기
+            this.statusLog = manageStack.undoStack[this.endIndex].statusLog;
+
+            this.todoList.forEach(this.replaceBackCb.bind(this));
+
+            if (this.statusLog === "removed") {
+                todo.todoList.push(manageStack.undoStack[this.endIndex].prevHistory);
+                printMsgUndoRedo.printUndoMsgRecovered(this.searchId, manageStack.undoStack[this.endIndex].prevHistory.name); // 메시지 출력
+            }
+            manageStack.redoStack.unshift(manageStack.undoStack.splice(this.endIndex, 1)[0]); // redo 스택으로 이동 
+            let stackLimit = 3;
+            manageStack.manageRedoStack(stackLimit) //  redo 스택 횟수 초과시 마지막 내역 삭제
+        } else if (manageStack.undoStack.length === 0) { // 스택이 꽉 찰 경우 undo 불가
+            console.log(`"더 이상 undo할 수 없습니다."`)
+        }
+    },
+
+    // (스택)undo forEach 콜백
+    replaceBackCb(val, idx) {
+        if (val.taskId === this.searchId && this.statusLog === "updated") {
+            this.todoList[idx] = manageStack.undoStack[this.endIndex].prevHistory;
+            printMsgUndoRedo.printUndoMsgUpdated( // 메시지 출력
+                this.searchId, manageStack.undoStack[this.endIndex].prevHistory.name,
+                manageStack.undoStack[this.endIndex].recentHistory.status, manageStack.undoStack[this.endIndex].prevHistory.status
+            );
+        }
+        if (val.taskId === this.searchId && this.statusLog === "added") {
+            this.todoList.splice(idx, 1);
+            printMsgUndoRedo.printUndoMsgRemoved(this.searchId, manageStack.undoStack[this.endIndex].recentHistory.name); // 메시지 출력
+        }
+    },
+
+    // (스택)redo 기능 
+    redo() { // 다시 변경 후 상태로 대치 
+        if (manageStack.redoStack.length != 0) { // 스택이 차지 않았을 경우 코드 실행
+            this.searchId = manageStack.redoStack[0].taskId;
+            this.statusLog = manageStack.redoStack[0].statusLog;
+
+            todo.todoList.forEach(this.replaceAgainCb.bind(this));
+
+            if (this.statusLog === "added") {
+                this.todoList.push(manageStack.redoStack[0].recentHistory);
+                printMsgUndoRedo.printRedoMsgAdded(this.searchId, manageStack.redoStack[0].recentHistory.name); // 메시지 출력
+                this.showStatus()
+            }
+            manageStack.undoStack.push(manageStack.redoStack.splice(0, 1)[0]); // undo 스택으로 이동
+        } else if (manageStack.redoStack.length === 0) {  // 스택이 꽉 찰 경우 redo 불가
+            console.log(`"더 이상 redo할 수 없습니다."`);
+        }
+    },
+
+    // (스택)redo forEach 콜백
+    replaceAgainCb(val, idx) {
+        if (val.taskId === this.searchId && this.statusLog === "updated") {
+            this.todoList[idx] = manageStack.redoStack[0].recentHistory;
+            printMsgUndoRedo.printRedoMsgUpdated( // 메시지 출력
+                this.searchId, manageStack.redoStack[0].prevHistory.name,
+                manageStack.redoStack[0].prevHistory.status, manageStack.redoStack[0].recentHistory.status
+            );
+            this.showStatus()
+        }
+        if (val.taskId === this.searchId && this.statusLog === "removed") {
+            todo.todoList.splice(idx, 1);
+            printMsgUndoRedo.printRedoMsgRemoved( // 메시지 출력
+                this.searchId, manageStack.redoStack[0].prevHistory.name,
+                manageStack.redoStack[0].prevHistory.status
+            );
+            this.showStatus()
+        }
     },
 
     // 특정 태그를 기준으로 할일 리스트 생성
@@ -107,13 +206,13 @@ const todo = {
             done: []
         }
         this.todoList.filter(val => val.tag === tagName)
-                     .forEach(val => {
-                        val.status === "todo" ? listObj.todo.push(val)
-                            : val.status === "doing" ? listObj.doing.push(val)
-                                : val.status === "done" ? listObj.done.push(val) : undefined;
+            .forEach(val => {
+                val.status === "todo" ? listObj.todo.push(val)
+                    : val.status === "doing" ? listObj.doing.push(val)
+                        : val.status === "done" ? listObj.done.push(val) : undefined;
             });
-        this.sortByTaskId(listObj);
-        this.printListByTag(listObj);
+        printList.sortByTaskId(listObj);
+        printList.printListByTag(listObj);
     },
 
     // 모든 태그를 기준으로 할일 리스트 생성
@@ -127,9 +226,42 @@ const todo = {
                     listObj[val.tag].push(val);
                 }
             });
-        this.sortByTaskId(listObj);
-        this.printListByAlltheTags(listObj);
+        printList.sortByTaskId(listObj);
+        printList.printListByAlltheTags(listObj);
     },
+
+    // 현재 상태에 따른 할일 리스트 생성 및 출력
+    showListByStatus(status) {
+        todo.todoList.filter(val => val.status === status)
+            .sort((a, b) => a.taskId - b.taskId) // id 순으로 정렬
+            .forEach(val =>
+                console.log(`- ${val.taskId}번, ${val.name}, [${val.tag}]${val.status === "done" ? `, 경과시간: ${val.runningTime}` : ""}`)
+            )
+    },
+
+    // 모든 현재 상태에 따른 할일 리스트 생성
+    showAllListByStatus() {
+        const listObj = {
+            todo: [],
+            doing: [],
+            done: []
+        }
+        this.todoList.forEach(val => {
+            val.status === "todo" ? listObj.todo.push(val)
+                : val.status === "doing" ? listObj.doing.push(val)
+                    : val.status === "done" ? listObj.done.push(val) : undefined;
+        });
+        this.taskTotalCount = listObj.todo.length + listObj.doing.length + listObj.done.length;
+        printList.sortByTaskId(listObj);
+        printList.generateSetTimeout(listObj);
+    },
+
+} // end todo
+
+
+
+// 리스트 출력(태그,상태,일괄) 기능 객체
+const printList = {
 
     // 생성된 할일 리스트를 아이디 순서로 정렬
     sortByTaskId(listObj) {
@@ -162,35 +294,9 @@ const todo = {
         }
     },
 
-    // 현재 상태에 따른 할일 리스트 생성 및 출력
-    showListByStatus(status) {
-        this.todoList.filter(val => val.status === status)
-            .sort((a, b) => a.taskId - b.taskId) // id 순으로 정렬
-            .forEach(val =>
-                console.log(`- ${val.taskId}번, ${val.name}, [${val.tag}]${val.status === "done" ? `, 경과시간: ${val.runningTime}` : ""}`)
-            )
-    },
-
-    // 모든 현재 상태에 따른 할일 리스트 생성
-    showAllListByStatus() {
-        const listObj = {
-            todo: [],
-            doing: [],
-            done: []
-        }
-        this.todoList.forEach(val => {
-            val.status === "todo" ? listObj.todo.push(val)
-                : val.status === "doing" ? listObj.doing.push(val)
-                    : val.status === "done" ? listObj.done.push(val) : undefined;
-        });
-        this.taskTotalCount = listObj.todo.length + listObj.doing.length + listObj.done.length;
-        this.sortByTaskId(listObj);
-        this.generateSetTimeout(listObj);
-    },
-
     // 리스트 지연출력 설정
     generateSetTimeout(listObj) {
-        console.log(`"총 ${this.taskTotalCount}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다....."`);
+        console.log(`"총 ${todo.taskTotalCount}개의 리스트를 가져왔습니다. 2초뒤에 todo내역을 출력합니다....."`);
 
         let repeatCount = 0;
         let milliSec = 2000;
@@ -198,7 +304,7 @@ const todo = {
 
         function repeatSelf(listObj) {
             setTimeout(() => {
-                todo.printListBySetTimeout(listObj, status);
+                printList.printListBySetTimeout(listObj, status);
                 if (repeatCount === 2) return; // 재귀 종료조건
                 repeatCount === 0 ? milliSec = 3000 : repeatCount === 1 ? milliSec = 2000 : "";
                 repeatCount === 0 ? status = "doing" : repeatCount === 1 ? status = "done" : "";
@@ -209,7 +315,6 @@ const todo = {
         }
         repeatSelf(listObj);
     },
-
 
     // 설정된 지연시간에 따라 리스트 출력
     printListBySetTimeout(listObj, status) {
@@ -224,7 +329,157 @@ const todo = {
         });
     },
 
-} // end todo
+} // end printList
+
+
+
+// 에러 검출 기능 객체
+const checkError = {
+
+    // (에러 검출)존재하지 않는 아이디의 할일 삭제시 에러 메시지 출력 
+    checkNotFoundId(target) {
+        const resultCheckId = this.todoList.every(val => val.taskId !== target.id);
+        if (resultCheckId) {
+            console.log(`"[error] ${target.id}번 아이디는 존재하지 않습니다."`)
+            return true;
+        } else {
+            return false;
+        }
+    },
+
+    // (에러 검출)같은 이름의 할일 추가시 에러 메시지 출력
+    checkIsSameName(target) {
+        const resultCheckSameName = this.todoList.some(val => val.name === target.name);
+        if (resultCheckSameName) {
+            console.log(`"[error] 이미 같은 이름의 할일이 존재합니다."`)
+            return true;
+        } else {
+            return false;
+        }
+    },
+
+    // (에러 검출)같은 상태로 업데이트하려는 경우 에러 메시지 출력
+    checkIsSameStatus(target) {
+        const resultCheckSameStatus = this.todoList.filter(val => val.taskId === target.id)
+            .filter(val => val.status === target.nextStatus).length === 1;
+        if (resultCheckSameStatus) {
+            console.log(`"[error] ${target.id}번은 이미 ${target.nextStatus}입니다."`)
+            return true;
+        } else {
+            return false;
+        }
+    },
+
+    // (에러 검출)부적절한 상태로 업데이트하려는 경우 에러 메시지 출력
+    checkInvalidUpdate(target) {
+        const resultCheckInvalidUpdate = 
+                this.todoList.filter(val => val.taskId === target.id)
+                            .filter(val =>
+                                (val.status === "done" && target.nextStatus === "doing") ||
+                                (val.status === "done" && target.nextStatus === "todo")
+                            ).length === 1; 
+        if (resultCheckInvalidUpdate){
+            console.log(`"[error] done 상태에서 ${target.nextStatus} 상태로 갈 수 없습니다."`)
+            return true;
+        } else {
+            return false;
+        }
+    },
+
+} // end checkError
+
+
+
+// undo, redo 스택 관리 객체
+const manageStack = {
+
+    // undo 스택
+    undoStack: [],
+
+    // redo 스택
+    redoStack: [],
+
+    // (스택) 활동 내역에 대한 변경전, 변경후 상태를 undo스택에 추가
+    moveUndoStack(taskId, statusLog, prevHistory, recentHistory) {
+        logObj = {};
+        logObj.taskId = taskId;
+        logObj.statusLog = statusLog;
+        logObj.prevHistory = prevHistory;
+        logObj.recentHistory = recentHistory;
+        let stackLimit = 3; // 스택 길이 제한 설정
+        this.manageUndoStack(logObj, stackLimit);
+    },
+
+    // (스택)undo스택 관리
+    manageUndoStack(logObj, stackLimit) {
+        if (this.undoStack.length < stackLimit) {
+            this.undoStack.push(logObj);
+        } else if (this.undoStack.length >= stackLimit) {
+            this.undoStack.splice(0, 1);
+            this.undoStack.push(logObj);
+        }
+    },
+
+    // (스택)redo스택 관리
+    manageRedoStack(stackLimit) {
+        if (this.redoStack.length > stackLimit) {
+            this.redoStack.splice(this.redoStack.length - 1, 1);
+        }
+    },
+
+} // end manageStack 
+
+
+
+// 할일 추가, 업데이트, 삭제 메시지 출력 기능 객체
+const printMsgTodo = {
+
+    printAddTodo(...args) {
+        console.log(`"id: ${args[0]}, '${args[1]}' 항목이 새로 추가되었습니다."`);
+    },
+
+    printUpdateTodo(...args) {
+        console.log(`"id: ${args[0]}, '${args[1]}' 항목이 ${args[2]} => ${args[3]} 상태로 업데이트되었습니다."`);
+    },
+
+    printRemoveTodo(...args) {
+        console.log(`"id: ${args[0]}, '${args[1]}' 삭제완료"`);
+    }
+
+} // end printMsgTodo
+
+
+
+// undo, redo 결과 메시지 출력 기능 객체 
+const printMsgUndoRedo = {
+
+    printUndoMsgRecovered(...args) {
+        console.log(`"${args[0]}번, '${args[1]}' 항목을 복구했습니다."`);
+    },
+
+    printUndoMsgUpdated(...args) {
+        console.log(`"${args[0]}번, '${args[1]}' 항목이 ${args[2]} => ${args[3]} 상태로 업데이트 복구되었습니다."`);
+    },
+
+    printUndoMsgRemoved(...args) {
+        console.log(`"${args[0]}번, '${args[1]}'(이)가 삭제되었습니다."`);
+    },
+
+    printRedoMsgAdded(...args) {
+        console.log(`"${args[0]}번, '${args[1]}' 항목이 다시 추가되었습니다."`);
+    },
+
+    printRedoMsgUpdated(...args) {
+        console.log(`"${args[0]}번, '${args[1]}' 항목이 ${args[2]} => ${args[3]} 상태로 다시 업데이트되었습니다."`);
+    },
+
+    printRedoMsgRemoved(...args) {
+        console.log(`"${args[0]}번, '${args[1]}'(이)가 ${args[2]}상태에서 다시 삭제되었습니다."`);
+    }
+
+} // end printMsgUndoRedo
+
+
 
 // 메소드 호출 및 실행 
 
@@ -246,12 +501,15 @@ todo.addTodo({ name: "현대사 읽기", tag: "study" });
 
 // 할일 업데이트
 // todo => doing
+// todo.updateTodo({ id: 1, nextStatus: "DoinG" });
 // todo.updateTodo({ id: 2, nextStatus: "DoinG" });
 // todo.updateTodo({ id: 3, nextStatus: "DoinG" });
 // todo.updateTodo({ id: 5, nextStatus: "DoinG" });
 // todo.updateTodo({ id: 7, nextStatus: "dOiNg" });
 
 // doing => done
+
+// todo.updateTodo({ id: 1, nextStatus: "DoNe" });
 // todo.updateTodo({ id: 2, nextStatus: "DoNe" });
 // todo.updateTodo({ id: 3, nextStatus: "DoNe" });
 // todo.updateTodo({ id: 5, nextStatus: "DoNe" });
@@ -277,4 +535,4 @@ todo.addTodo({ name: "현대사 읽기", tag: "study" });
 // todo.showListByStatus("doing");
 // todo.showListByStatus("done");
 
-todo.showAllListByStatus(); 
+//todo.showAllListByStatus(); 
