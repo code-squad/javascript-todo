@@ -101,19 +101,11 @@ const todo = {
     
     remove(objToRemove) {
         if (!removeFunc.checkError(objToRemove, this.task)) return;
-        let filteredTask = this.task.filter(taskObj => taskObj.id === objToRemove.id)
-        let removedTask = this.task.filter(taskObj => taskObj.id !== objToRemove.id)
-        this.task = removedTask
-        const removedLength = this.task.length
-        commonFunc.printChangeThing(filteredTask[0], removedLength, notRemovedLength)
+        this.task = removeUtility.remove(this.task, objToRemove)
     },//할 일과 id값을 제거해주는 함수
     
     update(objToUpdate) {
         if (!updateFunc.checkError(objToUpdate, this.task)) return;
-        this.lastDoArrays.push('update')
-        undoFunc.getLastTaskArrays(this.task)
-        let beforeTaskStatus = []
-        let changedTask = []
         this.task = this.task.map(taskObj => {
             if (objToUpdate.id === taskObj.id) {
                 beforeTaskStatus.push(taskObj.status)
@@ -235,7 +227,7 @@ const addUtility = {
 };//add메서드 내에 들어가는 메서드들을 따로 모아서 처리하는 객체.
 
 
-const removeFunc = {
+const removeUtility = {
     checkError(objToRemove, todoTask) {
         let checkFalse = 0
         todoTask.forEach(taskObj => {
@@ -249,10 +241,36 @@ const removeFunc = {
         }
         return true
     },
+    
+    remove(todoTask, objToRemove) {
+        commonUtility.printChangeThing(this.getFilteredTask(todoTask, objToRemove)[0], 'remove')
+        todoTask = this.getRemovedTask(todoTask, objToRemove)
+        return todoTask
+    },
+    
+    getRemovedTask(todoTask, objToRemove) {
+        return todoTask.filter(taskObj => {
+            return taskObj.id !== objToRemove.id
+        })
+    },
+
+    getFilteredTask(todoTask, objToRemove) {
+        return todoTask.filter(taskObj => {
+            return taskObj.id === objToRemove.id
+        })
+    }
 }
 
 
-const updateFunc = {
+const updateUtility = {
+    update(todoTask, objToUpdate) {
+        todoTask.map(taskObj => {
+            if(objToUpdate.id === taskObj.id) {
+                taskObj.status = objToUpdate.nextstatus.toLowerCase().replace(/ /gi,"")
+            }
+        })
+    },
+
     checkUpdateStatus(objToUpdate, todoTask) {
         if (objToUpdate.nextstatus === 'doing') {
             return this.updateDoingTime(objToUpdate, todoTask)
