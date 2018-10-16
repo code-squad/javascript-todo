@@ -12,9 +12,11 @@ const todo = {
     },
 
     update(updateObj) {
-        const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
-        const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
-        this.executeUpdate(taskToUpdate, statusToUpdate);
+        if (errorCheck.update(updateObj)) {
+            const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
+            const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
+            this.executeUpdate(taskToUpdate, statusToUpdate);
+        }
     },
 
     executeUpdate(taskToUpdate, statusToUpdate) {
@@ -206,8 +208,18 @@ const todo = {
 const errorCheck = {
     add(task) {
         for (const values of todo.taskList) {
-            if (values.name === task.name) {
+            if (task.name === values.name) {
                 console.log(`[error] 이미 같은 이름에 task가 존재합니다.`);
+                return false;
+            }
+        }
+        return true;
+    },
+    update(updateObj) {
+        const statusToUpdate = updateObj.nextstatus.trim().toLowerCase();
+        for (const values of todo.taskList) {
+            if (updateObj.id !== values.id) {
+                console.log(`[error] ${values.id}번 아이디는 존재하지 않습니다.`);
                 return false;
             }
         }
@@ -252,18 +264,18 @@ todo.add({
 
 
 todo.update({
-    id: todo.taskList[1].id,
+    id: 134328,
     nextstatus: "DOING"
 });
 
-todo.update({
-    id: todo.taskList[1].id,
-    nextstatus: "done"
-});
+// todo.update({
+//     id: todo.taskList[1].id,
+//     nextstatus: "done"
+// });
 
-todo.remove({
-    id: todo.taskList[0].id,
-});
+// todo.remove({
+//     id: todo.taskList[0].id,
+// });
 
 // todo.showTag('health');
 
