@@ -1,86 +1,63 @@
-const redoFunc = {
-    undidTaskArrays: [],//undo된 task의 상태들 저장.물론 3개까지
-
-    getUndidTaskArrays(todoTask) {
-        const beforeTask = [];
-        todoTask.forEach(taskObj => {
-            beforeValue = {
-                id: taskObj.id,
-                name: taskObj.name,
-                status: taskObj.status,
-                tag: taskObj.tag,
-                timeData: taskObj.timeData,
-            }
-            beforeTask.push(beforeValue)
-        })
-        this.undidTaskArrays.push(beforeTask);
-        if (this.undidTaskArrays.length > 3) {
-            this.undidTaskArrays.shift();
-        }
-    },
-};
-
-
-const undoFunc = {
-    lastTaskArrays: [], //이전의 todo.Task상태를 저장해줌
-
-    getLastTaskArrays(todoTask) {
-        const beforeTask = [];
-        todoTask.forEach(taskObj => {
-            beforeValue = {
-                id: taskObj.id,
-                name: taskObj.name,
-                status: taskObj.status,
-                tag: taskObj.tag,
-                timeData: taskObj.timeData,
-            }
-            beforeTask.push(beforeValue)
-        })
-        this.lastTaskArrays.push(beforeTask);
-        if (this.lastTaskArrays.length > 3) {
-            this.lastTaskArrays.shift();
-        }
-    }
-};
-
-
-const todo = {
+const todoData = {
     task: [],
-
+    
     lastDoArrays: [],//이전에 했던 상태 3개 저장
+    
+    redo() {
 
+    },
+
+    undo() {
+        this.task = undoUtility.undo(this.task, this.lastDoArrays.pop())
+    },
+    
     add(objToAdd) {
-        if (!checkError.add(objToAdd, this.task)) return;
+        if (!errorCheck.add(objToAdd, this.task)) return;
         this.task = addUtility.add(this.task, objToAdd)
+        this.lastDoArrays = lastDoData.lastDoDataArrays
     },//해야할일과 id값을 추가해주는 함수
-
+    
     remove(objToRemove) {
-        if (!checkError.remove(objToRemove, this.task)) return;
+        if (!errorCheck.remove(objToRemove, this.task)) return;
         this.task = removeUtility.remove(this.task, objToRemove)
+        this.lastDoArrays = lastDoData.lastDoDataArrays
     },//할 일과 id값을 제거해주는 함수
-
+    
     update(objToUpdate) {
-        if (!checkError.update(objToUpdate, this.task)) return;
+        if (!errorCheck.update(objToUpdate, this.task)) return;
         this.task = updateUtility.update(this.task, objToUpdate)
+        this.lastDoArrays = lastDoData.lastDoDataArrays
     },//상태 업데이트 함수
-
+    
     show(status) {
-        if (!checkError.show(status)) return;
+        if (!errorCheck.show(status)) return;
         showUtility.show(this.task, status)
     },//인자로 입력받은 상태의 정보들을 출력해주는 함수
-
+    
     showTag(tag) {
         showTagUtility.showTag(this.task, tag)
-    },
-
+    },//입력받은 태그의 정보들을 출력해주는 기능
+    
     showTags() {
         showTagsUtility.showTags(this.task)
-    },//태그에 따라 모든 값을 출력해주는 함수
-
+    },//태그에 따라 모든 값을 출력해주는 기능
+    
     showAll() {
         showUtility.showAll(this.task)
-    },//입력된 정보들의 상태에 따라 시간차로 출력해주는 함수, 재귀적으로 표현해볼것.
-}//해야 할일 객체
+    },//입력된 정보들의 상태에 따라 시간차로 출력해주는 기능
+}//해야 할일의 데이터 객체
+
+
+const redoUtility = {
+    
+};
+
+
+const undoUtility = {
+    undo(todoTask, lastDo) {
+
+    }
+};
 
 
 const addUtility = {
@@ -95,6 +72,7 @@ const addUtility = {
         todoTask.push(this.checkTag(newTodo))
         commonUtility.printChangeThing(newTodo, 'add')
         commonUtility.printStatusNum(todoTask)
+        lastDoData.getStatusData(newTodo.id, 'add')
         return todoTask
     },
 
@@ -120,6 +98,7 @@ const removeUtility = {
     remove(todoTask, objToRemove) {
         commonUtility.printChangeThing(this.getFilteredTask(todoTask, objToRemove)[0], 'remove')
         todoTask = this.getRemovedTask(todoTask, objToRemove)
+        lastDoData.getRemove(objToRemove.id, 'remove')
         return todoTask
     },
 
@@ -153,6 +132,7 @@ const updateUtility = {
         todoTask = this.checkUpdateStatus(objToUpdate, todoTask)
         commonUtility.printStatusNum(todoTask)
         commonUtility.printChangeThing(changedTask[0], 'update', beforeTaskStatus[0])
+        lastDoData.getUpdate(objToUpdate.id, 'update')
         return todoTask
     },
 
@@ -333,7 +313,7 @@ const commonUtility = {
         todo: 0,
         doing: 0,
         done: 0
-    },
+    },//statusNum객체
 
     initStatusNum() {
         this.statusNum.todo = 0;
@@ -346,7 +326,7 @@ const commonUtility = {
         accumulatedTask.forEach(obj => {
             this.statusNum[obj.status]++
         })
-    },//
+    },//todo, doing, done 의갯수를 세어주는 함수
 
     printStatusNum(accumulatedTask) {
         this.getStatusNum(accumulatedTask)
@@ -362,9 +342,10 @@ const commonUtility = {
             console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 업데이트 되었습니다.`)
         }
     },//할일이 추가되거나 제거되거나 업데이트 될 때 적합한 내용을 출력해 주는 함수
+
 };//Utility에서 공통적으로 사용되는 메서드들의 모음
 
-const checkError = {
+const errorCheck = {
     add(objToAdd, todoTask) {
         if((todoTask.filter(taskObj => taskObj.name === objToAdd.name)).length !== 0){
             console.log(`[error] 할 일 리스트에 같은 이름의 할 일이 존재합니다.`)
@@ -407,30 +388,43 @@ const checkError = {
     },
 }//문제상황이 발생했을 때 에러를 반환하는 메서드들의 모음
 
+const lastDoData = {
+    lastDoDataArrays:[],
+    getStatusData(idValue, status) {
+        this.lastDoDataArrays.push({id:idValue, status:status})
+        this.lastDoDataArrays = this.checkArraysLength(this.lastDoDataArrays)
+    },
 
+    checkArraysLength(array) {
+        if(array.length > 3) {
+            array.shift()
+        }
+        return array
+    }
+}
 // 테스트
 
 
 
 
-todo.add({ name: 'c++', tag: 'programming' });
-todo.add({ name: 'c++', tag: 'programming' })
-todo.add({ name: 'javascript', tag: 'programming' })
-todo.add({ name: 'java' })
-todo.remove({ id: 0 })
+todoData.add({ name: 'c++', tag: 'programming' });
+todoData.add({ name: 'c++', tag: 'programming' })
+todoData.add({ name: 'javascript', tag: 'programming' })
+todoData.add({ name: 'java' })
+todoData.remove({ id: 0 })
 
 
-todo.update({ id: 15, nextstatus: 'doing' })
-todo.update({ id: 3, nextstatus: 'doing' })
-todo.update({ id: 3, nextstatus: 'done' })
-todo.remove({ id: 15 });
-todo.show('done')
-todo.show('nothing')
-todo.showTag('awfe');
-todo.showTag();
-todo.show('doing');
-todo.show('nothingei')
-todo.show('todo')
+todoData.update({ id: 15, nextstatus: 'doing' })
+todoData.update({ id: 3, nextstatus: 'doing' })
+todoData.update({ id: 3, nextstatus: 'done' })
+todoData.remove({ id: 15 });
+todoData.show('done')
+todoData.show('nothing')
+todoData.showTag('awfe');
+todoData.showTag();
+todoData.show('doing');
+todoData.show('nothingei')
+todoData.show('todo')
 
 
 
