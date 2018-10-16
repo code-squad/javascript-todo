@@ -73,10 +73,12 @@ const todo = {
     },
 
     remove(id) {
-        for (const values of this.taskList) {
-            if (values.id === id.id) {
-                console.log(`id : ${id.id}, "${values.name}" 삭제 완료.`);
-                this.taskList.splice(this.taskList.indexOf(values), 1);
+        if (errorCheck.remove(id)) {
+            for (const values of this.taskList) {
+                if (values.id === id.id) {
+                    console.log(`id : ${id.id}, "${values.name}" 삭제 완료.`);
+                    this.taskList.splice(this.taskList.indexOf(values), 1);
+                }
             }
         }
     },
@@ -234,7 +236,18 @@ const errorCheck = {
                 return true;
             }
         }
-    }
+    },
+
+    remove(id) {
+
+        for (const values of todo.taskList) {
+            if (id.id !== values.id) {
+                console.log(`[error] ${values.id}번 아이디는 존재하지 않습니다.`);
+                return false;
+            }
+        }
+        return true;
+    },
 }
 //test
 todo.add({
@@ -280,12 +293,12 @@ todo.update({
 
 todo.update({
     id: todo.taskList[0].id,
-    nextstatus: "doing"
+    nextstatus: "done"
 });
 
-// todo.remove({
-//     id: todo.taskList[0].id,
-// });
+todo.remove({
+    id: 123,
+});
 
 // todo.showTag('health');
 
