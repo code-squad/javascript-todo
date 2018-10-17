@@ -216,7 +216,9 @@ const errorCheck = {
                 answer = false;
             }
         }
-        if (answer) { return answer }
+        if (answer) {
+            return answer
+        }
         console.log(`[error] 이미 같은 이름에 task가 존재합니다.`);
         return answer;
     },
@@ -250,13 +252,18 @@ const errorCheck = {
     },
 
     remove(id) {
+        //answer === false, 오류 반환
+        let answer = true;
         for (const values of todo.taskList) {
             if (id.id !== values.id) {
-                console.log(`[error] ${values.id}번 아이디는 존재하지 않습니다.`);
-                return false;
+                answer = false;
+            }
+            if (!answer) {
+                console.log(`[error] ${id.id}번 아이디는 존재하지 않습니다.`);
+                return answer;
             }
         }
-        return true;
+        return answer;
     },
 }
 //test
@@ -297,17 +304,17 @@ todo.add({
 
 todo.update({
     id: todo.taskList[0].id,
-    nextstatus: "done"
-});
-
-todo.update({
-    id: todo.taskList[0].id,
     nextstatus: "doing"
 });
 
-// todo.remove({
+// todo.update({
 //     id: todo.taskList[0].id,
+//     nextstatus: "doing"
 // });
+
+todo.remove({
+    id: 1234,
+});
 
 // todo.showTag('health');
 
