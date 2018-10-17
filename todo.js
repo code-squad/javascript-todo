@@ -57,6 +57,7 @@ const redoUtility = {
         } else {
             console.log(`undo한 값이 없습니다.`)
         }
+        return todoTask
     }
 };
 
@@ -66,13 +67,13 @@ const undoUtility = {
 
     undo(todoTask, lastDo) {
         if (lastDo.method === 'add') {
-            this.undidTaskArrays.push(todoTask)
+            this.undidTaskArrays.push(lastDo)
             return this.undoAdd(todoTask, lastDo)
         } else if (lastDo.method === 'remove') {
-            this.undidTaskArrays.push(todoTask)
+            this.undidTaskArrays.push(lastDo)
             return this.undoRemove(todoTask, lastDo)
         } else if (lastDo.method === 'update') {
-            this.undidTaskArrays.push(todoTask)
+            this.undidTaskArrays.push(lastDo)
             return this.undoUpdate(todoTask, lastDo)
         } else {
             console.log(`undo는 3번까지만 가능합니다.`)
@@ -88,22 +89,20 @@ const undoUtility = {
     undoRemove(todoTask, lastDo) {
         todoTask.push(lastDo.removedData)
         commonUtility.printChangeThing(lastDo.removedData, 'add')
-        this.undidTaskArrays.push(todoTask)
         return todoTask
     },
 
     undoUpdate(todoTask, lastDo) {
-        todoTask = this.resetUpdate(todoTask, lastDo)
-        commonUtility.printChangeThing(lastDo.beforeTask, 'update', lastDo.currentStatus)
-        this.undidTaskArrays.push(todoTask)
+        commonUtility.printChangeThing(lastDo.beforeData, 'update', lastDo.changedData.status)
+        todoTask = this.resetUpdate(todoTask, lastDo.beforeData)
         return todoTask
     },
 
-    resetUpdate(todoTask, beforeTask) {
+    resetUpdate(todoTask, beforeData) {
         todoTask = todoTask.map(taskObj => {
-            if (beforeTask.id === taskObj.id) {
-                taskObj.status = beforeTask.status
-                taskObj.timeData = beforeTask.timeData
+            if (beforeData.id === taskObj.id) {
+                taskObj.status = beforeData.status
+                taskObj.timeData = beforeData.timeData
                 return taskObj
             }
             return taskObj
@@ -172,20 +171,24 @@ const removeUtility = {
 const updateUtility = {
     update(todoTask, objToUpdate) {
         let beforeTaskData = [];
-        let changedTask = [];
+        let changedTaskData = [];
         todoTask = todoTask.map(taskObj => {
             if (objToUpdate.id === taskObj.id) {
-                beforeTaskData.push({ id: taskObj.id, name: taskObj.name, status: taskObj.status, timeData: taskObj.timeData })
+                beforeTaskData.push({ id: taskObj.id, name: taskObj.name, status: taskObj.status, tag: taskObj.tag, timeData: taskObj.timeData })
                 taskObj.status = objToUpdate.nextstatus.toLowerCase().replace(/ /gi, "")
-                changedTask.push(taskObj)
                 return taskObj
             }
             return taskObj
         })
         todoTask = this.checkUpdateStatus(objToUpdate, todoTask)
+        todoTask.forEach(taskObj => {
+            if (objToUpdate.id === taskObj.id) {
+                changedTaskData.push({ id: taskObj.id, name: taskObj.name, status: taskObj.status, tag: taskObj.tag, timeData: taskObj.timeData })
+            }
+        })
         commonUtility.printStatusNum(todoTask)
-        commonUtility.printChangeThing(changedTask[0], 'update', beforeTaskData[0].status)
-        lastDoData.getUpdatedData(objToUpdate.id, beforeTaskData[0], changedTask[0].status)
+        commonUtility.printChangeThing(changedTaskData[0], 'update', beforeTaskData[0].status)
+        lastDoData.getUpdatedData(objToUpdate.id, beforeTaskData[0], changedTaskData[0])
         return todoTask
     },
 
@@ -280,7 +283,6 @@ const showTagUtility = {
         })
         return sameTagAndStatusNum
     },//태그와 상태가 같은 것들의 개수를 세어주는 함수
-
 }//showTagfunc메서드 내에 들어가는 메서드들을 따로 모아서 처리
 
 
@@ -395,8 +397,8 @@ const commonUtility = {
             console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 업데이트 되었습니다.`)
         }
     },//할일이 추가되거나 제거되거나 업데이트 될 때 적합한 내용을 출력해 주는 함수
-
 };//Utility에서 공통적으로 사용되는 메서드들의 모음
+
 
 const errorCheck = {
     add(objToAdd, todoTask) {
@@ -441,6 +443,7 @@ const errorCheck = {
     },
 }//문제상황이 발생했을 때 에러를 반환하는 메서드들의 모음
 
+
 const lastDoData = {
     lastDoDataArrays: [],
     getAddedData(idValue, addedData) {
@@ -453,17 +456,17 @@ const lastDoData = {
         this.lastDoDataArrays = this.checkArraysLength(this.lastDoDataArrays);
     },
 
-    getUpdatedData(idValue, beforeTask, currentStatus) {
-        this.lastDoDataArrays.push({ id: idValue, method: 'update', beforeTask: beforeTask, currentStatus: currentStatus })
+    getUpdatedData(idValue, beforeData, changedData) {
+        this.lastDoDataArrays.push({ id: idValue, method: 'update', beforeData: beforeData, changedData: changedData})
         this.lastDoDataArrays = this.checkArraysLength(this.lastDoDataArrays);
     },
 
-    checkArraysLength(array) {
-        if (array.length > 3) {
-            array.shift()
+    checkArraysLength(arrays) {
+        if (arrays.length > 3) {
+            arrays.shift()
         }
-        return array
-    }
+        return arrays
+    },
 }
 // 테스트
 
@@ -475,10 +478,11 @@ todoData.add({ name: 't2', tag: 'programming' })
 todoData.add({ name: 't3', tag: 'programming' })
 todoData.add({ name: 't4' })
 todoData.add({ name: 't5' })
+todoData.update({id:3, nextstatus:'done'})
 todoData.undo();
 todoData.undo();
-todoData.redo();
-console.log(todoData.task)
+console.log(undoUtility.undidTaskArrays)
+
 
 
 
