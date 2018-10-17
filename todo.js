@@ -50,15 +50,49 @@ const todoData = {
 
 const redoUtility = {
     redo(todoTask, undidTask) {
-        if (undidTask !== undefined) {
-            todoTask = undidTask
-            console.log(`이전 undo값이 없던 일이 되었습니다.`)
+        if(undidTask === undefined) {
+            console.log(`undo된 값이 존재하지 않습니다.`)
             return todoTask
-        } else {
-            console.log(`undo한 값이 없습니다.`)
         }
+        if (undidTask.method === 'add') {
+            return this.redoAdd(todoTask, undidTask)
+        } else if (undidTask.method === 'remove') {
+            return this.redoRemove(todoTask, undidTask)
+        } else if (undidTask.method === 'update') {
+            return this.redoUpdate(todoTask, undidTask)
+        }
+    },
+
+    redoAdd(todoTask, undidTask) {
+        todoTask.push(undidTask.addedData)
+        commonUtility.printChangeThing(undidTask.addedData, 'add')
         return todoTask
-    }
+    },
+
+    redoRemove(todoTask, undidTask) {
+        commonUtility.printChangeThing(undidTask.removedData, 'remove')
+        todoTask = removeUtility.getRemovedTask(todoTask, { id: undidTask.removedData.id })
+        return todoTask
+    },
+
+    redoUpdate(todoTask, undidTask) {
+        commonUtility.printChangeThing(undidTask.changedData, 'update', undidTask.beforeData.status)
+        todoTask = this.resetUpdate(todoTask, undidTask.changedData)
+        return todoTask
+    },
+
+    resetUpdate(todoTask, undidData) {
+        todoTask = todoTask.map(taskObj => {
+            if (undidData.id === taskObj.id) {
+                taskObj.status = undidData.status
+                taskObj.timeData = undidData.timeData
+                return taskObj
+            }
+            return taskObj
+        })
+        return todoTask
+    },
+
 };
 
 
@@ -66,6 +100,10 @@ const undoUtility = {
     undidTaskArrays: [],
 
     undo(todoTask, lastDo) {
+        if (lastDo === undefined) {
+            console.log(`undo는 3회이상 실행 할 수 없습니다.`)
+            return todoTask;
+        }
         if (lastDo.method === 'add') {
             this.undidTaskArrays.push(lastDo)
             return this.undoAdd(todoTask, lastDo)
@@ -75,8 +113,6 @@ const undoUtility = {
         } else if (lastDo.method === 'update') {
             this.undidTaskArrays.push(lastDo)
             return this.undoUpdate(todoTask, lastDo)
-        } else {
-            console.log(`undo는 3번까지만 가능합니다.`)
         }
     },
 
@@ -129,7 +165,7 @@ const addUtility = {
     },
 
     getRanNum(todoTask) {
-        const ranNum = Math.floor(Math.random() * 5)
+        const ranNum = Math.floor(Math.random() * 6)
         const idArrays = todoTask.map(obj => obj.id)
         if (idArrays.includes(ranNum)) {
             return this.getRanNum(todoTask)
@@ -186,8 +222,8 @@ const updateUtility = {
                 changedTaskData.push({ id: taskObj.id, name: taskObj.name, status: taskObj.status, tag: taskObj.tag, timeData: taskObj.timeData })
             }
         })
-        commonUtility.printStatusNum(todoTask)
         commonUtility.printChangeThing(changedTaskData[0], 'update', beforeTaskData[0].status)
+        commonUtility.printStatusNum(todoTask)
         lastDoData.getUpdatedData(objToUpdate.id, beforeTaskData[0], changedTaskData[0])
         return todoTask
     },
@@ -394,7 +430,7 @@ const commonUtility = {
         } else if (calledMethod === 'remove') {
             console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 삭제 완료`)
         } else {
-            console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 업데이트 되었습니다.`)
+            console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeTaskStatus} => ${objToPrint.status} 상태로 변경 되었습니다.`)
         }
     },//할일이 추가되거나 제거되거나 업데이트 될 때 적합한 내용을 출력해 주는 함수
 };//Utility에서 공통적으로 사용되는 메서드들의 모음
@@ -423,10 +459,18 @@ const errorCheck = {
             console.log(`[error] 입력하신 id는 존재하지 않습니다. (입력하신 id : ${objToUpdate.id})`);
             return false
         }
+        const status = objToUpdate.nextstatus.toLowerCase().replace(/ /gi, "")
+        if (status !== 'doing' && status !== 'done' && status !== 'todo') {
+            console.log(`[error] 그런 상태는 존재하지 않습니다 (입력하신 상태 : ${status})`)
+            return false    
+        } 
         if (compareTask[0].status === objToUpdate.nextstatus) {
             console.log(`[error] 이미 ${objToUpdate.nextstatus}인 상태입니다.`)
             return false
-        } else if (compareTask[0].status === 'done' && objToUpdate.nextstatus === 'doing') {
+        } else if (compareTask[0].status === 'done' && objToUpdate.nextstatus === 'doing' || objToUpdate.nextstatus === 'todo') {
+            console.log(`[error] ${compareTask[0].status}상태에서 ${objToUpdate.nextstatus}상태로 되돌아갈 수 없습니다.`)
+            return false
+        } else if (compareTask[0].status === 'doing' && objToUpdate.nextstatus === 'todo') {
             console.log(`[error] ${compareTask[0].status}상태에서 ${objToUpdate.nextstatus}상태로 되돌아갈 수 없습니다.`)
             return false
         }
@@ -435,7 +479,7 @@ const errorCheck = {
 
     show(status) {
         if (status !== 'doing' && status !== 'done' && status !== 'todo') {
-            console.log(`[error] 할 일 들의 상태는 todo나 doing이나 done이어야만 합니다.
+            console.log(`[error] 할 일 들의 상태는 todo나 doing이나 done이어야만 합니다. 대소문자의 구별에 유의하세요
 모든 일들을 보고싶다면 todo.showAll()을 입력해 주세요.`);
             return false
         }
@@ -457,7 +501,7 @@ const lastDoData = {
     },
 
     getUpdatedData(idValue, beforeData, changedData) {
-        this.lastDoDataArrays.push({ id: idValue, method: 'update', beforeData: beforeData, changedData: changedData})
+        this.lastDoDataArrays.push({ id: idValue, method: 'update', beforeData: beforeData, changedData: changedData })
         this.lastDoDataArrays = this.checkArraysLength(this.lastDoDataArrays);
     },
 
@@ -474,14 +518,30 @@ const lastDoData = {
 
 
 todoData.add({ name: 't1', tag: 'programming' });
-todoData.add({ name: 't2', tag: 'programming' })
-todoData.add({ name: 't3', tag: 'programming' })
-todoData.add({ name: 't4' })
-todoData.add({ name: 't5' })
-todoData.update({id:3, nextstatus:'done'})
+todoData.add({ name: 't2', tag: 'test1' })
+todoData.add({ name: 't3', tag: 'test2' })
+todoData.add({ name: 't4', tag: 'test2' })
+todoData.add({ name: 't5', tag: 'test3' })
+todoData.add({ name: 't6' })
+todoData.update({id: 3, nextstatus:'done'})
+todoData.update({id: 3, nextstatus:'todo'})
+todoData.update({id: 3, nextstatus:'doing'})
+todoData.update({id: 2, nextstatus:'doing'})
+todoData.update({id: 2, nextstatus:'todo'})
+todoData.update({id: 2, nextstatus:'awefawef'})
+todoData.undo()
+todoData.undo()
+todoData.undo()
 todoData.undo();
+todoData.redo();
+todoData.redo();
+todoData.redo();
+todoData.redo();
 todoData.undo();
-console.log(undoUtility.undidTaskArrays)
+todoData.update({id: 2, nextstatus:'done'})
+todoData.undo();
+
+
 
 
 
