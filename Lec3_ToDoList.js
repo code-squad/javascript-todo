@@ -209,14 +209,18 @@ const todo = {
 
 const errorCheck = {
     add(task) {
+        //answer === false, 오류 반환
+        let answer = true;
         for (const values of todo.taskList) {
             if (task.name === values.name) {
-                console.log(`[error] 이미 같은 이름에 task가 존재합니다.`);
-                return false;
-            }
+                answer = false;
+            } 
         }
-        return true;
+        if(answer){return answer}
+        console.log(`[error] 이미 같은 이름에 task가 존재합니다.`);
+        return answer;
     },
+    
     update(updateObj) {
         for (const values of todo.taskList) {
             if (updateObj.id !== values.id) {
@@ -239,7 +243,6 @@ const errorCheck = {
     },
 
     remove(id) {
-
         for (const values of todo.taskList) {
             if (id.id !== values.id) {
                 console.log(`[error] ${values.id}번 아이디는 존재하지 않습니다.`);
@@ -255,10 +258,10 @@ todo.add({
     tag: "programming"
 });
 
-// todo.add({
-//     name: "자바스크립트 공부하기",
-//     tag: "programming"
-// });
+todo.add({
+    name: "자바스크립트 공부하기",
+    tag: "programming"
+});
 
 todo.add({
     name: "알고리즘 공부하기",
@@ -297,7 +300,7 @@ todo.update({
 });
 
 todo.remove({
-    id: 123,
+    id: todo.taskList[0].id,
 });
 
 // todo.showTag('health');
