@@ -4,7 +4,9 @@ const todoData = {
     lastDoArrays: [],//이전에 했던 상태 3개 저장
 
     redo() {
-        this.task = redoUtility.redo(this.task, undoUtility.undidTaskArrays.pop())
+        const undidTask = undoUtility.undidTaskArrays.pop()
+        this.task = redoUtility.redo(this.task, undidTask)
+        this.lastDoArrays.push(undidTask)
     },
 
     undo() {
@@ -208,10 +210,12 @@ const updateUtility = {
     update(todoTask, objToUpdate) {
         let beforeTaskData = [];
         let changedTaskData = [];
+        objToUpdate.nextstatus = objToUpdate.nextstatus.toLowerCase().replace(/ /gi, "")
+        console.log(objToUpdate)
         todoTask = todoTask.map(taskObj => {
             if (objToUpdate.id === taskObj.id) {
                 beforeTaskData.push({ id: taskObj.id, name: taskObj.name, status: taskObj.status, tag: taskObj.tag, timeData: taskObj.timeData })
-                taskObj.status = objToUpdate.nextstatus.toLowerCase().replace(/ /gi, "")
+                taskObj.status = objToUpdate.nextstatus
                 return taskObj
             }
             return taskObj
@@ -467,10 +471,10 @@ const errorCheck = {
         if (compareTask[0].status === objToUpdate.nextstatus) {
             console.log(`[error] 이미 ${objToUpdate.nextstatus}인 상태입니다.`)
             return false
-        } else if (compareTask[0].status === 'done' && objToUpdate.nextstatus === 'doing' || objToUpdate.nextstatus === 'todo') {
+        } else if (compareTask[0].status === 'done' && status === 'doing' || status === 'todo') {
             console.log(`[error] ${compareTask[0].status}상태에서 ${objToUpdate.nextstatus}상태로 되돌아갈 수 없습니다.`)
             return false
-        } else if (compareTask[0].status === 'doing' && objToUpdate.nextstatus === 'todo') {
+        } else if (compareTask[0].status === 'doing' && status === 'todo') {
             console.log(`[error] ${compareTask[0].status}상태에서 ${objToUpdate.nextstatus}상태로 되돌아갈 수 없습니다.`)
             return false
         }
@@ -522,24 +526,10 @@ todoData.add({ name: 't2', tag: 'test1' })
 todoData.add({ name: 't3', tag: 'test2' })
 todoData.add({ name: 't4', tag: 'test2' })
 todoData.add({ name: 't5', tag: 'test3' })
-todoData.add({ name: 't6' })
-todoData.update({id: 3, nextstatus:'done'})
-todoData.update({id: 3, nextstatus:'todo'})
-todoData.update({id: 3, nextstatus:'doing'})
-todoData.update({id: 2, nextstatus:'doing'})
-todoData.update({id: 2, nextstatus:'todo'})
-todoData.update({id: 2, nextstatus:'awefawef'})
-todoData.undo()
-todoData.undo()
-todoData.undo()
-todoData.undo();
-todoData.redo();
-todoData.redo();
-todoData.redo();
-todoData.redo();
-todoData.undo();
-todoData.update({id: 2, nextstatus:'done'})
-todoData.undo();
+
+
+
+
 
 
 
