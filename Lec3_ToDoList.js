@@ -214,30 +214,37 @@ const errorCheck = {
         for (const values of todo.taskList) {
             if (task.name === values.name) {
                 answer = false;
-            } 
+            }
         }
-        if(answer){return answer}
+        if (answer) { return answer }
         console.log(`[error] 이미 같은 이름에 task가 존재합니다.`);
         return answer;
     },
-    
+
     update(updateObj) {
+        //answer === false, 오류 반환
+        let answer = true;
         for (const values of todo.taskList) {
             if (updateObj.id !== values.id) {
-                console.log(`[error] ${values.id}번 아이디는 존재하지 않습니다.`);
-                return false;
+                answer = false;
+            }
+            if (!answer) {
+                console.log(`[error] ${updateObj.id}번 아이디는 존재하지 않습니다.`);
+                return answer;
             }
             if (values.id === updateObj.id) {
                 const statusToUpdate = updateObj.nextstatus.trim().toLowerCase();
                 if (statusToUpdate === values.status) {
                     console.log(`[error] ${values.id}번은 이미 ${statusToUpdate}입니다.`);
-                    return false;
+                    answer = false
+                    return answer;
                 }
                 if (statusToUpdate === 'doing' && values.status === 'done') {
                     console.log(`[error] done 상태에서 doing 상태로 갈 수 없습니다.`);
-                    return false;
+                    answer = false;
+                    return answer;
                 }
-                return true;
+                return answer;
             }
         }
     },
@@ -258,50 +265,49 @@ todo.add({
     tag: "programming"
 });
 
-todo.add({
-    name: "자바스크립트 공부하기",
-    tag: "programming"
-});
+// todo.add({
+//     name: "자바스크립트 공부하기",
+//     tag: "programming"
+// });
 
-todo.add({
-    name: "알고리즘 공부하기",
-    tag: "programming"
-});
+// todo.add({
+//     name: "알고리즘 공부하기",
+//     tag: "programming"
+// });
 
-todo.add({
-    name: "요가하기",
-    tag: "health"
-});
+// todo.add({
+//     name: "요가하기",
+//     tag: "health"
+// });
 
-todo.add({
-    name: "명상하기",
-    tag: "health"
-});
+// todo.add({
+//     name: "명상하기",
+//     tag: "health"
+// });
 
-todo.add({
-    name: "독서하기",
-    tag: "reading"
-});
+// todo.add({
+//     name: "독서하기",
+//     tag: "reading"
+// });
 
-todo.add({
-    name: "기타치기",
-    tag: "music"
-});
-
-
-todo.update({
-    id: todo.taskList[0].id,
-    nextstatus: "DOING"
-});
+// todo.add({
+//     name: "기타치기",
+//     tag: "music"
+// });
 
 todo.update({
     id: todo.taskList[0].id,
     nextstatus: "done"
 });
 
-todo.remove({
+todo.update({
     id: todo.taskList[0].id,
+    nextstatus: "doing"
 });
+
+// todo.remove({
+//     id: todo.taskList[0].id,
+// });
 
 // todo.showTag('health');
 
