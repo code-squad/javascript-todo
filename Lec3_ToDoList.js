@@ -1,21 +1,19 @@
-const todo = {
-    taskList: [],
+const history = {
     cacheList: [],
     undoCacheList: [],
     undoCount: 0,
-    // redoCount: 0,
     undo() {
         if (this.undoCount >= 3) {
             console.log(`undo는 세 번까지만 가능합니다. redo 한번 하세염`);
             return;
         }
-        const taskOrder = [this.add, this.remove, this.update];
+        const taskOrder = [todo.add, todo.remove, todo.update];
         const undoFunction = this.cacheList[this.cacheList.length - 2];
         const undoArg = this.cacheList[this.cacheList.length - 1];
         if (undoFunction === taskOrder[0]) {
-            taskOrder[1].call(this, undoArg);
+            taskOrder[1].call(todo, undoArg);
         } else if (undoFunction === taskOrder[1]) {
-            taskOrder[0].call(this, undoArg);
+            taskOrder[0].call(todo, undoArg);
         } else if (undoFunction === taskOrder[2]) {
             undoArg.previousStatus = undoArg.status;
             this.undoUpdate(undoArg);
@@ -28,12 +26,12 @@ const todo = {
     undoUpdate(arg) {
         if (arg.status === 'done') {
             delete arg.takenTime;
-            this.printUpdate(arg, 'doing');
+            todo.printUpdate(arg, 'doing');
             return;
         }
         if (arg.status === 'doing') {
             delete arg.doingTime;
-            this.printUpdate(arg, 'todo');
+            todo.printUpdate(arg, 'todo');
             return;
         }
     },
@@ -46,19 +44,19 @@ const todo = {
         const redoFunction = this.undoCacheList[this.undoCacheList.length - 2];
         const redoArg = this.undoCacheList[this.undoCacheList.length - 1];
 
-        if (redoFunction === this.add) {
-            this.taskList.push(redoArg);
-            let [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
+        if (redoFunction === todo.add) {
+            todo.taskList.push(redoArg);
+            let [todoCount, doingCount, doneCount] = todo.countStatus(todo.taskList);
             console.log(`id : ${redoArg.id}, "${redoArg.name}" 항목이 새로 추가되었습니다.
     현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
         }
-        if (redoFunction === this.remove) {
+        if (redoFunction === todo.remove) {
             console.log(`id : ${redoArg.id}, "${redoArg.name}" 삭제 완료.`);
-            this.taskList.splice(this.taskList.indexOf(redoArg), 1);
+            todo.taskList.splice(todo.taskList.indexOf(redoArg), 1);
         }
         this.cacheList.push(redoFunction, redoArg);
 
-        if (redoFunction === this.update) {
+        if (redoFunction === todo.update) {
             let previousStatus = redoArg.previousStatus;
             delete redoArg.previousStatus;
             this.executeUpdate(redoArg, previousStatus);
@@ -67,13 +65,126 @@ const todo = {
         this.undoCacheList.splice(this.undoCacheList.length - 2, 2);
         this.undoCount--;
     },
+}
+
+const show = {
+    findTags(taskList) {
+        let tagObj = {};
+        for (const values of taskList) {
+            if (!tagObj[values.tag]) {
+                tagObj[values.tag] = 1;
+            } else if (tagObj[values.tag])
+                tagObj[values.tag] += 1;
+        }
+        return tagObj;
+    },
+
+    showTag(tag) {
+        const result = todo.taskList.filter(value => value.tag === tag);
+        const [todoCount, doingCount, doneCount] = todo.countStatus(result);
+        console.log(`tag가 "${tag}"인 할 일: `);
+        if (todoCount !== 0) {
+            this.printShowTag('todo', result, todoCount);
+        }
+        if (doingCount !== 0) {
+            this.printShowTag('doing', result, doingCount);
+        }
+        if (doneCount !== 0) {
+            this.printShowTag('done', result, doneCount);
+        }
+    },
+
+    printShowTag(status, result, statusCount) {
+        console.log(`[${status}, 총 ${statusCount}개]`);
+        const taskWithSameStatus = result.filter(value => value.status === status);
+        taskWithSameStatus.forEach(function (task) {
+            console.log(`- ${task.id}번, ${task.name}`);
+        });
+    },
+
+    showTags() {
+        const result = todo.taskList.filter(value => value.tag !== 0);
+        const tagObj = this.findTags(result);
+        for (const tag in tagObj) {
+            console.log(`\n[${tag}, 총 ${tagObj[tag]}개]`);
+            const tasksWithSameObj = result.filter(result => result.tag === tag);
+            tasksWithSameObj.forEach(function (task) {
+                console.log(`- ${task.id}번, ${task.name}, [${task.status}]`);
+            });
+        }
+    },
+
+    show(status) {
+        let showStatus = status.replace(/ /g, "").toLowerCase();
+        console.log(`상태가 ${showStatus}인 task(s):`);
+        for (const values of todo.taskList) {
+            if (values.status !== showStatus) continue;
+            this.printShow(values, showStatus);
+        }
+    },
+
+    printShow(values, showStatus) {
+        if (showStatus === 'done') {
+            console.log(`- ${values.id}번, ${values.name}, [${values.tag}], ${values.takenTime}`)
+        } else if (showStatus === 'doing' || showStatus === 'todo') {
+            console.log(`- ${values.id}번, ${values.name}, [${values.tag}]`);
+        }
+    },
+
+    showAll() {
+        const [todoCount, doingCount, doneCount] = todo.countStatus(todo.taskList);
+        console.log(`총 ${todoCount + doingCount + doneCount}개의 리스트를 가져왔습니다. 2초 뒤에 todo 내역을 출력합니다...`);
+        const statusOrder = ['todo', 'doing', 'done'];
+        const CountOrder = [todoCount, doingCount, doneCount];
+        const timeOrder = [2000, 3000, 2000]
+        this.setTime(statusOrder, CountOrder, timeOrder, 0);
+    },
+
+    setTime(statusOrder, CountOrder, timeOrder, n) {
+        setTimeout(function () {
+            if (n > 2) {
+                return;
+            }
+            console.log(`[${statusOrder[n]}, 총 ${CountOrder[n]}개]`);
+            this.printShowAll(this.sortTaskByStatus(statusOrder[n]));
+            if (n < 2) {
+                console.log(`\n 지금부터 ${timeOrder[n + 1] / 1000}초 뒤에 ${statusOrder[n + 1]} 내역을 출력합니다...`);
+            }
+            this.setTime(statusOrder, CountOrder, timeOrder, n + 1)
+        }.bind(this), timeOrder[n]);
+    },
+
+    sortTaskByStatus(status) {
+        let tasks = [];
+        for (const values of todo.taskList) {
+            if (values.status === status) {
+                tasks.push(values);
+            }
+        }
+        return tasks;
+    },
+
+    printShowAll(arr) {
+        arr.forEach(function (task) {
+            if (task.takenTime) {
+                console.log(`- ${task.id}번, ${task.name}, [${task.tag}], ${task.takenTime}`)
+            } else if (!task.takenTime) {
+                console.log(`- ${task.id}번, ${task.name}, [${task.tag}]`);
+            }
+        });
+    }
+}
+
+const todo = {
+    taskList: [],
+    // redoCount: 0,
 
     add(task) {
         if (errorCheck.add(task)) {
             task.status = 'todo';
             task.id = Date.now() + Math.random();
             this.taskList.push(task);
-            this.cacheList.push(this.add, task);
+            history.cacheList.push(this.add, task);
             let [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
             console.log(`id : ${task.id}, "${task.name}" 항목이 새로 추가되었습니다.
     현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
@@ -85,7 +196,7 @@ const todo = {
             const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
             const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
             this.executeUpdate(taskToUpdate, statusToUpdate);
-            this.cacheList.push(this.update, taskToUpdate);
+            history.cacheList.push(this.update, taskToUpdate);
         }
     },
 
@@ -147,7 +258,7 @@ const todo = {
             for (const values of this.taskList) {
                 if (values.id === id.id) {
                     console.log(`id : ${id.id}, "${values.name}" 삭제 완료.`);
-                    this.cacheList.push(this.remove, values);
+                    history.cacheList.push(this.remove, values);
                     this.taskList.splice(this.taskList.indexOf(values), 1);
                 }
             }
@@ -169,112 +280,6 @@ const todo = {
         }
         return [todo, doing, done];
     },
-
-    findTags(taskList) {
-        let tagObj = {};
-        for (const values of taskList) {
-            if (!tagObj[values.tag]) {
-                tagObj[values.tag] = 1;
-            } else if (tagObj[values.tag])
-                tagObj[values.tag] += 1;
-        }
-        return tagObj;
-    },
-
-    showTag(tag) {
-        const result = this.taskList.filter(value => value.tag === tag);
-        const [todoCount, doingCount, doneCount] = this.countStatus(result);
-        console.log(`tag가 "${tag}"인 할 일: `);
-        if (todoCount !== 0) {
-            this.printShowTag('todo', result, todoCount);
-        }
-        if (doingCount !== 0) {
-            this.printShowTag('doing', result, doingCount);
-        }
-        if (doneCount !== 0) {
-            this.printShowTag('done', result, doneCount);
-        }
-    },
-
-    printShowTag(status, result, statusCount) {
-        console.log(`[${status}, 총 ${statusCount}개]`);
-        const taskWithSameStatus = result.filter(value => value.status === status);
-        taskWithSameStatus.forEach(function (task) {
-            console.log(`- ${task.id}번, ${task.name}`);
-        });
-    },
-
-    showTags() {
-        const result = this.taskList.filter(value => value.tag !== 0);
-        const tagObj = this.findTags(result);
-        for (const tag in tagObj) {
-            console.log(`\n[${tag}, 총 ${tagObj[tag]}개]`);
-            const tasksWithSameObj = result.filter(result => result.tag === tag);
-            tasksWithSameObj.forEach(function (task) {
-                console.log(`- ${task.id}번, ${task.name}, [${task.status}]`);
-            });
-        }
-    },
-
-    show(status) {
-        let showStatus = status.replace(/ /g, "").toLowerCase();
-        console.log(`상태가 ${showStatus}인 task(s):`);
-        for (const values of this.taskList) {
-            if (values.status !== showStatus) continue;
-            this.printShow(values, showStatus);
-        }
-    },
-
-    printShow(values, showStatus) {
-        if (showStatus === 'done') {
-            console.log(`- ${values.id}번, ${values.name}, [${values.tag}], ${values.takenTime}`)
-        } else if (showStatus === 'doing' || showStatus === 'todo') {
-            console.log(`- ${values.id}번, ${values.name}, [${values.tag}]`);
-        }
-    },
-
-    showAll() {
-        const [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
-        console.log(`총 ${todoCount + doingCount + doneCount}개의 리스트를 가져왔습니다. 2초 뒤에 todo 내역을 출력합니다...`);
-        const statusOrder = ['todo', 'doing', 'done'];
-        const CountOrder = [todoCount, doingCount, doneCount];
-        const timeOrder = [2000, 3000, 2000]
-        this.setTime(statusOrder, CountOrder, timeOrder, 0);
-    },
-
-    setTime(statusOrder, CountOrder, timeOrder, n) {
-        setTimeout(function () {
-            if (n > 2) {
-                return;
-            }
-            console.log(`[${statusOrder[n]}, 총 ${CountOrder[n]}개]`);
-            this.printShowAll(this.sortTaskByStatus(statusOrder[n]));
-            if (n < 2) {
-                console.log(`\n 지금부터 ${timeOrder[n + 1] / 1000}초 뒤에 ${statusOrder[n + 1]} 내역을 출력합니다...`);
-            }
-            this.setTime(statusOrder, CountOrder, timeOrder, n + 1)
-        }.bind(this), timeOrder[n]);
-    },
-
-    sortTaskByStatus(status) {
-        let tasks = [];
-        for (const values of this.taskList) {
-            if (values.status === status) {
-                tasks.push(values);
-            }
-        }
-        return tasks;
-    },
-
-    printShowAll(arr) {
-        arr.forEach(function (task) {
-            if (task.takenTime) {
-                console.log(`- ${task.id}번, ${task.name}, [${task.tag}], ${task.takenTime}`)
-            } else if (!task.takenTime) {
-                console.log(`- ${task.id}번, ${task.name}, [${task.tag}]`);
-            }
-        });
-    }
 }
 
 const errorCheck = {
@@ -411,12 +416,12 @@ todo.update({
 //     id: todo.taskList[0].id,
 // });
 
-// todo.showTag('health');
+show.showTag('health');
 
-// todo.showTags();
+show.showTags();
 
-// todo.show("DONE")
+show.show("DONE")
 
-// todo.showAll();
+show.showAll();
 
-// todo.printShowAll(todo.taskList);
+show.printShowAll(todo.taskList);
