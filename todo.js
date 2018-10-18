@@ -32,6 +32,7 @@ const todo = {
         this.getStatusNum(this.todoList)
         show.changes('add', newTodo)
         show.nowStatus(this.statusNum)
+        history.saveAddData(newTodo)
     },//add
 
     getRanNum(todoList) {
@@ -51,8 +52,10 @@ const todo = {
     },//for add2
 
     remove(objToRemove) {
-        show.changes('remove', this.todoList.filter(listObj => listObj.id === objToRemove.id)[0])
-        this.todoList = this.todoList.filter(taskObj => taskObj.id !== objToRemove.id)
+        var toRemoveData = this.todoList.filter(obj => obj.id === objToRemove.id)[0]
+        show.changes('remove', toRemoveData)
+        history.saveRemoveData(toRemoveData)
+        this.todoList = this.todoList.filter(obj => obj.id !== objToRemove.id)
     },//remove
 
     update(objToUpdate) {
@@ -60,8 +63,8 @@ const todo = {
         const beforeData = [];
         const updatedData = [];
         this.todoList = this.todoList.map(obj => {
-            if(obj.id === objToUpdate.id) {
-                beforeData.push({id: obj.id, name: obj.name, status: obj.status, tag: obj.tag, timeData: obj.timeData})
+            if (obj.id === objToUpdate.id) {
+                beforeData.push({ id: obj.id, name: obj.name, status: obj.status, tag: obj.tag, timeData: obj.timeData })
                 obj.status = objToUpdate.nextstatus
                 return obj
             }
@@ -69,12 +72,14 @@ const todo = {
         })
         this.todoList = this.checkUpdateStatus(objToUpdate, this.todoList)
         this.todoList.forEach(obj => {
-            if(obj.id === objToUpdate.id) {
-                updatedData.push({id: obj.id, name: obj.name, status: obj.status, tag: obj.tag, timeData: obj.timeData})
+            if (obj.id === objToUpdate.id) {
+                updatedData.push({ id: obj.id, name: obj.name, status: obj.status, tag: obj.tag, timeData: obj.timeData })
             }
         })
-        show.changes(updatedData[0], 'update', beforeData[0])
+        this.getStatusNum(this.todoList)
+        show.changes('update', updatedData[0], beforeData[0])
         show.nowStatus(this.statusNum)
+        history.saveUpdateData(updatedData[0], beforeData[0])
     },//update
 
     checkUpdateStatus(objToUpdate, todoList) {
@@ -123,9 +128,9 @@ const todo = {
     },//for update4
 
     undo() {
-
+        history.undo(this.todoList, history.dataList.pop())
     },
-    
+
     redo() {
 
     },
@@ -140,7 +145,7 @@ const todo = {
             return;
         }
         show.notHaveTag(tag, this.todoList)
-    },//showtag
+    },
 
     showTags() {
         const taggedTodos = this.todoList.filter(obj => obj.tag !== 'noting')
@@ -156,14 +161,91 @@ const todo = {
     },
 };
 
-const history = {
-    historylist: [],
-    undo() {
 
+const history = {
+    dataList: [],
+    undoList: [],
+    saveAddData(newTodo) {
+        this.dataList.push({ method: 'add', addedData: newTodo })
+        this.checkListNum(this.dataList)
     },
 
-    redo() {
+    saveRemoveData(removeData) {
+        this.dataList.push({ method: 'remove', removedData: removeData })
+        this.checkListNum(this.dataList)
+    },
 
+    saveUpdateData(updatedData, beforeData) {
+        this.dataList.push({ method: 'update', updatedData: updatedData, beforeData: beforeData })
+        this.checkListNum(this.dataList)
+    },
+
+    checkListNum(array) {
+        while (array.length > 3) {
+            array.shift()
+        }
+        return array
+    },
+
+    undo(todoTask, todo) {
+        if (todo === undefined) {
+            console.log(`undo는 3회이상 실행 할 수 없습니다.`)
+            return todoTask;
+        }
+        if (todo.method === 'add') {
+            this.undoList.push(todo)
+            return this.undoAdd(todoTask, todo)
+        } else if (todo.method === 'remove') {
+            this.undoList.push(todo)
+            return this.undoRemove(todoTask, todo)
+        } else if (todo.method === 'update') {
+            this.undoList.push(todo)
+            return this.undoUpdate(todoTask, todo)
+        }
+    },//check
+
+    undoAdd(todoTask, todo) {
+        show.changes('remove', todo.addedData)
+        todoTask = todoTask.filter(obj => obj.id !== todo.addedData.id)
+        return todoTask
+    },//add
+
+    undoRemove(todoTask, todo) {
+        todoTask.push(todo.removedData)
+        show.changes('add', todo.removedData)
+        return todoTask
+    },//remove
+
+    undoUpdate(todoTask, todo) {
+        show.changes('update', todo.beforeData, todo.updatedData)
+        todoTask = this.resetUpdate(todoTask, todo.beforeData)
+        return todoTask
+    },//update
+
+    resetUpdate(todoTask, beforeData) {
+        todoTask = todoTask.map(taskObj => {
+            if (beforeData.id === taskObj.id) {
+                taskObj.status = beforeData.status
+                taskObj.timeData = beforeData.timeData
+                return taskObj
+            }
+            return taskObj
+        })
+        return todoTask
+    },//for undoupdate
+
+    redo(todoTask, undidTask) {
+        if (this.undoList === undefined) {
+            console.log(`undo된 값이 존재하지 않습니다.`)
+            return todoTask;
+        }
+        if (undidTask.method === 'add') {
+            return this.redoAdd(todoTask, undidTask)
+        } else if (undidTask.method === 'remove') {
+            return this.redoRemove(todoTask, undidTask)
+        } else if (undidTask.method === 'update') {
+            return this.redoUpdate(todoTask, undidTask)
+        }
     },
 }
 
@@ -192,7 +274,7 @@ const show = {
             }
         })
     },//showStatus
-    
+
     haveTag(tag, todoList) {
         console.log(`--태그가 [${tag}]인 할 일들--`);
         this.byTag(tag, todoList)
@@ -287,13 +369,16 @@ const checkError = {
 
 }
 
-todo.add({name:'c++', tag:'programming'})
-todo.add({name:'c++', tag:'programming'})
-todo.add({name:'c++', tag:'programming'})
-todo.add({name:'c++', tag:'programming'})
-todo.add({name:'c++', tag:'programming'})
-todo.add({name:'c++', tag:'programming'})
-todo.remove({id:0})
-todo.show('todo')
-todo.showTags('programming')
-todo.showAll();
+todo.add({ name: '1', tag: 'programming' })
+todo.add({ name: '2', tag: 'programming' })
+todo.add({ name: '3', tag: 'programming' })
+todo.add({ name: '4', tag: 'programming' })
+todo.add({ name: '5', tag: 'programming' })
+todo.add({ name: '6', tag: 'programming' })
+todo.remove({ id: 0 })
+todo.remove({ id: 1 })
+todo.undo()
+todo.undo()
+todo.undo()
+
+
