@@ -135,15 +135,24 @@ const todo = {
     },
 
     showTag(tag) {
-        show.tag(this.todoList, tag)
-    },
+        if (tag !== undefined) {
+            show.haveTag(tag, this.todoList)
+            return;
+        }
+        show.notHaveTag(tag, this.todoList)
+    },//showtag
 
     showTags() {
-
+        const taggedTodos = this.todoList.filter(obj => obj.tag !== 'noting')
+        const sameTagList = show.getTagList(taggedTodos);
+        sameTagList.forEach(tag => {
+            const sameTagNum = show.getSameTagNum(tag, taggedTodos)
+            show.printSameTag(tag, taggedTodos, sameTagNum)
+        })
     },
 
     showAll() {
-
+        show.all(this.todoList)
     },
 };
 
@@ -184,16 +193,16 @@ const show = {
             }
         })
     },//showStatus
+    
+    haveTag(tag, todoList) {
+        console.log(`--태그가 [${tag}]인 할 일들--`);
+        this.byTag(tag, todoList)
+    },//showTag
 
-    tag(todoList, tag) {
-        if (tag !== undefined) {
-            console.log(`--태그가 [${tag}]인 할 일들--`)
-            this.byTag(tag, todoList)
-            return;
-        }
-        console.log(`--태그가 없는 할 일들--`)
-        this.byTag('nothing', todoList)
-    },//showtag
+    notHaveTag(tag, todoList) {
+        console.log(`--태그가 없는 할 일들--`);
+        this.byTag('noting', todoList)
+    },//showTag
 
     byTag(tag, todoList) {
         const todoNum = this.getSameTagAndStatusNum(tag, 'todo', todoList)
@@ -228,12 +237,50 @@ const show = {
         return sameTagAndStatusNum
     },//for tag
 
-    tags() {
+    getTagList(taggedTask) {
+        const tagList = taggedTask.map(obj => obj.tag)
+        const notOverlapTagList = tagList.filter((tag, index, tagList) => tagList.indexOf(tag) === index)
+        return notOverlapTagList
+    },//현재 task배열 내에있는 모든 tag값들을 중복 없이 따로 모아놓는 배열을 만드는 메서드
 
-    },
+    printSameTag(tag, taggedTask, sameTagNum) {
+        console.log(`--[${tag}], 총 ${sameTagNum}개--`)
+        taggedTask.forEach(taggedTaskObj => {
+            if (tag === taggedTaskObj.tag) {
+                console.log(`ID : ${taggedTaskObj.id}, ${taggedTaskObj.name}, [${taggedTaskObj.status}]`)
+            }
+        })
+    },//tag의 값에 따라서 출력해주는 메서드
 
-    all() {
+    getSameTagNum(tag, taggedTask) {
+        sameTagNum = 0
+        taggedTask.forEach(taggedTaskObj => {
+            if (tag === taggedTaskObj.tag) {
+                sameTagNum++
+            }
+        })
+        return sameTagNum
+    },//같은 태그의 개수를 세어주는 메서드
 
+    all(todoTask) {
+        commonUtility.getStatusNum(todoTask);
+        console.log(`총 ${todoTask.length}개의 리스트를 가져왔습니다.`)
+        this.setTime(todoTask, 'todo')
+    },//setTime메서드를 이용해서 재귀적으로 출력해주는 함수
+
+    setTime(todoTask, status) {
+        setTimeout(function () {
+            this.show(todoTask, status)
+            if (status === 'todo') {
+                status = 'doing'
+                this.setTime(todoTask, status)
+            } else if (status === 'doing') {
+                status = 'done'
+                this.setTime(todoTask, status)
+            } else if (status === 'done') {
+                return;
+            }
+        }.bind(showUtility), 2000)
     },
 }
 
@@ -250,5 +297,5 @@ todo.add({name:'c++', tag:'programming'})
 todo.add({name:'c++', tag:'programming'})
 todo.remove({id:0})
 todo.show('todo')
-todo.showTag('programming')
-console.log(todo.todoList)
+todo.showTags('programming')
+todo.showAll();
