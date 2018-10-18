@@ -168,7 +168,6 @@ const history = {
 }
 
 const show = {
-    showingList: [],
     nowStatus(statusNum) {
         console.log(`현재상태 todo : ${statusNum.todo}, doing: ${statusNum.doing}, done : ${statusNum.done}`)
     },
@@ -263,14 +262,13 @@ const show = {
     },//같은 태그의 개수를 세어주는 메서드
 
     all(todoTask) {
-        commonUtility.getStatusNum(todoTask);
         console.log(`총 ${todoTask.length}개의 리스트를 가져왔습니다.`)
         this.setTime(todoTask, 'todo')
     },//setTime메서드를 이용해서 재귀적으로 출력해주는 함수
 
     setTime(todoTask, status) {
         setTimeout(function () {
-            this.show(todoTask, status)
+            this.status(todoTask, status)
             if (status === 'todo') {
                 status = 'doing'
                 this.setTime(todoTask, status)
@@ -280,7 +278,7 @@ const show = {
             } else if (status === 'done') {
                 return;
             }
-        }.bind(showUtility), 2000)
+        }.bind(show), 2000)
     },
 }
 
