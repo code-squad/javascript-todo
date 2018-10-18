@@ -1,13 +1,66 @@
 const todo = {
     taskList: [],
+    cacheList: [],
+    undoCacheList: [],
+    undoCount: 0,
+    redoCount: 0,
+    undo() {
+        if (this.undoCount >= 3){
+            console.log(`undo는 세 번까지만 가능합니다. redo 한번 하세염`);
+            return;
+        }
+        const taskOrder = [this.add, this.remove, this.update];
+        const undoFunction = this.cacheList[this.cacheList.length - 2];
+        const undoArg = this.cacheList[this.cacheList.length - 1];
+        if (undoFunction === taskOrder[0]) {
+            taskOrder[1].call(this, undoArg);
+        } else if (undoFunction === taskOrder[1]) {
+            taskOrder[0].call(this, undoArg);
+        }
+        this.undoCacheList.push(undoFunction, undoArg);
+        this.cacheList.splice(this.cacheList.length - 2, 2);
+        this.undoCount++;
+    },
+
+    redo() {
+        if (this.redoCount >= 3){
+            console.log(`redo는 세 번까지만 가능합니다`);
+            return;
+        }
+        if (this.undoCount === 0){
+            console.log(`redo할 작업이 없습니다.`);
+            return;
+        }
+        const redoFunction = this.undoCacheList[this.undoCacheList.length - 2];
+        const redoArg = this.undoCacheList[this.undoCacheList.length - 1];
+
+        // add 일때 push 로 하는 거 까지 구현해따..............., remove는 어떻게?/ 
+        if(redoFunction === this.add){
+            this.taskList.push(redoArg);
+            let [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
+            console.log(`id : ${redoArg.id}, "${redoArg.name}" 항목이 새로 추가되었습니다.
+    현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
+        }
+        if(redoFunction === this.remove){
+            console.log(`id : ${redoArg.id}, "${redoArg.name}" 삭제 완료.`);
+            this.taskList.splice(this.taskList.indexOf(redoArg),1);
+        }
+
+        this.cacheList.push(redoFunction, redoArg);
+        this.undoCacheList.splice(this.undoCacheList.length - 2, 2);
+        this.undoCount--;
+        this.redoCount++;
+    },
+
     add(task) {
         if (errorCheck.add(task)) {
             task.status = 'todo';
             task.id = Date.now() + Math.random();
             this.taskList.push(task);
+            this.cacheList.push(this.add, task);
             let [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
             console.log(`id : ${task.id}, "${task.name}" 항목이 새로 추가되었습니다.
-현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
+    현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
         }
     },
 
@@ -206,7 +259,6 @@ const todo = {
     }
 }
 
-
 const errorCheck = {
     add(task) {
         //answer === false, 오류 반환
@@ -253,15 +305,16 @@ const errorCheck = {
 
     remove(id) {
         //answer === false, 오류 반환
-        let answer = true;
+        let answer = false;
         for (const values of todo.taskList) {
-            if (id.id !== values.id) {
-                answer = false;
-            }
-            if (!answer) {
-                console.log(`[error] ${id.id}번 아이디는 존재하지 않습니다.`);
+            if (id.id === values.id) {
+                answer = true;
                 return answer;
             }
+        }
+        if (!answer) {
+            console.log(`[error] ${id.id}번 아이디는 존재하지 않습니다.`);
+            return answer;
         }
         return answer;
     },
@@ -277,43 +330,62 @@ todo.add({
 //     tag: "programming"
 // });
 
-// todo.add({
-//     name: "알고리즘 공부하기",
-//     tag: "programming"
-// });
+todo.add({
+    name: "알고리즘 공부하기",
+    tag: "programming"
+});
 
-// todo.add({
-//     name: "요가하기",
-//     tag: "health"
-// });
 
-// todo.add({
-//     name: "명상하기",
-//     tag: "health"
-// });
+// for (i = 0; i < cacheList.length; i++) {
+//     if (i % 2 === 0) {
+//         cacheList[i](cacheList[i+1])
+//     }
+// }
+// console.log(cacheList)
 
-// todo.add({
-//     name: "독서하기",
-//     tag: "reading"
-// });
+// cacheList[0](cacheList[1])
+
+todo.add({
+    name: "요가하기",
+    tag: "health"
+});
+
+todo.add({
+    name: "명상하기",
+    tag: "health"
+});
+
+// todo.undo();
+// todo.undo();
+// todo.undo();
+// todo.undo();
+
+// todo.redo();
+// todo.redo();
+// todo.redo();
+
+todo.add({
+    name: "독서하기",
+    tag: "reading"
+});
 
 // todo.add({
 //     name: "기타치기",
 //     tag: "music"
 // });
 
-todo.update({
-    id: todo.taskList[0].id,
-    nextstatus: "doing"
-});
-
 // todo.update({
 //     id: todo.taskList[0].id,
 //     nextstatus: "doing"
 // });
 
+// todo.update({
+//     id: todo.taskList[0].id,
+//     nextstatus: "done"
+// });
+
 todo.remove({
-    id: 1234,
+    id: todo.taskList[0].id,
 });
 
 // todo.showTag('health');
