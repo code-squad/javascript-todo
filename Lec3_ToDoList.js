@@ -17,7 +17,7 @@ const todo = {
         } else if (undoFunction === taskOrder[1]) {
             taskOrder[0].call(this, undoArg);
         } else if (undoFunction === taskOrder[2]) {
-            undoArg.beforeStatus = undoArg.status;
+            undoArg.previousStatus = undoArg.status;
             this.undoUpdate(undoArg);
         }
         this.undoCacheList.push(undoFunction, undoArg);
@@ -27,22 +27,18 @@ const todo = {
 
     undoUpdate(arg) {
         if (arg.status === 'done') {
-            this.executeUpdate(arg, 'doing');
-            // this.cacheList.push(this.update, arg);
+            delete arg.takenTime;
+            this.printUpdate(arg, 'doing');
             return;
         }
         if (arg.status === 'doing') {
-            this.executeUpdate(arg, 'done');
-            // this.cacheList.push(this.update, arg);
+            delete arg.doingTime;
+            this.printUpdate(arg, 'todo');
             return;
         }
     },
 
     redo() {
-        // if (this.redoCount >= 3){
-        //     console.log(`redo는 세 번까지만 가능합니다`);
-        //     return;
-        // }
         if (this.undoCount === 0) {
             console.log(`redo할 작업이 없습니다.`);
             return;
@@ -50,7 +46,6 @@ const todo = {
         const redoFunction = this.undoCacheList[this.undoCacheList.length - 2];
         const redoArg = this.undoCacheList[this.undoCacheList.length - 1];
 
-        // add 일때 push 로 하는 거 까지 구현해따..............., remove는 어떻게?/ 
         if (redoFunction === this.add) {
             this.taskList.push(redoArg);
             let [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
@@ -61,11 +56,16 @@ const todo = {
             console.log(`id : ${redoArg.id}, "${redoArg.name}" 삭제 완료.`);
             this.taskList.splice(this.taskList.indexOf(redoArg), 1);
         }
-
         this.cacheList.push(redoFunction, redoArg);
+
+        if (redoFunction === this.update) {
+            let previousStatus = redoArg.previousStatus;
+            delete redoArg.previousStatus;
+            this.executeUpdate(redoArg, previousStatus);
+        }
+
         this.undoCacheList.splice(this.undoCacheList.length - 2, 2);
         this.undoCount--;
-        // this.redoCount++;
     },
 
     add(task) {
@@ -100,7 +100,7 @@ const todo = {
             let takenTime = (new Date().getTime() - taskToUpdate.doingTime) / 1000;
             takenTime = this.getTakenTimeWithUnit(takenTime);
             taskToUpdate.takenTime = takenTime;
-            delete taskToUpdate.doingTime;
+            // delete taskToUpdate.doingTime; undoUpdate에서 필요할 것 같아서 일단 주석처리
             this.printUpdate(taskToUpdate, statusToUpdate);
         }
     },
@@ -372,14 +372,6 @@ todo.add({
     tag: "health"
 });
 
-// todo.undo();
-// todo.undo();
-// todo.undo();
-// todo.undo();
-
-// todo.redo();
-// todo.redo();
-// todo.redo();
 
 todo.add({
     name: "독서하기",
@@ -405,6 +397,15 @@ todo.update({
     id: todo.taskList[1].id,
     nextstatus: "doing"
 });
+
+// todo.undo();
+// todo.undo();
+// todo.undo();
+// todo.undo();
+
+// todo.redo();
+// todo.redo();
+// todo.redo();
 
 // todo.remove({
 //     id: todo.taskList[0].id,
