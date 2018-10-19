@@ -1,6 +1,11 @@
 const Todo = {
     todoList: [],
 
+    init() {
+        Show.init()
+        todoList = [];
+    },
+
     getStatusNum(accumulatedTask) {
         let statusNum = new InitStatusNum(0, 0, 0)
         accumulatedTask.forEach(obj => {
@@ -17,6 +22,7 @@ const Todo = {
         Show.changes('add', newTodo)
         Show.nowStatus(statusNum)
         History.saveAddData(newTodo)
+        Show.wiseSaying(AddWiseSaying.getWiseSaying());
     },//add
 
     getRanNum(todoList) {
@@ -262,6 +268,14 @@ const History = {
 
 
 const Show = {
+    init() {
+        console.log(`할 일을 모두 제거하였습니다`);
+    },
+
+    wiseSaying(wiseSaying) {
+        console.log(wiseSaying)
+    },
+
     nowStatus(statusNum) {
         console.log(`현재상태 todo : ${statusNum.todo}, doing: ${statusNum.doing}, done : ${statusNum.done}`)
     },
@@ -428,6 +442,24 @@ const checkError = {
     },//show
 }
 
+const AddWiseSaying = {
+    list: ['일곱 번 넘어져도, 여덟 번 일어나라.',
+'어려움은 모든 것을 극복하는 것이다.',
+'시간은 금이다',
+'지나간 고통은 쾌락이다.',
+'행함이 없는 믿음은 쓸모가 없다.',
+'습관은 제2의 천성이다.',
+'사람들은 고용되었을 때 최상의 만족을 느낀다',
+'언제부터 천재가 존경받았는가?',
+'가장 하기 힘든 일은 아무 일도 안하는 것이다.',
+'웃으십시오.'],
+
+    getWiseSaying() {
+        const wiseSaying = this.list[Math.floor(Math.random() * this.list.length)]
+        return wiseSaying
+    }
+}
+
 class InitStatusNum {
     constructor(todo, doing, done) {
         this.todo = todo
@@ -455,6 +487,7 @@ Todo.update({id: 3, nextstatus: 'doIng'});
 Todo.undo();
 Todo.undo();
 Todo.undo();
+Todo.init();
 // Todo.update({id: 4, nextstatus: 'done'})
 // Todo.update({id: 4, nextstatus: 'doing'})
 // Todo.update({id: 3, nextstatus: 'todo'})
