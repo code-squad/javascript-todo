@@ -139,7 +139,7 @@ const todo = {
     },
 
     show(status) {
-        if(!checkError.show) return;
+        if(!checkError.show(status, this.todoList)) return;
         show.status(this.todoList, status)
     },
 
@@ -273,6 +273,7 @@ const history = {
         return todoTask
     },//update
 }
+
 
 const show = {
     nowStatus(statusNum) {
@@ -441,23 +442,27 @@ const checkError = {
     },//show
 }
 
-todo.add({ name: 't1', tag: 'programming' })
-todo.add({ name: 't2', tag: 'programming' })
-todo.add({ name: 't3', tag: 'programming' })
-todo.add({ name: 't4', tag: 'programming' })
-todo.add({ name: 't5', tag: 'programming' })
-todo.remove({id: 125})
-todo.update({id: 3, nextstatus: 'doing'})
-todo.update({id: 4, nextstatus: 'done'})
-todo.update({id: 4, nextstatus: 'doing'})
-todo.update({id: 3, nextstatus: 'todo'})
-todo.undo();
-todo.redo()
-todo.redo()
-todo.undo()
-todo.undo();
-todo.undo();
-todo.undo();
+// todo.add({ name: 't1', tag: 'programming' })
+// todo.add({ name: 't2', tag: 'asdf' })
+// todo.add({ name: 't3', tag: 'asdf' })
+// todo.add({ name: 't4', tag: 'programming' })
+// todo.add({ name: 't5', tag: 'programming' })
+// todo.update({id: 3, nextstatus: 'doIng'})
+// todo.update({id: 3, nextstatus: 'ToDO'})
+// todo.undo()
+// todo.redo();
+// todo.update({id: 4, nextstatus: 'done'})
+// todo.update({id: 4, nextstatus: 'doing'})
+// todo.update({id: 3, nextstatus: 'todo'})
+// todo.undo();
+// todo.redo()
+// todo.redo()
+// todo.undo()
+// todo.undo();
+// todo.undo();
+// todo.undo();
+
+
 
 
 
