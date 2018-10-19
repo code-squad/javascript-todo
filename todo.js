@@ -1,38 +1,21 @@
 const todo = {
     todoList: [],
 
-    statusNum: {
-        todo: 0,
-        doing: 0,
-        done: 0
-    },//statusNum
-
-    initStatusNum() {
-        this.statusNum.todo = 0;
-        this.statusNum.doing = 0;
-        this.statusNum.done = 0;
-    },//for statusNum
-
     getStatusNum(accumulatedTask) {
-        this.initStatusNum();
+        let statusNum = new initStatusNum(0, 0, 0)
         accumulatedTask.forEach(obj => {
-            this.statusNum[obj.status]++
+            statusNum[obj.status]++
         })
+        return statusNum
     },//for statusNum
 
     add(objToAdd) {
         if(!checkError.add(objToAdd, this.todoList)) return;
-        const newTodo = {
-            id: this.getRanNum(this.todoList),
-            name: objToAdd.name,
-            status: 'todo',
-            tag: objToAdd.tag,
-            timeData: 0,
-        }
+        const newTodo = new task(this.getRanNum(this.todoList), objToAdd.name, 'todo', objToAdd.tag, 0)
         this.todoList.push(this.checkTag(newTodo));
-        this.getStatusNum(this.todoList)
+        let statusNum = this.getStatusNum(this.todoList)
         show.changes('add', newTodo)
-        show.nowStatus(this.statusNum)
+        show.nowStatus(statusNum)
         history.saveAddData(newTodo)
     },//add
 
@@ -79,9 +62,9 @@ const todo = {
                 updatedData.push({ id: obj.id, name: obj.name, status: obj.status, tag: obj.tag, timeData: obj.timeData })
             }
         })
-        this.getStatusNum(this.todoList)
+        let statusNum = this.getStatusNum(this.todoList)
         show.changes('update', updatedData[0], beforeData[0])
-        show.nowStatus(this.statusNum)
+        show.nowStatus(statusNum)
         history.saveUpdateData(updatedData[0], beforeData[0])
     },//update
 
@@ -131,11 +114,11 @@ const todo = {
     },//for update4
 
     undo() {
-        history.undo(this.todoList, history.dataList.pop())
+        history.undo(this.todoList)
     },
 
     redo() {
-        history.redo(this.todoList, history.undoList.pop())
+        history.redo(this.todoList)
     },
 
     show(status) {
@@ -191,7 +174,8 @@ const history = {
         return array
     },
 
-    undo(todoTask, todo) {
+    undo(todoTask) {
+        todo = this.dataList.pop()
         if (todo === undefined) {
             console.log(`undo는 3회이상 실행 할 수 없습니다.`)
             return todoTask;
@@ -239,6 +223,7 @@ const history = {
     },//for undoupdate
 
     redo(todoTask, undid) {
+        undid = this.undoList.pop()
         if (undid === undefined) {
             console.log(`undo된 값이 존재하지 않습니다.`)
             return todoTask;
@@ -442,13 +427,32 @@ const checkError = {
     },//show
 }
 
-// todo.add({ name: 't1', tag: 'programming' })
-// todo.add({ name: 't2', tag: 'asdf' })
-// todo.add({ name: 't3', tag: 'asdf' })
-// todo.add({ name: 't4', tag: 'programming' })
-// todo.add({ name: 't5', tag: 'programming' })
-// todo.update({id: 3, nextstatus: 'doIng'})
-// todo.update({id: 3, nextstatus: 'ToDO'})
+class initStatusNum {
+    constructor(todo, doing, done) {
+        this.todo = todo
+        this.doing = doing
+        this.done = done
+    }
+}
+
+class task {
+    constructor(id, name, status, tag, timeData) {
+        this.id = id
+        this.name = name
+        this.status = status
+        this.tag = tag
+        this.timeData = timeData
+    }
+}
+
+todo.add({ name: 't1', tag: 'programming' })
+todo.add({ name: 't2', tag: 'asdf' })
+todo.add({ name: 't3', tag: 'asdf' })
+todo.add({ name: 't4', tag: 'programming' })
+todo.add({ name: 't5', tag: 'programming' })
+todo.update({id: 3, nextstatus: 'doIng'})
+todo.update({id: 3, nextstatus: 'ToDO'})
+console.log(todo.todoList)
 // todo.undo()
 // todo.redo();
 // todo.update({id: 4, nextstatus: 'done'})
