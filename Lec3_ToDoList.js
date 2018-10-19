@@ -315,17 +315,12 @@ const errorCheck = {
                 console.log(`[error] ${values.id}번은 이미 ${statusToUpdate}입니다.`);
                 answer = false;
             }
-            if (statusToUpdate === 'doing' && values.status === 'done') {
-                console.log(`[error] done 상태에서 doing 상태로 갈 수 없습니다.`);
+
+            const statusOrder = ['todo', 'doing', 'done']
+            if (statusOrder.indexOf(values.status) > statusOrder.indexOf(statusToUpdate)) {
+                console.log(`[error] ${values.status} 상태에서 ${statusToUpdate} 상태로 갈 수 없습니다.`);
                 answer = false;
-            }
-            if (statusToUpdate === 'todo' && values.status === 'doing') {
-                console.log(`[error] doing 상태에서 todo 상태로 갈 수 없습니다.`);
-                answer = false;
-            }
-            if (statusToUpdate === 'done' && values.status === 'todo') {
-                console.log(`[error] todo 상태에서 done 상태로 갈 수 없습니다.`);
-                answer = false;
+    
             }
             return answer;
         }
