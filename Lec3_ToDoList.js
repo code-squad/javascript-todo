@@ -59,7 +59,7 @@ const history = {
         if (redoFunction === todo.update) {
             let previousStatus = redoArg.previousStatus;
             delete redoArg.previousStatus;
-            this.executeUpdate(redoArg, previousStatus);
+            todo.executeUpdate(redoArg, previousStatus);
         }
 
         this.undoCacheList.splice(this.undoCacheList.length - 2, 2);
@@ -304,25 +304,31 @@ const errorCheck = {
         for (const values of todo.taskList) {
             if (updateObj.id === values.id) {
                 answer = true;
+            }
+            if (!answer) {
+                console.log(`[error] ${updateObj.id}번 아이디는 존재하지 않습니다.`);
                 return answer;
             }
-        }
-        if (!answer) {
-            console.log(`[error] ${updateObj.id}번 아이디는 존재하지 않습니다.`);
+            // 여기 지금 오류남... 값이 안 들어옴..... 
+            const statusToUpdate = updateObj.nextstatus.trim().toLowerCase();
+            if (statusToUpdate === values.status) {
+                console.log(`[error] ${values.id}번은 이미 ${statusToUpdate}입니다.`);
+                answer = false;
+            }
+            if (statusToUpdate === 'doing' && values.status === 'done') {
+                console.log(`[error] done 상태에서 doing 상태로 갈 수 없습니다.`);
+                answer = false;
+            }
+            if (statusToUpdate === 'todo' && values.status === 'doing') {
+                console.log(`[error] doing 상태에서 todo 상태로 갈 수 없습니다.`);
+                answer = false;
+            }
+            if (statusToUpdate === 'done' && values.status === 'todo') {
+                console.log(`[error] todo 상태에서 done 상태로 갈 수 없습니다.`);
+                answer = false;
+            }
             return answer;
         }
-        const statusToUpdate = updateObj.nextstatus.trim().toLowerCase();
-        if (statusToUpdate === values.status) {
-            console.log(`[error] ${values.id}번은 이미 ${statusToUpdate}입니다.`);
-            answer = false
-            return answer;
-        }
-        if (statusToUpdate === 'doing' && values.status === 'done') {
-            console.log(`[error] done 상태에서 doing 상태로 갈 수 없습니다.`);
-            answer = false;
-            return answer;
-        }
-        return answer;
     },
 
     remove(id) {
@@ -342,20 +348,20 @@ const errorCheck = {
     },
 }
 //test
-todo.add({
-    name: "자바스크립트 공부하기",
-    tag: "programming"
-});
+// todo.add({
+//     name: "자바스크립트 공부하기",
+//     tag: "programming"
+// });
 
 // todo.add({
 //     name: "자바스크립트 공부하기",
 //     tag: "programming"
 // });
 
-todo.add({
-    name: "알고리즘 공부하기",
-    tag: "programming"
-});
+// todo.add({
+//     name: "알고리즘 공부하기",
+//     tag: "programming"
+// });
 
 
 // for (i = 0; i < cacheList.length; i++) {
@@ -367,61 +373,61 @@ todo.add({
 
 // cacheList[0](cacheList[1])
 
-todo.add({
-    name: "요가하기",
-    tag: "health"
-});
-
-todo.add({
-    name: "명상하기",
-    tag: "health"
-});
-
-
-todo.add({
-    name: "독서하기",
-    tag: "reading"
-});
+// todo.add({
+//     name: "요가하기",
+//     tag: "health"
+// });
 
 // todo.add({
-//     name: "기타치기",
-//     tag: "music"
+//     name: "명상하기",
+//     tag: "health"
 // });
 
-todo.update({
-    id: todo.taskList[0].id,
-    nextstatus: "doing"
-});
 
-todo.update({
-    id: todo.taskList[0].id,
-    nextstatus: "done"
-});
+// todo.add({
+//     name: "독서하기",
+//     tag: "reading"
+// });
 
-todo.update({
-    id: todo.taskList[1].id,
-    nextstatus: "doing"
-});
+// // todo.add({
+// //     name: "기타치기",
+// //     tag: "music"
+// // });
 
-// todo.undo();
-// todo.undo();
-// todo.undo();
-// todo.undo();
-
-// todo.redo();
-// todo.redo();
-// todo.redo();
-
-// todo.remove({
+// todo.update({
 //     id: todo.taskList[0].id,
+//     nextstatus: "doing"
 // });
 
-show.showTag('health');
+// todo.update({
+//     id: todo.taskList[0].id,
+//     nextstatus: "done"
+// });
 
-show.showTags();
+// todo.update({
+//     id: todo.taskList[0].id,
+//     nextstatus: "doing"
+// });
 
-show.show("DONE")
+// // todo.undo();
+// // todo.undo();
+// // todo.undo();
+// // todo.undo();
 
-show.showAll();
+// // todo.redo();
+// // todo.redo();
+// // todo.redo();
 
-show.printShowAll(todo.taskList);
+// // todo.remove({
+// //     id: todo.taskList[0].id,
+// // });
+
+// // show.showTag('health');
+
+// // show.showTags();
+
+// // show.show("DONE")
+
+// // todo.showAll();
+
+// // todo.printShowAll(todo.taskList);
