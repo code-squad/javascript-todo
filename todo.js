@@ -132,7 +132,7 @@ const todo = {
     },
 
     redo() {
-
+        history.redo(this.todoList, history.undoList.pop())
     },
 
     show(status) {
@@ -234,19 +234,40 @@ const history = {
         return todoTask
     },//for undoupdate
 
-    redo(todoTask, undidTask) {
-        if (this.undoList === undefined) {
+    redo(todoTask, undid) {
+        if (undid === undefined) {
             console.log(`undo된 값이 존재하지 않습니다.`)
             return todoTask;
         }
-        if (undidTask.method === 'add') {
-            return this.redoAdd(todoTask, undidTask)
-        } else if (undidTask.method === 'remove') {
-            return this.redoRemove(todoTask, undidTask)
-        } else if (undidTask.method === 'update') {
-            return this.redoUpdate(todoTask, undidTask)
+        if (undid.method === 'add') {
+            this.dataList.push(undid)
+            return this.redoAdd(todoTask, undid)
+        } else if (undid.method === 'remove') {
+            this.dataList.push(undid)
+            return this.redoRemove(todoTask, undid)
+        } else if (undid.method === 'update') {
+            this.dataList.push(undid)
+            return this.redoUpdate(todoTask, undid)
         }
     },
+
+    redoAdd(todoTask, undid) {
+        todoTask.push(undid.addedData)
+        show.changes('add', undid.addedData)
+        return todoTask
+    },//remove
+
+    redoRemove(todoTask, undid) {
+        show.changes('remove', undid.removedData)
+        todoTask = todoTask.filter(obj => obj.id !== undid.removedData.id)
+        return todoTask
+    },//add
+
+    redoUpdate(todoTask, undid) {
+        show.changes('update', undid.updatedData, undid.beforeData)
+        todoTask = this.resetUpdate(todoTask, undid.updatedData)
+        return todoTask
+    },//update
 }
 
 const show = {
@@ -364,21 +385,67 @@ const show = {
     },
 }
 
-const checkError = {
-    checkList: [],
 
+const checkError = {
+    add(objToAdd, todoTask) {
+        if ((todoTask.filter(taskObj => taskObj.name === objToAdd.name)).length !== 0) {
+            console.log(`[error] 할 일 리스트에 같은 이름의 할 일이 존재합니다.`)
+            return false
+        };
+        return true
+    },//add
+
+    remove(objToRemove, todoTask) {
+        if (!todoTask.map(taskObj => taskObj.id).includes(objToRemove.id)) {
+            console.log(`[error] 입력하신 id는 존재하지 않습니다. (입력하신 id : ${objToRemove.id})`);
+            return false
+        }
+        return true
+    },//remove
+
+    update(objToUpdate, todoTask) {
+        const compareTask = todoTask.filter(taskObj => objToUpdate.id === taskObj.id)
+        if (!todoTask.map(taskObj => taskObj.id).includes(objToUpdate.id)) {
+            console.log(`[error] 입력하신 id는 존재하지 않습니다. (입력하신 id : ${objToUpdate.id})`);
+            return false
+        }
+        const status = objToUpdate.nextstatus.toLowerCase().replace(/ /gi, "")
+        if (status !== 'doing' && status !== 'done' && status !== 'todo') {
+            console.log(`[error] 그런 상태는 존재하지 않습니다 (입력하신 상태 : ${status})`)
+            return false    
+        } 
+        if (compareTask[0].status === objToUpdate.nextstatus) {
+            console.log(`[error] 이미 ${objToUpdate.nextstatus}인 상태입니다.`)
+            return false
+        } else if (compareTask[0].status === 'done' && status === 'doing' || status === 'todo') {
+            console.log(`[error] ${compareTask[0].status}상태에서 ${objToUpdate.nextstatus}상태로 되돌아갈 수 없습니다.`)
+            return false
+        } else if (compareTask[0].status === 'doing' && status === 'todo') {
+            console.log(`[error] ${compareTask[0].status}상태에서 ${objToUpdate.nextstatus}상태로 되돌아갈 수 없습니다.`)
+            return false
+        }
+        return true
+    },//update
+
+    show(status) {
+        if (status !== 'doing' && status !== 'done' && status !== 'todo') {
+            console.log(`[error] 할 일 들의 상태는 todo나 doing이나 done이어야만 합니다. 대소문자의 구별에 유의하세요
+모든 일들을 보고싶다면 todo.showAll()을 입력해 주세요.`);
+            return false
+        }
+        return true
+    },//show
 }
 
-todo.add({ name: '1', tag: 'programming' })
-todo.add({ name: '2', tag: 'programming' })
-todo.add({ name: '3', tag: 'programming' })
-todo.add({ name: '4', tag: 'programming' })
-todo.add({ name: '5', tag: 'programming' })
-todo.add({ name: '6', tag: 'programming' })
-todo.remove({ id: 0 })
-todo.remove({ id: 1 })
+todo.add({ name: 't1', tag: 'programming' })
+todo.add({ name: 't2', tag: 'programming' })
+todo.add({ name: 't3', tag: 'programming' })
+todo.add({ name: 't4', tag: 'programming' })
+todo.add({ name: 't5', tag: 'programming' })
+todo.add({ name: 't6', tag: 'programming' })
+
+todo.redo()
 todo.undo()
-todo.undo()
-todo.undo()
+console.log(history.undoList)
 
 
