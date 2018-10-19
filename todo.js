@@ -21,6 +21,7 @@ const todo = {
     },//for statusNum
 
     add(objToAdd) {
+        if(!checkError.add(objToAdd, this.todoList)) return;
         const newTodo = {
             id: this.getRanNum(this.todoList),
             name: objToAdd.name,
@@ -52,6 +53,7 @@ const todo = {
     },//for add2
 
     remove(objToRemove) {
+        if(!checkError.remove(objToRemove, this.todoList)) return;
         var toRemoveData = this.todoList.filter(obj => obj.id === objToRemove.id)[0]
         show.changes('remove', toRemoveData)
         history.saveRemoveData(toRemoveData)
@@ -59,6 +61,7 @@ const todo = {
     },//remove
 
     update(objToUpdate) {
+        if(!checkError.update(objToUpdate, this.todoList)) return;
         objToUpdate.nextstatus = objToUpdate.nextstatus.toLowerCase().replace(/ /gi, "")
         const beforeData = [];
         const updatedData = [];
@@ -136,6 +139,7 @@ const todo = {
     },
 
     show(status) {
+        if(!checkError.show) return;
         show.status(this.todoList, status)
     },
 
@@ -442,10 +446,18 @@ todo.add({ name: 't2', tag: 'programming' })
 todo.add({ name: 't3', tag: 'programming' })
 todo.add({ name: 't4', tag: 'programming' })
 todo.add({ name: 't5', tag: 'programming' })
-todo.add({ name: 't6', tag: 'programming' })
-
+todo.remove({id: 125})
+todo.update({id: 3, nextstatus: 'doing'})
+todo.update({id: 4, nextstatus: 'done'})
+todo.update({id: 4, nextstatus: 'doing'})
+todo.update({id: 3, nextstatus: 'todo'})
+todo.undo();
+todo.redo()
 todo.redo()
 todo.undo()
-console.log(history.undoList)
+todo.undo();
+todo.undo();
+todo.undo();
+
 
 
