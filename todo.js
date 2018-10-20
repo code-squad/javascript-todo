@@ -26,11 +26,12 @@ class TodosList {
     }
     remove({id, deadline}, errorType){
         let error = this.error.isSameId(this.todos, 'remove', id, errorType);
-        if(error&& deadline){return;}
         if(error){ console.log(error); return; }
 
         let prevData = this.dataProcessing.getPrevData(this.todos, id);
         this.todos = this.todos.filter((target)=>target.id !== id);
+
+        if(deadline){ console.log(`${id}번 작업의 마감 시간이 지났습니다. 따라서 해당 작업을 삭제합니다.`) }
 
         this.manipulateData({active: 'remove', id: id, name: prevData.name, tag:prevData.tag, prevStatus: prevData.status}, errorType);
     }
@@ -53,7 +54,7 @@ class TodosList {
         if(errorType === 'alarm') console.log(`${id}번 ${prevData.name} 작업을 시작합니다.`); 
         this.manipulateData({active: 'update', id: id, name: prevData.name, prevStatus: prevData.status, nextStatus}, errorType);
         
-        if(deadline) this.playAlarm({id, deadline})
+        if(deadline) this.playAlarm({id, deadline});
     }
     playAlarm({id, setTime, deadline}){
         (async () => {
@@ -138,7 +139,7 @@ class ErrorCheck {
         }
         return this.showError({active: 'update', error_check, id, prevData, nextStatus}, undo);
     }
-    isSameId(data, active, id, undo){
+    isSameId(data, active, id, errorType){
         let error_check = false;
         let sameId = [];
         if(active === 'remove' || active === 'update'){
@@ -147,7 +148,7 @@ class ErrorCheck {
         if(!sameId){
             error_check = true;
         }
-        return this.showError({active: 'remove', error_check: error_check, id: id}, undo);
+        return this.showError({active: 'remove', error_check: error_check, id: id}, errorType);
     }
     isProcessingError(processingType, counter){
         if(processingType === 'undo'){
@@ -163,7 +164,7 @@ class ErrorCheck {
             }
         }
     }
-    showError({active, error_check, id, prevData, nextStatus}, undo){
+    showError({active, error_check, id, prevData, nextStatus}, errorType){
         let error = '';
         if(active === 'add' && error_check){
             error = ` todo에는 이미 같은 이름의 task가 존재합니다. `;
@@ -176,9 +177,10 @@ class ErrorCheck {
             if(error_check === 'reverse') error = ` ${prevData.status} 상태에서 ${nextStatus}상태로 갈 수 없습니다.`;
             if(error_check === 'jump') error = ` ${prevData.status}상태에서 바로 ${nextStatus}를 실행할 수 없습니다.`;
         }
-        if(error_check && undo === undefined) error = `[error] ${error}`;
-        if(undo === 'undo' && error_check)  error = `[redoError] ${error}`;
-        if(undo === 'alarm' && error_check) error = `[alarmError] ${error}`;
+        if(error_check && errorType === undefined) error = `[error] ${error}`;
+        if(errorType === 'undo' && error_check)  error = `[redoError] ${error}`;
+        if(errorType === 'alarm' && error_check) error = `[alarmError] ${error}`;
+        if(errorType === 'deadline' && error_check) error = `[deadlineError] ${error}`;
         return error;
     }
 }
@@ -426,7 +428,7 @@ todosList.update({id:2,  nextStatus:"doing"});
 todosList.undo();
 todosList.redo();
 todosList.update({id:2,  nextStatus:"done"});
-todosList.update({id:4,  nextStatus:"doing", deadline: 5000});
+todosList.update({id:4,  nextStatus:"doing", deadline: 15000});
 
 console.log();
 console.log("- tag에 따른 결과값");
