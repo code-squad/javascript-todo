@@ -20,23 +20,31 @@ const history = {
     },
 
     undoUpdate(arg) {
-        if (arg.status === 'done') {
-            delete arg.takenTime;
-            todo.printUpdate(arg, 'doing');
-            return;
-        }
-        if (arg.status === 'doing') {
-            delete arg.doingTime;
-            todo.printUpdate(arg, 'todo');
-            return;
+        for (const values of todo.taskList) {
+            if (values.id === arg.id) {
+                if (arg.status === 'done') {
+                    delete arg.takenTime;
+                    arg.status = 'doing';
+                    todo.taskList[todo.taskList.indexOf(values)] = arg;
+                    todo.printUpdate(arg, 'doing');
+                    return;
+                }
+                if (arg.status === 'doing') {
+                    delete arg.doingTime;
+                    arg.status = 'todo';
+                    todo.taskList[todo.taskList.indexOf(values)] = arg;
+                    todo.printUpdate(arg, 'todo');
+                    return;
+                }
+            }
         }
     },
 
     undo() {
-//         if (this.undoCount >= 3) {
-//             console.log(`undo는 세 번까지만 가능합니다. redo 한번 하세염`);
-//             return;
-//         }
+        //         if (this.undoCount >= 3) {
+        //             console.log(`undo는 세 번까지만 가능합니다. redo 한번 하세염`);
+        //             return;
+        //         }
         if (this.cacheList.length === 0) {
             console.log(`undo 할 게 없습니다.`);
             return;
@@ -57,9 +65,9 @@ const history = {
         if (this.undoCacheList.length > 5) {
             this.undoCacheList.shift();
             this.undoCacheList.shift();
-//             this.undoCacheList--;
+            //             this.undoCacheList--;
         }
-        this.undoCacheList ? this.undoCacheList.push(undoFunction, undoArg):this.undoCacheList = [undoFunction, undoArg];
+        this.undoCacheList ? this.undoCacheList.push(undoFunction, undoArg) : this.undoCacheList = [undoFunction, undoArg];
         // this.undoCount++;
     },
 
@@ -82,9 +90,9 @@ const history = {
             console.log(`id : ${redoArg.id}, "${redoArg.name}" 삭제 완료.`);
             todo.taskList.splice(todo.taskList.indexOf(redoArg), 1);
         }
-        if (this.cacheList.length > 2) {
-            this.cacheList.shift();
-        }
+        // if (this.cacheList.length > 2) {
+        //     this.cacheList.shift();
+        // }
         this.cacheList.push(redoFunction, redoArg);
 
         if (redoFunction === 'update') {
@@ -92,7 +100,7 @@ const history = {
             delete redoArg.previousStatus;
             todo.executeUpdate(redoArg, previousStatus);
         }
-//         this.undoCount--;
+        //         this.undoCount--;
     },
 }
 
@@ -213,13 +221,13 @@ const todo = {
             task.status = 'todo';
             task.id = Date.now() + Math.random();
             this.taskList.push(task);
-            if(history.cacheList.length > 5){
+            if (history.cacheList.length > 5) {
                 history.cacheList.shift();
                 history.cacheList.shift();
                 history.cacheList.push('add', Object.assign({}, task));
-            } else if(history.cacheList.length < 6){
+            } else if (history.cacheList.length < 6) {
                 history.cacheList.push('add', Object.assign({}, task));
-                }
+            }
             let [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
             console.log(`id : ${task.id}, "${task.name}" 항목이 새로 추가되었습니다.
     현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
@@ -231,14 +239,14 @@ const todo = {
             const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
             const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
             this.executeUpdate(taskToUpdate, statusToUpdate);
- 
-            if(history.cacheList.length > 5){
+
+            if (history.cacheList.length > 5) {
                 history.cacheList.shift();
                 history.cacheList.shift();
-            history.cacheList.push('update', Object.assign({}, taskToUpdate));
-            } else if(history.cacheList.length < 6){
-            history.cacheList.push('update', Object.assign({}, taskToUpdate));
-                }
+                history.cacheList.push('update', Object.assign({}, taskToUpdate));
+            } else if (history.cacheList.length < 6) {
+                history.cacheList.push('update', Object.assign({}, taskToUpdate));
+            }
         }
     },
 
@@ -300,13 +308,13 @@ const todo = {
             for (const values of this.taskList) {
                 if (values.id === id.id) {
                     console.log(`id : ${id.id}, "${values.name}" 삭제 완료.`);
-            if(history.cacheList.length > 5){
-                history.cacheList.shift();
-                history.cacheList.shift();
-                    history.cacheList.push('remove', Object.assign({}, values));
-            } else if(history.cacheList.length < 6){
-                    history.cacheList.push('remove', Object.assign({}, values));
-                }
+                    if (history.cacheList.length > 5) {
+                        history.cacheList.shift();
+                        history.cacheList.shift();
+                        history.cacheList.push('remove', Object.assign({}, values));
+                    } else if (history.cacheList.length < 6) {
+                        history.cacheList.push('remove', Object.assign({}, values));
+                    }
                     this.taskList.splice(this.taskList.indexOf(values), 1);
                 }
             }
@@ -371,14 +379,14 @@ const errorCheck = {
                     answer = false;
                     return answer;
                 }
-                if(answer) {return answer}
+                if (answer) { return answer }
             }
         }
         if (!answer) {
             console.log(`[error] ${updateObj.id}번 아이디는 존재하지 않습니다.`);
             return answer;
         }
-//         return answer;
+        //         return answer;
     },
 
     remove(id) {
