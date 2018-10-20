@@ -54,7 +54,7 @@ const history = {
             undoArg.previousStatus = undoArg.status;
             this.undoUpdate(undoArg);
         }
-        if (this.undoCacheList.length > 6) {
+        if (this.undoCacheList.length > 5) {
             this.undoCacheList.shift();
             this.undoCacheList.shift();
 //             this.undoCacheList--;
@@ -64,10 +64,10 @@ const history = {
     },
 
     redo() {
-//         if (this.undoCount === 0) {
-//             console.log(`redo할 작업이 없습니다.`);
-//             return;
-//         }
+        if (this.undoCacheList.length === 0) {
+            console.log(`redo할 작업이 없습니다.`);
+            return;
+        }
         const redoFunction = this.undoCacheList[this.undoCacheList.length - 2];
         const redoArg = this.undoCacheList[this.undoCacheList.length - 1];
         this.undoCacheList.pop();
