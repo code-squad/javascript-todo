@@ -506,7 +506,7 @@ class InitStatusNum {
     }
 };
 
-const Task = class {
+class Task {
     constructor(id, name, status, tag, timeData) {
         this.id = id
         this.name = name
@@ -515,24 +515,3 @@ const Task = class {
         this.timeData = timeData
     }
 };
-
-Todo.init();
-Todo.add({name:'python1', tag:'programming'})
-Todo.add({name:'python2', tag:'programming'})
-Todo.add({name:'python3', tag:'programming'})
-Todo.add({name:'python4', tag:'programming'})
-Todo.add({name:'python5', tag:'programming'})
-Todo.undo();
-Todo.init();
-Todo.undo();
-console.log(Todo.todoList)
-
-// Todo.undo()
-// Todo.undo();
-// Todo.undo();
-// Todo.undo();
-
-
-
-
-
