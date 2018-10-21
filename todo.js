@@ -424,7 +424,7 @@ const Show = {
 const CheckError = {
     init(todoTask) {
         if(todoTask.length === 0) {
-            console.log(`[error] 이미 할일이 아무것도 없는데 초기화한다구요?`)
+            console.log(`[error] 할 일이 아무것도 없는데 초기화한다구요?`)
             return false
         }
         return true
@@ -506,7 +506,7 @@ class InitStatusNum {
     }
 };
 
-class Task {
+const Task = class {
     constructor(id, name, status, tag, timeData) {
         this.id = id
         this.name = name
@@ -516,12 +516,16 @@ class Task {
     }
 };
 
-// Todo.init();
+Todo.init();
 Todo.add({name:'python1', tag:'programming'})
 Todo.add({name:'python2', tag:'programming'})
 Todo.add({name:'python3', tag:'programming'})
 Todo.add({name:'python4', tag:'programming'})
 Todo.add({name:'python5', tag:'programming'})
+Todo.undo();
+Todo.init();
+Todo.undo();
+console.log(Todo.todoList)
 
 // Todo.undo()
 // Todo.undo();
