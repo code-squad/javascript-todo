@@ -122,7 +122,7 @@ const history = {
 
     undo() {
         if (this.cacheList.length === 0) {
-            console.log(`undo 할 게 없습니다.`);
+            console.log(`undo는 세 번까지 가능합니다.`);
             return;
         }
         const undoFunction = this.cacheList[this.cacheList.length - 2];
@@ -205,7 +205,7 @@ const history = {
     redoAdd(redoArg) {
         todo.taskList.push(redoArg);
         console.log(`id : ${redoArg.id}, "${redoArg.name}" 항목이 새로 추가되었습니다.`);
-        this.printStatusCount();
+        todo.printStatusCount();
     },
 
     redoRemove(redoArg) {
