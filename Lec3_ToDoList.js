@@ -26,6 +26,7 @@ const todo = {
             let doingTime = new Date().getTime();
             taskToUpdate.doingTime = doingTime;
             this.printUpdate(taskToUpdate, statusToUpdate);
+            this.printStatusCount();
         }
 
         if (statusToUpdate === 'done') {
@@ -33,6 +34,7 @@ const todo = {
             takenTime = this.getTakenTimeWithUnit(takenTime);
             taskToUpdate.takenTime = takenTime;
             this.printUpdate(taskToUpdate, statusToUpdate);
+            this.printStatusCount();
         }
     },
 
@@ -56,11 +58,11 @@ const todo = {
         if (takenTime <= t.min) {
             takenTime = takenTime + '초';
         } else if (takenTime <= t.hr) {
-            takenTime = (takenTime / min).toFixed(0) + '분';
+            takenTime = (takenTime / t.min).toFixed(0) + '분';
         } else if (takenTime <= t.d) {
-            takenTime = (takenTime / hr).toFixed(0) + '시간';
+            takenTime = (takenTime / t.hr).toFixed(0) + '시간';
         } else if (takenTime > t.d) {
-            takenTime = (takenTime / d).toFixed(0) + '일';
+            takenTime = (takenTime / t.d).toFixed(0) + '일';
         };
         return takenTime;
     },
@@ -69,6 +71,11 @@ const todo = {
         console.log(
             `id : ${taskToUpdate.id}, "${taskToUpdate.name}" 항목이 (${taskToUpdate.status} => ${statusToUpdate}) 상태로 업데이트되었습니다.`);
         taskToUpdate.status = statusToUpdate;
+        // let [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
+        // console.log(`현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개`);
+    },
+
+    printStatusCount() {
         let [todoCount, doingCount, doneCount] = this.countStatus(this.taskList);
         console.log(`현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개`);
     },
@@ -105,7 +112,7 @@ const todo = {
 const history = {
     cacheList: [],
     undoCacheList: [],
-    cacheListCheck(func, task){
+    cacheListCheck(func, task) {
         if (this.cacheList.length > 5) {
             this.cacheList.shift();
             this.cacheList.shift();
@@ -114,6 +121,7 @@ const history = {
             this.cacheList.push(func, Object.assign({}, task));
         }
     },
+
     undoAdd(undoArg) {
         for (const values of todo.taskList) {
             if (values.id === undoArg.id) {
@@ -135,16 +143,18 @@ const history = {
             if (values.id === arg.id) {
                 if (arg.status === 'done') {
                     todo.printUpdate(arg, 'doing');
-                    delete arg.takenTime;
+                    // delete arg.takenTime;
                     arg.status = 'doing';
                     todo.taskList[todo.taskList.indexOf(values)] = arg;
+                    todo.printStatusCount();
                     return;
                 }
                 if (arg.status === 'doing') {
                     todo.printUpdate(arg, 'todo');
-                    delete arg.doingTime;
+                    // delete arg.doingTime;
                     arg.status = 'todo';
                     todo.taskList[todo.taskList.indexOf(values)] = arg;
+                    todo.printStatusCount();
                     return;
                 }
             }
@@ -174,34 +184,50 @@ const history = {
         }
         this.undoCacheList ? this.undoCacheList.push(undoFunction, undoArg) : this.undoCacheList = [undoFunction, undoArg];
     },
+    
+    redoAdd(redoArg) {
+        todo.taskList.push(redoArg);
+        let [todoCount, doingCount, doneCount] = todo.countStatus(todo.taskList);
+        console.log(`id : ${redoArg.id}, "${redoArg.name}" 항목이 새로 추가되었습니다.
+현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
+    },
+
+    redoRemove(redoArg) {
+        console.log(`id : ${redoArg.id}, "${redoArg.name}" 삭제 완료.`);
+        todo.taskList.splice(todo.taskList.indexOf(redoArg), 1);
+    },
+
+    redoUpdate(redoArg) {
+        for (const values of todo.taskList) {
+            if (values.id === redoArg.id) {
+                todo.printUpdate(redoArg, redoArg.previousStatus);
+                redoArg.previousStatus = redoArg.status;
+                todo.taskList[todo.taskList.indexOf(values)] = redoArg;
+                todo.printStatusCount();
+            }
+        }
+    },
 
     redo() {
         if (this.undoCacheList.length === 0) {
-            console.log(`redo할 작업이 없습니다.`);
+            console.log(`redo 할 게 없습니다.`);
             return;
         }
         const redoFunction = this.undoCacheList[this.undoCacheList.length - 2];
         const redoArg = this.undoCacheList[this.undoCacheList.length - 1];
         this.undoCacheList.pop();
         this.undoCacheList.pop();
+        this.cacheList.push(redoFunction, redoArg);
         if (redoFunction === 'add') {
-            todo.taskList.push(redoArg);
-            let [todoCount, doingCount, doneCount] = todo.countStatus(todo.taskList);
-            console.log(`id : ${redoArg.id}, "${redoArg.name}" 항목이 새로 추가되었습니다.
-    현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
+            this.redoAdd(redoArg);
         }
         if (redoFunction === 'remove') {
-            console.log(`id : ${redoArg.id}, "${redoArg.name}" 삭제 완료.`);
-            todo.taskList.splice(todo.taskList.indexOf(redoArg), 1);
+            this.redoRemove(redoArg);
         }
-        this.cacheList.push(redoFunction, redoArg);
-
         if (redoFunction === 'update') {
-            let previousStatus = redoArg.previousStatus;
-            delete redoArg.previousStatus;
-            todo.executeUpdate(redoArg, previousStatus);
+            this.redoUpdate(redoArg);
         }
-    },
+    }
 }
 
 const errorCheck = {
@@ -243,7 +269,9 @@ const errorCheck = {
                     answer = false;
                     return answer;
                 }
-                if (answer) { return answer }
+                if (answer) {
+                    return answer
+                }
             }
         }
         if (!answer) {
