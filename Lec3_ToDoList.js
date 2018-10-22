@@ -51,7 +51,7 @@ const todo = {
 
     findTaskToUpdate(updateObj) {
         let taskToUpdate = {};
-        const statusToUpdate = updateObj.nextstatus.trim().toLowerCase();
+        const statusToUpdate = updateObj.nextstatus.replace(/ /gi,"").toLowerCase();
         for (const values of this.taskList) {
             if (values.id === updateObj.id) {
                 taskToUpdate = values;
@@ -247,7 +247,7 @@ const errorCheck = {
                 answer = true;
             }
             if (answer === true) {
-                const statusToUpdate = updateObj.nextstatus.trim().toLowerCase();
+                const statusToUpdate = updateObj.nextstatus.replace(/ /gi,"").toLowerCase();
                 if (statusToUpdate === values.status) {
                     console.log(`[error] ${values.id}번은 이미 ${statusToUpdate}입니다.`);
                     answer = false;
