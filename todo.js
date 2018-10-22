@@ -1,5 +1,7 @@
-const Todo = {
-    todoList: [],
+class Todo {
+    constructor(todoList,) {
+        this.todoList = todoList
+    }
 
     init() {
         if(!CheckError.init(this.todoList)) return;
@@ -7,7 +9,7 @@ const Todo = {
         History.saveInitData(allDataObj)
         this.todoList = [];
         Show.init(this.todoList)
-    },
+    }
 
     getStatusNum(accumulatedTask) {
         let statusNum = new InitStatusNum(0, 0, 0)
@@ -15,7 +17,7 @@ const Todo = {
             statusNum[obj.status]++
         })
         return statusNum
-    },
+    }
 
     add(objToAdd) {
         if(!CheckError.add(objToAdd, this.todoList)) return;
@@ -26,7 +28,7 @@ const Todo = {
         Show.nowStatus(statusNum)
         History.saveAddData(newTodo)
         Show.wiseSaying(AddWiseSaying.getWiseSaying());
-    },//add
+    }//add
 
     getRanNum(todoList) {
         const ranNum = Math.floor(Math.random() * 6)
@@ -35,47 +37,56 @@ const Todo = {
             return this.getRanNum(this.todoList)
         }
         return ranNum;
-    },//for add1
+    }//for add1
 
     checkTag(newTask) {
         if (newTask.tag === undefined) {
             newTask.tag = 'nothing'
         }
         return newTask
-    },//for add2
+    }//for add2
 
     remove(objToRemove) {
         if(!CheckError.remove(objToRemove, this.todoList)) return;
-        var toRemoveData = this.todoList.filter(obj => obj.id === objToRemove.id)[0]
+        const toRemoveData = this.todoList.filter(obj => obj.id === objToRemove.id)[0]
         Show.changes('remove', toRemoveData)
         History.saveRemoveData(toRemoveData)
         this.todoList = this.todoList.filter(obj => obj.id !== objToRemove.id)
-    },//remove
+    }//remove
 
     update(objToUpdate) {
         if(!CheckError.update(objToUpdate, this.todoList)) return;
         objToUpdate.nextstatus = objToUpdate.nextstatus.toLowerCase().replace(/ /gi, "")
-        const beforeData = [];
-        const updatedData = [];
-        this.todoList = this.todoList.map(obj => {
+        const beforeData = this.copyData(this.todoList, objToUpdate)
+        this.todoList = this.getUpdatedList(this.todoList, objToUpdate)
+        this.todoList = this.checkUpdateStatus(objToUpdate, this.todoList)
+        const updatedData = this.copyData(this.todoList, objToUpdate)
+        const statusNum = this.getStatusNum(this.todoList);
+        Show.changes('update', updatedData[0], beforeData[0])
+        Show.nowStatus(statusNum)
+        History.saveUpdateData(updatedData[0], beforeData[0])
+    }//update
+
+    getUpdatedList(todoTask, objToUpdate) {
+        todoTask.map(obj => {
             if (obj.id === objToUpdate.id) {
-                beforeData.push(new Task(obj.id, obj.name,obj.status, obj.tag, obj.timeData))
                 obj.status = objToUpdate.nextstatus
                 return obj
             }
             return obj
         })
-        this.todoList = this.checkUpdateStatus(objToUpdate, this.todoList)
-        this.todoList.forEach(obj => {
-            if (obj.id === objToUpdate.id) {
-                updatedData.push(new Task(obj.id, obj.name,obj.status, obj.tag, obj.timeData))
+        return todoTask
+    }//for update1
+
+    copyData(todoTask, objToUpdate) {
+        const Data = [];
+        todoTask.forEach(obj => {
+            if(obj.id === objToUpdate.id) {
+                Data.push(new Task(obj.id, obj.name, obj.status, obj.tag, obj.timeData))
             }
         })
-        let statusNum = this.getStatusNum(this.todoList)
-        Show.changes('update', updatedData[0], beforeData[0])
-        Show.nowStatus(statusNum)
-        History.saveUpdateData(updatedData[0], beforeData[0])
-    },//update
+        return Data
+    }//for update2
 
     checkUpdateStatus(objToUpdate, todoList) {
         if (objToUpdate.nextstatus === 'doing') {
@@ -84,7 +95,7 @@ const Todo = {
             return this.updateTakeTime(objToUpdate, todoList)
         }
         return todoList
-    },//for update1
+    }//for update3
 
     updateDoingTime(objToUpdate, todoList) {
         todoList.forEach(obj => {
@@ -93,7 +104,7 @@ const Todo = {
             }
         })
         return todoList
-    },//for update2
+    }//for update4
 
     updateTakeTime(objToUpdate, todoList) {
         todoList.forEach(obj => {
@@ -102,7 +113,7 @@ const Todo = {
             }
         })
         return todoList
-    },//for update3
+    }//for update5
 
     getTakeTime(doingTime, currentTime) {
         let takenTime = ''
@@ -120,20 +131,20 @@ const Todo = {
         takenMsecTime = takenMsecTime - takenMinutes * msecPerMinute
         takenTime += takenDays + '일, ' + takenHours + '시간, ' + takenMinutes + '분'
         return takenTime;
-    },//for update4
+    }//for update6
 
     undo() {
         this.todoList = History.undo(this.todoList)
-    },
+    }
 
     redo() {
         this.todoList = History.redo(this.todoList)
-    },
+    }
 
     show(status) {
         if(!CheckError.show(status, this.todoList)) return;
         Show.status(this.todoList, status)
-    },
+    }
 
     showTag(tag) {
         if (tag !== undefined) {
@@ -141,7 +152,7 @@ const Todo = {
             return;
         }
         Show.notHaveTag(tag, this.todoList)
-    },
+    }
 
     showTags() {
         const taggedTodos = this.todoList.filter(obj => obj.tag !== 'noting')
@@ -150,36 +161,39 @@ const Todo = {
             const sameTagNum = Show.getSameTagNum(tag, taggedTodos)
             Show.printSameTag(tag, taggedTodos, sameTagNum)
         })
-    },
+    }
 
     showAll() {
         Show.all(this.todoList)
-    },
+    }
 };
 
 
-const History = {
-    dataList: [],
-    undoList: [],
+class History {
+    constructor(dataList, undoList) {
+        this.dataList = dataList
+        this.undoList = undoList
+    }
+
     saveAddData(newTodo) {
         this.dataList.push({ method: 'add', addedData: newTodo })
         this.checkListNum(this.dataList)
-    },
+    }
 
     saveRemoveData(removeData) {
         this.dataList.push({ method: 'remove', removedData: removeData })
         this.checkListNum(this.dataList)
-    },
+    }
 
     saveUpdateData(updatedData, beforeData) {
         this.dataList.push({ method: 'update', updatedData: updatedData, beforeData: beforeData })
         this.checkListNum(this.dataList)
-    },
+    }
 
     saveInitData(initData) {
         this.dataList.push({ method: 'init', initedData: initData.dataList})
         this.checkListNum(this.dataList)
-    },
+    }
 
     checkListNum(array) {
         const limitNum = 3
@@ -187,7 +201,7 @@ const History = {
             array.shift()
         }
         return array
-    },
+    }
 
     undo(todoTask) {
         todo = this.dataList.pop()
@@ -208,31 +222,31 @@ const History = {
             this.undoList.push(todo)
             return this.undoInit(todoTask, todo)
         }
-    },//check
+    }//check
 
     undoInit(todoTask, todo) {
         todoTask = todo.initedData
         Show.init(todoTask)
         return todoTask
-    },
+    }
 
     undoAdd(todoTask, todo) {
         Show.changes('remove', todo.addedData)
         todoTask = todoTask.filter(obj => obj.id !== todo.addedData.id)
         return todoTask
-    },//add
+    }//add
 
     undoRemove(todoTask, todo) {
         todoTask.push(todo.removedData)
         Show.changes('add', todo.removedData)
         return todoTask
-    },//remove
+    }//remove
 
     undoUpdate(todoTask, todo) {
         Show.changes('update', todo.beforeData, todo.updatedData)
         todoTask = this.resetUpdate(todoTask, todo.beforeData)
         return todoTask
-    },//update
+    }//update
 
     resetUpdate(todoTask, beforeData) {
         todoTask = todoTask.map(taskObj => {
@@ -244,7 +258,7 @@ const History = {
             return taskObj
         })
         return todoTask
-    },//for undoupdate
+    }//for undoupdate
 
     redo(todoTask, undid) {
         undid = this.undoList.pop()
@@ -265,50 +279,50 @@ const History = {
             this.dataList.push(undid)
             return this.redoInit(todoTask)
         }
-    },
+    }
 
     redoInit(todoTask) {
         todoTask = [];
         Show.init(todoTask)
         return todoTask
-    },
+    }
 
     redoAdd(todoTask, undid) {
         todoTask.push(undid.addedData)
         Show.changes('add', undid.addedData)
         return todoTask
-    },//remove
+    }//remove
 
     redoRemove(todoTask, undid) {
         Show.changes('remove', undid.removedData)
         todoTask = todoTask.filter(obj => obj.id !== undid.removedData.id)
         return todoTask
-    },//add
+    }//add
 
     redoUpdate(todoTask, undid) {
         Show.changes('update', undid.updatedData, undid.beforeData)
         todoTask = this.resetUpdate(todoTask, undid.updatedData)
         return todoTask
-    },//update
+    }//update
 };
 
 
-const Show = {
+class Show {
     init(todoTask) {
         if(todoTask.length === 0) {
             console.log(`할 일이 초기화되었습니다. 후회되신다면 undo를....`);
         } else {
             console.log(`잘 생각 하셧습니다. 다시 되돌려놓았습니다.`)
         }
-    },
+    }
 
     wiseSaying(wiseSaying) {
         console.log(wiseSaying)
-    },
+    }
 
     nowStatus(statusNum) {
         console.log(`현재상태 todo : ${statusNum.todo}, doing: ${statusNum.doing}, done : ${statusNum.done}`)
-    },
+    }
 
     changes(method, objToPrint, beforeChangeObj) {
         if (method === 'add') {
@@ -318,7 +332,7 @@ const Show = {
         } else {
             console.log(`ID : ${objToPrint.id}, ${objToPrint.name} 항목이 ${beforeChangeObj.status} => ${objToPrint.status} 상태로 변경 되었습니다.`)
         }
-    },
+    }
 
     status(todoList, status) {
         console.log(`--${status} 상태인 할 일들--`);
@@ -329,17 +343,17 @@ const Show = {
                 console.log(`ID : ${obj.id}, ${obj.name}, [${obj.tag}]`)
             }
         })
-    },//showStatus
+    }//showStatus
 
     haveTag(tag, todoList) {
         console.log(`--태그가 [${tag}]인 할 일들--`);
         this.byTag(tag, todoList)
-    },//showTag
+    }//showTag
 
     notHaveTag(tag, todoList) {
         console.log(`--태그가 없는 할 일들--`);
         this.byTag('noting', todoList)
-    },//showTag
+    }//showTag
 
     byTag(tag, todoList) {
         const todoNum = this.getSameTagAndStatusNum(tag, 'todo', todoList)
@@ -351,7 +365,7 @@ const Show = {
         const doneNum = this.getSameTagAndStatusNum(tag, 'done', todoList)
         console.log(`[done, 총 ${doneNum}개]`)
         this.sameTag(tag, 'done', todoList);
-    },//for tag
+    }//for tag
 
     sameTag(tag, status, todoList) {
         const filteredList = todoList.filter(obj => obj.tag === tag && obj.status === status)
@@ -362,7 +376,7 @@ const Show = {
             }
             console.log(`ID : ${obj.id}, ${obj.name}`)
         })
-    },//for tag
+    }//for tag
 
     getSameTagAndStatusNum(tag, status, todoTask) {
         let sameTagAndStatusNum = 0
@@ -372,13 +386,13 @@ const Show = {
             }
         })
         return sameTagAndStatusNum
-    },//for tag
+    }//for tag
 
     getTagList(taggedTask) {
         const tagList = taggedTask.map(obj => obj.tag)
         const notOverlapTagList = tagList.filter((tag, index, tagList) => tagList.indexOf(tag) === index)
         return notOverlapTagList
-    },//현재 task배열 내에있는 모든 tag값들을 중복 없이 따로 모아놓는 배열을 만드는 메서드
+    }//현재 task배열 내에있는 모든 tag값들을 중복 없이 따로 모아놓는 배열을 만드는 메서드
 
     printSameTag(tag, taggedTask, sameTagNum) {
         console.log(`--[${tag}], 총 ${sameTagNum}개--`)
@@ -387,7 +401,7 @@ const Show = {
                 console.log(`ID : ${taggedTaskObj.id}, ${taggedTaskObj.name}, [${taggedTaskObj.status}]`)
             }
         })
-    },//tag의 값에 따라서 출력해주는 메서드
+    }//tag의 값에 따라서 출력해주는 메서드
 
     getSameTagNum(tag, taggedTask) {
         sameTagNum = 0
@@ -397,12 +411,12 @@ const Show = {
             }
         })
         return sameTagNum
-    },//같은 태그의 개수를 세어주는 메서드
+    }//같은 태그의 개수를 세어주는 메서드
 
     all(todoTask) {
         console.log(`총 ${todoTask.length}개의 리스트를 가져왔습니다.`)
         this.setTime(todoTask, 'todo')
-    },//setTime메서드를 이용해서 재귀적으로 출력해주는 함수
+    }//setTime메서드를 이용해서 재귀적으로 출력해주는 함수
 
     setTime(todoTask, status) {
         setTimeout(function () {
@@ -417,18 +431,18 @@ const Show = {
                 return;
             }
         }.bind(Show), 2000)
-    },
+    }
 };
 
 
-const CheckError = {
+class CheckError {
     init(todoTask) {
         if(todoTask.length === 0) {
             console.log(`[error] 할 일이 아무것도 없는데 초기화한다구요?`)
             return false
         }
         return true
-    },
+    }
 
     add(objToAdd, todoTask) {
         if ((todoTask.filter(taskObj => taskObj.name === objToAdd.name)).length !== 0) {
@@ -436,7 +450,7 @@ const CheckError = {
             return false
         };
         return true
-    },//add
+    }//add
 
     remove(objToRemove, todoTask) {
         if (!todoTask.map(taskObj => taskObj.id).includes(objToRemove.id)) {
@@ -444,7 +458,7 @@ const CheckError = {
             return false
         }
         return true
-    },//remove
+    }//remove
 
     update(objToUpdate, todoTask) {
         const compareTask = todoTask.filter(taskObj => objToUpdate.id === taskObj.id)
@@ -468,7 +482,7 @@ const CheckError = {
             return false
         }
         return true
-    },//update
+    }//update
 
     show(status) {
         if (status !== 'doing' && status !== 'done' && status !== 'todo') {
@@ -477,11 +491,12 @@ const CheckError = {
             return false
         }
         return true
-    },//show
+    }//show
 }
 
-const AddWiseSaying = {
-    list: ['일곱 번 넘어져도, 여덟 번 일어나라.',
+class AddWiseSaying {
+    constructor() {
+        this.list= ['일곱 번 넘어져도, 여덟 번 일어나라.',
 '어려움은 모든 것을 극복하는 것이다.',
 '시간은 금이다',
 '지나간 고통은 쾌락이다.',
@@ -490,8 +505,9 @@ const AddWiseSaying = {
 '사람들은 고용되었을 때 최상의 만족을 느낀다',
 '언제부터 천재가 존경받았는가?',
 '가장 하기 힘든 일은 아무 일도 안하는 것이다.',
-'웃으십시오.'],
-
+'웃으십시오.']
+    }
+    
     getWiseSaying() {
         const wiseSaying = this.list[Math.floor(Math.random() * this.list.length)]
         return wiseSaying
@@ -504,7 +520,7 @@ class InitStatusNum {
         this.doing = doing
         this.done = done
     }
-};
+}
 
 class Task {
     constructor(id, name, status, tag, timeData) {
@@ -514,4 +530,16 @@ class Task {
         this.tag = tag
         this.timeData = timeData
     }
-};
+}
+
+Todo.add({name: 't1', tag:'t1'})
+Todo.add({name: 't2', tag:'t2'})
+Todo.add({name: 't3', tag:'t3'})
+Todo.add({name: 't4', tag:'t4'})
+Todo.add({name: 't5', tag:'t5'})
+Todo.add({name: 't6', tag:'t6'})
+Todo.update({id:3 , nextstatus:'doing'})
+Todo.undo()
+Todo.undo()
+Todo.redo();
+Todo.redo();
