@@ -108,11 +108,20 @@ const history = {
     // cacheList에 task 3개로 유지
     checkCacheList(func, task) {
         this.cacheList.push(func, Object.assign({}, task));
-        while (this.cacheList.length > 6) {
-            this.cacheList.shift();
-        }
+        this.fixArrLength(this.cacheList)
     },
     
+    removeOldTask(arr){
+            arr.pop();
+            arr.pop();
+    },
+
+    fixArrLength(arr){
+        while (arr.length > 6) {
+            arr.shift();
+        }
+    },
+
     undo() {
         if (this.cacheList.length === 0) {
             console.log(`undo는 세 번까지 가능합니다.`);
@@ -120,8 +129,7 @@ const history = {
         }
         const undoFunction = this.cacheList[this.cacheList.length - 2];
         const undoArg = this.cacheList[this.cacheList.length - 1];
-        this.cacheList.pop();
-        this.cacheList.pop();
+        this.removeOldTask(this.cacheList)
         if (undoFunction === 'add') {
             this.undoAdd(undoArg);
         } else if (undoFunction === 'remove') {
@@ -131,9 +139,7 @@ const history = {
             this.undoUpdate(undoArg);
         }
         this.undoCacheList ? this.undoCacheList.push(undoFunction, undoArg) : this.undoCacheList = [undoFunction, undoArg];
-        while (this.undoCacheList.length > 6) {
-            this.undoCacheList.shift();
-        }
+        this.fixArrLength(this.undoCacheList);
     },
 
     redo() {
@@ -143,9 +149,7 @@ const history = {
         }
         const redoFunction = this.undoCacheList[this.undoCacheList.length - 2];
         const redoArg = this.undoCacheList[this.undoCacheList.length - 1];
-        // 위에 언급한대로 수정하고, (반복문활용) 자꾸 사용되는 코드임으로, 함수로 별도로 만드는 것이 좋음.
-        this.undoCacheList.pop();
-        this.undoCacheList.pop();
+        this.removeOldTask(this.undoCacheList)
         this.cacheList.push(redoFunction, redoArg);
         if (redoFunction === 'add') {
             this.redoAdd(redoArg);
