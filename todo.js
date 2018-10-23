@@ -59,12 +59,12 @@ class TodosList {
     playAlarm({id, setTime, deadline}){
         (async () => {
             if(setTime){
-                await delay.setTimeOut(setTime);
+                await this.todoMessage.delay(setTime);
                 this.update({id,  nextStatus: 'doing', deadline}, 'alarm');
             }
             if(deadline){
-                await delay.setTimeOut(deadline);
-                this.remove({id, deadline}, 'deadline')
+                await this.todoMessage.delay(deadline);
+                this.remove({id, deadline}, 'deadline');
             }
         })();
     }
@@ -208,13 +208,14 @@ class TodoMassage {
         };
         (async () => {
           for await (let x of range()) {
-            await console.log(x.notice);
-            await delay.setTimeOut(x.sec);
+            console.log(x.notice);
+            await this.delay(x.sec);
             console.log(x.title);
             console.log(x.list);
           }
         })();
     }
+    delay(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
 }
 
 class DataProcessing {
@@ -357,10 +358,6 @@ class Log {
     }
 }
 
-class Delay {
-    setTimeOut(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
-}
-
 class StopWatch {
     start(){
         return new Date().getTime();
@@ -376,7 +373,6 @@ class StopWatch {
 }
 
 const todosList = new TodosList(new ErrorCheck(), new TodoMassage, new DataProcessing(), new Log(), new StopWatch());
-const delay = new Delay();
 
 // undo &b redo test
 console.log("- undo, redo 기본 사용");
