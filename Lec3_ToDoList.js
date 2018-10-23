@@ -5,7 +5,7 @@ const todo = {
             task.status = 'todo';
             task.id = Date.now() + Math.random();
             this.taskList.push(task);
-            history.cacheListCheck('add', task);
+            history.checkCacheList('add', task);
             console.log(`id : ${task.id}, "${task.name}" 항목이 새로 추가되었습니다.`)
             this.printStatusCount();
         }
@@ -16,7 +16,7 @@ const todo = {
             const taskToUpdate = this.findTaskToUpdate(updateObj)[0];
             const statusToUpdate = this.findTaskToUpdate(updateObj)[1];
             this.executeUpdate(taskToUpdate, statusToUpdate);
-            history.cacheListCheck('update', taskToUpdate);
+            history.checkCacheList('update', taskToUpdate);
         }
     },
 
@@ -24,7 +24,7 @@ const todo = {
         if (!errorCheck.remove(id)) return;
         const result = this.taskList.filter(values => values.id === id.id);
         console.log(`id : ${result[0].id}, "${result[0].name}" 삭제 완료.`);
-        history.cacheListCheck('remove', result[0]);
+        history.checkCacheList('remove', result[0]);
         this.taskList.splice(this.taskList.indexOf(result[0]), 1);
     },
 
@@ -106,13 +106,13 @@ const history = {
     cacheList: [],
     undoCacheList: [],
     // cacheList에 task 3개로 유지
-    cacheListCheck(func, task) {
+    checkCacheList(func, task) {
         this.cacheList.push(func, Object.assign({}, task));
         while (this.cacheList.length > 6) {
             this.cacheList.shift();
         }
     },
-
+    
     undo() {
         if (this.cacheList.length === 0) {
             console.log(`undo는 세 번까지 가능합니다.`);
@@ -130,11 +130,10 @@ const history = {
             undoArg.previousStatus = undoArg.status;
             this.undoUpdate(undoArg);
         }
-        if (this.undoCacheList.length > 5) {
-            this.undoCacheList.shift();
+        this.undoCacheList ? this.undoCacheList.push(undoFunction, undoArg) : this.undoCacheList = [undoFunction, undoArg];
+        while (this.undoCacheList.length > 6) {
             this.undoCacheList.shift();
         }
-        this.undoCacheList ? this.undoCacheList.push(undoFunction, undoArg) : this.undoCacheList = [undoFunction, undoArg];
     },
 
     redo() {
