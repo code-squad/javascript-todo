@@ -107,13 +107,9 @@ const history = {
     undoCacheList: [],
     // cacheList에 task 3개로 유지
     cacheListCheck(func, task) {
-        if (this.cacheList.length > 5) {
-            // shift() 똑같은코드를 여러번 쓰는 것보다, while문등으로 cacheList의 길이가 주어진 값(3)이 될때까지 반복적으로 shift호출하는 게 좀더 똑똑한 표현같아요.
+        this.cacheList.push(func, Object.assign({}, task));
+        while (this.cacheList.length > 6) {
             this.cacheList.shift();
-            this.cacheList.shift();
-            this.cacheList.push(func, Object.assign({}, task));
-        } else if (this.cacheList.length < 6) {
-            this.cacheList.push(func, Object.assign({}, task));
         }
     },
 
@@ -412,21 +408,21 @@ todo.add({
 });
 
 
-// todo.add({
-//     name: "요가하기",
-//     tag: "health"
-// });
+todo.add({
+    name: "요가하기",
+    tag: "health"
+});
 
-// todo.add({
-//     name: "명상하기",
-//     tag: "health"
-// });
+todo.add({
+    name: "명상하기",
+    tag: "health"
+});
 
 
-// todo.add({
-//     name: "독서하기",
-//     tag: "reading"
-// });
+todo.add({
+    name: "독서하기",
+    tag: "reading"
+});
 
 // todo.add({
 //     name: "기타치기",
