@@ -22,10 +22,10 @@ const todo = {
 
     remove(id) {
         if (!errorCheck.remove(id)) return;
-        const result = this.taskList.filter(values => values.id === id.id);
-        console.log(`id : ${result[0].id}, "${result[0].name}" 삭제 완료.`);
-        history.checkCacheList('remove', result[0]);
-        this.taskList.splice(this.taskList.indexOf(result[0]), 1);
+        const taskToRemove = this.taskList.filter(values => values.id === id.id);
+        console.log(`id : ${taskToRemove[0].id}, "${taskToRemove[0].name}" 삭제 완료.`);
+        history.checkCacheList('remove', taskToRemove[0]);
+        this.taskList.splice(this.taskList.indexOf(taskToRemove[0]), 1);
     },
 
     executeUpdate(taskToUpdate, statusToUpdate) {
@@ -180,6 +180,8 @@ const history = {
 
     undoUpdate(arg) {
         // for-if-if .. 이렇게 중첩된 코드는 안좋은 코드~ 읽기 어렵고 디버깅이 어려운 코드에요.
+        const result = this.taskList.filter(values => values.id === id.id);
+
         for (const values of todo.taskList) {
             if (values.id === arg.id) {
                 if (arg.status === 'done') {
