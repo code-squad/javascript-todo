@@ -110,13 +110,13 @@ const history = {
         this.cacheList.push(func, Object.assign({}, task));
         this.fixArrLength(this.cacheList)
     },
-    
-    removeOldTask(arr){
-            arr.pop();
-            arr.pop();
+
+    removeOldTask(arr) {
+        arr.pop();
+        arr.pop();
     },
 
-    fixArrLength(arr){
+    fixArrLength(arr) {
         while (arr.length > 6) {
             arr.shift();
         }
@@ -179,27 +179,22 @@ const history = {
     },
 
     undoUpdate(arg) {
-        // for-if-if .. 이렇게 중첩된 코드는 안좋은 코드~ 읽기 어렵고 디버깅이 어려운 코드에요.
-        const result = this.taskList.filter(values => values.id === id.id);
-
-        for (const values of todo.taskList) {
-            if (values.id === arg.id) {
-                if (arg.status === 'done') {
-                    todo.printUpdate(arg, 'doing');
-                    arg.status = 'doing';
-                    todo.taskList[todo.taskList.indexOf(values)] = arg;
-                    todo.printStatusCount();
-                    return;
-                }
-                if (arg.status === 'doing') {
-                    todo.printUpdate(arg, 'todo');
-                    arg.status = 'todo';
-                    todo.taskList[todo.taskList.indexOf(values)] = arg;
-                    todo.printStatusCount();
-                    return;
-                }
-            }
+        const taskToUndoUpdate = todo.taskList.filter(values => values.id === arg.id);
+        if (arg.status === 'done') {
+            this.printUndoUpdate(arg, 'doing', taskToUndoUpdate);
+            return;
         }
+        if (arg.status === 'doing') {
+            this.printUndoUpdate(arg, 'todo', taskToUndoUpdate);
+            return;
+        }
+    },
+
+    printUndoUpdate(arg, changingStatus, taskToUndoUpdate) {
+        todo.printUpdate(arg, changingStatus);
+        arg.status = changingStatus;
+        todo.taskList[todo.taskList.indexOf(taskToUndoUpdate)] = arg;
+        todo.printStatusCount();
     },
 
     redoAdd(redoArg) {
@@ -402,32 +397,32 @@ const show = {
 
 
 //test
-todo.add({
-    name: "자바스크립트 공부하기",
-    tag: "programming"
-});
+// todo.add({
+//     name: "자바스크립트 공부하기",
+//     tag: "programming"
+// });
 
-todo.add({
-    name: "알고리즘 공부하기",
-    tag: "programming"
-});
-
-
-todo.add({
-    name: "요가하기",
-    tag: "health"
-});
-
-todo.add({
-    name: "명상하기",
-    tag: "health"
-});
+// todo.add({
+//     name: "알고리즘 공부하기",
+//     tag: "programming"
+// });
 
 
-todo.add({
-    name: "독서하기",
-    tag: "reading"
-});
+// todo.add({
+//     name: "요가하기",
+//     tag: "health"
+// });
+
+// todo.add({
+//     name: "명상하기",
+//     tag: "health"
+// });
+
+
+// todo.add({
+//     name: "독서하기",
+//     tag: "reading"
+// });
 
 // todo.add({
 //     name: "기타치기",
@@ -458,9 +453,9 @@ todo.add({
 // todo.redo();
 // todo.redo();
 
-todo.remove({
-    id: todo.taskList[0].id,
-});
+// todo.remove({
+//     id: todo.taskList[0].id,
+// });
 
 // show.showTag('health');
 
