@@ -21,13 +21,14 @@ const todo = {
     },
 
     remove(id) {
-        if (errorCheck.remove(id)) {
-            for (const values of this.taskList) {
-                if (values.id === id.id) {
-                    console.log(`id : ${id.id}, "${values.name}" 삭제 완료.`);
-                    history.cacheListCheck('remove', values);
-                    this.taskList.splice(this.taskList.indexOf(values), 1);
-                }
+        //if안에 모든코드가 들어가 있으니.. if(!errorCheck.remove(id)) return;해서 빨리 탈출해서 indent를 제거하면 좋겠음.
+        if (!errorCheck.remove(id)) return;
+        for (const values of this.taskList) {
+            //for-of 안에서 if문을 썼는데요. filter -> forEach 방식으로 바꿔보세요. 함수형프로그래밍 형태로 데이터를 처리하는게 좀더 읽기 좋고, 함수단위로 기능을 세분화시키는 것이라 좋아요.
+            if (values.id === id.id) {
+                console.log(`id : ${id.id}, "${values.name}" 삭제 완료.`);
+                history.cacheListCheck('remove', values);
+                this.taskList.splice(this.taskList.indexOf(values), 1);
             }
         }
     },
@@ -51,7 +52,7 @@ const todo = {
 
     findTaskToUpdate(updateObj) {
         let taskToUpdate = {};
-        const statusToUpdate = updateObj.nextstatus.replace(/ /gi,"").toLowerCase();
+        const statusToUpdate = updateObj.nextstatus.replace(/ /gi, "").toLowerCase();
         for (const values of this.taskList) {
             if (values.id === updateObj.id) {
                 taskToUpdate = values;
@@ -112,6 +113,7 @@ const history = {
     // cacheList에 task 3개로 유지
     cacheListCheck(func, task) {
         if (this.cacheList.length > 5) {
+            // shift() 똑같은코드를 여러번 쓰는 것보다, while문등으로 cacheList의 길이가 주어진 값(3)이 될때까지 반복적으로 shift호출하는 게 좀더 똑똑한 표현같아요.
             this.cacheList.shift();
             this.cacheList.shift();
             this.cacheList.push(func, Object.assign({}, task));
@@ -151,6 +153,7 @@ const history = {
         }
         const redoFunction = this.undoCacheList[this.undoCacheList.length - 2];
         const redoArg = this.undoCacheList[this.undoCacheList.length - 1];
+        // 위에 언급한대로 수정하고, (반복문활용) 자꾸 사용되는 코드임으로, 함수로 별도로 만드는 것이 좋음.
         this.undoCacheList.pop();
         this.undoCacheList.pop();
         this.cacheList.push(redoFunction, redoArg);
@@ -182,6 +185,7 @@ const history = {
     },
 
     undoUpdate(arg) {
+        // for-if-if .. 이렇게 중첩된 코드는 안좋은 코드~ 읽기 어렵고 디버깅이 어려운 코드에요.
         for (const values of todo.taskList) {
             if (values.id === arg.id) {
                 if (arg.status === 'done') {
@@ -247,7 +251,7 @@ const errorCheck = {
                 answer = true;
             }
             if (answer === true) {
-                const statusToUpdate = updateObj.nextstatus.replace(/ /gi,"").toLowerCase();
+                const statusToUpdate = updateObj.nextstatus.replace(/ /gi, "").toLowerCase();
                 if (statusToUpdate === values.status) {
                     console.log(`[error] ${values.id}번은 이미 ${statusToUpdate}입니다.`);
                     answer = false;
