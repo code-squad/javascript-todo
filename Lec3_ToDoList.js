@@ -193,7 +193,7 @@ const history = {
     printUndoUpdate(arg, changingStatus, taskToUndoUpdate) {
         todo.printUpdate(arg, changingStatus);
         arg.status = changingStatus;
-        todo.taskList[todo.taskList.indexOf(taskToUndoUpdate)] = arg;
+        todo.taskList[todo.taskList.indexOf(taskToUndoUpdate[0])] = arg;
         todo.printStatusCount();
     },
 
