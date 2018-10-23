@@ -1,14 +1,14 @@
 
-// 할일 관리 애플리케이션 step4 modified 2
+// 할일 관리 애플리케이션 step4 modified 3
 
 // 할일 추가, 업데이트, 삭제 기능 객체 생성 클래스 
-const TodoMainCommand = class {
+const TodoCommand = class {
 
-    constructor({ todoList, taskId, removedItemsBin, mainSupport }) {
+    constructor({ todoList, taskId, removedItemsBin, todoControl }) {
         this.todoList = todoList;
         this.taskId = taskId;
         this.removedItemsBin = removedItemsBin;
-        this.mainSupport = mainSupport;
+        this.todoControl = todoControl;
     }
 
     // 현재 상태 출력
@@ -26,7 +26,7 @@ const TodoMainCommand = class {
 
     // 할일 추가
     addTodo(todoInfo) {
-        if (this.mainSupport.errorCheck.checkIsSameName.call(this, todoInfo)) return; // 에러 검출 메소드 호출
+        if (this.todoControl.errorCheck.checkIsSameName.call(this, todoInfo)) return; // 에러 검출 메소드 호출
         const info = todoInfo;
         let recentHistory; // 변경 후 내역(할일 추가)
         this.taskId++;
@@ -41,9 +41,9 @@ const TodoMainCommand = class {
                 addedTime: info.addedTime, startTime: info.startTime, endTime: info.endTime, runningTime: info.runningTime
             };
         }
-        this.mainSupport.msgPrinting.todoMsg.printAddTodo(info.taskId, info.name); // 메시지 출력
-        this.mainSupport.stackManagement.moveUndoStack(info.taskId, "added", null, recentHistory); // 할일 추가시 undo 스택에 내역 전달 
-        this.mainSupport.stackManagement.redoStack = [];
+        this.todoControl.msgPrinting.todoMsg.printAddTodo(info.taskId, info.name); // 메시지 출력
+        this.todoControl.stackManagement.moveUndoStack(info.taskId, "added", null, recentHistory); // 할일 추가시 undo 스택에 내역 전달 
+        this.todoControl.stackManagement.redoStack = [];
         this.showStatus();
     }
 
@@ -53,16 +53,16 @@ const TodoMainCommand = class {
         this.info.nextStatus = this.info.nextStatus.toLowerCase(); // 상태를 소문자로 변경하고 대치
 
         // 에러 검출 메소드 호출
-        if (this.mainSupport.errorCheck.checkInvalidStatus.call(this, this.info)) return;
-        if (this.mainSupport.errorCheck.checkNotFoundId.call(this, this.info)) return;
-        if (this.mainSupport.errorCheck.checkIsSameStatus.call(this, this.info)) return;
-        if (this.mainSupport.errorCheck.checkInvalidUpdate.call(this, this.info)) return;
+        if (this.todoControl.errorCheck.checkInvalidStatus.call(this, this.info)) return;
+        if (this.todoControl.errorCheck.checkNotFoundId.call(this, this.info)) return;
+        if (this.todoControl.errorCheck.checkIsSameStatus.call(this, this.info)) return;
+        if (this.todoControl.errorCheck.checkInvalidUpdate.call(this, this.info)) return;
 
         this.todoList.filter(val => val.taskId === this.info.id)
-            .forEach(this.updateTaskCb.bind(this));
-        this.mainSupport.msgPrinting.todoMsg.printUpdateTodo(this.info.id, this.taskName, this.prevStatus, this.info.nextStatus); // 메시지 출력 
-        this.mainSupport.stackManagement.moveUndoStack(this.info.id, "updated", this.prevHistory, this.recentHistory); // 할일 업데이트 시 undo 스택에 내역 전달
-        this.mainSupport.stackManagement.redoStack = [];
+                    .forEach(this.updateTaskCb.bind(this));
+        this.todoControl.msgPrinting.todoMsg.printUpdateTodo(this.info.id, this.taskName, this.prevStatus, this.info.nextStatus); // 메시지 출력 
+        this.todoControl.stackManagement.moveUndoStack(this.info.id, "updated", this.prevHistory, this.recentHistory); // 할일 업데이트 시 undo 스택에 내역 전달
+        this.todoControl.stackManagement.redoStack = [];
         this.showStatus();
     }
 
@@ -114,7 +114,7 @@ const TodoMainCommand = class {
 
     // 할 일 삭제
     removeTodo(removeInfo) {
-        if (this.mainSupport.errorCheck.checkNotFoundId.call(this, removeInfo)) return; // 에러 검출 메소드 호출
+        if (this.todoControl.errorCheck.checkNotFoundId.call(this, removeInfo)) return; // 에러 검출 메소드 호출
         const info = removeInfo;
         const prevHistory = this.todoList.filter(val =>
             val.taskId === info.id)[0];
@@ -126,30 +126,28 @@ const TodoMainCommand = class {
         );
         let taskName = filterdTodo[0].name;
         this.todoList.splice(this.todoList.indexOf(filterdTodo[0]), 1);
-        this.mainSupport.msgPrinting.todoMsg.printRemoveTodo(info.id, taskName); // 메시지 출력
-        this.mainSupport.stackManagement.moveUndoStack(info.id, "removed", "onTodoList", "inBin"); // 삭제 내역 기록
-        this.mainSupport.stackManagement.redoStack = [];
+        this.todoControl.msgPrinting.todoMsg.printRemoveTodo(info.id, taskName); // 메시지 출력
+        this.todoControl.stackManagement.moveUndoStack(info.id, "removed", "onTodoList", "inBin"); // 삭제 내역 기록
+        this.todoControl.stackManagement.redoStack = [];
         this.showStatus();
     }
 
     // undo 기능 
     undo() { // 변경 후 상태를 변경 전 상태로 대치 
-        if (this.mainSupport.stackManagement.undoStack.length != 0) { // 스택이 차지 않았을 경우 코드 실행
-            this.endIndex = this.mainSupport.stackManagement.undoStack.length - 1;
-            this.endIndexVal = this.mainSupport.stackManagement.undoStack[this.endIndex];
-            this.idToSearch = this.endIndexVal.taskId; // 해당 ID 찾기
-            this.statusLog = this.endIndexVal.statusLog;
-
-            this.todoList.forEach(this.replaceBackCb.bind(this));
-
-            this.undoInCaseRemoved();
-
-            this.mainSupport.stackManagement.redoStack.unshift(this.mainSupport.stackManagement.undoStack.splice(this.endIndex, 1)[0]); // redo 스택으로 이동 
-            let stackLimit = 3;
-            this.mainSupport.stackManagement.manageRedoStack(stackLimit) //  redo 스택 횟수 초과시 마지막 내역 삭제
-        } else if (this.mainSupport.stackManagement.undoStack.length === 0) { // 스택이 꽉 찰 경우 undo 불가
+        if (this.todoControl.stackManagement.undoStack.length === 0) { // 스택이 꽉 찰 경우 undo 불가
             console.log(`"더 이상 undo할 수 없습니다."`)
-        }
+            return;
+        } // 스택이 차지 않았을 경우 코드 실행
+        this.endIndex = this.todoControl.stackManagement.undoStack.length - 1;
+        this.endIndexVal = this.todoControl.stackManagement.undoStack[this.endIndex];
+        this.idToSearch = this.endIndexVal.taskId; // 해당 ID 찾기
+        this.statusLog = this.endIndexVal.statusLog;
+
+        this.todoList.forEach(this.replaceBackCb.bind(this));
+        this.undoInCaseRemoved();
+
+        this.todoControl.stackManagement.moveRedoStack(this.endIndex); // undo 후 redo 스택으로 이동
+        this.todoControl.stackManagement.manageRedoStack() //  redo 스택 횟수 초과시 마지막 내역 삭제
     }
 
     // undo forEach 콜백
@@ -161,58 +159,53 @@ const TodoMainCommand = class {
     }
 
     undoInCaseRemoved() {
-        if (this.statusLog === "removed") {
-            let targetToRecover = this.removedItemsBin.filter(val => this.endIndexVal.taskId === val.taskId)[0];
-            this.removedItemsBin.splice(this.removedItemsBin.indexOf(targetToRecover), 1);
-            this.todoList.push(targetToRecover);
-            this.mainSupport.msgPrinting.undoRedoMsg.printUndoMsgRecovered(this.idToSearch, targetToRecover.name); // 메시지 출력
-        }
+        if (this.statusLog !== "removed") return;
+        let targetToRecover = this.removedItemsBin.filter(val => this.endIndexVal.taskId === val.taskId)[0];
+        this.removedItemsBin.splice(this.removedItemsBin.indexOf(targetToRecover), 1);
+        this.todoList.push(targetToRecover);
+        this.todoControl.msgPrinting.undoRedoMsg.printUndoMsgRecovered(this.idToSearch, targetToRecover.name); // 메시지 출력
     }
 
     undoInCaseUpdated(idx) {
-        if (this.statusLog === "updated") {
-            this.todoList[idx] = this.endIndexVal.prevHistory;
-            let name = this.endIndexVal.prevHistory.name,
-                recentStatus = this.endIndexVal.recentHistory.status,
-                prevStatus = this.endIndexVal.prevHistory.status;
-            this.mainSupport.msgPrinting.undoRedoMsg.printUndoMsgUpdated(this.idToSearch, name, recentStatus, prevStatus); // 메시지 출력
-        }
+        if (this.statusLog !== "updated") return;
+        this.todoList[idx] = this.endIndexVal.prevHistory;
+        let name = this.endIndexVal.prevHistory.name,
+            recentStatus = this.endIndexVal.recentHistory.status,
+            prevStatus = this.endIndexVal.prevHistory.status;
+        this.todoControl.msgPrinting.undoRedoMsg.printUndoMsgUpdated(this.idToSearch, name, recentStatus, prevStatus); // 메시지 출력
     }
 
     undoInCaseAdded(idx) {
-        if (this.statusLog === "added") {
-            let name = this.endIndexVal.recentHistory.name;
-            this.todoList.splice(idx, 1);
-            this.mainSupport.msgPrinting.undoRedoMsg.printUndoMsgRemoved(this.idToSearch, name); // 메시지 출력
-        }
+        if (this.statusLog !== "added") return;
+        let name = this.endIndexVal.recentHistory.name;
+        this.todoList.splice(idx, 1);
+        this.todoControl.msgPrinting.undoRedoMsg.printUndoMsgRemoved(this.idToSearch, name); // 메시지 출력
     }
 
     undoInCaseRecovered(idx) {
-        if (this.statusLog === "recovered") {
-            let removedItem = this.todoList.splice(idx, 1)[0];
-            this.removedItemsBin.push(removedItem);
-            this.mainSupport.msgPrinting.undoRedoMsg.printUndoMsgRemoved(this.idToSearch, removedItem.name); // 메시지 출력
-        }
+        if (this.statusLog !== "recovered") return;
+        let removedItem = this.todoList.splice(idx, 1)[0];
+        this.removedItemsBin.push(removedItem);
+        this.todoControl.msgPrinting.undoRedoMsg.printUndoMsgRemoved(this.idToSearch, removedItem.name); // 메시지 출력
     }
 
     // (스택)redo 기능 
     redo() { // 다시 변경 후 상태로 대치 
-        if (this.mainSupport.stackManagement.redoStack.length != 0) { // 스택이 차지 않았을 경우 코드 실행
-            this.firstIndexVal = this.mainSupport.stackManagement.redoStack[0];
-            this.statusLog = this.firstIndexVal.statusLog;
-            this.idToSearch = this.firstIndexVal.taskId;
-
-            todo.todoList.forEach(this.replaceAgainCb.bind(this));
-
-            this.redoInCaseAdded();
-            this.redoInCaseRecovered();
-
-            this.mainSupport.stackManagement.undoStack.push(this.mainSupport.stackManagement.redoStack.splice(0, 1)[0]); // undo 스택으로 이동
-            let stackLimit = 3; // 스택 길이 제한 설정
-            this.mainSupport.stackManagement.manageUndoStackFromRedoStack(stackLimit);
-        } else if (this.mainSupport.stackManagement.redoStack.length === 0) {  // 스택이 꽉 찰 경우 redo 불가
+        if (this.todoControl.stackManagement.redoStack.length === 0) { // 스택이 꽉 찰 경우 redo 불가
             console.log(`"더 이상 redo할 수 없습니다."`);
+            return;
         }
+        // 스택이 차지 않았을 경우 코드 실행
+        this.firstIndexVal = this.todoControl.stackManagement.redoStack[0];
+        this.statusLog = this.firstIndexVal.statusLog;
+        this.idToSearch = this.firstIndexVal.taskId;
+
+        todo.todoList.forEach(this.replaceAgainCb.bind(this));
+        this.redoInCaseAdded();
+        this.redoInCaseRecovered();
+
+        this.todoControl.stackManagement.moveUndoStackFromRedoStack();
+        this.todoControl.stackManagement.manageUndoStackFromRedoStack();
     }
 
     // (스택)redo forEach 콜백
@@ -223,59 +216,56 @@ const TodoMainCommand = class {
     }
 
     redoInCaseAdded() {
-        if (this.statusLog === "added") {
-            this.todoList.push(this.firstIndexVal.recentHistory);
-            let name = this.firstIndexVal.recentHistory.name;
-            this.mainSupport.msgPrinting.undoRedoMsg.printRedoMsgAdded(this.idToSearch, name); // 메시지 출력
-            this.showStatus();
-        }
+        if (this.statusLog !== "added") return;
+        this.todoList.push(this.firstIndexVal.recentHistory);
+        let name = this.firstIndexVal.recentHistory.name;
+        this.todoControl.msgPrinting.undoRedoMsg.printRedoMsgAdded(this.idToSearch, name); // 메시지 출력
+        this.showStatus();
+
     }
 
     redoInCaseRecovered() {
-        if (this.statusLog === "recovered") {
-            let targetToRecover = this.removedItemsBin.filter(val => this.firstIndexVal.taskId === val.taskId)[0];
-            this.removedItemsBin.splice(this.removedItemsBin.indexOf(targetToRecover), 1);
-            this.todoList.push(targetToRecover);
-            this.mainSupport.msgPrinting.undoRedoMsg.printRedoMsgAdded(this.idToSearch, targetToRecover.name); // 메시지 출력
-            this.showStatus();
-        }
+        if (this.statusLog !== "recovered") return;
+        let targetToRecover = this.removedItemsBin.filter(val => this.firstIndexVal.taskId === val.taskId)[0];
+        this.removedItemsBin.splice(this.removedItemsBin.indexOf(targetToRecover), 1);
+        this.todoList.push(targetToRecover);
+        this.todoControl.msgPrinting.undoRedoMsg.printRedoMsgAdded(this.idToSearch, targetToRecover.name); // 메시지 출력
+        this.showStatus();
     }
 
     redoInCaseUpdated(idx) {
-        if (this.statusLog === "updated") {
-            let prevStatus = this.firstIndexVal.prevHistory.status,
-                recentStatus = this.firstIndexVal.recentHistory.status,
-                name = this.firstIndexVal.prevHistory.name;
-            this.todoList[idx] = this.firstIndexVal.recentHistory;
-            this.mainSupport.msgPrinting.undoRedoMsg.printRedoMsgUpdated(this.idToSearch, name, prevStatus, recentStatus); // 메시지 출력
-            this.showStatus();
-        }
+        if (this.statusLog !== "updated") return;
+        let prevStatus = this.firstIndexVal.prevHistory.status,
+            recentStatus = this.firstIndexVal.recentHistory.status,
+            name = this.firstIndexVal.prevHistory.name;
+        this.todoList[idx] = this.firstIndexVal.recentHistory;
+        this.todoControl.msgPrinting.undoRedoMsg.printRedoMsgUpdated(this.idToSearch, name, prevStatus, recentStatus); // 메시지 출력
+        this.showStatus();
     }
 
     redoInCaseRemoved(idx) {
-        if (this.statusLog === "removed") {
-            let removedItem = this.todoList.splice(idx, 1)[0];
-            let name = removedItem.name;
-            let status = removedItem.status;
-            this.removedItemsBin.push(removedItem);
-            this.mainSupport.msgPrinting.undoRedoMsg.printRedoMsgRemoved(this.idToSearch, name, status); // 메시지 출력
-            this.showStatus();
-        }
+        if (this.statusLog !== "removed") return;
+        let removedItem = this.todoList.splice(idx, 1)[0];
+        let name = removedItem.name;
+        let status = removedItem.status;
+        this.removedItemsBin.push(removedItem);
+        this.todoControl.msgPrinting.undoRedoMsg.printRedoMsgRemoved(this.idToSearch, name, status); // 메시지 출력
+        this.showStatus();
     }
 
     // 삭제된 항목 복구
     recover() {
-        if (this.mainSupport.resultListView.printRecoverableItemsList()) return; // 복구 가능 항목 출력, 항목 없을 시 메소드 종료
+        if (this.todoControl.resultListView.printRecoverableItemsList()) return; // 복구 가능 항목 출력, 항목 없을 시 메소드 종료
         let recoverableId = parseInt(prompt(`"복구할 아이디를 선택하십시오."`)); // 복구할 아이디 값 프롬프트 입력
-        if (this.mainSupport.errorCheck.checkNotFoundrecoverableId.call(this, recoverableId)) return; // 에러 검출 메소드 호출
+        if (this.todoControl.errorCheck.checkNotFoundrecoverableId.call(this, recoverableId)) return; // 에러 검출 메소드 호출
 
         let targetToBeRecovered = this.removedItemsBin.filter(val => val.taskId === recoverableId)[0];
 
         this.removedItemsBin.splice(this.removedItemsBin.indexOf(targetToBeRecovered), 1); // 복구 대상을 휴지통에서 제거
         this.todoList.push(targetToBeRecovered); // 기존 할일 목록에 복구된 항목 추가
-        this.mainSupport.stackManagement.moveUndoStack(recoverableId, "recovered", "inBin", "onTodoList"); // undoStack에 내역 추가 
-        this.mainSupport.stackManagement.redoStack = [];
-        this.mainSupport.msgPrinting.undoRedoMsg.printMsgRecoveredFromBin(recoverableId, targetToBeRecovered.name); // 메시지 출력
+        this.todoControl.stackManagement.moveUndoStack(recoverableId, "recovered", "inBin", "onTodoList"); // undoStack에 내역 추가 
+        this.todoControl.stackManagement.redoStack = [];
+        this.todoControl.msgPrinting.undoRedoMsg.printMsgRecoveredFromBin(recoverableId, targetToBeRecovered.name); // 메시지 출력
     }
 
     // 특정 태그를 기준으로 할일 리스트 생성
@@ -295,23 +285,23 @@ const TodoMainCommand = class {
                 : val.status === "doing" ? listObj.doing.push(val)
                     : val.status === "done" ? listObj.done.push(val) : undefined;
         });
-        this.mainSupport.resultListView.sortByTaskId(listObj);
-        this.mainSupport.resultListView.printListByTag(listObj);
+        this.todoControl.resultListView.sortByTaskId(listObj);
+        this.todoControl.resultListView.printListByTag(listObj);
     }
 
     // 모든 태그를 기준으로 할일 리스트 생성
     showListByAlltheTags() {
         const listObj = {}
         this.todoList.filter(val => val.tag)
-            .forEach(val => {
-                if (!listObj[val.tag]) {
-                    listObj[val.tag] = [val];
-                } else if (listObj[val.tag]) {
-                    listObj[val.tag].push(val);
-                }
-            });
-        this.mainSupport.resultListView.sortByTaskId(listObj);
-        this.mainSupport.resultListView.printListByAlltheTags(listObj);
+                    .forEach(val => {
+                        if (!listObj[val.tag]) {
+                            listObj[val.tag] = [val];
+                        } else if (listObj[val.tag]) {
+                            listObj[val.tag].push(val);
+                        }
+                    });
+        this.todoControl.resultListView.sortByTaskId(listObj);
+        this.todoControl.resultListView.printListByAlltheTags(listObj);
     }
 
     // 현재 상태에 따른 할일 리스트 생성 및 출력
@@ -322,10 +312,10 @@ const TodoMainCommand = class {
             return;
         }
         resultCheckIsStatus.filter(val => val.status === status)
-            .sort((a, b) => a.taskId - b.taskId) // id 순으로 정렬
-            .forEach(val =>
-                console.log(`- ${val.taskId}번, ${val.name}, [${val.tag}]${val.status === "done" ? `, 경과시간: ${val.runningTime}` : ""}`)
-            )
+                            .sort((a, b) => a.taskId - b.taskId) // id 순으로 정렬
+                            .forEach(val =>
+                                console.log(`- ${val.taskId}번, ${val.name}, [${val.tag}]${val.status === "done" ? `, 경과시간: ${val.runningTime}` : ""}`)
+                            )
     }
 
     // 모든 현재 상태에 따른 할일 리스트 생성
@@ -341,8 +331,8 @@ const TodoMainCommand = class {
                     : val.status === "done" ? listObj.done.push(val) : undefined;
         });
         this.taskTotalCount = listObj.todo.length + listObj.doing.length + listObj.done.length;
-        this.mainSupport.resultListView.sortByTaskId(listObj);
-        this.mainSupport.resultListView.generateSetTimeout(listObj);
+        this.todoControl.resultListView.sortByTaskId(listObj);
+        this.todoControl.resultListView.generateSetTimeout(listObj);
     }
 
 } // end class Todo
@@ -393,7 +383,7 @@ const ResultListView = class {
 
         function repeatSelf(listObj) {
             setTimeout(() => {
-                todo.mainSupport.resultListView.printListBySetTimeout(listObj, repeatStatus[repeatCount]);
+                todo.todoControl.resultListView.printListBySetTimeout(listObj, repeatStatus[repeatCount]);
                 if (repeatCount === 2) return; // 재귀 종료조건
                 repeatCount += 1;
                 console.log(`\n"지금부터 ${repeatMilliSec[repeatCount] / 1000}초뒤에 ${repeatStatus[repeatCount]}내역을 출력합니다...."`);
@@ -488,8 +478,9 @@ const ErrorCheck = class {
 
     // (에러 검출)같은 상태로 업데이트하려는 경우 에러 메시지 출력
     checkIsSameStatus(target) {
-        const resultCheckSameStatus = this.todoList.filter(val => val.taskId === target.id)
-            .filter(val => val.status === target.nextStatus).length === 1;
+        const resultCheckSameStatus = 
+            this.todoList.filter(val => val.taskId === target.id)
+                        .filter(val => val.status === target.nextStatus).length === 1;
         if (resultCheckSameStatus) {
             console.log(`"[error] ${target.id}번은 이미 ${target.nextStatus}입니다."`)
             return true;
@@ -502,8 +493,8 @@ const ErrorCheck = class {
     checkInvalidUpdate(target) {
         const resultCheckInvalidUpdate =
             this.todoList.filter(val => val.taskId === target.id)
-                .filter(val => val.status == "done")
-                .filter(() => target.nextStatus === "doing" || target.nextStatus === "todo").length === 1;
+                        .filter(val => val.status == "done")
+                        .filter(() => target.nextStatus === "doing" || target.nextStatus === "todo").length === 1;
         if (resultCheckInvalidUpdate) {
             console.log(`"[error] done 상태에서 ${target.nextStatus} 상태로 갈 수 없습니다."`)
             return true;
@@ -531,12 +522,16 @@ const StackManagement = class {
         logObj.statusLog = statusLog;
         logObj.prevHistory = prevHistory;
         logObj.recentHistory = recentHistory;
-        let stackLimit = 3; // 스택 길이 제한 설정
-        this.manageUndoStack(logObj, stackLimit);
+        this.manageUndoStack(logObj);
+    }
+
+    // (스택) undo 후 redo 스택으로 이동
+    moveRedoStack(endIndex) {
+        this.redoStack.unshift(this.undoStack.splice(endIndex, 1)[0]);
     }
 
     // (스택)undo스택 관리
-    manageUndoStack(logObj, stackLimit) {
+    manageUndoStack(logObj, stackLimit = 3) {
         if (this.undoStack.length < stackLimit) {
             this.undoStack.push(logObj);
         } else if (this.undoStack.length >= stackLimit) {
@@ -545,14 +540,20 @@ const StackManagement = class {
         }
     }
 
+    // (스택) redo 후 undo 스택으로 이동
+    moveUndoStackFromRedoStack() {
+        this.undoStack.push(this.redoStack.splice(0, 1)[0]);
+    }
+
     // (스택)redo스택 관리
-    manageRedoStack(stackLimit) {
+    manageRedoStack(stackLimit = 3) {
         if (this.redoStack.length > stackLimit) {
             this.redoStack.splice(this.redoStack.length - 1, 1);
         }
     }
 
-    manageUndoStackFromRedoStack(stackLimit) {
+    // (스택) redo 후 undo 스택 관리
+    manageUndoStackFromRedoStack(stackLimit = 3) {
         if (this.undoStack.length > stackLimit) {
             this.undoStack.splice(this.undoStack[0], 1);
         }
@@ -612,18 +613,19 @@ const msgPrinting = {
 } // end msgPrinting
 
 // 클래스를 이용하여 todo 객체 생성 및 다른 클래스, 객체 주입
-const todo = new TodoMainCommand({
+const todo = new TodoCommand({
     todoList: [],
     taskId: 0,
     removedItemsBin: [],
 
-    mainSupport: {
+    todoControl: {
         resultListView: new ResultListView(),
         errorCheck: new ErrorCheck(),
         stackManagement: new StackManagement({ undoStack: [], redoStack: [] }),
         msgPrinting
     },
 });
+
 
 
 // 메소드 호출 및 실행 
