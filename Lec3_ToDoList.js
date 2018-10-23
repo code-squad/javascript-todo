@@ -21,16 +21,11 @@ const todo = {
     },
 
     remove(id) {
-        //if안에 모든코드가 들어가 있으니.. if(!errorCheck.remove(id)) return;해서 빨리 탈출해서 indent를 제거하면 좋겠음.
         if (!errorCheck.remove(id)) return;
-        for (const values of this.taskList) {
-            //for-of 안에서 if문을 썼는데요. filter -> forEach 방식으로 바꿔보세요. 함수형프로그래밍 형태로 데이터를 처리하는게 좀더 읽기 좋고, 함수단위로 기능을 세분화시키는 것이라 좋아요.
-            if (values.id === id.id) {
-                console.log(`id : ${id.id}, "${values.name}" 삭제 완료.`);
-                history.cacheListCheck('remove', values);
-                this.taskList.splice(this.taskList.indexOf(values), 1);
-            }
-        }
+        const result = this.taskList.filter(values => values.id === id.id);
+        console.log(`id : ${result[0].id}, "${result[0].name}" 삭제 완료.`);
+        history.cacheListCheck('remove', result[0]);
+        this.taskList.splice(this.taskList.indexOf(result[0]), 1);
     },
 
     executeUpdate(taskToUpdate, statusToUpdate) {
@@ -406,15 +401,15 @@ const show = {
 
 
 //test
-// todo.add({
-//     name: "자바스크립트 공부하기",
-//     tag: "programming"
-// });
+todo.add({
+    name: "자바스크립트 공부하기",
+    tag: "programming"
+});
 
-// todo.add({
-//     name: "알고리즘 공부하기",
-//     tag: "programming"
-// });
+todo.add({
+    name: "알고리즘 공부하기",
+    tag: "programming"
+});
 
 
 // todo.add({
@@ -462,9 +457,9 @@ const show = {
 // todo.redo();
 // todo.redo();
 
-// todo.remove({
-//     id: todo.taskList[0].id,
-// });
+todo.remove({
+    id: todo.taskList[0].id,
+});
 
 // show.showTag('health');
 
