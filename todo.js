@@ -56,17 +56,15 @@ class TodosList {
         
         if(deadline) this.playAlarm({id, deadline});
     }
-    playAlarm({id, setTime, deadline}){
-        (async () => {
-            if(setTime){
-                await this.todoMessage.delay(setTime);
-                this.update({id,  nextStatus: 'doing', deadline}, 'alarm');
-            }
-            if(deadline){
-                await this.todoMessage.delay(deadline);
-                this.remove({id, deadline}, 'deadline');
-            }
-        })();
+    async playAlarm({id, setTime, deadline}){
+        if(setTime){
+            await this.todoMessage.delay(setTime);
+            this.update({id,  nextStatus: 'doing', deadline}, 'alarm');
+        }
+        if(deadline){
+            await this.todoMessage.delay(deadline);
+            this.remove({id, deadline}, 'deadline');
+        }
     }
     manipulateData({active, id, name, tag, prevStatus, nextStatus}, errorType){
         let statusCount = this.dataProcessing.getCurrentStatus(this.todos, 'status');
@@ -202,18 +200,13 @@ class TodoMassage {
             console.log(`${requiredValueObj[value]}`);
         }
     }
-    showAsyncMessage(noticeArr){
-        function* range() {
-          for (let value of noticeArr) yield Promise.resolve(value);
-        };
-        (async () => {
-          for await (let x of range()) {
+    async showAsyncMessage(noticeArr){
+        for (let x of noticeArr) {
             console.log(x.notice);
             await this.delay(x.sec);
             console.log(x.title);
             console.log(x.list);
-          }
-        })();
+        }
     }
     delay(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
 }
