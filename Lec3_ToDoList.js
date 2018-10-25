@@ -1,5 +1,9 @@
 const todo = {
     taskList: [],
+    getTaskList(){
+        return this.taskList;
+    },
+
     add(task) {
         if (errorCheck.add(task)) {
             task.status = 'todo';
@@ -23,9 +27,9 @@ const todo = {
     remove(id) {
         if (!errorCheck.remove(id)) return;
         const taskToRemove = this.taskList.filter(values => values.id === id.id);
-        console.log(`id : ${taskToRemove[0].id}, "${taskToRemove[0].name}" 삭제 완료.`);
         history.checkCacheList('remove', taskToRemove[0]);
         this.taskList.splice(this.taskList.indexOf(taskToRemove[0]), 1);
+        console.log(`id : ${taskToRemove[0].id}, "${taskToRemove[0].name}" 삭제 완료.`);
     },
 
     executeUpdate(taskToUpdate, statusToUpdate) {
@@ -163,23 +167,23 @@ const history = {
     },
 
     undoAdd(undoArg) {
-        for (const values of todo.taskList) {
+        for (const values of todo.getTaskList()) {
             if (values.id === undoArg.id) {
                 console.log(`id : ${values.id}, "${values.name}" 삭제 완료.`);
-                todo.taskList.splice(todo.taskList.indexOf(values), 1);
+                todo.getTaskList().splice(todo.getTaskList().indexOf(values), 1);
             }
         }
     },
 
     undoRemove(undoArg) {
-        todo.taskList.push(undoArg);
-        let [todoCount, doingCount, doneCount] = todo.countStatus(todo.taskList);
+        todo.getTaskList().push(undoArg);
+        let [todoCount, doingCount, doneCount] = todo.countStatus(todo.getTaskList());
         console.log(`id : ${undoArg.id}, "${undoArg.name}" 항목이 새로 추가되었습니다.
     현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
     },
 
     undoUpdate(arg) {
-        const taskToUndoUpdate = todo.taskList.filter(values => values.id === arg.id);
+        const taskToUndoUpdate = todo.getTaskList().filter(values => values.id === arg.id);
         if (arg.status === 'done') {
             this.printUndoUpdate(arg, 'doing', taskToUndoUpdate);
             return;
@@ -193,27 +197,27 @@ const history = {
     printUndoUpdate(arg, changingStatus, taskToUndoUpdate) {
         todo.printUpdate(arg, changingStatus);
         arg.status = changingStatus;
-        todo.taskList[todo.taskList.indexOf(taskToUndoUpdate[0])] = arg;
+        todo.getTaskList()[todo.getTaskList().indexOf(taskToUndoUpdate[0])] = arg;
         todo.printStatusCount();
     },
 
     redoAdd(redoArg) {
-        todo.taskList.push(redoArg);
+        todo.getTaskList().push(redoArg);
         console.log(`id : ${redoArg.id}, "${redoArg.name}" 항목이 새로 추가되었습니다.`);
         todo.printStatusCount();
     },
 
     redoRemove(redoArg) {
         console.log(`id : ${redoArg.id}, "${redoArg.name}" 삭제 완료.`);
-        todo.taskList.splice(todo.taskList.indexOf(redoArg), 1);
+        todo.getTaskList().splice(todo.getTaskList().indexOf(redoArg), 1);
     },
 
     redoUpdate(redoArg) {
-        for (const values of todo.taskList) {
+        for (const values of todo.getTaskList()) {
             if (values.id === redoArg.id) {
                 todo.printUpdate(redoArg, redoArg.previousStatus);
                 redoArg.previousStatus = redoArg.status;
-                todo.taskList[todo.taskList.indexOf(values)] = redoArg;
+                todo.getTaskList()[todo.getTaskList().indexOf(values)] = redoArg;
                 todo.printStatusCount();
             }
         }
@@ -223,7 +227,7 @@ const history = {
 const errorCheck = {
     add(task) {
         let answer = true;
-        for (const values of todo.taskList) {
+        for (const values of todo.getTaskList()) {
             if (task.name === values.name) {
                 answer = false;
             }
@@ -237,7 +241,7 @@ const errorCheck = {
 
     update(updateObj) {
         let answer = false;
-        for (const values of todo.taskList) {
+        for (const values of todo.getTaskList()) {
             if (updateObj.id === values.id) {
                 answer = true;
             }
@@ -272,7 +276,7 @@ const errorCheck = {
 
     remove(id) {
         let answer = false;
-        for (const values of todo.taskList) {
+        for (const values of todo.getTaskList()) {
             if (id.id === values.id) {
                 answer = true;
                 return answer;
@@ -299,7 +303,7 @@ const show = {
     },
 
     showTag(tag) {
-        const result = todo.taskList.filter(value => value.tag === tag);
+        const result = todo.getTaskList().filter(value => value.tag === tag);
         const [todoCount, doingCount, doneCount] = todo.countStatus(result);
         console.log(`tag가 "${tag}"인 할 일: `);
         if (todoCount !== 0) {
@@ -322,7 +326,7 @@ const show = {
     },
 
     showTags() {
-        const result = todo.taskList.filter(value => value.tag !== 0);
+        const result = todo.getTaskList().filter(value => value.tag !== 0);
         const tagObj = this.findTags(result);
         for (const tag in tagObj) {
             console.log(`\n[${tag}, 총 ${tagObj[tag]}개]`);
@@ -336,7 +340,7 @@ const show = {
     show(status) {
         let showStatus = status.replace(/ /g, "").toLowerCase();
         console.log(`상태가 ${showStatus}인 task(s):`);
-        for (const values of todo.taskList) {
+        for (const values of todo.getTaskList()) {
             if (values.status !== showStatus) continue;
             this.printShow(values, showStatus);
         }
@@ -351,7 +355,7 @@ const show = {
     },
 
     showAll() {
-        const [todoCount, doingCount, doneCount] = todo.countStatus(todo.taskList);
+        const [todoCount, doingCount, doneCount] = todo.countStatus(todo.getTaskList());
         console.log(`총 ${todoCount + doingCount + doneCount}개의 리스트를 가져왔습니다. 2초 뒤에 todo 내역을 출력합니다...`);
         const statusOrder = ['todo', 'doing', 'done'];
         const CountOrder = [todoCount, doingCount, doneCount];
@@ -375,7 +379,7 @@ const show = {
 
     sortTaskByStatus(status) {
         let tasks = [];
-        for (const values of todo.taskList) {
+        for (const values of todo.getTaskList()) {
             if (values.status === status) {
                 tasks.push(values);
             }
