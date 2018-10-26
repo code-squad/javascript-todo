@@ -1,13 +1,22 @@
+class Task {
+    constructor(name, tag, id, status){
+            this.name = name;
+            this.tag = tag || '';
+            this.id = Date.now() + Math.random();
+            this.status = 'todo';
+    }
+}
 const todo = {
     taskList: [],
+
     getTaskList(){
         return this.taskList;
     },
 
     add(task) {
         if (errorCheck.add(task)) {
-            task.status = 'todo';
-            task.id = Date.now() + Math.random();
+            // task.status = 'todo';
+            // task.id = Date.now() + Math.random();
             this.taskList.push(task);
             history.checkCacheList('add', task);
             console.log(`id : ${task.id}, "${task.name}" 항목이 새로 추가되었습니다.`)
@@ -401,37 +410,12 @@ const show = {
 
 
 //test
-// todo.add({
-//     name: "자바스크립트 공부하기",
-//     tag: "programming"
-// });
-
-// todo.add({
-//     name: "알고리즘 공부하기",
-//     tag: "programming"
-// });
-
-
-// todo.add({
-//     name: "요가하기",
-//     tag: "health"
-// });
-
-// todo.add({
-//     name: "명상하기",
-//     tag: "health"
-// });
-
-
-// todo.add({
-//     name: "독서하기",
-//     tag: "reading"
-// });
-
-// todo.add({
-//     name: "기타치기",
-//     tag: "music"
-// });
+// todo.add(new Task("자바스크립트 공부하기","programming"));
+// todo.add(new Task("알고리즘 공부하기","programming"));
+// todo.add(new Task("요가하기","health"));
+// todo.add(new Task("명상하기","health"));
+// todo.add(new Task("독서하기","reading"));
+// todo.add(new Task("기타치기","music"));
 
 // todo.update({
 //     id: todo.taskList[0].id,
@@ -447,15 +431,6 @@ const show = {
 //     id: todo.taskList[1].id,
 //     nextstatus: "done"
 // });
-
-// todo.undo();
-// todo.undo();
-// todo.undo();
-// todo.undo();
-
-// todo.redo();
-// todo.redo();
-// todo.redo();
 
 // todo.remove({
 //     id: todo.taskList[0].id,
