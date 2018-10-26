@@ -8,6 +8,7 @@ class Task {
 }
 const todo = {
     taskList: [],
+    totalTakenTime: 0,
 
     getTaskList(){
         return this.taskList;
@@ -51,6 +52,7 @@ const todo = {
 
         if (statusToUpdate === 'done') {
             let takenTime = (new Date().getTime() - taskToUpdate.doingTime) / 1000;
+            this.totalTakenTime += takenTime;
             takenTime = this.getTakenTimeWithUnit(takenTime);
             taskToUpdate.takenTime = takenTime;
             this.printUpdate(taskToUpdate, statusToUpdate);
@@ -112,6 +114,11 @@ const todo = {
             }
         }
         return [todo, doing, done];
+    },
+
+    printTotalTime(){
+        const totalTakenTime = this.getTakenTimeWithUnit(this.totalTakenTime);
+        console.log(`당신이 열심히 산 시간 : ${totalTakenTime}`);
     },
 }
 
