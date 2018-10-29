@@ -1,3 +1,4 @@
+//  todo를 생성하는 class
 class Task {
     constructor(obj) {
         this.id = taskProgram.taskCount;
@@ -59,7 +60,7 @@ class TaskClipBoard {
             // 1인 인자값이 존재할시redo/undo수행시 실행함수를clipBoard에 추가하지 않는다.
             taskProgram.update(reversedObj, 1);
             /* undo 실행시 clipBoard에 저장된 0번째함수의 반대의경우를 실행하는경우라
-            taskProgram.obj.function.name 의방식으로 실행이 불가능..*/
+            taskProgram[obj.function.name](conleobj,1); 의방식으로 실행이 불가능..*/
             this.undoCount++;
         } else if (obj.fn.name === 'remove') {
             console.log('[alert] remove를 실행취소할시 state값은 삭제될때의 상태로 추가됩니다.');
@@ -95,7 +96,8 @@ class Utility {
         } else if (obj.name.length === 0) {
             console.log('[Error] name값을 입력해주세요');
             return false;
-        } else if (typeof (obj.name) === 'string') {
+        } else if (typeof (obj.
+            name) === 'string') {
             return this.loopName(taskProgram.taskArray, obj) ? true : false;
         }
         return true;
@@ -466,31 +468,79 @@ class TaskProgram {
             }
         });
     }
+    viewAlltask() {
+        let cloneArray = JSON.parse(JSON.stringify(this.taskArray));
+        view.changeTask(cloneArray)
+    }
 };
+class View {
+    constructor() {
+        this.todoSting =
+`==========================================
+    ████████╗ ██████╗ ██████╗  ██████╗ ██╗
+    ╚══██╔══╝██╔═══██╗██╔══██╗██╔═══██╗██║
+       ██║   ██║   ██║██║  ██║██║   ██║██║
+       ██║   ██║   ██║██║  ██║██║   ██║╚═╝
+       ██║   ╚██████╔╝██████╔╝╚██████╔╝██╗
+ kaka's╚═╝    ╚═════╝ ╚═════╝  ╚═════╝ ╚═
+==========================================`
+    }
+    changeTask(taskArray) {
+        console.log(this.todoSting);
+        for (let obj of taskArray) {
+            obj.tag = this.addSpace(obj.tag)
+            obj.state = this.addSpace(obj.state)
+            obj.name = this.addSpace(obj.name, 1)
+            this.task =
+`--------------------
+|${obj.name}| 
+|${obj.tag}|  
+|${obj.state}| 
+--------------------`
+        console.log(this.task)
+        }
+      
+    }
+    addSpace(name, korean = 0) {
+        if (korean === 1) {
+            for (let i = name.length; i <= 15; i++) {
+                name += " "
+            }
+            return name
+        }
+        else {
+            if(name.length === 0)  name = 'emptyTag'
+            for (let i = name.length; i <= 18; i++) {
+                name += " "
+            }
+            return name
+        }
+    }
+}
 
 const [taskClipBoard, utility, taskProgram] = [new TaskClipBoard, new Utility, new TaskProgram]
+const view = new View;
 taskProgram.add({ name: '친구만나기' });
-taskClipBoard.undo();
+// taskClipBoard.undo();
 taskProgram.add({ name: '숨쉬기', tag: 'working' });
-taskClipBoard.undo();
+// taskClipBoard.undo();
 taskProgram.add({ name: '공부하기' });
-taskClipBoard.undo()
-taskClipBoard.undo()
-taskClipBoard.undo()
+// taskClipBoard.undo()
+// taskClipBoard.undo()
+// taskClipBoard.undo()
 taskProgram.add({ name: '밥먹기', tag: 'Work ing' });
-taskClipBoard.undo()
+// taskClipBoard.undo()
 taskProgram.add({ name: '밥먹 기' });
 taskProgram.add({ name: '손씻기', tag: 'prog    raming' });
 taskProgram.update({ id: 0, nextstatus: '      Doing' });
-taskProgram.update({ id: 0, nextstatus: 'done' })
+// taskProgram.update({ id: 0, nextstatus: 'done' })
 taskProgram.update('         1$done')
 taskProgram.update({ id: 1, nextstatus: 'd oing' });
-taskProgram.update({ id: 1, nextstatus: '   don   e' });
-taskProgram.update({ id: 1, nextstatus: 'donE' });
+// taskProgram.update({ id: 1, nextstatus: '   don   e' });
+// taskProgram.update({ id: 1, nextstatus: 'donE' });
 taskProgram.remove({ id: 144 });
 taskClipBoard.undo();
 taskProgram.showTag('workinG')
 taskProgram.showTags();
 taskProgram.show('   done      ');
-taskProgram.showAll();
-
+taskProgram.viewAlltask()
