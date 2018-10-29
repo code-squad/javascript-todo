@@ -6,6 +6,127 @@ class Task {
             this.status = 'todo';
     }
 }
+
+class History {
+    constructor(){
+        this.cacheList = [];
+        this.undoCacheList = [];
+    }
+
+    checkCacheList(func, task) {
+        this.cacheList.push(func, Object.assign({}, task));
+        this.fixArrLength(this.cacheList)
+    }
+
+    removeOldTask(arr) {
+        arr.pop();
+        arr.pop();
+    }
+
+    fixArrLength(arr) {
+        while (arr.length > 6) {
+            arr.shift();
+        }
+    }
+
+    undo() {
+        if (this.cacheList.length === 0) {
+            console.log(`undo는 세 번까지 가능합니다.`);
+            return;
+        }
+        const undoFunction = this.cacheList[this.cacheList.length - 2];
+        const undoArg = this.cacheList[this.cacheList.length - 1];
+        this.removeOldTask(this.cacheList)
+        if (undoFunction === 'add') {
+            this.undoAdd(undoArg);
+        } else if (undoFunction === 'remove') {
+            this.undoRemove(undoArg);
+        } else if (undoFunction === 'update') {
+            undoArg.previousStatus = undoArg.status;
+            this.undoUpdate(undoArg);
+        }
+        this.undoCacheList ? this.undoCacheList.push(undoFunction, undoArg) : this.undoCacheList = [undoFunction, undoArg];
+        this.fixArrLength(this.undoCacheList);
+    }
+
+    redo() {
+        if (this.undoCacheList.length === 0) {
+            console.log(`redo 할 게 없습니다.`);
+            return;
+        }
+        const redoFunction = this.undoCacheList[this.undoCacheList.length - 2];
+        const redoArg = this.undoCacheList[this.undoCacheList.length - 1];
+        this.removeOldTask(this.undoCacheList)
+        this.cacheList.push(redoFunction, redoArg);
+        if (redoFunction === 'add') {
+            this.redoAdd(redoArg);
+        }
+        if (redoFunction === 'remove') {
+            this.redoRemove(redoArg);
+        }
+        if (redoFunction === 'update') {
+            this.redoUpdate(redoArg);
+        }
+    }
+
+    undoAdd(undoArg) {
+        for (const values of todo.getTaskList()) {
+            if (values.id === undoArg.id) {
+                console.log(`id : ${values.id}, "${values.name}" 삭제 완료.`);
+                todo.getTaskList().splice(todo.getTaskList().indexOf(values), 1);
+            }
+        }
+    }
+
+    undoRemove(undoArg) {
+        todo.getTaskList().push(undoArg);
+        let [todoCount, doingCount, doneCount] = todo.countStatus(todo.getTaskList());
+        console.log(`id : ${undoArg.id}, "${undoArg.name}" 항목이 새로 추가되었습니다.
+    현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
+    }
+
+    undoUpdate(arg) {
+        const taskToUndoUpdate = todo.getTaskList().filter(values => values.id === arg.id);
+        if (arg.status === 'done') {
+            this.printUndoUpdate(arg, 'doing', taskToUndoUpdate);
+            return;
+        }
+        if (arg.status === 'doing') {
+            this.printUndoUpdate(arg, 'todo', taskToUndoUpdate);
+            return;
+        }
+    }
+
+    printUndoUpdate(arg, changingStatus, taskToUndoUpdate) {
+        todo.printUpdate(arg, changingStatus);
+        arg.status = changingStatus;
+        todo.getTaskList()[todo.getTaskList().indexOf(taskToUndoUpdate[0])] = arg;
+        todo.printStatusCount();
+    }
+
+    redoAdd(redoArg) {
+        todo.getTaskList().push(redoArg);
+        console.log(`id : ${redoArg.id}, "${redoArg.name}" 항목이 새로 추가되었습니다.`);
+        todo.printStatusCount();
+    }
+
+    redoRemove(redoArg) {
+        console.log(`id : ${redoArg.id}, "${redoArg.name}" 삭제 완료.`);
+        todo.getTaskList().splice(todo.getTaskList().indexOf(redoArg), 1);
+    }
+
+    redoUpdate(redoArg) {
+        for (const values of todo.getTaskList()) {
+            if (values.id === redoArg.id) {
+                todo.printUpdate(redoArg, redoArg.previousStatus);
+                redoArg.previousStatus = redoArg.status;
+                todo.getTaskList()[todo.getTaskList().indexOf(values)] = redoArg;
+                todo.printStatusCount();
+            }
+        }
+    }
+}
+
 const todo = {
     taskList: [],
     totalTakenTime: 0,
@@ -16,8 +137,6 @@ const todo = {
 
     add(task) {
         if (errorCheck.add(task)) {
-            // task.status = 'todo';
-            // task.id = Date.now() + Math.random();
             this.taskList.push(task);
             history.checkCacheList('add', task);
             console.log(`id : ${task.id}, "${task.name}" 항목이 새로 추가되었습니다.`)
@@ -120,124 +239,6 @@ const todo = {
         const totalTakenTime = this.getTakenTimeWithUnit(this.totalTakenTime);
         console.log(`당신이 열심히 산 시간 : ${totalTakenTime}`);
     },
-}
-
-const history = {
-    cacheList: [],
-    undoCacheList: [],
-    // cacheList에 task 3개로 유지
-    checkCacheList(func, task) {
-        this.cacheList.push(func, Object.assign({}, task));
-        this.fixArrLength(this.cacheList)
-    },
-
-    removeOldTask(arr) {
-        arr.pop();
-        arr.pop();
-    },
-
-    fixArrLength(arr) {
-        while (arr.length > 6) {
-            arr.shift();
-        }
-    },
-
-    undo() {
-        if (this.cacheList.length === 0) {
-            console.log(`undo는 세 번까지 가능합니다.`);
-            return;
-        }
-        const undoFunction = this.cacheList[this.cacheList.length - 2];
-        const undoArg = this.cacheList[this.cacheList.length - 1];
-        this.removeOldTask(this.cacheList)
-        if (undoFunction === 'add') {
-            this.undoAdd(undoArg);
-        } else if (undoFunction === 'remove') {
-            this.undoRemove(undoArg);
-        } else if (undoFunction === 'update') {
-            undoArg.previousStatus = undoArg.status;
-            this.undoUpdate(undoArg);
-        }
-        this.undoCacheList ? this.undoCacheList.push(undoFunction, undoArg) : this.undoCacheList = [undoFunction, undoArg];
-        this.fixArrLength(this.undoCacheList);
-    },
-
-    redo() {
-        if (this.undoCacheList.length === 0) {
-            console.log(`redo 할 게 없습니다.`);
-            return;
-        }
-        const redoFunction = this.undoCacheList[this.undoCacheList.length - 2];
-        const redoArg = this.undoCacheList[this.undoCacheList.length - 1];
-        this.removeOldTask(this.undoCacheList)
-        this.cacheList.push(redoFunction, redoArg);
-        if (redoFunction === 'add') {
-            this.redoAdd(redoArg);
-        }
-        if (redoFunction === 'remove') {
-            this.redoRemove(redoArg);
-        }
-        if (redoFunction === 'update') {
-            this.redoUpdate(redoArg);
-        }
-    },
-
-    undoAdd(undoArg) {
-        for (const values of todo.getTaskList()) {
-            if (values.id === undoArg.id) {
-                console.log(`id : ${values.id}, "${values.name}" 삭제 완료.`);
-                todo.getTaskList().splice(todo.getTaskList().indexOf(values), 1);
-            }
-        }
-    },
-
-    undoRemove(undoArg) {
-        todo.getTaskList().push(undoArg);
-        let [todoCount, doingCount, doneCount] = todo.countStatus(todo.getTaskList());
-        console.log(`id : ${undoArg.id}, "${undoArg.name}" 항목이 새로 추가되었습니다.
-    현재 상태 - todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개 `);
-    },
-
-    undoUpdate(arg) {
-        const taskToUndoUpdate = todo.getTaskList().filter(values => values.id === arg.id);
-        if (arg.status === 'done') {
-            this.printUndoUpdate(arg, 'doing', taskToUndoUpdate);
-            return;
-        }
-        if (arg.status === 'doing') {
-            this.printUndoUpdate(arg, 'todo', taskToUndoUpdate);
-            return;
-        }
-    },
-
-    printUndoUpdate(arg, changingStatus, taskToUndoUpdate) {
-        todo.printUpdate(arg, changingStatus);
-        arg.status = changingStatus;
-        todo.getTaskList()[todo.getTaskList().indexOf(taskToUndoUpdate[0])] = arg;
-        todo.printStatusCount();
-    },
-
-    redoAdd(redoArg) {
-        todo.getTaskList().push(redoArg);
-        console.log(`id : ${redoArg.id}, "${redoArg.name}" 항목이 새로 추가되었습니다.`);
-        todo.printStatusCount();
-    },
-
-    redoRemove(redoArg) {
-        console.log(`id : ${redoArg.id}, "${redoArg.name}" 삭제 완료.`);
-        todo.getTaskList().splice(todo.getTaskList().indexOf(redoArg), 1);
-    },
-
-    redoUpdate(redoArg) {
-        for (const values of todo.getTaskList()) {
-            if (values.id === redoArg.id) {
-                todo.printUpdate(redoArg, redoArg.previousStatus);
-                redoArg.previousStatus = redoArg.status;
-                todo.getTaskList()[todo.getTaskList().indexOf(values)] = redoArg;
-                todo.printStatusCount();
-            }
-        }
-    }
 }
 
 const errorCheck = {
@@ -413,8 +414,6 @@ const show = {
         });
     }
 }
-
-
 
 //test
 // todo.add(new Task("자바스크립트 공부하기","programming"));
