@@ -415,28 +415,30 @@ const show = {
     }
 }
 
+const history = new History();
+
 //test
-// todo.add(new Task("자바스크립트 공부하기","programming"));
-// todo.add(new Task("알고리즘 공부하기","programming"));
-// todo.add(new Task("요가하기","health"));
-// todo.add(new Task("명상하기","health"));
-// todo.add(new Task("독서하기","reading"));
-// todo.add(new Task("기타치기","music"));
+todo.add(new Task("자바스크립트 공부하기","programming"));
+todo.add(new Task("알고리즘 공부하기","programming"));
+todo.add(new Task("요가하기","health"));
+todo.add(new Task("명상하기","health"));
+todo.add(new Task("독서하기","reading"));
+todo.add(new Task("기타치기","music"));
 
-// todo.update({
-//     id: todo.taskList[0].id,
-//     nextstatus: "doing"
-// });
+todo.update({
+    id: todo.taskList[0].id,
+    nextstatus: "doing"
+});
 
-// todo.update({
-//     id: todo.taskList[1].id,
-//     nextstatus: "doing"
-// });
+todo.update({
+    id: todo.taskList[1].id,
+    nextstatus: "doing"
+});
 
-// todo.update({
-//     id: todo.taskList[1].id,
-//     nextstatus: "done"
-// });
+todo.update({
+    id: todo.taskList[1].id,
+    nextstatus: "done"
+});
 
 // todo.remove({
 //     id: todo.taskList[0].id,
