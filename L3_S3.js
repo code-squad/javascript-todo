@@ -1,7 +1,7 @@
 // lecture3 - STEP3. 사용성향상
 class todoProgram {
 
-  constructor() { // 변수 생성하기
+  constructor() { // 변수 생성하기dd
     this.historyList = [];
     this.undoList = [];
     this.taskList = [];
@@ -131,6 +131,7 @@ class todoProgram {
         nextstatus: newTask[1]
       }
     }
+    return newTask;
   }
 
   update(newTask, undo) { // 현재상태를 갱신
@@ -339,23 +340,8 @@ todo.update("1$done");
 todo.update('1$done');
 todo.update("1$doing");
 todo.update('9$doing');
-todo.remove({ id: 8 })
-// todo.update("2$ doing");
-// todo.update("38$ doNe ");
-// todo.update({ id: 1, nextstatus: "doNe" });
-// todo.undo();
-// todo.redo();
-// todo.remove({ id: 33 });
-// todo.remove({ id: 1 });
-// todo.undo();
-// todo.undo();
-// todo.undo();
-// todo.undo();
-// todo.redo();
-// todo.redo();
-// todo.redo();
-// todo.redo();
+todo.remove({id:8});
 
 todo.show('todo');
 todo.show('doing');
-todo.show("done");
+todo.show("done");  
