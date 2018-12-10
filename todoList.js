@@ -1,7 +1,7 @@
 // lecture3 - STEP3. 사용성향상
 class todoProgram {
 
-  constructor() { // 변수 생성하기dd
+  constructor() { // 변수 생성하기
     this.historyList = [];
     this.undoList = [];
     this.taskList = [];
