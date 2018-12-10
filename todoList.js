@@ -1,4 +1,4 @@
-// lecture3 - STEP3. 사용성향상
+// lecture3 - STEP4. ES6 Classes로 개선 
 class todoProgram {
 
   constructor() { // 변수 생성하기
@@ -202,9 +202,20 @@ class todoProgram {
     for (let i = 0; i < 3; i++) this.printTasks(this.status[i], sortTaskArr[i].length, sortTaskArr[i], overTime);
   }
 
-  pushTasks(tagsArray, sortTask) { // 태그가 맞으면 sortTask의 맞는 인덱스에 push
+  findTags(tagsArray, sortTask) {
+    this.taskList.forEach(function (task) { // 태그를 종류별로 tagsArray에 추가
+      if (task.tag === undefined) return;
+      const tagBool = tagsArray.indexOf(task.tag);
+      if (tagBool === -1) {
+        tagsArray.push(task.tag);
+        sortTask.push([]);
+      }
+    });
+  }
+
+  pushTasks(tagsArray, sortTask) { // 태그가 맞으면 sortTask의 맞는 인덱스에 Task를 push
     this.taskList.forEach(function (task) {
-      let tagBool = tagsArray.indexOf(task.tag);
+      const tagBool = tagsArray.indexOf(task.tag);
       if (tagBool !== -1) {
         sortTask[tagBool].push(task);
       }
@@ -312,6 +323,11 @@ class todoProgram {
       case 'update':
         this.update({ id: history.id, nextstatus: history.status }, undo);
         break;
+      case 'reset':
+        this.undoReset(history, undo);
+        break;
+      case 'undoReset':
+        this.reset(undo);
     }
   }
 
@@ -327,21 +343,43 @@ class todoProgram {
     this.undoCount--;
     this.redoCount++;
   }
+
+  resetPrint(undo) {
+    if (undo) console.log(`todoList 초기화가 취소되었습니다.`);
+    else console.log(`todoList가 초기화 되었습니다.`);
+  }
+
+  reset(undo) {
+    const oldId = this.id;
+    this.id = 1;
+    this.resetPrint();
+    this.newLine();
+    if (undo === undefined) this.pushHistory({ taskList: this.taskList, method: 'reset', oldId: oldId }, 'history');
+    this.taskList = [];
+  }
+
+  undoReset(history, undo) {
+    this.taskList = history.taskList;
+    this.id = history.oldId;
+    this.resetPrint('undo');
+    this.newLine();
+    if (undo === 'undo') this.pushHistory({ taskList: this.taskList, method: 'undoReset', id: this.id }, 'undo');
+  }
 }
 
 
 
 const todo = new todoProgram();
 todo.add({ name: "자바스크립트 공부안하기", tag: "programming" });
-todo.add({ name: "자바스크립트 공부안하기", tag: "programming" });
+todo.add({ name: "ios 공부하기", tag: "programming" });
+todo.add({ name: "HTML 공부하기", tag: "programming" });
+
+todo.showTags();
+
+todo.reset();
 todo.undo();
 todo.redo();
-todo.update("1$done");
-todo.update('1$done');
-todo.update("1$doing");
-todo.update('9$doing');
-todo.remove({id:8});
 
-todo.show('todo');
-todo.show('doing');
-todo.show("done");  
+todo.showTags();
+
+todo.add({ name: "Java study", tag: "programming" });
