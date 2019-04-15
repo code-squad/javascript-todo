@@ -58,6 +58,17 @@ const printStatus = function(args){
     console.log(`${args}리스트 : 총 : `+newTodoList[args].length + "건 : " + result.join(', '));
 }
 
+const checkTags = function(tag){
+    let result = [];
+    todos.forEach(function(list){
+        if (list.tags.includes(tag)) {
+            result.push(list.name);
+        }
+    })
+ 
+    console.log(`${tag} 키워드 검색 결과 :`  + result.join(', '));
+ };
+
 const show = (obj) => {
     newTodoList = {'todo' : [], 'doing' : [], 'done' : []};
     makeNewTodoList();
