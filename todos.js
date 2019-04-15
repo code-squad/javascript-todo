@@ -69,6 +69,14 @@ const checkTags = function(tag){
     console.log(`${tag} 키워드 검색 결과 :`  + result.join(', '));
  };
 
+ let printStatusAfterCheckKwd = function (searchKeyWord) {
+    if (searchKeyWord === 'all') {
+        printAll();
+    } else {
+        printStatus(searchKeyWord);
+    }
+ }
+
 const show = (obj) => {
     newTodoList = {'todo' : [], 'doing' : [], 'done' : []};
     makeNewTodoList();
