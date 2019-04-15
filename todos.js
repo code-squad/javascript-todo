@@ -77,16 +77,16 @@ const checkTags = function(tag){
     }
  }
 
-const show = (obj) => {
+ const show = (keyWord, searchKeyWord) => {
     newTodoList = {'todo' : [], 'doing' : [], 'done' : []};
     makeNewTodoList();
-
-    if (obj === "all") {
-        printAll();
+ 
+    if (keyWord == 'status') {
+        printStatusAfterCheckKwd(searchKeyWord);
     } else {
-        printStatus(obj);
+        checkTags(searchKeyWord);
     }
-}
+ }
 
 show("all");
 show("todo");
