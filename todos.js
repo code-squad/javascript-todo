@@ -30,3 +30,13 @@ const todos =  [
         'id' : 65464
     }
 ];
+
+const newTodoList = {'todo' : [], 'doing' : [], 'done' : []};
+
+const makeNewTodoList = function(){
+    todos.forEach(function(todo){
+        let key = todo.status;
+        let value = todo.name;
+        newTodoList[key].push(value);
+    })
+};
