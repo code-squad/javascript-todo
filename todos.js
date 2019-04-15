@@ -59,13 +59,11 @@ const todos =  [
  }
  
  const checkTags = (tag) => {
-    let result = [];
-    todos.forEach((list) => {
-        if (list.tags.includes(tag)) {
-            result.push(list.name);
-        }
-    })
- 
+    let result = []; 
+    result = todos.filter((todo) => {
+        return todo.tags.includes(tag);
+    }).map((obj) => { return obj.name });
+
     console.log(`${tag} 키워드 검색 결과 :`  + result.join(', '));
  };
  
@@ -81,7 +79,7 @@ const todos =  [
     newTodoObject = {'todo' : [], 'doing' : [], 'done' : []};
     makeNewTodoList();
  
-    if (keyWord == 'status') {
+    if (keyWord === 'status') {
         printStatusAfterCheckKwd(searchKeyWord);
     } else {
         checkTags(searchKeyWord);
