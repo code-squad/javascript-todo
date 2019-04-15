@@ -31,7 +31,7 @@ const todos =  [
     }
 ];
 
-const newTodoList = {'todo' : [], 'doing' : [], 'done' : []};
+let newTodoList;
 
 const makeNewTodoList = function(){
     todos.forEach(function(todo){
@@ -59,6 +59,7 @@ const printStatus = function(args){
 }
 
 const show = (obj) => {
+    newTodoList = {'todo' : [], 'doing' : [], 'done' : []};
     makeNewTodoList();
 
     if (obj === "all") {
@@ -67,3 +68,8 @@ const show = (obj) => {
         printStatus(obj);
     }
 }
+
+show("all");
+show("todo");
+show("doing");
+show("done");
