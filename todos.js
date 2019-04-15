@@ -88,7 +88,10 @@ const checkTags = function(tag){
     }
  }
 
-show("all");
-show("todo");
-show("doing");
-show("done");
+ show("status", "all");
+ show("status", "todo");
+ show("status", "doing");
+ show("status", "done");
+ show("tag", "favorite");
+ show("tag", "food");
+ show("tag", "javascript");
