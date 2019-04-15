@@ -40,3 +40,11 @@ const makeNewTodoList = function(){
         newTodoList[key].push(value);
     })
 };
+
+const printAll = function(){
+    let result = [];
+    for(key in newTodoList){
+        result.push(key + ": " + newTodoList[key].length + "개");
+    }
+    console.log("현재상태 : ", result.join(', '));
+}
