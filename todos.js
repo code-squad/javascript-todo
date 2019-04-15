@@ -48,3 +48,12 @@ const printAll = function(){
     }
     console.log("현재상태 : ", result.join(', '));
 }
+
+const printStatus = function(args){
+    let result = [];
+
+    for(key in newTodoList[args]){
+        result.push(newTodoList[args][key]);
+    }
+    console.log(`${args}리스트 : 총 : `+newTodoList[args].length + "건 : " + result.join(', '));
+}
