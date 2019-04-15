@@ -2,14 +2,12 @@
 
    1. 스켈레톤 코드 작성
 
-      ![skeletoncode](C:\Users\Minjae\Documents\github\PR\javascript-todo\img\skeletoncode.PNG)
+      ![skeletoncode](./img\skeletoncode.PNG)
 
-   2. 수도코드 작성 ![skeletoncode](C:\Users\Minjae\Documents\github\PR\javascript-todo\img\skeletoncode.PNG)
-
-
+   2. 수도코드 작성![pseudocode](.\img\pseudocode.png)
 
 2. 다른방식으로 구현해보기
    1. 도식화 후 구현
       - 클래스 사용
 
-![Image from iOS (1)](C:\Users\Minjae\Documents\github\PR\javascript-todo\img\Image from iOS (1).jpg)
+![Image from iOS (1)](.\img\Image from iOS (1).jpg)
