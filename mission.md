@@ -10,4 +10,4 @@
    1. 도식화 후 구현
       - 클래스 사용
 
-![Image from iOS (1)](./img/Image from iOS (1).jpg)
+![Image from iOS (1)](./img/refact.jpg)
