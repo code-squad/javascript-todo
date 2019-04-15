@@ -57,3 +57,13 @@ const printStatus = function(args){
     }
     console.log(`${args}리스트 : 총 : `+newTodoList[args].length + "건 : " + result.join(', '));
 }
+
+const show = (obj) => {
+    makeNewTodoList();
+
+    if (obj === "all") {
+        printAll();
+    } else {
+        printStatus(obj);
+    }
+}
