@@ -38,37 +38,36 @@ const todos = [
   ];
   
   class TodoList {
-    constructor() {
-      this.status = {
-        TODO: 0,
-        DOING: 1,
-        DONE: 2
-      };
-    }
     count() {
-      const arr = [0, 0, 0];
+      const countObj = {
+        todo : 0,
+        doing : 0,
+        done : 0
+      }
+
       todos.forEach(element => {
         const { status } = element;
-        if (status === "todo") arr[this.status.TODO] += 1;
-        else if (status === "doing") arr[this.status.DOING] += 1;
-        else if (status === "done") arr[this.status.DONE] += 1;
+        countObj[status] += 1;
       });
-      return arr;
+      return countObj;
     }
   
-    printAll(countArr) {
+    printAll(countObj) {
       let resultStr;
-      resultStr = `현재상태 : todo : ${countArr[this.status.TODO]}개, doing : ${
-        countArr[this.status.DOING]
-      }, done : ${countArr[this.status.DONE]}`;
+      resultStr = `현재상태 : todo : ${countObj.TODO}개, doing : ${
+        countObj.DOING
+      }, done : ${countObj.DONE}`;
       console.log(resultStr);
     }
   
     getNames(status) {
-      const namesArr = [];
-      todos.forEach(element => {
-        if (status === element.status) namesArr.push(element.name);
-      });
+      const namesArr = todos
+      .filter(function(element){
+        return status === element.status
+      })
+      .map(function(element){
+        return element.name;
+      })
       return namesArr;
     }
   
@@ -85,8 +84,8 @@ const todos = [
   
     show(status) {
       if (status === "all") {
-        const countArr = this.count();
-        this.printAll(countArr);
+        const countObj = this.count();
+        this.printAll(countObj);
       } else if (status === "todo" || status === "doing" || status === "done") {
         const namesArr = this.getNames(status);
         this.printList(namesArr);
