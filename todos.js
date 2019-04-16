@@ -12,15 +12,15 @@ class Todo {
       { todo: [], doing: [], done: [] }
     );
   }
-}
 
-const printAll = () => {
-  let result = [];
-  for (key in newTodoObject) {
-    result.push(key + ': ' + newTodoObject[key].length + '개');
+  printAll() {
+    console.log(
+      Object.entries(this.customTodos).reduce((acc, cur) => {
+        return (acc += `${cur[0]}: ${cur[1].length}개 `);
+      }, '현재상태 : ')
+    );
   }
-  console.log('현재상태 : ', result.join(', '));
-};
+}
 
 //  const printStatus = (args) => {
 //     let result = [];
@@ -60,7 +60,7 @@ const show = (keyWord, searchKeyWord) => {
 };
 
 const todo = new Todo(todos);
-console.log(todo.customTodos);
+todo.printAll();
 // show('status', 'all');
 //  show("status", "todo");
 //  show("status", "doing");
