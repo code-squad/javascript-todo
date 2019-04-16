@@ -2,13 +2,17 @@ const todos = require('./data');
 
 let newTodoObject;
 
-const makeNewTodoList = () => {
-  todos.forEach(todo => {
-    let key = todo.status;
-    let value = todo.name;
-    newTodoObject[key].push(value);
-  });
-};
+class Todo {
+  constructor(todos) {
+    this.customTodos = todos.reduce(
+      (acc, cur) => {
+        acc[cur.status].push(cur.name);
+        return acc;
+      },
+      { todo: [], doing: [], done: [] }
+    );
+  }
+}
 
 const printAll = () => {
   let result = [];
@@ -47,7 +51,6 @@ const printAll = () => {
 
 const show = (keyWord, searchKeyWord) => {
   newTodoObject = { todo: [], doing: [], done: [] };
-  makeNewTodoList();
   printAll();
   // if (keyWord === 'status') {
   //printStatusAfterCheckKwd(searchKeyWord);
@@ -56,7 +59,9 @@ const show = (keyWord, searchKeyWord) => {
   // }
 };
 
-show('status', 'all');
+const todo = new Todo(todos);
+console.log(todo.customTodos);
+// show('status', 'all');
 //  show("status", "todo");
 //  show("status", "doing");
 //  show("status", "done");
