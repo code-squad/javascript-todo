@@ -119,6 +119,24 @@ const todos = [
       }, 1000);
     }
 
+    deleteData(id){
+      let deletingObj;
+
+      todos.forEach((element, index) => {
+        if(element.id === id) {
+          deletingObj = element;
+          todos.splice(index, 1);
+        }
+      });
+
+      console.log(`${deletingObj.name}이(가) ${deletingObj.status} 목록에서 삭제됐습니다.`);
+      setTimeout(() => {
+        this.show("all");
+      }, 1000);
+    };
+
+    
+
 
 
 
