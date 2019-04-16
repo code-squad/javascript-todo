@@ -3,41 +3,43 @@ const todos = [
       name: "자바스크립트 공부하기",
       tags: ["programming", "javascript"],
       status: "todo",
-      id: 12123123
+      id: 423
     },
     {
       name: "그림 그리기",
       tags: ["picture", "favorite"],
       status: "doing",
-      id: 312323
+      id: 1535
     },
     {
       name: "라면 끓여먹기",
       tags: ["food", "favorite"],
       status: "doing",
-      id: 1541515132
+      id: 9999
     },
     {
       name: "칼퇴하기",
       tags: ["wolibal", "favorite"],
       status: "todo",
-      id: 15132213251
+      id: 512
     },
     {
       name: "알고리즘풀기",
       tags: ["study", "hell"],
       status: "done",
-      id: 123123312323
+      id: 2
     },
     {
       name: "운동하기",
       tags: ["workout", "hell"],
       status: "todo",
-      id: 3121234323
+      id: 77
     }
   ];
+
+  const ids = [423,1535,9999,512,2,77];
   
-  class TodoList {
+  module.exports = class TodoList {
     count() {
       const countObj = {
         todo : 0,
@@ -54,9 +56,9 @@ const todos = [
   
     printAll(countObj) {
       let resultStr;
-      resultStr = `현재상태 : todo : ${countObj.TODO}개, doing : ${
-        countObj.DOING
-      }, done : ${countObj.DONE}`;
+      resultStr = `현재상태 : todo : ${countObj.todo}개, doing : ${
+        countObj.doing
+      }개, done : ${countObj.done}개`;
       console.log(resultStr);
     }
   
@@ -88,16 +90,48 @@ const todos = [
         this.printAll(countObj);
       } else if (status === "todo" || status === "doing" || status === "done") {
         const namesArr = this.getNames(status);
-        this.printList(namesArr);
+        this.printList(namesArr, status);
       } else {
         throw Error("show의 인자는 todo, doing, done, all 만 가능합니다!");
       }
     }
+
+    add(name, tags) {
+      let id;
+      while(true) {
+        id = Math.floor(Math.random() * 10000) +1;
+        if(ids.indexOf(id) === -1) {
+          ids.push(id);
+          break;
+        }
+      }
+
+      const todoObj = {
+        "name" : name,
+        "tags" : tags,
+        "status" : "todo",
+        "id" : id
+      }
+      todos.push(todoObj);
+      console.log(`${name} 1개가 추가됐습니다.(id : ${id})`);
+      setTimeout(() => {
+        this.show("all");
+      }, 1000);
+    }
+
+
+
+
+
+
+
+
+
   }
   
-  const myTodo = new TodoList();
-  myTodo.show("all");
-  myTodo.show("todo");
-  myTodo.show("doing");
-  myTodo.show("done");
-  myTodo.show("too");
+  // const myTodo = new TodoList();
+  // myTodo.show("all");
+  // myTodo.show("todo");
+  // myTodo.show("doing");
+  // myTodo.show("done");
+  // myTodo.show("too");
