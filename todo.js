@@ -19,40 +19,34 @@ const showsortedByDeadLine = function (filterArg) {
 
 const show = function (filterArg) {
 
-    const getTodoMap = function (_array, checkKey) {
+    const getTodoMap = function (_array) {
         // 리듀스로 구현
-        const middleObj = _array.reduce((acc, curr) => {
-            if (acc.hasOwnProperty(curr.checkKey)) {
-                acc[curr.status]++;
-            } else {
-                acc[curr.status] = 1;
-            }
-            return acc;
-        }, {});
+        const middleObj = _array.reduce((accum,curr)=>{
+            accum[curr.status] = ++accum[curr.status] || 1;
+            return accum;
+        },{})
         return new Map(Object.entries(middleObj))
     }
 
     const showTodoAll = function (_array) {
-        const todoMap = getTodoMap(_array, "status");
+        const todoMap = getTodoMap(_array);
         // Map 객체의 keys()는 Iterator를 반환. Array.from(Iterator)는 Array를 반환.
         // Object.keys(obj)는...?
-        const showMessageArray = Array.from(todoMap.keys())
-            .reduce((acc, curr) => {
-                acc.push(`${curr}는 ${todoMap.get(curr)}개`);
-                return acc;
-            }, []);
+        const showMessageArray = [...todoMap.entries()].reduce((accum,cur)=>{
+            accum.push(`${cur[0]}는${todoMap.get(cur[0])}임`);
+            // accum.push(`${cur[0]}는${cur[1]}임`);
+            return accum
+        }
+        ,[]);
         console.log(showMessageArray.join(", "));
     }
 
     const showFilteredTodo = function (_array, filterArg) {
-        // 필터링된 Array는 Map이 필요 없다.
-        const filteredArray = _array.filter(v => v.status === filterArg);
-        const showMessageArray = filteredArray
-            .reduce((acc, curr) => {
-                acc.push(curr['name']); // name은 키워드와 혼동되므로 문자열로 처리 하자.
-                return acc;
-            }, []);
-        console.log(`${filterArg} - ${filteredArray.length}개 : ` + showMessageArray.join(", "));
+        const _filteredArray = _array.filter(v=>v.status === filterArg);
+        const todoMap = getTodoMap(_filteredArray);
+        const totalCount = [...todoMap.values()].reduce((accum,cur)=>accum+cur);
+        const _filteredObjNameString = _filteredArray.map(el=>el.name).join(", ");
+        console.log(`${filterArg}는 총 ${totalCount}개: ${_filteredObjNameString}`);
     }
 
     if (filterArg === "all") {
