@@ -17,12 +17,6 @@ const todos =  [{
     'id' : 12123123
 },
 {
-    'name' : '자바스크립트4', 
-    'tags' : ['programming', 'javascript'],
-    'status' : 'doing',
-    'id' : 12123123
-},
-{
     'name' : '자바스크립트5', 
     'tags' : ['programming', 'javascript'],
     'status' : 'done',
@@ -53,39 +47,36 @@ const todos =  [{
 const show = (status) => {
 if (status === 'all' ) {
     showAll();
-} else if ( status === 'todo') {
-    showTodo();
+} else {
+    showTodo(status);
 }
 }
 
-const showAll = function () {
-const list = [0, 0, 0]; 
-todos.forEach(function (todolist) {
+const list = {
+'todo': [],
+'doing': [],
+'done': []
+}
+
+const showAll = () => { 
+todos.forEach((todolist) => {
     if (todolist['status'] === 'todo') {
-        list[0] = list[0] + 1;
-        console.log(list[0]);
+        list.todo.push(todolist['name']);
     } else if (todolist['status'] === 'doing') {
-        list[1] += 1;
+        list.doing.push(todolist['name']);
     } else {
-        list[2] += 1;
+        list.done.push(todolist['name']);
     }
 })
-console.log(list);
-console.log(`현재상태 : todo: ${list[0]}개, doing: ${list[1]}, done: ${list[2]}`);
+console.log(`현재상태 : todo: ${list.todo.length}개, doing: ${list.doing.length}, done: ${list.done.length}`);
 }
 
-const showTodo = function () {
-let list = 0;
-const donelist = [];
-for (let halil of todos) {
-     if (halil['status'] === 'done') {
-        list += 1;
-    donelist.push(halil['name']);
+const showTodo = (status) => {
+result = todos.filter(v => v.status === status).map(v => v.name);
+console.log(`${status}리스트 :  총 ${result.length} 건 : ${result}`);
 }
-}
-console.log(`todo리스트 :  총 ${list} 건 : ${donelist}`);
-}
+
 
 
 show('all');
-show('todo');
+show('done');
