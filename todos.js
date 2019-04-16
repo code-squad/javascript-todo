@@ -1,95 +1,53 @@
-const todos =  [
-    {
-        'name' : '자바스크립트 공부하기',
-        'tags' : ['programming', 'javascript'],
-        'status' : 'todo',
-        'id' : 12123123
-    },
-    {
-        'name' : '그림 그리기',
-        'tags' : ['picture', 'favorite'],
-        'status' : 'doing',
-        'id' : 35435345
-    },
-    {
-        'name' : '꽃구경하기',
-        'tags' : ['flower', 'favorite'],
-        'status' : 'done',
-        'id' : 7657
-    },
-    {
-        'name' : '저녁식사',
-        'tags' : ['dinner', 'food'],
-        'status' : 'todo',
-        'id' : 097989
-    },
-    {
-        'name' : '커피마시기',
-        'tags' : ['coffee', 'favorite'],
-        'status' : 'doing',
-        'id' : 65464
-    }
- ];
- 
- let newTodoObject;
- 
- const makeNewTodoList = () => {
-    todos.forEach(todo => {
-        let key = todo.status;
-        let value = todo.name;
-        newTodoObject[key].push(value);
-    })
- };
- 
- const printAll = () => {
-    let result = [];
-    for(key in newTodoObject){
-        result.push(key + ": " + newTodoObject[key].length + "개");
-    }
-    console.log("현재상태 : ", result.join(', '));
- }
- 
- const printStatus = (args) => {
-    let result = [];
- 
-    for(key in newTodoObject[args]){
-        result.push(newTodoObject[args][key]);
-    }
-    console.log(`${args}리스트 : 총 :` +newTodoObject[args].length + "건 : " + result.join(', '));
- }
- 
- const checkTags = (tag) => {
-    let result = []; 
-    result = todos.filter((todo) => {
-        return todo.tags.includes(tag);
-    }).map((obj) => { return obj.name });
+const todos = require('./data');
 
-    console.log(`${tag} 키워드 검색 결과 :`  + result.join(', '));
- };
- 
- let printStatusAfterCheckKwd = (searchKeyWord) => {
-    if (searchKeyWord === 'all') {
-        printAll();
-    } else {
-        printStatus(searchKeyWord);
-    }
- }
- 
- const show = (keyWord, searchKeyWord) => {
-    newTodoObject = {'todo' : [], 'doing' : [], 'done' : []};
-    makeNewTodoList();
- 
-    if (keyWord === 'status') {
-        printStatusAfterCheckKwd(searchKeyWord);
-    } else {
-        checkTags(searchKeyWord);
-    }
- }
- 
- show("status", "all");
- show("status", "todo");
- show("status", "doing");
- show("status", "done");
- show("tag", "favorite");
- show("tag", "food");
- show("tag", "javascript");
+class Todo {
+	constructor(todos) {
+		this.todos = todos;
+		this.customTodos = todos.reduce(
+			(acc, cur) => {
+				acc[cur.status].push(cur.name);
+				return acc;
+			},
+			{ todo: [], doing: [], done: [] }
+		);
+	}
+
+	show(type, condition) {
+		let result;
+		if (type === 'status') {
+			if (condition === 'all') {
+				result = this.printAll();
+			} else {
+				result = this.printStatus(condition);
+			}
+		} else {
+			result = this.printTags(condition);
+		}
+		console.log(result);
+	}
+
+	printAll() {
+		return Object.entries(this.customTodos).reduce((acc, cur) => {
+			return (acc += `${cur[0]}: ${cur[1].length}개 `);
+		}, '현재상태 : ');
+	}
+
+	printStatus(status) {
+		return `${status}리스트 총 ${this.customTodos[status].length}건 : ${this.customTodos[status]}`;
+	}
+
+	printTags(tag) {
+		const tagArr = this.todos.filter(todo => todo.tags.includes(tag)).map(obj => obj.name);
+		return `${tag} 키워드 검색 결과 : ${tagArr.join(', ')}`;
+	}
+}
+
+const todo = new Todo(todos);
+
+todo.show('status', 'all');
+todo.show('status', 'todo');
+todo.show('status', 'doing');
+todo.show('status', 'done');
+todo.show('tag', 'favorite');
+todo.show('tag', 'food');
+todo.show('tag', 'javascript');
