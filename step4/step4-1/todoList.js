@@ -68,7 +68,6 @@ const getID = (todos) => {
     return r;
 }
 
-
 const addList = (input) =>{
     const input_arr = input.split('$');
     const id = getID(todos);
@@ -83,7 +82,28 @@ const addList = (input) =>{
 }
 
 addList('add$sleep$["favorite"]');
-console.log(todos);
+// console.log(todos);
+
+
+const deleteList = (input) =>{
+    const input_arr = input.split('$');
+    const checkedList = todos.filter(list => {
+        // console.log(list.id)
+        return list.id == input_arr[1]
+    })
+
+    if(checkedList.length === 0){
+        throw Error("존재하지 않는 id 입니다.")
+    }
+    
+    const willDeleteList = checkedList[0];
+    const deletedListStatus = willDeleteList.status;
+    const matchedIndex= todos.indexOf(willDeleteList)
+    todos.splice(matchedIndex,1);
+    return deletedListStatus
+}
+
+console.log(deleteList('delete$312323'))
 
 
 const printListAll = (todoCount, doingCount, doneCount) => {
