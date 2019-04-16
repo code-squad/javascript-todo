@@ -61,14 +61,25 @@ const idList = []
 const getID = (idList) => {
     const r = Math.floor(Math.random()*10000) + 1;
     if(idList.indexOf(r) === -1) idList.push(r);
-    console.log(idList);
-    // return r;
+    // console.log(idList);
+    return r;
 }
 
-const addList = () =>{
+const addList = (input) =>{
+    const input_arr = input.split('$');
+    const id = getID(idList);
 
-
+    const newTodo = {
+        'name' : input_arr[1],
+        'tag' : input_arr[2],
+        'status' : "todo",
+        'id' : id
+    };
+    todos.push(newTodo);
 }
+
+addList('add$sleep$["favorite"]');
+console.log(todos);
 
 
 const printListAll = (todoCount, doingCount, doneCount) => {
