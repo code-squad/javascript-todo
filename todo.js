@@ -135,7 +135,23 @@ const todos = [
       }, 1000);
     };
 
-    
+    updateData(id, status) {
+      let name;
+
+      todos.forEach((element) =>{
+        if(element.id === id){
+          element.status = status;
+          name = element.name;
+        }
+      });
+      
+      setTimeout(() => {
+        console.log(`${name}이(가) ${status}로 상태가 변경됐습니다.`)
+        setTimeout(() => {
+          this.show("all");
+        }, 1000);
+      }, 3000);
+    }
 
 
 
