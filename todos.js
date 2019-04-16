@@ -12,25 +12,23 @@ class Todo {
 	}
 
 	show(status) {
+		let result;
 		if (status === 'all') {
-			this.printAll();
+			result = this.printAll();
 		} else {
-			this.printStatus(status);
+			result = this.printStatus(status);
 		}
+		console.log(result);
 	}
 
 	printAll() {
-		console.log(
-			Object.entries(this.customTodos).reduce((acc, cur) => {
-				return (acc += `${cur[0]}: ${cur[1].length}개 `);
-			}, '현재상태 : ')
-		);
+		return Object.entries(this.customTodos).reduce((acc, cur) => {
+			return (acc += `${cur[0]}: ${cur[1].length}개 `);
+		}, '현재상태 : ');
 	}
 
 	printStatus(status) {
-		console.log(
-			`${status}리스트 총 ${this.customTodos[status].length}건 : ${this.customTodos[status]}`
-		);
+		return `${status}리스트 총 ${this.customTodos[status].length}건 : ${this.customTodos[status]}`;
 	}
 }
 
