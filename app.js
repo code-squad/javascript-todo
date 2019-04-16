@@ -26,22 +26,20 @@ const executeCommand = (commandArray) => {
     if(action === "show"){
         myTodoList.show(commandArray[1]);
     }else if(action === "add"){
-        // name = commandArray[1];
-        // tag = commandArray[2];
+        name = commandArray[1];  
+        tag = commandArray[2];
+        
+        myTodoList.add(name,tag);
 
-        // add(name,tag);
-        console.log(`add ${commandArray[1]}, ${commandArray[2]}`);
     }else if(action === "delete"){
-        // id = commandArray[1];
-
-        // delete(id);
-        console.log(`delete ${commandArray[1]}`);
+        id = parseInt(commandArray[1]);
+        myTodoList.deleteData(id);
+    
     }else if(action === "update"){
-        // id = commandArray[1];
-        // status = commandArray[2];
+        id =  parseInt(commandArray[1]);
+        status = commandArray[2];
 
-        // update(id,status);
-        console.log(`update ${commandArray[1]}, ${commandArray[2]}`);
+        myTodoList.updateData(id,status);
     }else{
         console.log("명령어가 유효하지 않습니다.");
     }
