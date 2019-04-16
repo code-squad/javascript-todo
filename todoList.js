@@ -51,3 +51,22 @@ const deleteData = function (order) {
 // 명령하세요 : delete$7788  //id번호
 // 공부하기 todo가 목록에서 삭제됐습니다
 // 현재상태 :  todo: 3개, doing:2개, done:4개
+
+
+const updateData = function (order) {
+    const idToUpdate = Number(order.match(/(?<=\$)[0-9]*(?=\$)/)[0]);
+    const statusToUpdate = order.match(/(?<=\d\$)[a-z]*/)[0];
+    todos.forEach((el) => {
+        if (el['id'] === idToUpdate) {
+            setTimeout(() => {
+                console.log(`${el['name']}가 ${el['status']}에서 ${statusToUpdate}으로 상태가 변경됐습니다.`);
+                el['status'] = statusToUpdate;
+                setTimeout(() => showAll(), 1000);
+            }, 3000);
+        }
+    })
+}
+// console.log(updateData('update$34536$done'))
+// 명령하세요 : update$7788$doing
+// 공부하기가 doing으로 상태가 변경됐습니다
+// 현재상태 :  todo: 3개, doing:2개, done:4개
