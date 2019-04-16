@@ -23,12 +23,22 @@ const todos =  [
 
 const getRandomInt = ()=> {
     const max = 10000;
-    return Math.floor(Math.random() * Math.floor(max))
+    return Math.floor(Math.random() * Math.floor(max));
 }
 
+const isExist = (randomInt) => {
+    const idCheck = (obj) => obj.id === randomInt;
+    return todos.some(idCheck);
+} 
 
-
-
+const getID = () => {
+    let ID = getRandomInt();
+    while(isExist(ID)) {
+        ID = getRandomInt();
+    }
+    return ID;
+    }
+getID()
 function init(todos){
     const res = {
     
