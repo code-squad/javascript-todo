@@ -21,6 +21,13 @@ const todos =  [
     }
 ];
 
+const getRandomInt = ()=> {
+    const max = 10000;
+    return Math.floor(Math.random() * Math.floor(max))
+}
+
+
+
 
 function init(todos){
     const res = {
