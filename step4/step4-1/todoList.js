@@ -57,6 +57,19 @@ const getTodoName = (array, status) => {
 
 }
 
+const idList = []
+const getID = (idList) => {
+    const r = Math.floor(Math.random()*10000) + 1;
+    if(idList.indexOf(r) === -1) idList.push(r);
+    console.log(idList);
+    // return r;
+}
+
+const addList = () =>{
+
+
+}
+
 
 const printListAll = (todoCount, doingCount, doneCount) => {
     const result = `현재상태 : todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCount}개`;
