@@ -35,3 +35,19 @@ const addData = function (order) {
 // 명령하세요 : add$sleep$["favorite"]
 // 공부하기 1개가 추가됐습니다.(id : 7788)
 // 현재상태 :  todo: 3개, doing:2개, done:4개
+
+
+const deleteData = function (order) {
+    const idToDelete = Number(order.match(/(?<=\$)[0-9]*/)[0]);
+    todos.forEach((el, i) => {
+        if (el['id'] === idToDelete) {
+            console.log(`${el['name']}(${el['status']})가 목록에서 삭제됐습니다.`);
+            todos.splice(i, 1);
+        }
+    });
+    setTimeout(() => showAll(), 1000);
+}
+// console.log(deleteData('delete$43532'))
+// 명령하세요 : delete$7788  //id번호
+// 공부하기 todo가 목록에서 삭제됐습니다
+// 현재상태 :  todo: 3개, doing:2개, done:4개
