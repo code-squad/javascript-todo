@@ -12,18 +12,20 @@ const todos =  [
         'tags' : ['picture', 'favorite'],
         'status' : 'doing',
         'id' : 312323
+    },
+    {
+        'name' : '할게 많다', 
+        'tags' : ['programming', 'javascript'],
+        'status' : 'todo',
+        'id' : 12123143
     }
-    // ....
 ];
 
-// const show = (obj) => {
-// ...
-// }
 
-const res = {
-    
-};
 function init(todos){
+    const res = {
+    
+    };
     for( obj of todos) {
        if(res[obj.status] === undefined) {
            res[obj.status] = [];
@@ -34,20 +36,20 @@ function init(todos){
     } 
     return res;
 }
-init(todos);
 
 function show(status){
+    const arrangedData = init(todos);
+    let res; 
     if (status === "all") {
-        for (key in res ) {
-            console.log( key, ": ", res[key].length)
+        for (key in arrangedData ) {
+            console.log( key, ": ", arrangedData[key].length)
         }
     }
-    if (!(res[status]===undefined)) {
-        console.log(res[status].map(v => v.name).join(", "))
+    if (!(arrangedData[status]===undefined)) {
+        res = arrangedData[status].map(v => v.name);
+        console.log(res.join(", "));
     }
 }
 
 show("all");
-show("todo")
-// show("all");
-// show("todo");
+show("todo");
