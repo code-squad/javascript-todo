@@ -57,17 +57,21 @@ const getTodoName = (array, status) => {
 
 }
 
-const idList = []
-const getID = (idList) => {
+
+const getID = (todos) => {
     const r = Math.floor(Math.random()*10000) + 1;
-    if(idList.indexOf(r) === -1) idList.push(r);
-    // console.log(idList);
+    const checkDuplicatedID = todos.filter(list => {
+        return list.id === r;
+    });
+    if(checkDuplicatedID.length > 0) getID(todos);
+
     return r;
 }
 
+
 const addList = (input) =>{
     const input_arr = input.split('$');
-    const id = getID(idList);
+    const id = getID(todos);
 
     const newTodo = {
         'name' : input_arr[1],
