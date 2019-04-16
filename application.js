@@ -70,3 +70,12 @@ const updateData = function (order) {
 // 명령하세요 : update$7788$doing
 // 공부하기가 doing으로 상태가 변경됐습니다
 // 현재상태 :  todo: 3개, doing:2개, done:4개
+
+
+module.exports = {
+    showAll,
+    showEachData,
+    addData,
+    deleteData,
+    updateData
+}
