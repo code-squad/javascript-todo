@@ -2,6 +2,7 @@ const todos = require('./data');
 
 class Todo {
 	constructor(todos) {
+		this.todos = todos;
 		this.customTodos = todos.reduce(
 			(acc, cur) => {
 				acc[cur.status].push(cur.name);
@@ -11,12 +12,16 @@ class Todo {
 		);
 	}
 
-	show(status) {
+	show(type, condition) {
 		let result;
-		if (status === 'all') {
-			result = this.printAll();
+		if (type === 'status') {
+			if (condition === 'all') {
+				result = this.printAll();
+			} else {
+				result = this.printStatus(condition);
+			}
 		} else {
-			result = this.printStatus(status);
+			result = this.printTags(condition);
 		}
 		console.log(result);
 	}
@@ -30,26 +35,19 @@ class Todo {
 	printStatus(status) {
 		return `${status}리스트 총 ${this.customTodos[status].length}건 : ${this.customTodos[status]}`;
 	}
+
+	printTags(tag) {
+		const tagArr = this.todos.filter(todo => todo.tags.includes(tag)).map(obj => obj.name);
+		return `${tag} 키워드 검색 결과 : ${tagArr.join(', ')}`;
+	}
 }
 
-//  const checkTags = (tag) => {
-//     let result = [];
-//     result = todos.filter((todo) => {
-//         return todo.tags.includes(tag);
-//     }).map((obj) => { return obj.name });
-
-//     console.log(`${tag} 키워드 검색 결과 :`  + result.join(', '));
-//  }
-
 const todo = new Todo(todos);
-todo.show('all');
-todo.show('done');
-todo.show('doing');
-todo.show('todo');
-// show('status', 'all');
-//  show("status", "todo");
-//  show("status", "doing");
-//  show("status", "done");
-//  show("tag", "favorite");
-//  show("tag", "food");
-//  show("tag", "javascript");
+
+todo.show('status', 'all');
+todo.show('status', 'todo');
+todo.show('status', 'doing');
+todo.show('status', 'done');
+todo.show('tag', 'favorite');
+todo.show('tag', 'food');
+todo.show('tag', 'javascript');
