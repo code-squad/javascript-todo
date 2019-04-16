@@ -32,9 +32,8 @@ const show = function (filterArg) {
         const todoMap = getTodoMap(_array);
         // Map 객체의 keys()는 Iterator를 반환. Array.from(Iterator)는 Array를 반환.
         // Object.keys(obj)는...?
-        const showMessageArray = [...todoMap.entries()].reduce((accum,cur)=>{
-            accum.push(`${cur[0]}는${todoMap.get(cur[0])}임`);
-            // accum.push(`${cur[0]}는${cur[1]}임`);
+        const showMessageArray = [...todoMap.keys()].reduce((accum,cur)=>{
+            accum.push(`${cur}는${todoMap.get(cur)}임`);
             return accum
         }
         ,[]);
@@ -43,8 +42,7 @@ const show = function (filterArg) {
 
     const showFilteredTodo = function (_array, filterArg) {
         const _filteredArray = _array.filter(v=>v.status === filterArg);
-        const todoMap = getTodoMap(_filteredArray);
-        const totalCount = [...todoMap.values()].reduce((accum,cur)=>accum+cur);
+        const totalCount = _filteredArray.length;
         const _filteredObjNameString = _filteredArray.map(el=>el.name).join(", ");
         console.log(`${filterArg}는 총 ${totalCount}개: ${_filteredObjNameString}`);
     }
