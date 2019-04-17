@@ -30,34 +30,29 @@ const todos =  [
         'id' : 65464
     }
 ];
-
-let newTodoObject;
-
 const makeNewTodoList = () => {
+    let newTodoObject = {'todo' : [], 'doing' : [], 'done' : []};;
     todos.forEach(todo => {
         let key = todo.status;
         let value = todo.name;
         newTodoObject[key].push(value);
-    })
+    });
+    return newTodoObject;
 };
-
-const printAll = () => {
+const printAll = (newTodoObject) => {
     let result = [];
     for(key in newTodoObject){
         result.push(key + ": " + newTodoObject[key].length + "개");
     }
     console.log("현재상태 : ", result.join(', '));
 }
-
-const printStatus = (args) => {
+const printStatus = (args, newTodoObject) => {
     let result = [];
-
     for(key in newTodoObject[args]){
         result.push(newTodoObject[args][key]);
     }
     console.log(`${args}리스트 : 총 : `+newTodoObject[args].length + "건 : " + result.join(', '));
 }
-
 const checkTags = (tag) => {
     let result = [];
     result = todos.filter((todo) => {
@@ -66,26 +61,21 @@ const checkTags = (tag) => {
  
     console.log(`${tag} 키워드 검색 결과 :`  + result.join(', '));
  };
-
  let printStatusAfterCheckKwd = (searchKeyWord) => {
+    let newTodoObject = makeNewTodoList();
     if (searchKeyWord === 'all') {
-        printAll();
+        printAll(newTodoObject);
     } else {
-        printStatus(searchKeyWord);
+        printStatus(searchKeyWord, newTodoObject);
     }
  }
-
  const show = (keyWord, searchKeyWord) => {
-    newTodoObject = {'todo' : [], 'doing' : [], 'done' : []};
-    makeNewTodoList();
- 
     if (keyWord == 'status') {
         printStatusAfterCheckKwd(searchKeyWord);
     } else {
         checkTags(searchKeyWord);
     }
  }
-
  show("status", "all");
  show("status", "todo");
  show("status", "doing");
