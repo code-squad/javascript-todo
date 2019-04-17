@@ -1,35 +1,35 @@
 const data = require('./todos')
 const todos = data.todos;
 
-const show = (array, status) => {
+const show = (todoList, status) => {
     switch (status) {
         case "all":
-            const [todoCount, doingCount, doneCount] = getAllStatus(array);
+            const [todoCount, doingCount, doneCount] = getAllStatus(todoList);
             printListAll(todoCount, doingCount, doneCount)
             break;
 
         case "todo":
-            const [todoCount_, todo_result] = getTodoName(array, status);
+            const [todoCount_, todo_result] = getTodoName(todoList, status);
             printList(status, todoCount_, todo_result);
             break;
 
         case "doing":
-            const [doingCount_, doing_result] = getTodoName(array, status)
+            const [doingCount_, doing_result] = getTodoName(todoList, status)
             printList(status, doingCount_, doing_result);
             break;
 
         case "done":
-            const [doneCount_, done_result] = getTodoName(array, status)
+            const [doneCount_, done_result] = getTodoName(todoList, status)
             printList(status, doneCount_, done_result);
             break;
     }
 };
 
-const getAllStatus = array => {
+const getAllStatus = todoList => {
     let todoCount = 0
     let doingCount = 0
     let doneCount = 0
-    array.forEach(function (obj) {
+    todoList.forEach(function (obj) {
         if (obj.status === "todo") {
             todoCount++;
         }
@@ -43,9 +43,9 @@ const getAllStatus = array => {
     return [todoCount, doingCount, doneCount]
 };
 
-const getTodoName = (array, status) => {
+const getTodoName = (todoList, status) => {
     totalCount = 0;
-    const done_result = array.filter(function (obj) {
+    const done_result = todoList.filter(function (obj) {
         return obj.status === status;
     })
         .map(function (obj) {
