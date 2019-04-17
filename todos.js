@@ -31,45 +31,43 @@ const todos =  [
     }
 ];
 
-let newTodoList;
+let newTodoObject;
 
-const makeNewTodoList = function(){
-    todos.forEach(function(todo){
+const makeNewTodoList = () => {
+    todos.forEach(todo => {
         let key = todo.status;
         let value = todo.name;
-        newTodoList[key].push(value);
+        newTodoObject[key].push(value);
     })
 };
 
-const printAll = function(){
+const printAll = () => {
     let result = [];
-    for(key in newTodoList){
-        result.push(key + ": " + newTodoList[key].length + "개");
+    for(key in newTodoObject){
+        result.push(key + ": " + newTodoObject[key].length + "개");
     }
     console.log("현재상태 : ", result.join(', '));
 }
 
-const printStatus = function(args){
+const printStatus = (args) => {
     let result = [];
 
-    for(key in newTodoList[args]){
-        result.push(newTodoList[args][key]);
+    for(key in newTodoObject[args]){
+        result.push(newTodoObject[args][key]);
     }
-    console.log(`${args}리스트 : 총 : `+newTodoList[args].length + "건 : " + result.join(', '));
+    console.log(`${args}리스트 : 총 : `+newTodoObject[args].length + "건 : " + result.join(', '));
 }
 
-const checkTags = function(tag){
+const checkTags = (tag) => {
     let result = [];
-    todos.forEach(function(list){
-        if (list.tags.includes(tag)) {
-            result.push(list.name);
-        }
-    })
+    result = todos.filter((todo) => {
+        return todo.tags.includes(tag);
+    }).map((obj) => { return obj.name });
  
     console.log(`${tag} 키워드 검색 결과 :`  + result.join(', '));
  };
 
- let printStatusAfterCheckKwd = function (searchKeyWord) {
+ let printStatusAfterCheckKwd = (searchKeyWord) => {
     if (searchKeyWord === 'all') {
         printAll();
     } else {
@@ -78,7 +76,7 @@ const checkTags = function(tag){
  }
 
  const show = (keyWord, searchKeyWord) => {
-    newTodoList = {'todo' : [], 'doing' : [], 'done' : []};
+    newTodoObject = {'todo' : [], 'doing' : [], 'done' : []};
     makeNewTodoList();
  
     if (keyWord == 'status') {
