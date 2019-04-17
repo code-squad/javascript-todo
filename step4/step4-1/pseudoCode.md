@@ -51,39 +51,23 @@
     2. string 값 todo / doing / done: 각 상태의 할일 이름과 총 갯수
 
 ```javascript
-const show = (array, status) => {
-    switch (status) {
-        case "all":
+const show = (할 일 목록, 현재 상태) => {
+    if (현재상태 체크) {
+        'all' 일 경우 
         todoCount = 0
         doingCount = 0
         doneCount = 0
-        array.foEach(function(obj) {
-            if(obj.status === "todo") {
-                todoCount++;
-            } 
-            if (obj.status === "doing") {
-                doingCount++;
-            } 
-            if (obj.status === "done") {
-                doneCount++;
-            }
-        })
+        
+        function: 전체 목록의 현재 상태를 체크하는 함수 (위의 Count변수를 증가)
         return `todo: ${todoCount}개, doing: ${doingCount}개, done: ${doneCOunt}개`
-        break;
 
-        case "todo" / "doing" / "done":
+
+        'all'이 아닐 경우 체크: "todo" / "doing" / "done":
         totalCount = 0;
         
-        const result = array.filter(function(obj) {
-            return obj.status === status;
-        })
-        .map(function(obj) {
-            totalCount++;
-            return obj.name
-        })
-        
+        function: 입력한 현재상태에 해당하는 목록의 이름과 갯수를 체크하는 함수 (위의 Count변수를 증가)
         return `총 ${totalCount}개: ${result.join(', ')}`
-        break;
+
     }
 }
 ```
