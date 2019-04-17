@@ -2,28 +2,16 @@ const data = require('./todos')
 const todos = data.todos;
 
 const show = (todoList, status) => {
-    switch (status) {
-        case "all":
+        if (status === `all`){
             const [todoCount, doingCount, doneCount] = getAllStatus(todoList);
             printListAll(todoCount, doingCount, doneCount)
-            break;
+            return
+        }
 
-        case "todo":
             const [todoCount_, todo_result] = getTodoName(todoList, status);
             printList(status, todoCount_, todo_result);
-            break;
 
-        case "doing":
-            const [doingCount_, doing_result] = getTodoName(todoList, status)
-            printList(status, doingCount_, doing_result);
-            break;
-
-        case "done":
-            const [doneCount_, done_result] = getTodoName(todoList, status)
-            printList(status, doneCount_, done_result);
-            break;
-    }
-};
+    };
 
 const getAllStatus = todoList => {
     let todoCount = 0
