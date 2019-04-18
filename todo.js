@@ -1,4 +1,5 @@
 const readline = require("readline")
+const {log} = console
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -6,7 +7,7 @@ const rl = readline.createInterface({
 });
 
 const generateId = () => {
-    let id = 0
+    let id = ((1 + Math.random()) * 0x10000 | 0).toString(16).substring(1)
     return id;
 }
 
@@ -33,7 +34,7 @@ class Todos {
 
     start(){
         rl.question("명령하세요 : ", (inst)=> {
-            if (inst === "quit" || inst === "q") {
+            if (inst === "quit()" || inst === "q()") {
                 console.log("프로그램을 종료합니다.")
                 rl.close()
                 return;
@@ -53,10 +54,12 @@ class Todos {
     }
 
     show() {
+        
 
     }
 
-    add() {
+    add(name, tags) {
+
     }
 
     delete() {
