@@ -92,6 +92,7 @@ class Todos {
     add(name, tags) {
         let id = generateId()
         let status = "todo"
+        let str = ""
         if(arguments.length !== this.add.length){
             throw Error("LACKPARAM")
         }
@@ -105,19 +106,30 @@ class Todos {
                 status
             }
         )
+        str = `${name}이(가) 1개 추가하였습니다. (id : ${id})`
+        console.log("\x1b[32m%s\x1b[0m", str)
         setTimeout(() => this.show("all") ,1000)
     }
 
     delete(id) {
         let index = getIndexById(this.todos, id)
+        let str = ""
+        let {name, status} = this.todos[index]
         this.todos.splice(index, 1)
+        str = `${name} ${status}이(가) 목록에서 삭제되었습니다.`
+        console.log("\x1b[32m%s\x1b[0m", str)
         setTimeout(() => this.show("all") ,1000)
     }
 
     update(id, status) {
         let index = getIndexById(this.todos, id)
+        let str = ""
         this.todos[index].status = status
-        setTimeout(() => this.show("all") ,1000)
+        setTimeout(() => {
+            str = `${this.todos[index].name} ${status}이(가) 목록에서 변경되었습니다.`
+            console.log("\x1b[32m%s\x1b[0m", str)
+            setTimeout(() => this.show("all") ,1000)
+        },3000)
     }
 }
 
