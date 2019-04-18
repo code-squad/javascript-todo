@@ -5,7 +5,7 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-// bootstrap
+// preparing for tasks
 var data = fs.readFileSync('./todos.json')
 var todos = JSON.parse(data)
 
@@ -27,8 +27,10 @@ const createId = (name) => {
   const uniqueId = charCode + timeNow
   return uniqueId
 }
-const sleep = msec => new Promise(resolve => setTimeout(resolve, msec))
 
+const sleep = (msec) => {
+  new Promise(resolve => setTimeout(resolve, msec))
+}
 
 
 // operations(add, update, delete, show)
@@ -52,6 +54,7 @@ module.exports.show = (objStr) => {
 module.exports.add = async (name, tags) => {
   tags = JSON.parse(tags)
   uniqueId = createId(name)
+
   todos.push({'name' : name, 'tags': tags, 'status': 'todo', 'id': uniqueId})
   console.log(`${name} 1개가 추가됐습니다. (id : ${uniqueId})`)
 
@@ -62,9 +65,10 @@ module.exports.add = async (name, tags) => {
 
 module.exports.update = async (id, status) => {
   id*=1
-  todoIndex = todos.findIndex(element => element.id === id)
-  const {name, tags} = todos[todoIndex]
-  todos.splice(todoIndex, 1, {name: name, id: id, tags: tags, status: status})
+  index = todos.findIndex(element => element.id === id)
+  const {name, tags} = todos[index]
+  todos.splice(index, 1, {name: name, id: id, tags: tags, status: status})
+
   await sleep(3000)
   console.log(`${name}가 ${status}로 상태가 변경되었습니다.`)
   
@@ -75,19 +79,14 @@ module.exports.update = async (id, status) => {
 
 module.exports.delete = async (id) => {
   id*=1
-  todoIndex = todos.findIndex(element => element.id === id)
-  console.log(`${todos[todoIndex]}가 목록에서 삭제됩니다.`)
-  todos.splice(todoIndex, 1)
+  index = todos.findIndex(element => element.id === id)
+  console.log(`${todos[index]}가 목록에서 삭제됩니다.`)
+  todos.splice(index, 1)
   
   await sleep(1000)
   this.show('all')
   return
 }
-
-
-
-
-
 
 // terminate program
 module.exports.shutdownRl = async () => {
