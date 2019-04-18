@@ -114,8 +114,10 @@ class Todos {
         setTimeout(() => this.show("all") ,1000)
     }
 
-    update() {
-
+    update(id, status) {
+        let index = getIndexById(this.todos, id)
+        this.todos[index].status = status
+        setTimeout(() => this.show("all") ,1000)
     }
 }
 
