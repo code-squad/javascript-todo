@@ -40,6 +40,17 @@ const todos = [
 
 const ids = [423, 1535, 9999, 512, 2, 77];
 
+const getRandomId = () => {
+  let id;
+    while (true) {
+      id = Math.floor(Math.random() * 10000) + 1;
+      if (ids.indexOf(id) === -1) {
+        break;
+      }
+    }
+    return id;
+  }
+
 module.exports = class TodoList {
   count() {
     const countObj = {
@@ -102,14 +113,9 @@ module.exports = class TodoList {
       log("add명령어의 인자가 잘못 되었습니다");
       return;
     }
-    let id;
-    while (true) {
-      id = Math.floor(Math.random() * 10000) + 1;
-      if (ids.indexOf(id) === -1) {
-        ids.push(id);
-        break;
-      }
-    }
+    const id = getRandomId();
+    ids.push(id);
+
 
     const todoObj = {
       "name": name,
