@@ -1,72 +1,54 @@
-const todos = [
-  {
-    'name' : '자바스크립트 공부하기', 
-    'tags' : ['programming', 'javascript'],
-    'status' : 'todo',
-    'id' : 12123123
-  },
-                {
-    'name' : ' 그림 그리기', 
-    'tags' : ['picture', 'favorite'],
-    'status' : 'doing',
-    'id' : 312323
-  },
-  {
-    'name' : '스위프트 배우기', 
-    'tags' : ['programming', 'javascript'],
-    'status' : 'todo',
-    'id' : 12123123
-  },
-  {
-    'name' : '리엑트 공부하기', 
-    'tags' : ['programming', 'javascript'],
-    'status' : 'todo',
-    'id' : 12123123
-  },
-  {
-    'name' : '운동하기', 
-    'tags' : ['programming', 'javascript'],
-    'status' : 'done',
-    'id' : 12123123
-  },
-  {
-    'name' : '독서하기', 
-    'tags' : ['programming', 'javascript'],
-    'status' : 'done',
-    'id' : 12123123
-  },
-  {
-    'name' : '금연하기', 
-    'tags' : ['programming', 'javascript'],
-    'status' : 'doing',
-    'id' : 12123123
-  },
-  {
-    'name' : '알고리즘풀기', 
-    'tags' : ['programming', 'javascript'],
-    'status' : 'todo',
-    'id' : 12123123
-  }
-]
+const tools = require('./todoTools')
 
-const show = (objStr) => {
-  let todoSum = todos.filter(v => v.status === 'todo').length
-  let doingSum = todos.filter(v => v.status === 'doing').length
-  let doneSum = todos.length - todoSum - doingSum
-	
-  const props = {'todo' : todoSum, 'doing' : doingSum, 'done' : doneSum}
-  
-  if (objStr === 'all'){
-    console.log(`현재상태 : todo: ${todoSum}개, doing: ${doingSum}개, done: ${doneSum}개`)
-    return
-  }
-  result = todos.filter(v => v.status === objStr).map(v => v.name)
-  console.log(`${objStr}리스트 : 총${props[objStr]}건 : ${result.reduce((acc, cur)=> acc + ', ' + cur)}`)
 
-  return 
+
+
+// tools.show('all')
+// tools.show('todo')
+// tools.show('doing')
+// tools.show('done')
+
+//todos.push({name: '자스노드자스노드', tags: ['nodejs', 'javacoffee'], status: 'todo', id: 12421521341235234})
+const main =  async () => {
+  let argu = ''
+  while(1){
+    argu = await tools.input('명령해주세요! >> ')
+    let getOut = false
+    let props = argu.split('$')
+    switch(props[0]) {
+      case 'show':
+      tools.show(props[1])
+      break
+
+      case 'add':
+      await tools.add(props[1], props[2])
+      break
+
+      case 'update':
+      await tools.update(props[1], props[2])
+      break
+
+      case 'delete':
+      await tools.delete(props[1])
+      break
+
+      case 'exit':
+      getOut = true
+      break
+      
+      case 'test':
+      break
+      
+      default:
+      console.log('사용법에 대해서 설명하기')
+    }
+    if(getOut === true){
+      break
+    }
+  }
+
+  tools.shutdownRl()
+  tools.saveFile()
 }
 
-show('all')
-show('todo')
-show('doing')
-show('done')
+main()
