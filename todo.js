@@ -76,29 +76,65 @@ const add = (inputName, inputTag) => {
     todo.status = "todo";
     todo.id = getID();
     todos.push(todo);
-    show("all");
+    console.log(`${todo.name} 이 1개가 추가되었습니다`)
+    setTimeout(() => {
+        show("all"); 
+        rl.prompt();
+    } ,1000)
 }
 
 // add("할일없음");
 const deleteTodo = (id) => {
     let todo2delete;
     todos.forEach((todo) => {
-        if(todo.id === id) todo2delete = todos.pop(todo);
+        if(todo.id === Number(id)) todo2delete = todos.pop(todo);
     });
     console.log(`${todo2delete.name} ${todo2delete.status} 가 목록에서 삭제됐습니다.`)
+    setTimeout(() => {
+        show("all");
+        rl.prompt();
+    },1000)
 }
 
 const update = (id, inputStatus) => {
     let todo2update;
     todos.forEach((todo) => {
-        if(todo.id === id) {
+        if(todo.id === Number(id)) {
             todos.status = inputStatus; 
             todo2update = todo;
         }
     });
-    console.log(`${todo2update.name} 가 ${todo2update.status}(으)로 변경되었습니다.`)
+    setTimeout(() => {
+        console.log(`${todo2update.name} 가 ${todo2update.status}(으)로 변경되었습니다.`);
+        setTimeout(()=> {
+            show("all")
+            rl.prompt();
+        }, 1000)
+
+    },3000)
+    
 }
-update(312323, "doing")
-// show("all");
-// show("todo");
-//deleteTodo(312323)
+
+const readline=require("readline");
+ 
+const rl=readline.createInterface({
+  input:process.stdin,
+  output:process.stdout,
+  prompt: "명령하세요: "
+});
+
+const parseInput = input => input.split("$");
+
+
+rl.prompt();
+rl.on("line",(data)=>{
+    const input = parseInput(data);
+    switch (input[0]) {
+        case "add" : add(input[1], input[2]);
+        break;
+        case "update" : update(input[1], input[2]);
+        break;
+        case "delete": deleteTodo(input[1]);
+        break;
+    }    
+});
