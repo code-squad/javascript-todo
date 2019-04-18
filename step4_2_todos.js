@@ -161,11 +161,11 @@ const updateTodo = (args, todos) => {
 const deleteTodo = (args, todos) => {
     for(key in todos){
         if(todos[key].id === Number(args[1])){
+            console.log(`${todos[key].name} ${todos[key].status}가 목록에서 삭제됐습니다.`)
             todos.splice(key,1);
         }
     }
 
-    console.log(`${todos[key].name} ${todos[key].status}가 목록에서 삭제됐습니다.`)
     checkOrder("show$status$all", todos);
 }
 
