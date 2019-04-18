@@ -26,18 +26,19 @@ const getRandomInt = ()=> {
     return Math.floor(Math.random() * Math.floor(max));
 }
 
-const isExist = (randomInt) => {
+const isIdExistInTodos = (randomInt) => {
     const idCheck = (obj) => obj.id === randomInt;
     return todos.some(idCheck);
 } 
 
 const getID = () => {
     let ID = getRandomInt();
-    while(isExist(ID)) {
+    while(isIdExistInTodos(ID)) {
         ID = getRandomInt();
     }
     return ID;
     }
+
 getID()
 function init(todos){
     const res = {
