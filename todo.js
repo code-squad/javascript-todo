@@ -1,7 +1,7 @@
 const readline = require("readline")
-const {
-    log
-} = console
+const ERROR = {
+    "LACKPARAM" : "인자의 개수가 부족합니다. 다시 입력해 주세요."
+}
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -25,13 +25,7 @@ const splitStringByChar = (inst, s) => {
 
 class Todos {
     constructor() {
-        this.todos = []
-        this.INSTRUCTION = {
-            "add": this.add,
-            "show": this.show,
-            "update": this.update,
-            "delete": this.delete
-        }
+        this.todos = [{a : 1}]
     }
 
     start() {
@@ -41,13 +35,18 @@ class Todos {
             if (inst === "quit()" || inst === "q()") {
                 rl.close()
             }
-            inst = splitStringByChar(inst, "$") 
+            inst = splitStringByChar(inst, "$")
             let instruction_type = inst.shift()
             try {
-                this.INSTRUCTION[instruction_type](...inst)
-            } catch {
-                console.log("\x1b[31m%s\x1b[0m", "올바르지 않은 명령어입나다.")
-                console.log("\x1b[31m%s\x1b[0m", "사용할 수 있는 명령어 : show | add | update | delete")
+                
+                this[instruction_type](...inst) 
+            } catch(e) {
+                console.log(e.message)
+                if (ERROR[e.message]) {
+                    console.log("\x1b[31m%s\x1b[0m", ERROR[e.message])
+                } else {
+                    console.log("\x1b[31m%s\x1b[0m", "올바르지 않은 명령어입나다.\n사용할 수 있는 명령어 : show | add | update | delete")
+                }
             }
             rl.prompt()
         }).on("close", () => {
@@ -58,12 +57,28 @@ class Todos {
     }
 
     show() {
-
+        console.log("SHOW!")
 
     }
 
     add(name, tags) {
+        let id = generateId()
+        let status = "todo"
+        if(arguments.length !== this.add.length){
+            throw Error("LACKPARAM")
+        }
+        tags = tags.replace(/\[|\]|\"|\'/g, "").split(",")
 
+        this.todos.push(
+            {
+                id,
+                name,
+                tags,
+                status
+            }
+        )
+        console.dir(this.todos)
+        setTimeout(this.show,1000)
     }
 
     delete() {
