@@ -13,8 +13,10 @@ const generateId = () => {
     return id;
 }
 
-const getIndexById = (id) => {
-    let index = -1;
+const getIndexById = (todos, id) => {
+    let index = todos.findIndex((el) => {
+        return el.id === id
+    })
     return index
 }
 
@@ -39,7 +41,7 @@ const getTodos = (todos) => {
 const getTodosByStatus = (todos, status) => {
     let str = ""
     let count = getCountbyStatus(todos, status)
-    str += `${status}리스트 : 총 ${count}건 : ` + todos.filter(v => v.status == status).map(v => v.name).join(", ")
+    str += `${status}리스트 : 총 ${count}건 : ` + todos.filter(v => v.status == status).map(v => `'${v.name}, ${v.id}번'`).join(", ")
     return str
 }
 
@@ -106,8 +108,10 @@ class Todos {
         setTimeout(() => this.show("all") ,1000)
     }
 
-    delete() {
-
+    delete(id) {
+        let index = getIndexById(this.todos, id)
+        this.todos.splice(index, 1)
+        setTimeout(() => this.show("all") ,1000)
     }
 
     update() {
