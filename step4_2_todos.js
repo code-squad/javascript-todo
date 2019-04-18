@@ -32,6 +32,7 @@ const printStatus = function(args, newTodoList){
     }
 
     console.log(`${args}리스트 : 총 : `+newTodoList[args].length + "건 : " + currentEachStatus.join(', '));
+    inputOrder(todos.todos);
 }
 
 const checkTags = (tag, todos) => {
@@ -42,6 +43,7 @@ const checkTags = (tag, todos) => {
     }).map((obj) => { return obj.name });
  
     console.log(`${tag} 키워드 검색 결과 :`  + result.join(', '));
+    checkOrder("show$status$all", todos);
  };
 
  let printStatusAfterCheckKwd = function (searchKeyWord, newTodoList) {
@@ -152,6 +154,7 @@ const updateTodo = (args, todos) => {
     setTimeout(() => {
         console.log(todos);
     }, 3000);
+
     checkOrder("show$status$all", todos);
 }
 
