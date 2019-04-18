@@ -37,9 +37,9 @@ const getID = () => {
         ID = getRandomInt();
     }
     return ID;
-    }
+}
+// getID()
 
-getID()
 function init(todos){
     const res = {
     
@@ -69,5 +69,24 @@ function show(status){
     }
 }
 
-show("all");
-show("todo");
+const add = (inputName, inputTag) => {
+    const todo = {};
+    todo.name = inputName;
+    if(!inputTag === undefined) todo.tag = inputTag;
+    todo.status = "todo";
+    todo.id = getID();
+    todos.push(todo);
+    show("all");
+}
+
+// add("할일없음");
+const deleteTodo = (id) => {
+    let todo2delete;
+    todos.forEach((todo) => {
+        if(todo.id === id) todo2delete = todos.pop(todo);
+    });
+    console.log(`${todo2delete.name} ${todo2delete.status} 가 목록에서 삭제됐습니다.`)
+}
+// show("all");
+// show("todo");
+deleteTodo(312323)
