@@ -20,9 +20,16 @@ r.on('line', function (line) {
     else{
         console.log('--invalid order');
         console.log('show$all\nshow$<status>\nadd$<name>$<["tag"]\ndelete$<id>\nupdate$<id>$<status>');
+        r.prompt();
     }
-    r.prompt()
 });
 r.on('close', function () {
     process.exit();
 });
+
+
+module.exports = {
+    r
+}
+
+

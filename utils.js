@@ -1,40 +1,50 @@
-const todos = require('./todosData');
-
-
-const matchedData = [];
-
-
-const checkValidId = function (idStr) {
-    let isTrue = false;
-    const nameAndIdList = [];
-    todos.forEach((el, i) => {
-        if (Number.isFinite(el['id']) && el['id'] === idStr) {
-            isTrue = true;
-            matchedData.push(el, i);
-        }
-        nameAndIdList.push([el['name'], el['id']]);
-    });
-    if (!isTrue) {
+const isValidId = function (idNum) {
+    if (idNum) {
+        return true;
+    } else {
         console.log('invalid idNumber');
-        console.log(`'${nameAndIdList.join('\' \'')}'`);
+        console.log('idNumber is five digits')
+        return false;
     }
-    return isTrue;
 }
 
 
-const checkValidDo = function (doStr) {
-    const doList = ['todo', 'doing', 'done'];
-    const isTrue = doList.some((el) => el === doStr);
-    if(!isTrue) {
-        console.log('invalid order');
-        console.log('show$<all, todo, doing, done>');
+const isValidStatus = function (status) {
+    if (status) {
+        return true;
+    } else {
+        console.log('invalid status');
+        console.log('<todo, doing, done>');
+        return false;
     }
-    return isTrue;
+}
+
+
+const isValidName = function (name) {
+    if (name) {
+        return true;
+    } else {
+        console.log('invalid name');
+        console.log('name is not a number');
+        return false;
+    }
+}
+
+
+const isValidTag = function (tag) {
+    if (tag) {
+        return true;
+    } else {
+        console.log('invalid tag');
+        console.log('tag is only English\tex)["<English>"]');
+        return false;
+    }
 }
 
 
 module.exports = {
-    checkValidId,
-    checkValidDo,
-    matchedData
+    isValidId,
+    isValidStatus,
+    isValidName,
+    isValidTag
 }
