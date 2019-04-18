@@ -13,35 +13,53 @@ const generateId = () => {
     return id;
 }
 
-const getTodoIndex = (id) => {
+const getIndexById = (id) => {
     let index = -1;
     return index
 }
 
-const splitStringByChar = (inst, s) => {
-    let instruction = inst.split(s)
-    return instruction
+const getParsedCommand = (command, s) => {
+    command = command.split(s)
+    return command
+}
+
+const getCountbyStatus = (todos, status) => todos.filter(v => v.status == status).length
+
+const getTodos = (todos) => {
+    let str = ""
+    let counts = {
+        "todo": getCountbyStatus(todos,"todo"),
+        "doing": getCountbyStatus(todos,"doing"),
+        "done": getCountbyStatus(todos,"done"),
+    }
+    str += "현재상태 : " + Object.entries(counts).map(([k, v]) => `${k}: ${v}개`).join(", ")
+    return str
+}
+
+const getTodosByStatus = (todos, status) => {
+    let str = ""
+    let count = getCountbyStatus(todos, status)
+    str += `${status}리스트 : 총 ${count}건 : ` + todos.filter(v => v.status == status).map(v => v.name).join(", ")
+    return str
 }
 
 class Todos {
     constructor() {
-        this.todos = [{a : 1}]
+        this.todos = []
     }
 
     start() {
         rl.setPrompt("명령하세요 : ")
         rl.prompt()
-        rl.on("line", (inst) => {
-            if (inst === "quit()" || inst === "q()") {
+        rl.on("line", (command) => {
+            if (command === "quit()" || command === "q()") {
                 rl.close()
             }
-            inst = splitStringByChar(inst, "$")
-            let instruction_type = inst.shift()
+            command = getParsedCommand(command, "$")
+            let command_type = command.shift()
             try {
-                
-                this[instruction_type](...inst) 
+                this[command_type](...command) 
             } catch(e) {
-                console.log(e.message)
                 if (ERROR[e.message]) {
                     console.log("\x1b[31m%s\x1b[0m", ERROR[e.message])
                 } else {
@@ -56,9 +74,17 @@ class Todos {
 
     }
 
-    show() {
-        console.log("SHOW!")
 
+    show(option) {
+        let options = {
+            "all" : getTodos,
+            "todo" : getTodosByStatus,
+            "doing" : getTodosByStatus,
+            "done" : getTodosByStatus,
+        }
+
+        let answer = options[option](this.todos, option)
+        console.log(answer)
     }
 
     add(name, tags) {
@@ -77,8 +103,7 @@ class Todos {
                 status
             }
         )
-        console.dir(this.todos)
-        setTimeout(this.show,1000)
+        setTimeout(() => this.show("all") ,1000)
     }
 
     delete() {
