@@ -16,7 +16,7 @@ class Todo {
     console.log('hello');
   }
 
-  show(type, condition) {
+  show(type, condition, inputPrompt) {
     let result;
     if (type === 'status') {
       if (condition === 'all') {
@@ -28,6 +28,7 @@ class Todo {
       result = this.printTags(condition);
     }
     console.log(result);
+    inputPrompt.prompt();
   }
 
   printAll() {
