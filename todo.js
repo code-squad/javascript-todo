@@ -87,6 +87,18 @@ const deleteTodo = (id) => {
     });
     console.log(`${todo2delete.name} ${todo2delete.status} 가 목록에서 삭제됐습니다.`)
 }
+
+const update = (id, inputStatus) => {
+    let todo2update;
+    todos.forEach((todo) => {
+        if(todo.id === id) {
+            todos.status = inputStatus; 
+            todo2update = todo;
+        }
+    });
+    console.log(`${todo2update.name} 가 ${todo2update.status}(으)로 변경되었습니다.`)
+}
+update(312323, "doing")
 // show("all");
 // show("todo");
-deleteTodo(312323)
+//deleteTodo(312323)
