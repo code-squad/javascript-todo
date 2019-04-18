@@ -9,7 +9,7 @@ var r = readline.createInterface({
 r.setPrompt('명령하세요 : ');
 r.prompt();
 r.on('line', function (line) {
-    if (line === 'exit') {
+    if (line === 'q') {
         r.close();
     }
     if(line === 'show$all') application.showAll(line);
@@ -17,6 +17,10 @@ r.on('line', function (line) {
     else if(line.slice(0,3) === 'add') application.addData(line);
     else if(line.slice(0,6) === 'delete') application.deleteData(line);
     else if(line.slice(0,6) === 'update') application.updateData(line);
+    else{
+        console.log('--invalid order');
+        console.log('show$all\nshow$<status>\nadd$<name>$<["tag"]\ndelete$<id>\nupdate$<id>$<status>');
+    }
     r.prompt()
 });
 r.on('close', function () {
