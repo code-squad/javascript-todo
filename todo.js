@@ -1,5 +1,7 @@
 const readline = require("readline")
-const {log} = console
+const {
+    log
+} = console
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -24,37 +26,39 @@ const splitStringByChar = (inst, s) => {
 class Todos {
     constructor() {
         this.todos = []
-        this.INSTRUCTION  = {
-            "add" : this.add,
-            "show" : this.show,
-            "update" : this.update,
-            "delete" : this.delete
+        this.INSTRUCTION = {
+            "add": this.add,
+            "show": this.show,
+            "update": this.update,
+            "delete": this.delete
         }
     }
 
-    start(){
-        rl.question("명령하세요 : ", (inst)=> {
+    start() {
+        rl.setPrompt("명령하세요 : ")
+        rl.prompt()
+        rl.on("line", (inst) => {
             if (inst === "quit()" || inst === "q()") {
-                console.log("프로그램을 종료합니다.")
                 rl.close()
-                return;
             }
-            inst = splitStringByChar(inst, "$")
+            inst = splitStringByChar(inst, "$") 
             let instruction_type = inst.shift()
             try {
                 this.INSTRUCTION[instruction_type](...inst)
             } catch {
                 console.log("\x1b[31m%s\x1b[0m", "올바르지 않은 명령어입나다.")
                 console.log("\x1b[31m%s\x1b[0m", "사용할 수 있는 명령어 : show | add | update | delete")
-            } finally {
-                this.start()
             }
+            rl.prompt()
+        }).on("close", () => {
+            console.log("프로그램을 종료합니다.")
+            process.exit()
         })
-        
+
     }
 
     show() {
-        
+
 
     }
 
