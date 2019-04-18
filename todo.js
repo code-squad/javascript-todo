@@ -28,6 +28,30 @@ class Todo {
     setTimeout(() => this.show('status', 'all', inputPrompt), 1000);
   }
 
+  delete(id, inputPrompt) {
+    const deleteInfo = this.filterById(id);
+
+    if (deleteInfo.length !== 0) {
+      this.data.splice(deleteInfo[0], 1);
+      this.todoCount = this.setTodoCount(this.data);
+
+      console.log(`${deleteInfo[1]} todo가 목록에서 삭제되었습니다.`);
+    } else {
+      console.log('입력하신 id가 존재하지 않습니다.');
+    }
+
+    setTimeout(() => this.show('status', 'all', inputPrompt), 1000);
+  }
+
+  filterById(id) {
+    let deleteInfo = this.data
+      .map((todo, i) => (todo.id === Number(id) ? [i, todo.name] : undefined))
+      .filter(index => index !== undefined);
+
+    // flat method ES2019에 새로 도입, node 11.0버전 이상부터 사용가능
+    return !Array.prototype.flat ? deleteInfo[0] : deleteInfo.flat();
+  }
+
   show(type, condition, inputPrompt) {
     let result;
     if (type === 'status') {

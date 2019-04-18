@@ -15,8 +15,10 @@ inputPrompt.on('line', message => {
   if (message === '0') {
     inputPrompt.close();
   }
-  const arr = message.split('$');
-  todo[arr[0]](arr[1], arr[2], inputPrompt);
+  const userInput = message.split('$');
+  const methodName = userInput.splice(0, 1);
+
+  todo[methodName](...userInput, inputPrompt);
 });
 
 inputPrompt.on('close', () => {
