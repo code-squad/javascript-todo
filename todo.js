@@ -14,8 +14,18 @@ class Todo {
     }, {});
   }
 
-  hello() {
-    console.log('hello');
+  add(name, tags = '', inputPrompt) {
+    // string type의 tags를 string type 배열로 만듦
+    tags = tags.replace(/[\[\]\"\'\s]/g, '').split(',');
+
+    const id = makeId();
+    const addData = { name, tags, status: 'todo', id };
+
+    this.data.push(addData);
+    this.todoCount.todo.push(name);
+    console.log(`${name} 1개가 추가되었습니다.(id : ${id})`);
+
+    setTimeout(() => this.show('status', 'all', inputPrompt), 1000);
   }
 
   show(type, condition, inputPrompt) {

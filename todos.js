@@ -16,7 +16,7 @@ inputPrompt.on('line', message => {
     inputPrompt.close();
   }
   const arr = message.split('$');
-  todo[arr[0]]('status', arr[1], inputPrompt); // show test case
+  todo[arr[0]](arr[1], arr[2], inputPrompt);
 });
 
 inputPrompt.on('close', () => {
