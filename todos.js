@@ -1,4 +1,4 @@
-const todos =  [ 
+module.exports.todos =  [ 
     {
         'name' : '자바스크립트 공부하기', 
         'tags' : ['programming', 'javascript'],
@@ -30,68 +30,3 @@ const todos =  [
         'id' : 65464
     }
 ];
-
-let newTodoList;
-
-const makeNewTodoList = function(){
-    todos.forEach(function(todo){
-        let key = todo.status;
-        let value = todo.name;
-        newTodoList[key].push(value);
-    })
-};
-
-const printAll = function(){
-    let result = [];
-    for(key in newTodoList){
-        result.push(key + ": " + newTodoList[key].length + "개");
-    }
-    console.log("현재상태 : ", result.join(', '));
-}
-
-const printStatus = function(args){
-    let result = [];
-
-    for(key in newTodoList[args]){
-        result.push(newTodoList[args][key]);
-    }
-    console.log(`${args}리스트 : 총 : `+newTodoList[args].length + "건 : " + result.join(', '));
-}
-
-const checkTags = function(tag){
-    let result = [];
-    todos.forEach(function(list){
-        if (list.tags.includes(tag)) {
-            result.push(list.name);
-        }
-    })
- 
-    console.log(`${tag} 키워드 검색 결과 :`  + result.join(', '));
- };
-
- let printStatusAfterCheckKwd = function (searchKeyWord) {
-    if (searchKeyWord === 'all') {
-        printAll();
-    } else {
-        printStatus(searchKeyWord);
-    }
- }
-
- const show = (keyWord, searchKeyWord) => {
-    newTodoList = {'todo' : [], 'doing' : [], 'done' : []};
-    makeNewTodoList();
- 
-    if (keyWord == 'status') {
-        printStatusAfterCheckKwd(searchKeyWord);
-    } else {
-        checkTags(searchKeyWord);
-    }
- }
-
- show("status", "all");
- show("status", "todo");
- show("status", "doing");
- show("status", "done");
- show("tag", "favorite");
- show("tag", "food");
- show("tag", "javascript");
