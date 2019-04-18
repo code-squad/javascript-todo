@@ -96,8 +96,12 @@ module.exports = class TodoList {
       throw Error("show의 인자는 todo, doing, done, all 만 가능합니다!");
     }
   }
-
+  
   addData(name, tags) {
+    if(name === undefined){
+      log("add명령어의 인자가 잘못 되었습니다");
+      return;
+    }
     let id;
     while (true) {
       id = Math.floor(Math.random() * 10000) + 1;
@@ -121,8 +125,12 @@ module.exports = class TodoList {
   }
 
   deleteData(id) {
-    let deletingObj;
     const numId = parseInt(id);
+    if(!Number.isFinite(numId)){
+      log("delete명령어의 인자가 잘못 되었습니다");
+      return;
+    }
+    let deletingObj;
 
     todos.forEach((element, index) => {
       if (element.id === numId) {
@@ -138,8 +146,14 @@ module.exports = class TodoList {
   };
 
   updateData(id, status) {
-    let name;
+    const statusReg = /^todo$|^doing$|^done$/;
+    const matchResult = `${status}`.toString().match(statusReg);
     const numId = parseInt(id);
+    if(!Number.isFinite(numId) || matchResult === null){
+      log("update명령어의 인자가 잘못 되었습니다");
+      return;
+    }
+    let name;
     todos.forEach((element) => {
       if (element.id === numId) {
         element.status = status;
