@@ -1,3 +1,5 @@
+const makeId = require('./makeId');
+
 class Todo {
   constructor(data) {
     this.data = data;
@@ -28,6 +30,7 @@ class Todo {
       result = this.printTags(condition);
     }
     console.log(result);
+    // console.log(makeId());
     inputPrompt.prompt();
   }
 
