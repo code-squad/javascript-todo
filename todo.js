@@ -81,18 +81,18 @@ module.exports = class TodoList {
       .map(element => element.name);
     return namesArr;
   }
-  //arrow function 즐겨사용하면 더 보기 좋음.
   printList(namesArr, status) {
-    let resultStr = `${status} 리스트 : 총 ${namesArr.length}건 : `;
-    namesArr.forEach((element, index) => {
-      resultStr += `'${element}'`;
-      if (index < namesArr.length - 1) {
-        resultStr += `, `;
+    let baseStr = `${status} 리스트 : 총 ${namesArr.length}건 : `;
+    let resultStr = namesArr.reduce((accumulator, currentName) => {
+      if(baseStr === accumulator){
+        return accumulator + currentName;
+      }else{
+        return accumulator +" , "+currentName;
       }
-    });
+    }, baseStr);
     log(resultStr);
   }
-
+  
   showData(status) {
     const statusReg = /^all$|^todo$|^doing$|^done$/;
     const matchResult = `${status}`.match(statusReg);
