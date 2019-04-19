@@ -1,7 +1,8 @@
 class Todo {
-  constructor(data) {
+  constructor(data, inputPrompt) {
     this.data = data;
     this.todoCount = this.setTodoCount(data);
+    this.inputPrompt = inputPrompt;
   }
 
   setTodoCount(data) {
@@ -12,7 +13,7 @@ class Todo {
     }, {});
   }
 
-  add(name, tags = '', inputPrompt) {
+  add(name, tags = '') {
     // string type의 tags를 string type 배열로 만듦
     tags = tags.replace(/[\[\]\"\'\s]/g, '').split(',');
 
@@ -23,10 +24,10 @@ class Todo {
     this.todoCount.todo.push(name);
     console.log(`${name} 1개가 추가되었습니다.(id : ${id})`);
 
-    setTimeout(() => this.show('status', 'all', inputPrompt), 1000);
+    setTimeout(() => this.show('status', 'all', this.inputPrompt), 1000);
   }
 
-  delete(id, inputPrompt) {
+  delete(id) {
     const beforeLen = this.data.length;
     let name;
 
@@ -40,7 +41,7 @@ class Todo {
 
     console.log(returnMessage);
 
-    setTimeout(() => this.show('status', 'all', inputPrompt), 1000);
+    setTimeout(() => this.show('status', 'all', this.inputPrompt), 1000);
   }
 
   // 반환값 [filteredData, deletedName]
@@ -59,7 +60,7 @@ class Todo {
     ];
   }
 
-  update(id, status, inputPrompt) {
+  update(id, status) {
     let name;
     this.data.map(todo => {
       if (todo.id === Number(id)) {
@@ -77,11 +78,11 @@ class Todo {
 
     setTimeout(() => {
       console.log(returnMessage);
-      setTimeout(() => this.show('status', 'all', inputPrompt), 1000);
+      setTimeout(() => this.show('status', 'all', this.inputPrompt), 1000);
     }, 3000);
   }
 
-  show(type, condition, inputPrompt) {
+  show(type, condition) {
     let result;
     if (type === 'status') {
       if (condition === 'all') {
@@ -96,7 +97,7 @@ class Todo {
     }
     console.log(result);
 
-    inputPrompt.prompt();
+    this.inputPrompt.prompt();
   }
 
   printAll() {
