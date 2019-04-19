@@ -1,6 +1,6 @@
 const tools = require('./todoTools'); // 세미콜론이 없으면 뒤에 iife에서 오류나는 언어가 있다?
 
-(async () => {
+const main = async () => {
   let argu = ''
   console.log('안녕!이라고 입력하면 사용법을 알려줍니다.')
   while(1){
@@ -45,4 +45,5 @@ const tools = require('./todoTools'); // 세미콜론이 없으면 뒤에 iife�
   }
   tools.shutdownRl()
   tools.saveFile()
-})()
+}
+main()

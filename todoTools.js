@@ -1,4 +1,5 @@
 const fs = require('fs')
+const util = require('util')
 const readline = require("readline");
 const rl = readline.createInterface({
   input: process.stdin,
@@ -28,9 +29,15 @@ const createId = (name) => {
   return uniqueId
 }
 
-const sleep = (msec) => {
-  new Promise(resolve => setTimeout(resolve, msec))
+const checkId = (index) => {
+  if(index === -1){
+    console.log('잘못된 id값입니다. 다시 확인해주세요')
+    return false
+  }
+  return true
 }
+
+const sleep = msec => new Promise(resolve => setTimeout(resolve, msec))
 
 
 // operations(add, update, delete, show)
@@ -66,6 +73,9 @@ module.exports.add = async (name, tags) => {
 module.exports.update = async (id, status) => {
   id*=1
   index = todos.findIndex(element => element.id === id)
+  if(!checkId(index)){
+    return
+  }
   const {name, tags} = todos[index]
   todos.splice(index, 1, {name: name, id: id, tags: tags, status: status})
 
@@ -80,7 +90,10 @@ module.exports.update = async (id, status) => {
 module.exports.delete = async (id) => {
   id*=1
   index = todos.findIndex(element => element.id === id)
-  console.log(`${todos[index]}가 목록에서 삭제됩니다.`)
+  if(!checkId(index)){
+    return
+  }
+  console.log(`${todos[index].name} ${todos[index].status}가 목록에서 삭제됩니다.`)
   todos.splice(index, 1)
   
   await sleep(1000)
