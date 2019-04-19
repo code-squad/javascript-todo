@@ -127,23 +127,23 @@ const addTodo = (args, todos) => {
     checkOrder("show$status$all", todos);
 }
 
-const updateTodo = (args, todos) => {
+const updateTodo = (updatedSchedule, todos) => {
     // update$id$name$tags$status
     for (todo of todos) {
-        if (todo.id === Number(args[1])) {
-            if (args[2] !== 'nc') {
-                console.log(`${todo.name}가 ${args[2]}로 변경되었습니다.`);
-                todo.name = args[2];
+        if (todo.id === Number(updatedSchedule[1])) {
+            if (updatedSchedule[2] !== 'nc') {
+                console.log(`${todo.name}가 ${updatedSchedule[2]}로 변경되었습니다.`);
+                todo.name = updatedSchedule[2];
             }
 
-            if (args[3] !== 'nc') {
-                console.log(`${todo.tags}가 ${args[3]}로 변경되었습니다.`);
-                todo.tags = args[3];
+            if (updatedSchedule[3] !== 'nc') {
+                console.log(`${todo.tags}가 ${updatedSchedule[3]}로 변경되었습니다.`);
+                todo.tags = updatedSchedule[3];
             }
 
-            if (args[4] !== 'nc') {
-                console.log(`${todo.status}가 ${args[4]}로 변경되었습니다.`);
-                todo.status = args[4];
+            if (updatedSchedule[4] !== 'nc') {
+                console.log(`${todo.status}가 ${updatedSchedule[4]}로 변경되었습니다.`);
+                todo.status = updatedSchedule[4];
             }
         }
     }
