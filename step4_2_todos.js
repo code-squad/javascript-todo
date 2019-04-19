@@ -61,7 +61,7 @@ const show = (keyWord, searchKeyWord, todos) => {
 };
 
 
-const makeUI = () => {
+const makeUniqueId = () => {
     function s4() {
         return ((1 + Math.random()) * 0x10000 | 0).toString(16).substring(1);
     }
@@ -117,7 +117,7 @@ const addTodo = (args, todos) => {
         'name': args[1],
         'tags': args[2].split(","),
         'status': 'todo',
-        'id': makeUI()
+        'id': makeUniqueId()
     };
 
     todos.push(todo);
