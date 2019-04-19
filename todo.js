@@ -1,3 +1,5 @@
+const message = require('./msg');
+
 class Todo {
   constructor(data, inputPrompt) {
     this.data = data;
@@ -13,7 +15,8 @@ class Todo {
     }, {});
   }
 
-  asyncShowAll(time) {
+  logMessage(message, time) {
+    console.log(message);
     setTimeout(() => this.show('status', 'all', this.inputPrompt), time);
   }
 
@@ -26,9 +29,8 @@ class Todo {
 
     this.data.push(addData);
     this.todoCount.todo.push(name);
-    console.log(`${name} 1개가 추가되었습니다.(id : ${id})`);
 
-    this.asyncShowAll(1000);
+    this.logMessage(message.ADD_DATA(name, id), 1000);
   }
 
   delete(id) {
@@ -39,13 +41,9 @@ class Todo {
     this.todoCount = this.setTodoCount(this.data);
 
     const returnMessage =
-      beforeLen === this.data.length
-        ? '입력하신 id가 존재하지 않습니다.'
-        : `${name} todo가 목록에서 삭제되었습니다.`;
+      beforeLen === this.data.length ? message.NOT_EXISTED_ID : message.DELETED_DATA(name);
 
-    console.log(returnMessage);
-
-    this.asyncShowAll(1000);
+    this.logMessage(returnMessage, 1000);
   }
 
   // 반환값 [filteredData, deletedName]
@@ -76,13 +74,10 @@ class Todo {
     this.todoCount = this.setTodoCount(this.data);
 
     const returnMessage =
-      name === undefined
-        ? '입력하신 id가 존재하지 않습니다.'
-        : `${name}가 ${status}로 변경되었습니다.`;
+      name === undefined ? message.NOT_EXISTED_ID : message.UPDATE_DATA(name, status);
 
     setTimeout(() => {
-      console.log(returnMessage);
-      this.asyncShowAll(1000);
+      this.logMessage(returnMessage, 1000);
     }, 3000);
   }
 
@@ -97,7 +92,7 @@ class Todo {
     } else if (type === 'tag') {
       result = this.printTags(condition);
     } else {
-      result = '입력하신 검색 조건이 잘못 되었습니다.';
+      result = message.WRONG_TYPE;
     }
     console.log(result);
 
