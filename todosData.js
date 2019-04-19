@@ -6,6 +6,7 @@ const todos = [
         'id': 43532
     },
     {
+        
         'name': '그림 그리기',
         'tags': ['picture', 'favorite'],
         'status': 'doing',

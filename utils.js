@@ -36,7 +36,7 @@ const isValidTag = function (tag) {
         return true;
     } else {
         console.log('invalid tag');
-        console.log('tag is only English\tex)["<English>"]');
+        console.log('tag is only English with standard form  ex)["<English>"]');
         return false;
     }
 }
