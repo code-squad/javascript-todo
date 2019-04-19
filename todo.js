@@ -20,14 +20,14 @@ const getIndexById = (todos, id) => {
     return index
 }
 
-const getParsedCommand = (command, s) => {
-    command = command.split(s)
+const getParsedCommand = (command, char) => {
+    command = command.split(char)
     return command
 }
 
 const getCountbyStatus = (todos, status) => todos.filter(v => v.status == status).length
 
-const getTodos = (todos) => {
+const getStatus = (todos) => {
     let str = ""
     let counts = {
         "todo": getCountbyStatus(todos,"todo"),
@@ -38,7 +38,7 @@ const getTodos = (todos) => {
     return str
 }
 
-const getTodosByStatus = (todos, status) => {
+const getListByStatus = (todos, status) => {
     let str = ""
     let count = getCountbyStatus(todos, status)
     str += `${status}리스트 : 총 ${count}건 : ` + todos.filter(v => v.status == status).map(v => `'${v.name}, ${v.id}번'`).join(", ")
@@ -68,7 +68,6 @@ class Todos {
                     console.log("\x1b[31m%s\x1b[0m", "올바르지 않은 명령어입나다.\n사용할 수 있는 명령어 : show | add | update | delete")
                 }
             }
-            rl.prompt()
         }).on("close", () => {
             console.log("프로그램을 종료합니다.")
             process.exit()
@@ -79,14 +78,16 @@ class Todos {
 
     show(option) {
         let options = {
-            "all" : getTodos,
-            "todo" : getTodosByStatus,
-            "doing" : getTodosByStatus,
-            "done" : getTodosByStatus,
+            "all" : getStatus,
+            "todo" : getListByStatus,
+            "doing" : getListByStatus,
+            "done" : getListByStatus,
         }
 
         let answer = options[option](this.todos, option)
         console.log(answer)
+        setTimeout(() => {
+            rl.prompt()}, 0)
     }
 
     add(name, tags) {
