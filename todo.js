@@ -44,15 +44,15 @@ const MAX_ID_NUMBER = 10000;
 const getRandomId = maxIdNumber => {
   let id;
   let loopCount = 0;
-    while (true) {
-      
-      id = Math.floor(Math.random() * maxIdNumber) + 1;
-      if(todos.filter(element =>element.id === id).length === 0) break;
-      if(++loopCount > MAX_ID_NUMBER) throw Error("할일 목록이 가득 찼습니다.");
-      
-    }
-    return id;
+  while (true) {
+
+    id = Math.floor(Math.random() * maxIdNumber) + 1;
+    if (todos.filter(element => element.id === id).length === 0) break;
+    if (++loopCount > MAX_ID_NUMBER) throw Error("할일 목록이 가득 찼습니다.");
+
   }
+  return id;
+}
 
 module.exports = class TodoList {
   count() {
@@ -61,7 +61,6 @@ module.exports = class TodoList {
       doing: 0,
       done: 0
     }
-//++ 도 있긴하죠.
     todos.forEach(element => {
       const { status } = element;
       countObj[status] += 1;
@@ -78,14 +77,14 @@ module.exports = class TodoList {
   }
   getNames(status) {
     const namesArr = todos
-      .filter(element =>status === element.status)
+      .filter(element => status === element.status)
       .map(element => element.name);
     return namesArr;
   }
-//arrow function 즐겨사용하면 더 보기 좋음.
+  //arrow function 즐겨사용하면 더 보기 좋음.
   printList(namesArr, status) {
     let resultStr = `${status} 리스트 : 총 ${namesArr.length}건 : `;
-    namesArr.forEach(function (element, index) {
+    namesArr.forEach((element, index) => {
       resultStr += `'${element}'`;
       if (index < namesArr.length - 1) {
         resultStr += `, `;
@@ -97,20 +96,20 @@ module.exports = class TodoList {
   showData(status) {
     const statusReg = /^all$|^todo$|^doing$|^done$/;
     const matchResult = `${status}`.match(statusReg);
-    if(matchResult === null){
+    if (matchResult === null) {
       log('show 명령어 인자가 잘못 되었습니다.');
       return;
     }
 
-    if(matchResult[0] === 'all'){
+    if (matchResult[0] === 'all') {
       const countObj = this.count();
       this.printAll(countObj);
-    }else{
+    } else {
       const namesArr = this.getNames(status);
       this.printList(namesArr, status);
     }
   }
-  
+
   addData(name, tags) {
     const nameReg = /^\s+$/;
     const nameMatchResult = `${name}`.match(nameReg);
@@ -126,7 +125,7 @@ module.exports = class TodoList {
       return;
     }
     const id = getRandomId(MAX_ID_NUMBER);
-    
+
     const todoObj = {
       "name": name,
       "tags": tags,
@@ -143,11 +142,12 @@ module.exports = class TodoList {
   //여기는 filter & reduce 같은 메서드로 수정할까요? (검토해보세요)
   deleteData(id) {
     const numId = parseInt(id);
-    if(!Number.isFinite(numId)){
+    if (!Number.isFinite(numId)) {
       log("delete명령어의 인자가 잘못 되었습니다");
       return;
     }
-    let deletingObj;
+    // const deletingObj = todos.filter(element => element.id === numId);
+
     todos.forEach((element, index) => {
       if (element.id === numId) {
         deletingObj = element;
@@ -160,18 +160,18 @@ module.exports = class TodoList {
       this.showData("all");
     }, 1000);
   };
-//별건 아니지만 자꾸 중복코드로 보입니다. 어떻게 하면 좋을까요?
-//message를 함수안에서 모두 제거하고 밖에 객체매핑으로 만드는 건 어때요?
+  //별건 아니지만 자꾸 중복코드로 보입니다. 어떻게 하면 좋을까요?
+  //message를 함수안에서 모두 제거하고 밖에 객체매핑으로 만드는 건 어때요?
   updateData(id, status) {
     const statusReg = /^todo$|^doing$|^done$/;
     const matchResult = `${status}`.toString().match(statusReg);
     const numId = parseInt(id);
-    if(!Number.isFinite(numId) || matchResult === null){
+    if (!Number.isFinite(numId) || matchResult === null) {
       log("update명령어의 인자가 잘못 되었습니다");
       return;
     }
     let name;
-    todos.forEach((element) => {
+    todos.forEach(element => {
       if (element.id === numId) {
         element.status = status;
         name = element.name;
