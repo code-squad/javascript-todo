@@ -51,7 +51,7 @@ function application(line) {
 
     const addData = function (order) {
         const name = order.match(/(?<=add\$)\D*(?=\$)/);
-        const tag = order.match(/(?<=[a-z]\[\")[a-z]*(?=\"\])/i);
+        const tag = order.match(/(?<=\[\")[a-z]*(?=\"\])/i);
         if (!utils.isValidName(name)) return r.prompt();
         if (!utils.isValidTag(tag)) return r.prompt();
 
@@ -59,7 +59,7 @@ function application(line) {
         objToAdd['name'] = name[0];
         objToAdd['tag'] = tag[0];
         objToAdd['status'] = 'todo';
-        objToAdd['id'] = Math.floor(Math.random() * (100000 - 10000 + 1) + 10000);
+        objToAdd['id'] = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000);
         todos.push(objToAdd);
         console.log(`${objToAdd['name']} 1개가 추가됐습니다.(id : ${objToAdd['id']})`);
         setTimeout(() => showAll(), 1000);
