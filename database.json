@@ -1,6 +1,6 @@
 [
   {
-    "name": "지구정복하기",
+    "name": "지구정복",
     "category": "mad science",
     "status": "don't do",
     "id": 1,
@@ -47,5 +47,12 @@
     "status": "smoking",
     "id": 8,
     "deadline": "2019-04-15"
+  },
+  {
+    "name": "test",
+    "category": "what",
+    "status": "todo",
+    "id": 475048043,
+    "deadline": ""
   }
 ]

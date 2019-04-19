@@ -40,16 +40,14 @@ const addTodo = function (...arg) {
 }
 
 const updateTodo = function (objId, objPorp, objValue) {
-    todo.database.forEach((v, i) => {
-        if (v.id == objId) {
-            v[objPorp] = objValue;
-            console.log(`${v.id}의 ${objPorp}가 ${objValue}로 변경되었습니다.`);
-        }
-    });
+    const targetObj = todo.database.filter(v=>v.id == objId)[0];
+    targetObj[objPorp] = objValue;
     syncronizecDatabase();
 }
 
 const deleteTodo = function (objId) {
+    // database에서 삭제해야 하는데, filter를 쓰면 새로운 array를 반환한다...
+    // foreach로 순회하며 맞는 id가 있으면 스플라이스하는걸로...ㅠㅠ
     todo.database.forEach((v, i) => {
         if (v.id == objId) {
             console.log(`id: ${v.id}, name: ${v.name}이 삭제되었습니다.`);
@@ -70,7 +68,9 @@ const showTodo = function (...arg) {
 const parseCommand = function (inputArg) {
     [commandArg, ...deliveryArg] = inputArg.split("$");
     COMM_DICT[commandArg](...deliveryArg);
-    todo.show('all');
+    setTimeout(()=>{
+        todo.show('all');
+    },1000);
 };
 
 const COMM_DICT = {
@@ -79,6 +79,7 @@ const COMM_DICT = {
     update: updateTodo,
     delete: deleteTodo
 };
+
 rl.on('line', (input) => {
     if (input === "exit") {
         rl.close();
