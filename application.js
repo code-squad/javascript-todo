@@ -52,14 +52,13 @@ function application(line) {
     const addData = function (order) {
         const name = order.match(/(?<=add\$)\D*(?=\$)/);
         const tag = order.match(/(?<=\[\")[a-z]*(?=\"\])/i);
-        if (!utils.isValidName(name)) return r.prompt();
-        if (!utils.isValidTag(tag)) return r.prompt();
+        if (!utils.isValidName(name) || !utils.isValidTag(tag)) return r.prompt();
 
         const objToAdd = {};
         objToAdd['name'] = name[0];
         objToAdd['tag'] = tag[0];
         objToAdd['status'] = 'todo';
-        objToAdd['id'] = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000);
+        objToAdd['id'] = utils.makeRanNum(5,todos);
         todos.push(objToAdd);
         console.log(`${objToAdd['name']} 1개가 추가됐습니다.(id : ${objToAdd['id']})`);
         setTimeout(() => showAll(), 1000);
@@ -95,8 +94,7 @@ function application(line) {
     const updateData = function (order) {
         const id = order.match(/(?<=update\$)\d{5}(?=\$)/);
         const status = order.match(/(?<=\d{5}\$)(todo|doing|done)$/g);
-        if (!utils.isValidId(id)) return r.prompt();
-        if (!utils.isValidStatus(status)) return r.prompt();
+        if (!utils.isValidId(id) || !utils.isValidStatus(status)) return r.prompt();
 
         todos.some((el, i) => {
             if (el['id'] === Number(id[0])) {
