@@ -4,6 +4,14 @@ const todo_shell = {
     
     todoData : data,
 
+    todoObjectTemplate : {
+        name: "",
+        category: "",
+        status : "",
+        id : "",
+        deadline: "",
+    },
+
     run: function(){
 
     },
@@ -15,15 +23,28 @@ const todo_shell = {
     },
 
     addTodo : function(...arg){
-        
+        if (arg[0].length !== arg[1].length) throw new Error("키와 값의 갯수가 맍지 않습니다.");
+        const addToObj = this.todoObjectTemplate;
+        for (let i = 0; i < arg[0].length; i++){
+            addToObj[arg[0][i]]  = arg[1][i];
+        }
+        return addToObj;
     },
 
-    updateTodo: function(){
-
+    updateTodo: function(objId,objPorp,objValue){
+        this.todoData.forEach((v,i) =>{
+            if (v.id == objId){
+                v[objPorp] = objValue;
+            }
+        });
     },
 
-    deleteTodo: function(){
-
+    deleteTodo: function(objId, ...arg){
+        this.todoData.forEach((v,i) =>{
+            if (v.id == objId){
+                this.todoData.splice(i,1);
+            }
+        });
     },
 
     showTodo: function(...arg){
@@ -42,3 +63,7 @@ const todo_shell = {
     },
 
 }
+
+
+todo_shell.deleteTodo("2");
+console.log(todo_shell.todoData);
