@@ -1,79 +1,88 @@
+const readline = require('readline');
+const todo = require('./todo.js');
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+})
 
+const todoObjectTemplate = {
+    name: "",
+    category: "",
+    status: "",
+    id: "",
+    deadline: "",
+};
 
-const todo_shell = {
-    todoData : require('./database.json'),
-    
-    todoObjectTemplate: {
-        name: "",
-        category: "",
-        status: "",
-        id: "",
-        deadline: "",
-    },
-    run: function (args) {
-        this.parseCommand(args);
-    },
+const getHashCode = function (inputArg) {
+    return Math.abs((inputArg + Date.now()).split("").reduce(function (a, b) { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0));
+};
 
-    addTodo: function (...arg) {
-        if (arg[0].length !== arg[1].length) throw new Error("키와 값의 갯수가 맍지 않습니다.");
-        const addToObj = this.todoObjectTemplate;
-        for (let i = 0; i < arg[0].length; i++) {
-            addToObj[arg[0][i]] = arg[1][i];
-        }
+const syncronizecDatabase = function () {
+    const fs = require('fs');
+    let syncData = JSON.stringify(todo.database, null, 2);
+    fs.writeFile('./database.json', syncData, (err) => {
+        if (err) throw err;
+    });
+};
 
-        addToObj.id = this.getHashCode(arg[1][0]);
-        this.todoData.push(addToObj);
-    },
-
-    updateTodo: function (objId, objPorp, objValue) {
-        this.todoData.forEach((v, i) => {
-            if (v.id == objId) {
-                v[objPorp] = objValue;
-            }
-        });
-    },
-
-    deleteTodo: function (objId, ...arg) {
-        this.todoData.forEach((v, i) => {
-            if (v.id == objId) {
-                todoData.splice(i, 1);
-            }
-        });
-    },
-
-    showTodo: function (...arg) {
-        if (arg[0] === "all") {
-        var a = this.todoData;
-        console.log(a);
-        }
-        // return this.todoData.filter(todo =>
-        //     todo[arg[0]] === arg[1]
-        // )
-    },
-
-    syncronizecDatabase: function () {
-        let syncData = JSON.stringify(this.todoData, null, 2);
-        fs.writeFile('./database.json', syncData, (err) => {
-            if (err) throw err;
-        });
-    },
-
-    getHashCode: function (inputString) {
-        return Math.abs((inputString + Date.now()).split("").reduce(function (a, b) { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0));
-    },
-
-    parseCommand: function (inputArg) {
-        [commandArg, ...deliveryArg] = inputArg.split("$");
-        COMMAND_DICT[commandArg](...deliveryArg);
+const addTodo = function (...arg) {
+    argKey = arg[0].split(",");
+    argValue = arg[1].split(",");
+    if (argKey.length !== argValue.length) throw new Error("키와 값의 갯수가 맍지 않습니다.");
+    const addToObj = todoObjectTemplate;
+    for (let i = 0; i < argKey.length; i++) {
+        addToObj[argKey[i]] = argValue[i];
     }
-
+    addToObj.id = getHashCode(arg[1][0]);
+    todo.database.push(addToObj);
+    syncronizecDatabase();
+    console.log(`${addToObj.id}가 추가되었습니다.`);
 }
 
-const COMMAND_DICT = {
-    show: todo_shell.showTodo,
-    add: todo_shell.addTodo,
-    update: todo_shell.updateTodo,
-    delete: todo_shell.deleteTodo,
+const updateTodo = function (objId, objPorp, objValue) {
+    todo.database.forEach((v, i) => {
+        if (v.id == objId) {
+            v[objPorp] = objValue;
+            console.log(`${v.id}의 ${objPorp}가 ${objValue}로 변경되었습니다.`);
+        }
+    });
+    syncronizecDatabase();
 }
 
-todo_shell.run("show$all");
+const deleteTodo = function (objId) {
+    todo.database.forEach((v, i) => {
+        if (v.id == objId) {
+            console.log(`id: ${v.id}, name: ${v.name}이 삭제되었습니다.`);
+            todo.database.splice(i, 1);
+        }
+    });
+    syncronizecDatabase();
+};
+
+const showTodo = function (...arg) {
+    if (arg[0] === "all") {
+        todo.show('all');
+    } else {
+        todo.show(arg[0], arg[1]);
+    }
+};
+
+const parseCommand = function (inputArg) {
+    [commandArg, ...deliveryArg] = inputArg.split("$");
+    COMM_DICT[commandArg](...deliveryArg);
+    todo.show('all');
+};
+
+const COMM_DICT = {
+    show: showTodo,
+    add: addTodo,
+    update: updateTodo,
+    delete: deleteTodo
+};
+rl.on('line', (input) => {
+    if (input === "exit") {
+        rl.close();
+    } else {
+        parseCommand(input);
+    }
+});

@@ -7,16 +7,9 @@
     "deadline": "2025-01-01"
   },
   {
-    "name": "구글 입사",
-    "category": "mission impossible",
-    "status": "doing",
-    "id": 2,
-    "deadline": "2080-12-31"
-  },
-  {
-    "name": "크롱과 뽀로로보기",
+    "name": "edited",
     "category": "chakanil",
-    "status": "todo",
+    "status": "kill",
     "id": 3,
     "deadline": "2019-04-17"
   },
