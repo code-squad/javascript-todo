@@ -53,7 +53,7 @@ const printStatusAfterCheckKwd = function (searchKeyWord, newTodoObject, todos) 
 const show = (keyWord, searchKeyWord, todos) => {
     const newTodoObject = makenewTodoObject(todos);
  
-    if (keyWord == 'status') {
+    if (keyWord === 'status') {
         printStatusAfterCheckKwd(searchKeyWord, newTodoObject, todos);
     } else {
         checkTags(searchKeyWord, todos);
