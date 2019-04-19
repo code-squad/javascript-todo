@@ -8,6 +8,8 @@ const inputPrompt = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
+
+console.log('0을 입력하면 프로그램이 종료됩니다.');
 inputPrompt.setPrompt('명령하세요 : ');
 inputPrompt.prompt();
 
@@ -24,11 +26,3 @@ inputPrompt.on('line', message => {
 inputPrompt.on('close', () => {
   process.exit();
 });
-
-// todo.show('status', 'all');
-// todo.show('status', 'todo');
-// todo.show('status', 'doing');
-// todo.show('status', 'done');
-// todo.show('tag', 'favorite');
-// todo.show('tag', 'food');
-// todo.show('tag', 'javascript');
