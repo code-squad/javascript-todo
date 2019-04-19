@@ -91,8 +91,10 @@ class Todo {
       } else {
         result = this.printStatus(condition);
       }
-    } else {
+    } else if (type === 'tag') {
       result = this.printTags(condition);
+    } else {
+      result = '입력하신 검색 조건이 잘못 되었습니다.';
     }
     console.log(result);
 
