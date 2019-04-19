@@ -9,10 +9,10 @@ const getCommand = () => {
         output: process.stdout
     });
 
-    rl.on("line", function (line) {
+    rl.on("line", line => {
         const commandArray = line.split("$");
         executeCommand(commandArray);
-    }).on("close", function () {
+    }).on("close", () => {
         process.exit();
     });
 }
