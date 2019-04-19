@@ -41,8 +41,9 @@ const getIdListByTodoList = () => {
 
 // 1 ~ 9999 까지
 const getRandomID = () => { 
+    const limitLength = 10000;
     const IdList = getIdListByTodoList();
-    while (true) {
+    while (IdList.length < limitLength) {
         const randomID = Math.floor(Math.random() * 10000) + 1;
         let isExistsRandomID = false;
         for (const value of IdList) {
