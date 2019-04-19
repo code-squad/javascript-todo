@@ -39,7 +39,8 @@ const todos = [
 ];
 
 const ids = [423, 1535, 9999, 512, 2, 77];
-
+//todo 데이터를 탐색해서 id 중복을 체크하도록 해보세요.
+//10000 이런 값은 변경가능한 내용임으로, 파라미터로 받는 게 어때요?
 const getRandomId = () => {
   let id;
     while (true) {
@@ -58,7 +59,7 @@ module.exports = class TodoList {
       doing: 0,
       done: 0
     }
-
+//++ 도 있긴하죠.
     todos.forEach(element => {
       const { status } = element;
       countObj[status] += 1;
@@ -73,18 +74,13 @@ module.exports = class TodoList {
       }개, done : ${countObj.done}개`;
     log(resultStr);
   }
-
   getNames(status) {
     const namesArr = todos
-      .filter(function (element) {
-        return status === element.status
-      })
-      .map(function (element) {
-        return element.name;
-      })
+      .filter(element =>status === element.status)
+      .map(element => element.name);
     return namesArr;
   }
-
+//arrow function 즐겨사용하면 더 보기 좋음.
   printList(namesArr, status) {
     let resultStr = `${status} 리스트 : 총 ${namesArr.length}건 : `;
     namesArr.forEach(function (element, index) {
@@ -145,13 +141,13 @@ module.exports = class TodoList {
   }
 
   deleteData(id) {
+    //여기는 filter & reduce 같은 메서드로 수정할까요? (검토해보세요)
     const numId = parseInt(id);
     if(!Number.isFinite(numId)){
       log("delete명령어의 인자가 잘못 되었습니다");
       return;
     }
     let deletingObj;
-
     todos.forEach((element, index) => {
       if (element.id === numId) {
         deletingObj = element;
@@ -164,7 +160,8 @@ module.exports = class TodoList {
       this.showData("all");
     }, 1000);
   };
-
+//별건 아니지만 자꾸 중복코드로 보입니다. 어떻게 하면 좋을까요?
+//message를 함수안에서 모두 제거하고 밖에 객체매핑으로 만드는 건 어때요?
   updateData(id, status) {
     const statusReg = /^todo$|^doing$|^done$/;
     const matchResult = `${status}`.toString().match(statusReg);
