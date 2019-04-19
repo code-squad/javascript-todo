@@ -38,13 +38,14 @@ const todos = [
   }
 ];
 
+const MAX_ID_NUMBER = 10000;
+
 const ids = [423, 1535, 9999, 512, 2, 77];
 //todo 데이터를 탐색해서 id 중복을 체크하도록 해보세요.
-//10000 이런 값은 변경가능한 내용임으로, 파라미터로 받는 게 어때요?
-const getRandomId = () => {
+const getRandomId = maxIdNumber => {
   let id;
     while (true) {
-      id = Math.floor(Math.random() * 10000) + 1;
+      id = Math.floor(Math.random() * maxIdNumber) + 1;
       if (ids.indexOf(id) === -1) {
         break;
       }
@@ -123,7 +124,7 @@ module.exports = class TodoList {
       log(`add 명령어의 인자 tag형태가 잘못 되었습니다. example: ["tagname"]`);
       return;
     }
-    const id = getRandomId();
+    const id = getRandomId(MAX_ID_NUMBER);
     ids.push(id);
 
     
@@ -140,8 +141,8 @@ module.exports = class TodoList {
     }, 1000);
   }
 
+  //여기는 filter & reduce 같은 메서드로 수정할까요? (검토해보세요)
   deleteData(id) {
-    //여기는 filter & reduce 같은 메서드로 수정할까요? (검토해보세요)
     const numId = parseInt(id);
     if(!Number.isFinite(numId)){
       log("delete명령어의 인자가 잘못 되었습니다");
