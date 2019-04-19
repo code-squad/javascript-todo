@@ -1,5 +1,3 @@
-const todos = require("./todos");
-
 const makeNewTodoList = function (todos) {
     const newTodoList = { 'todo': [], 'doing': [], 'done': [] };
 
@@ -12,7 +10,7 @@ const makeNewTodoList = function (todos) {
     return newTodoList;
 };
 
-const printAll = function (newTodoList) {
+const printAll = function (newTodoList, todos) {
     const currentAllStatus = [];
     for (key in newTodoList) {
         currentAllStatus.push(key + ": " + newTodoList[key].length + "개");
@@ -20,11 +18,11 @@ const printAll = function (newTodoList) {
 
     setTimeout(() => {
         console.log("현재상태 : ", currentAllStatus.join(', '));
-        inputOrder(todos);
+        runTodoProgram(todos);
     }, 1000);
 }
 
-const printStatus = function (args, newTodoList) {
+const printStatus = function (args, newTodoList, todos) {
     const currentEachStatus = [];
 
     for (key in newTodoList[args]) {
@@ -44,19 +42,19 @@ const checkTags = (tag, todos) => {
     checkOrder("show$status$all", todos);
 };
 
-const printStatusAfterCheckKwd = function (searchKeyWord, newTodoList) {
+const printStatusAfterCheckKwd = function (searchKeyWord, newTodoList, todos) {
     if (searchKeyWord === 'all') {
-        printAll(newTodoList);
+        printAll(newTodoList, todos);
     } else {
-        printStatus(searchKeyWord, newTodoList);
+        printStatus(searchKeyWord, newTodoList, todos);
     }
 };
 
 const show = (keyWord, searchKeyWord, todos) => {
     const newTodoList = makeNewTodoList(todos);
-
+ 
     if (keyWord == 'status') {
-        printStatusAfterCheckKwd(searchKeyWord, newTodoList);
+        printStatusAfterCheckKwd(searchKeyWord, newTodoList, todos);
     } else {
         checkTags(searchKeyWord, todos);
     }
@@ -152,7 +150,7 @@ const updateTodo = (args, todos) => {
 
     setTimeout(() => {
         console.log(todos);
-    }, 20000);
+    }, 3000);
 
     checkOrder("show$status$all", todos);
 }
@@ -172,4 +170,4 @@ const runTodoProgram = (todos) => {
     inputOrder(todos);
 }
 
-runTodoProgram(todos.todos);
+runTodoProgram(require("./todos").todos);
