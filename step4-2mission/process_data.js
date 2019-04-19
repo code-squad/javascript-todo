@@ -43,7 +43,11 @@ const getIdListByTodoList = () => {
 const getRandomID = () => { 
     const limitLength = 10000;
     const IdList = getIdListByTodoList();
-    while (IdList.length < limitLength) {
+    if (IdList.length >= limitLength) {
+        console.log('꽉 차있습니다. 비워주세요');
+        return;
+    }
+    while (true) {
         const randomID = Math.floor(Math.random() * 10000) + 1;
         let isExistsRandomID = false;
         for (const value of IdList) {
