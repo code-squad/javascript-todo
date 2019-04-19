@@ -1,5 +1,3 @@
-const makeId = require('./makeId');
-
 class Todo {
   constructor(data) {
     this.data = data;
@@ -18,7 +16,7 @@ class Todo {
     // string type의 tags를 string type 배열로 만듦
     tags = tags.replace(/[\[\]\"\'\s]/g, '').split(',');
 
-    const id = makeId();
+    const id = Date.now();
     const addData = { name, tags, status: 'todo', id };
 
     this.data.push(addData);
