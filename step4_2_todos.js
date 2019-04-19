@@ -1,19 +1,19 @@
-const makeNewTodoList = function (todos) {
-    const newTodoList = { 'todo': [], 'doing': [], 'done': [] };
+const makenewTodoObject = function (todos) {
+    const newTodoObject = { 'todo': [], 'doing': [], 'done': [] };
 
     todos.forEach(function (todo) {
         const key = todo.status;
         const value = todo.name;
-        newTodoList[key].push(value);
+        newTodoObject[key].push(value);
     })
 
-    return newTodoList;
+    return newTodoObject;
 };
 
-const printAll = function (newTodoList, todos) {
+const printAll = function (newTodoObject, todos) {
     const currentAllStatus = [];
-    for (key in newTodoList) {
-        currentAllStatus.push(key + ": " + newTodoList[key].length + "개");
+    for (key in newTodoObject) {
+        currentAllStatus.push(key + ": " + newTodoObject[key].length + "개");
     }
 
     setTimeout(() => {
@@ -22,14 +22,14 @@ const printAll = function (newTodoList, todos) {
     }, 1000);
 }
 
-const printStatus = function (args, newTodoList, todos) {
+const printStatus = function (args, newTodoObject, todos) {
     const currentEachStatus = [];
 
-    for (key in newTodoList[args]) {
-        currentEachStatus.push(newTodoList[args][key]);
+    for (key in newTodoObject[args]) {
+        currentEachStatus.push(newTodoObject[args][key]);
     }
 
-    console.log(`${args}리스트 : 총 : ` + newTodoList[args].length + "건 : " + currentEachStatus.join(', '));
+    console.log(`${args}리스트 : 총 : ` + newTodoObject[args].length + "건 : " + currentEachStatus.join(', '));
     checkOrder("show$status$all", todos);
 }
 
@@ -42,19 +42,19 @@ const checkTags = (tag, todos) => {
     checkOrder("show$status$all", todos);
 };
 
-const printStatusAfterCheckKwd = function (searchKeyWord, newTodoList, todos) {
+const printStatusAfterCheckKwd = function (searchKeyWord, newTodoObject, todos) {
     if (searchKeyWord === 'all') {
-        printAll(newTodoList, todos);
+        printAll(newTodoObject, todos);
     } else {
-        printStatus(searchKeyWord, newTodoList, todos);
+        printStatus(searchKeyWord, newTodoObject, todos);
     }
 };
 
 const show = (keyWord, searchKeyWord, todos) => {
-    const newTodoList = makeNewTodoList(todos);
+    const newTodoObject = makenewTodoObject(todos);
  
     if (keyWord == 'status') {
-        printStatusAfterCheckKwd(searchKeyWord, newTodoList, todos);
+        printStatusAfterCheckKwd(searchKeyWord, newTodoObject, todos);
     } else {
         checkTags(searchKeyWord, todos);
     }
