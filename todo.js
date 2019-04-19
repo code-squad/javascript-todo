@@ -61,6 +61,28 @@ class Todo {
     ];
   }
 
+  update(id, status, inputPrompt) {
+    let name;
+    this.data.map(todo => {
+      if (todo.id === Number(id)) {
+        name = todo.name;
+        todo.status = status;
+      }
+    });
+
+    this.todoCount = this.setTodoCount(this.data);
+
+    const returnMessage =
+      name === undefined
+        ? '입력하신 id가 존재하지 않습니다.'
+        : `${name}가 ${status}로 변경되었습니다.`;
+
+    setTimeout(() => {
+      console.log(returnMessage);
+      setTimeout(() => this.show('status', 'all', inputPrompt), 1000);
+    }, 3000);
+  }
+
   show(type, condition, inputPrompt) {
     let result;
     if (type === 'status') {
