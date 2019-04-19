@@ -40,15 +40,16 @@ const todos = [
 
 const MAX_ID_NUMBER = 10000;
 
-const ids = [423, 1535, 9999, 512, 2, 77];
-//todo 데이터를 탐색해서 id 중복을 체크하도록 해보세요.
+
 const getRandomId = maxIdNumber => {
   let id;
+  let loopCount = 0;
     while (true) {
+      
       id = Math.floor(Math.random() * maxIdNumber) + 1;
-      if (ids.indexOf(id) === -1) {
-        break;
-      }
+      if(todos.filter(element =>element.id === id).length === 0) break;
+      if(++loopCount > MAX_ID_NUMBER) throw Error("할일 목록이 가득 찼습니다.");
+      
     }
     return id;
   }
@@ -125,8 +126,6 @@ module.exports = class TodoList {
       return;
     }
     const id = getRandomId(MAX_ID_NUMBER);
-    ids.push(id);
-
     
     const todoObj = {
       "name": name,
