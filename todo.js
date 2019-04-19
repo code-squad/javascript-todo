@@ -56,6 +56,14 @@ const getRandomId = maxIdNumber => {
 
 const getMatchResult = (string ,regExp) => string.match(regExp);
 
+const MSG = {
+  SHOW_PARAM_ERR : `show 명령어 인자가 잘못 되었습니다.`,
+  ADD_PARAM_NAME_ERR : `add 명령어의 인자 name이 잘못 되었습니다.`,
+  ADD_PARAM_TAG_ERR : `add 명령어의 인자 tag형태가 잘못 되었습니다. example: ["tagname"]`,
+  DELETE_PARAM_ERR : `delete명령어의 인자가 잘못 되었습니다.`,
+  UPDATE_PARAM_ERR : `update명령어의 인자가 잘못 되었습니다.`
+}
+
 module.exports = class TodoList {
   count() {
     const countObj = {
@@ -99,7 +107,7 @@ module.exports = class TodoList {
     const statusReg = /^all$|^todo$|^doing$|^done$/;
     const matchResult = getMatchResult(`${status}`,statusReg);
     if (matchResult === null) {
-      log('show 명령어 인자가 잘못 되었습니다.');
+      log(MSG.SHOW_PARAM_ERR);
       return;
     }
 
@@ -119,11 +127,11 @@ module.exports = class TodoList {
     const tagsMatchResult = getMatchResult(`${tags}`,tagsReg);
 
     if (nameMatchResult !== null || name === "") {
-      log(`add 명령어의 인자 name이 잘못 되었습니다.`);
+      log(MSG.ADD_PARAM_NAME_ERR);
       return;
     }
     if (tagsMatchResult === null) {
-      log(`add 명령어의 인자 tag형태가 잘못 되었습니다. example: ["tagname"]`);
+      log(MSG.ADD_PARAM_TAG_ERR);
       return;
     }
     const id = getRandomId(MAX_ID_NUMBER);
@@ -145,10 +153,11 @@ module.exports = class TodoList {
   deleteData(id) {
     const numId = parseInt(id);
     if (!Number.isFinite(numId)) {
-      log("delete명령어의 인자가 잘못 되었습니다");
+      log(MSG.DELETE_PARAM_ERR);
       return;
     }
-    // const deletingObj = todos.filter(element => element.id === numId);
+    let deletingObj;
+    // todos.filter(element => element.id === numId);
 
     todos.forEach((element, index) => {
       if (element.id === numId) {
@@ -162,14 +171,13 @@ module.exports = class TodoList {
       this.showData("all");
     }, 1000);
   };
-  //별건 아니지만 자꾸 중복코드로 보입니다. 어떻게 하면 좋을까요?
-  //message를 함수안에서 모두 제거하고 밖에 객체매핑으로 만드는 건 어때요?
+
   updateData(id, status) {
     const statusReg = /^todo$|^doing$|^done$/;
     const matchResult = getMatchResult(`${status}`,statusReg);
     const numId = parseInt(id);
     if (!Number.isFinite(numId) || matchResult === null) {
-      log("update명령어의 인자가 잘못 되었습니다");
+      log(MSG.UPDATE_PARAM_ERR);
       return;
     }
     let name;
