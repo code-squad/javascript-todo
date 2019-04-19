@@ -113,7 +113,7 @@ const showList = (todos) => {
 
 const addTodo = (args, todos) => {
     // add$CS 공부하기$코드스쿼드,CS
-    todo = {
+    const todo = {
         'name': args[1],
         'tags': args[2].split(","),
         'status': 'todo',
