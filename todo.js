@@ -149,23 +149,25 @@ module.exports = class TodoList {
     }, 1000);
   }
 
-  //여기는 filter & reduce 같은 메서드로 수정할까요? (검토해보세요)
-  deleteData(id) {
+  deleteData(id) {j
     const numId = parseInt(id);
     if (!Number.isFinite(numId)) {
       log(MSG.DELETE_PARAM_ERR);
       return;
     }
-    let deletingObj;
-    // todos.filter(element => element.id === numId);
+    let indexOfDeletingObj;
 
-    todos.forEach((element, index) => {
-      if (element.id === numId) {
-        deletingObj = element;
-        todos.splice(index, 1);
-      }
-    });
+    const deletingObj = todos.filter((element,index) => {
+      indexOfDeletingObj = index;
+      return element.id === numId
+    })[0];
 
+    if(deletingObj === undefined){
+      log(MSG.DELETE_PARAM_ERR);
+      return;
+    }
+    todos.splice(indexOfDeletingObj, 1);
+    
     log(`${deletingObj.name}이(가) ${deletingObj.status} 목록에서 삭제됐습니다.`);
     setTimeout(() => {
       this.showData("all");
