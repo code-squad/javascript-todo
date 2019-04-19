@@ -30,18 +30,35 @@ class Todo {
 
   delete(id, inputPrompt) {
     const beforeLen = this.data.length;
-    this.data = this.data.filter(todo => (todo.id === Number(id) ? false : true));
+    let name;
+
+    [this.data, name] = this.filterById(id);
     this.todoCount = this.setTodoCount(this.data);
 
     const returnMessage =
       beforeLen === this.data.length
         ? '입력하신 id가 존재하지 않습니다.'
-        : '목록에서 삭제되었습니다.';
+        : `${name} todo가 목록에서 삭제되었습니다.`;
 
     console.log(returnMessage);
 
-    // console.log('입력하신 id가 존재하지 않습니다.')
     setTimeout(() => this.show('status', 'all', inputPrompt), 1000);
+  }
+
+  // 반환값 [filteredData, deletedName]
+  filterById(id) {
+    let deletedName;
+    return [
+      this.data.filter(todo => {
+        if (todo.id === Number(id)) {
+          deletedName = todo.name;
+          return false;
+        } else {
+          return true;
+        }
+      }),
+      deletedName
+    ];
   }
 
   show(type, condition, inputPrompt) {
