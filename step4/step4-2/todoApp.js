@@ -12,15 +12,15 @@ const checkCommands = (input, inputReadline) => {
 
     if (command === 'add') {
         const newTodo = addList(secondElment, thirdElement);
-        if (newTodo !== undefined) printCommandResult(command, newTodo, inputReadline);
+        if (newTodo !== undefined) printCommandResult(command, newTodo, inputReadline, 1000);
     }
     if (command === 'delete') {
         const matchedList = deleteList(secondElment, inputReadline);
-        if (matchedList !== undefined) printCommandResult(command, matchedList, inputReadline);
+        if (matchedList !== undefined) printCommandResult(command, matchedList, inputReadline, 1000);
     }
     if (command === 'update') {
         const matchedList = updateList(secondElment, thirdElement, inputReadline);
-        if (matchedList !== undefined) printCommandResult(command, matchedList, inputReadline);
+        if (matchedList !== undefined) printCommandResult(command, matchedList, inputReadline, 1000, 3000);
     }
     if (command === 'show') {
         show(todos, secondElment, inputReadline)
@@ -147,14 +147,14 @@ const printSpecificStatusList = (status, Count, list) => {
     console.log(result);
 }
 
-const printCommandResult = (command, updatedList, inputReadline) => {
+const printCommandResult = (command, updatedList, inputReadline, showAllMsgTimeout, updateMsgTimeout) => {
     if (command === "update") {
         setTimeout(() => {
             console.log(`${updatedList.name} ${updatedList.status}으로 상태가 변경되었습니다.`)
             setTimeout(() => {
                 show(todos, "all", inputReadline);
-            }, 1000);
-        }, 3000);
+            }, showAllMsgTimeout);
+        }, updateMsgTimeout);
         return
     }
 
@@ -168,7 +168,7 @@ const printCommandResult = (command, updatedList, inputReadline) => {
 
     setTimeout(() => {
         show(todos, "all", inputReadline);
-    }, 1000);
+    }, showAllMsgTimeout);
 }
 
 
