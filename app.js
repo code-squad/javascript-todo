@@ -1,89 +1,165 @@
+const data = require('./database.json');
+const fs = require('fs');
 const readline = require('readline');
-const todo = require('./todo.js');
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
-})
+  });
 
-const todoObjectTemplate = {
-    name: "",
-    category: "",
-    status: "",
-    id: "",
-    deadline: "",
-};
+const todo_shell = {
 
-const getHashCode = function (inputArg) {
-    return Math.abs((inputArg + Date.now()).split("").reduce(function (a, b) { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0));
-};
+    todoObjectTemplate: {
+        name: "",
+        category: "",
+        status: "",
+        id: "",
+        deadline: "",
+    },
 
-const syncronizecDatabase = function () {
-    const fs = require('fs');
-    let syncData = JSON.stringify(todo.database, null, 2);
-    fs.writeFile('./database.json', syncData, (err) => {
-        if (err) throw err;
-    });
-};
 
-const addTodo = function (...arg) {
-    argKey = arg[0].split(",");
-    argValue = arg[1].split(",");
-    if (argKey.length !== argValue.length) throw new Error("키와 값의 갯수가 맍지 않습니다.");
-    const addToObj = todoObjectTemplate;
-    for (let i = 0; i < argKey.length; i++) {
-        addToObj[argKey[i]] = argValue[i];
-    }
-    addToObj.id = getHashCode(arg[1][0]);
-    todo.database.push(addToObj);
-    syncronizecDatabase();
-    console.log(`${addToObj.id}가 추가되었습니다.`);
-}
+    showCurrentStatus: function(){
+        const resultObj = data.map(el=>el.status)
+        .reduce((accum,curr)=>{
+            accum[curr] = ++accum[curr] || 1;
+            return accum;
+        },{});
+        
+        const result = Object.keys(resultObj).reduce((accum,curr)=>{
+            accum.push(`${curr}은 ${resultObj[curr]}임`);
+            return accum;
+        },[]).join(",")
 
-const updateTodo = function (objId, objPorp, objValue) {
-    const targetObj = todo.database.filter(v=>v.id == objId)[0];
-    targetObj[objPorp] = objValue;
-    syncronizecDatabase();
-}
+        console.log(result);
+    },
 
-const deleteTodo = function (objId) {
-    // database에서 삭제해야 하는데, filter를 쓰면 새로운 array를 반환한다...
-    // foreach로 순회하며 맞는 id가 있으면 스플라이스하는걸로...ㅠㅠ
-    todo.database.forEach((v, i) => {
-        if (v.id == objId) {
-            console.log(`id: ${v.id}, name: ${v.name}이 삭제되었습니다.`);
-            todo.database.splice(i, 1);
+    showFilteredTodo : function(_filteredData){
+        const totalCount = _filteredData.length;
+        const resultTodoList = _filteredData.reduce((accum,curr)=>{
+            accum.push(`${curr.name}`)
+            return accum
+        },[]).join(", ");
+        console.log(`todo리스트 총${totalCount}건 : ${resultTodoList}`)
+    },
+
+    filterArg: function(...arg){
+        if (arg[0] === "all") { return data }
+        return data.filter(todo =>
+            todo[arg[0]] === arg[1]
+        )
+    },
+
+    showTodo: function (...arg) {
+        const filteredData = todo_shell.filterArg(...arg)
+        
+        if(filteredData === data){todo_shell.showCurrentStatus()}
+        else {
+            todo_shell.showFilteredTodo(filteredData);
         }
-    });
-    syncronizecDatabase();
-};
 
-const showTodo = function (...arg) {
-    if (arg[0] === "all") {
-        todo.show('all');
-    } else {
-        todo.show(arg[0], arg[1]);
+        rl.prompt();
+
+        
+    },
+
+
+    addTodo: function (...arg) {
+        const keyArg = arg[0].split(",");
+        const valueArg = arg[1].split(",");
+        if (keyArg.length !== valueArg.length) throw new Error("키와 값의 갯수가 맍지 않습니다.");
+        const addTodoObj = JSON.parse(JSON.stringify(todo_shell.todoObjectTemplate))
+        // const addTodoObj = todo_shell.todoObjectTemplate;
+        for (let i = 0; i < keyArg.length; i++) {
+            addTodoObj[keyArg[i]] = valueArg[i];
+        }
+
+        addTodoObj.id = todo_shell.getHashCode(valueArg[0]);
+        data.push(addTodoObj);
+        
+        console.log(`${addTodoObj.name} 1개가 추가되었습니다. (id :${addTodoObj.id})`);
+        setTimeout(()=>{
+            todo_shell.syncronizecDatabase();
+            todo_shell.showCurrentStatus();
+            rl.prompt();
+        },1000)
+
+    },
+    updateTodo: function (objId, objKey, objValue) {
+        const updatedData = data.filter(v=>v.id === parseInt(objId));
+
+        data.forEach((v, i) => {
+            if (v.id === parseInt(objId)) {
+                v[objKey] = objValue;
+            }
+        });
+
+        console.log(`${updatedData[0].name}의 ${objKey}가 ${objValue}로 변경되었습니다.`);
+        setTimeout(()=>{
+            setTimeout(()=>{
+                todo_shell.syncronizecDatabase();
+                todo_shell.showCurrentStatus();
+                rl.prompt();
+            },1000)
+        },3000)
+
+
+
+    },
+    deleteTodo: function (objId, ...arg) {
+        
+        const deletedData = data.filter(v=>v.id === parseInt(objId));
+        data.forEach((v, i) => {
+            if (v.id === parseInt(objId)) {
+                data.splice(i, 1);
+            }
+        });
+
+        console.log(`${deletedData[0].name}가 목록에서 삭제되었습니다.`);
+        setTimeout(()=>{
+            todo_shell.syncronizecDatabase();
+            todo_shell.showCurrentStatus();
+            rl.prompt();
+        },1000)
+        
+    },
+
+    getHashCode: function (inputString) {
+        return Math.abs((inputString + Date.now()).split("").reduce(function (a, b) { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0));
+    },
+
+    parseCommand: function (inputArg) {
+        [commandArg, ...deliveryArg] = inputArg.split("$");
+        return todo_shell[commandArg+"Todo"](...deliveryArg);
+        // todo_shell.COMMAND_DICT[commandArg](...deliveryArg);
+    },
+
+    // COMMAND_DICT:{
+    //     show:todo_shell.showTodo,
+    //     add:todo_shell.addTodo,
+    //     delete:todo_shell.deleteTodo,
+    //     update:todo_shell.updateTodo,
+    // },
+
+    syncronizecDatabase: function () {
+        let syncData = JSON.stringify(data, null, 2);
+        fs.writeFile('./database.json', syncData, (err) => {
+            if (err) throw err;
+        });
+    },
+    
+    run: function(){
+
+        rl.setPrompt('명령하세요 : ');
+        rl.prompt();
+
+
+          rl.on('line', (input) => {
+
+              if(input === "exit") return rl.close()
+
+              todo_shell.parseCommand(input);
+            //   todo_shell.showCurrentStatus() 여기에 넣고 싶은데 어떻게 수정해야할지 모르겠음. 
+        
+            
+          });
     }
-};
-
-const parseCommand = function (inputArg) {
-    [commandArg, ...deliveryArg] = inputArg.split("$");
-    COMM_DICT[commandArg](...deliveryArg);
-    setTimeout(()=>{
-        todo.show('all');
-    },1000);
-};
-
-const COMM_DICT = {
-    show: showTodo,
-    add: addTodo,
-    update: updateTodo,
-    delete: deleteTodo
-};
-
-rl.on('line', (input) => {
-    if (input === "exit") {
-        rl.close();
-    } else {
-        parseCommand(input);
-    }
-});
+}
