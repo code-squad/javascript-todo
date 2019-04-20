@@ -1,11 +1,7 @@
 const database = require('./database.json');
 
 const showsortedByDeadLine = function (filterArg) {
-
     const printdatabase = function (_array) {
-        const sortedDeadline = _array.map((element) => ({ deadline: element.deadline, id: element.id }))
-            .sort((a, b) => a.deadline > b.deadline ? 1 : -1);
-
         sortedDeadline.forEach(element => {
             console.log(database.filter(el => el.id === element.id));
         })
