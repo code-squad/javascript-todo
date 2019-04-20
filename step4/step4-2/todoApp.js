@@ -82,7 +82,6 @@ const show = (todoList, status, inputReadline) => {
     const [specificStatusCount, specificStatusName] = getTodoName(todoList, status);
     printSpecificStatusList(status, specificStatusCount, specificStatusName);
     inputReadline.prompt();
-    return
 };
 
 const createNewID = (todos, maxNumOfID) => {
