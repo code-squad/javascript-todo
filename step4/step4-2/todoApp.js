@@ -79,8 +79,8 @@ const show = (todoList, status, inputReadline) => {
         return
     }
 
-    const [todoCount_, todo_result] = getTodoName(todoList, status);
-    printSpecificStatusList(status, todoCount_, todo_result);
+    const [specificStatusCount, specificStatusName] = getTodoName(todoList, status);
+    printSpecificStatusList(status, specificStatusCount, specificStatusName);
     inputReadline.prompt();
     return
 };
@@ -113,16 +113,15 @@ const getAllStatus = todoList => {
 };
 
 const getTodoName = (todoList, status) => {
-    totalCount = 0;
-    const done_result = todoList.filter(function (obj) {
+
+    const specificStatusName = todoList.filter(function (obj) {
         return obj.status === status;
     })
         .map(function (obj) {
-            totalCount++;
             return obj.name
         })
 
-    return [totalCount, done_result];
+    return [specificStatusName.length, specificStatusName];
 }
 
 const checkID = (inputID) => {
