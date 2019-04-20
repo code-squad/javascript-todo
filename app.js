@@ -163,13 +163,3 @@ const todo_shell = {
           });
     }
 }
-
-
-// todo_shell.parseCommand("show$all");
-// // log(todo_shell.parseCommand("show$status$todo"));
-// todo_shell.parseCommand("add$name,status,category$과제끝내기,doing,wannabe");
-// todo_shell.parseCommand("update$1$status$done");
-// todo_shell.parseCommand("delete$7");
-
-
-todo_shell.run();
