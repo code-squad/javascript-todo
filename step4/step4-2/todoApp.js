@@ -29,7 +29,7 @@ const checkCommands = (input, inputReadline) => {
 
 
 const addList = (addName, addTag) => {
-    const id = createNewID(todos);
+    const id = createNewID(todos, 10000);
 
     const newTodo = {
         'name': addName,
@@ -85,10 +85,10 @@ const show = (todoList, status, inputReadline) => {
     return
 };
 
-const createNewID = (todos) => {
-    const newID = Math.floor(Math.random() * 10000) + 1;
+const createNewID = (todos, maxNumOfID) => {
+    const newID = Math.floor(Math.random() * maxNumOfID) + 1;
     const checkDuplicatedID = checkID(newID)
-    if (typeof checkDuplicatedID !== 'undefined') createNewID(todos);
+    if (typeof checkDuplicatedID !== 'undefined') createNewID(todos,maxNumOfID);
 
     return newID;
 }
