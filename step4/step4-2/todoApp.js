@@ -73,14 +73,14 @@ const updateList = (updateID, updateStatus, inputReadline) => {
 
 const show = (todoList, status, inputReadline) => {
     if (status === `all`) {
-        const allCurrentStatus = getAllStatus(todoList);
-        printAllCurrentStatus(allCurrentStatus.todoCount, allCurrentStatus.doingCount, allCurrentStatus.doneCount);
+        const {todoCount, doingCount, doneCount} = getAllStatus(todoList);
+        printAllCurrentStatus(todoCount, doingCount, doneCount);
         inputReadline.prompt();
         return
     }
 
-    const todoNameWithCount = getTodoNameWithCount(todoList, status);
-    printSpecificStatusList(status, todoNameWithCount.specificStatusCount, todoNameWithCount.specificStatusName);
+    const {specificStatusCount, specificStatusName} = getTodoNameWithCount(todoList, status);
+    printSpecificStatusList(status, specificStatusCount, specificStatusName);
     inputReadline.prompt();
 };
 
