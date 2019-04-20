@@ -73,8 +73,8 @@ const updateList = (updateID, updateStatus, inputReadline) => {
 
 const show = (todoList, status, inputReadline) => {
     if (status === `all`) {
-        const [todoCount, doingCount, doneCount] = getAllStatus(todoList);
-        printAllCurrentStatus(todoCount, doingCount, doneCount);
+        const allCurrentStatus = getAllStatus(todoList);
+        printAllCurrentStatus(allCurrentStatus.todoCount, allCurrentStatus.doingCount, allCurrentStatus.doneCount);
         inputReadline.prompt();
         return
     }
@@ -108,7 +108,7 @@ const getAllStatus = todoList => {
             doneCount++;
         }
     })
-    return [todoCount, doingCount, doneCount]
+    return {todoCount, doingCount, doneCount}
 };
 
 const getTodoName = (todoList, status) => {
