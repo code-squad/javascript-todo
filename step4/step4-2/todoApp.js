@@ -79,8 +79,8 @@ const show = (todoList, status, inputReadline) => {
         return
     }
 
-    const [specificStatusCount, specificStatusName] = getTodoName(todoList, status);
-    printSpecificStatusList(status, specificStatusCount, specificStatusName);
+    const todoNameWithCount = getTodoNameWithCount(todoList, status);
+    printSpecificStatusList(status, todoNameWithCount.specificStatusCount, todoNameWithCount.specificStatusName);
     inputReadline.prompt();
 };
 
@@ -111,16 +111,17 @@ const getAllStatus = todoList => {
     return {todoCount, doingCount, doneCount}
 };
 
-const getTodoName = (todoList, status) => {
+const getTodoNameWithCount = (todoList, status) => {
+    const tmpStorage = {specificStatusName : [], specificStatusCount: 0};
+    const specificNameWithCount = todoList.reduce((acc, cur) =>{
+        if(cur.status === status){
+            acc.specificStatusCount += 1;
+            acc.specificStatusName.push(cur.name);
+        }
+        return acc;
+    }, tmpStorage);
 
-    const specificStatusName = todoList.filter(function (obj) {
-        return obj.status === status;
-    })
-        .map(function (obj) {
-            return obj.name
-        })
-
-    return [specificStatusName.length, specificStatusName];
+    return specificNameWithCount;
 }
 
 const checkID = (inputID) => {
