@@ -63,6 +63,6 @@ module.exports = {
     saveTodoList, 
     getStatusListByTodoList, 
     getNameAndStatusById, 
-    getIdListByTodoList, 
+    getTodoId,
     getRandomID,
 };
