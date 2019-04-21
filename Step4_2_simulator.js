@@ -15,7 +15,7 @@ const rl = readLine.createInterface( {
         const splitQuery = query.replace(/\s/gi, "").split('$');
         const executionCommand = splitQuery[0];
         const nonCommand = splitQuery.splice(1);
-        const isComplete = controlCommand[executionCommand](nonCommand);
+        const isComplete = controlCommand(executionCommand, nonCommand);
 
         if (isComplete) {
             let millisecond = 1000;
