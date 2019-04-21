@@ -5,6 +5,7 @@ const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
   });
+const message = require('./message');
 
 const todo_shell = {
 
@@ -24,21 +25,21 @@ const todo_shell = {
             return accum;
         },{});
         
-        const result = Object.keys(resultObj).reduce((accum,curr)=>{
+        const resultNonFilteredList = Object.keys(resultObj).reduce((accum,curr)=>{
             accum.push(`${curr}은 ${resultObj[curr]}임`);
             return accum;
         },[]).join(",")
 
-        console.log(result);
+        console.log(resultNonFilteredList);
     },
 
     showFilteredTodo : function(_filteredData){
         const totalCount = _filteredData.length;
-        const resultTodoList = _filteredData.reduce((accum,curr)=>{
+        const resultFilteredList = _filteredData.reduce((accum,curr)=>{
             accum.push(`${curr.name}`)
             return accum
         },[]).join(", ");
-        console.log(`todo리스트 총${totalCount}건 : ${resultTodoList}`)
+        console.log(`todo리스트 총${totalCount}건 : ${resultFilteredList}`)
     },
 
     filterArg: function(...arg){
@@ -61,10 +62,20 @@ const todo_shell = {
         
     },
 
+    delaySyncronizeDatabaseAndShowCurrentStatus : function(time){
+        setTimeout(()=>{
+            todo_shell.syncronizecDatabase();
+            todo_shell.showCurrentStatus();
+            rl.prompt();
+        },time)
+    },
+
 
     addTodo: function (...arg) {
-        const keyArg = arg[0].split(",");
-        const valueArg = arg[1].split(",");
+        const [keyString , valueString] = arg;
+        const keyArg = keyString.split(",");
+        const valueArg = valueString.split(",");
+
         if (keyArg.length !== valueArg.length) throw new Error("키와 값의 갯수가 맍지 않습니다.");
         const addTodoObj = JSON.parse(JSON.stringify(todo_shell.todoObjectTemplate))
         // const addTodoObj = todo_shell.todoObjectTemplate;
@@ -75,16 +86,12 @@ const todo_shell = {
         addTodoObj.id = todo_shell.getHashCode(valueArg[0]);
         data.push(addTodoObj);
         
-        console.log(`${addTodoObj.name} 1개가 추가되었습니다. (id :${addTodoObj.id})`);
-        setTimeout(()=>{
-            todo_shell.syncronizecDatabase();
-            todo_shell.showCurrentStatus();
-            rl.prompt();
-        },1000)
+        message.add(addTodoObj.name,addTodoObj.id)
+        todo_shell.delaySyncronizeDatabaseAndShowCurrentStatus(1000);
 
     },
     updateTodo: function (objId, objKey, objValue) {
-        const updatedData = data.filter(v=>v.id === parseInt(objId));
+        const updatedData = data.find(v=>v.id === parseInt(objId));
 
         data.forEach((v, i) => {
             if (v.id === parseInt(objId)) {
@@ -92,13 +99,9 @@ const todo_shell = {
             }
         });
 
-        console.log(`${updatedData[0].name}의 ${objKey}가 ${objValue}로 변경되었습니다.`);
         setTimeout(()=>{
-            setTimeout(()=>{
-                todo_shell.syncronizecDatabase();
-                todo_shell.showCurrentStatus();
-                rl.prompt();
-            },1000)
+            message.update(updatedData.name,objKey,objValue)
+            todo_shell.delaySyncronizeDatabaseAndShowCurrentStatus(1000);
         },3000)
 
 
@@ -106,19 +109,14 @@ const todo_shell = {
     },
     deleteTodo: function (objId, ...arg) {
         
-        const deletedData = data.filter(v=>v.id === parseInt(objId));
+        const deletedData = data.find(v=>v.id === parseInt(objId));
         data.forEach((v, i) => {
             if (v.id === parseInt(objId)) {
                 data.splice(i, 1);
             }
         });
-
-        console.log(`${deletedData[0].name}가 목록에서 삭제되었습니다.`);
-        setTimeout(()=>{
-            todo_shell.syncronizecDatabase();
-            todo_shell.showCurrentStatus();
-            rl.prompt();
-        },1000)
+        message.delete(deletedData.name);
+        todo_shell.delaySyncronizeDatabaseAndShowCurrentStatus(1000);
         
     },
 
@@ -162,4 +160,17 @@ const todo_shell = {
             
           });
     }
+
+
+
 }
+
+
+// todo_shell.parseCommand("show$all");
+// // log(todo_shell.parseCommand("show$status$todo"));
+// todo_shell.parseCommand("add$name,status,category$과제끝내기,doing,wannabe");
+// todo_shell.parseCommand("update$1$status$done");
+// todo_shell.parseCommand("delete$7");
+
+
+todo_shell.run();
