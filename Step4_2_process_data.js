@@ -27,12 +27,10 @@ const getStatusListByTodoList = () => {
 }
 
 const getNameAndStatusById = (id) => {
-    for (const object of todoList) {
-        if (object['id'] === id) {
-            return [object['name'], object['status']];
-        }
-    }
-    console.log(`id ${id} 은(는) 존재하지 않습니다.`);
+    return todoList.reduce( (arr, object, index) => {
+        if (object['id'] === id) arr.push([index, object['name'], object['status']]);
+        return arr;
+    }, [] )[0];
 }
 
 const getIdListByTodoList = () => {
