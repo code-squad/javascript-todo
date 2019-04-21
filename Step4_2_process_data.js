@@ -34,7 +34,11 @@ const getNameAndStatusById = (id) => {
 }
 
 const getIdListByTodoList = () => {
-    return todoList.map( (value) => { return value['id']; } );
+    return todoList.map( (object) => { return object['id']; } );
+}
+
+const getTodoId = (id) => {
+    return getIdListByTodoList().filter( (element) => { return id === element; } )[0];
 }
 
 // 1 ~ 9999 까지
