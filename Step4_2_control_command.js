@@ -1,8 +1,8 @@
 const processData = require('./process_data');
 
 // 비동기로 처리..show all..
-const showCompletionStatus = () => {
-    setTimeout( () => { processQuery['show'](['all']); }, 1000 );
+const showCompletionStatus = (milliSecond) => {
+    setTimeout( () => { controlCommand('show', ['all']); }, milliSecond );
 }
 
 const checkStatusCommand = (currentStatus) => {
