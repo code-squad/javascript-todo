@@ -57,7 +57,14 @@ function show(status){
     }
     rl.prompt()
 }
-class makeTodo {
+
+const callFuncWithMessage = (setTime) => {
+    setTimeout(() => {
+        show("all"); 
+    } ,setTime)
+}
+
+class MakeTodo {
     constructor(name, id, tag){
         this.name = name;
         this.status = "todo";
@@ -67,12 +74,10 @@ class makeTodo {
 }
 
 const add = (inputName, inputTag) => {
-    const todo = new makeTodo(inputName, getId(10000), inputTag)
+    const todo = new MakeTodo(inputName, getId(10000), inputTag)
     todos.push(todo);
     console.log(`${todo.name} 이 1개가 추가되었습니다`)
-    setTimeout(() => {
-        show("all"); 
-    } ,1000)
+    callShowAllAfterSetTime(1000);
 }
 
 const deleteTodo = (id) => {
@@ -83,19 +88,23 @@ const deleteTodo = (id) => {
         todos.splice(todos.indexOf(todo2delete),1)[0];
         console.log(`${todo2delete.name}가 ${todo2delete.status} 목록에서 삭제됐습니다.`)
     }
-    setTimeout(() => {
-        show("all");
-    },1000)
+    callShowAllAfterSetTime(1000);
+}
+const seTimeoutWithMessage = (message, setTime)=>{
+        console.log(message);
+        callShowAllAfterSetTime(1000)
 }
 
-const update = (id, inputStatus) => {
+const printResultMessageAfterSetTime = (msg,setTime) => {
+    setTime(() => {
+        console.log(msg);
+        callShowAllAfterSetTime(1000);
+    }, setTime)
+}
+
+const update = (id, inputStatus, setTime = 3000) => {
     if(!/todo|doing|done/.test(inputStatus)){
-        setTimeout(() => {
-            console.log("변경가능한 status는 todo, doing, done 입니다");
-            setTimeout(()=> {
-                show("all")
-            }, 1000)
-        },3000)
+        printResultMessageAfterSetTime("변경가능한 status는 todo, doing, done 입니다", setTime);
         return;
     }    
     let todo2update;
@@ -106,20 +115,9 @@ const update = (id, inputStatus) => {
         }
     });
     if(!todo2update === undefined) {
-        setTimeout(() => {
-            console.log(`${todo2update.name} 가 ${todo2update.status}(으)로 변경되었습니다.`);
-            setTimeout(()=> {
-                show("all")
-            }, 1000)
-
-        },3000)
+        printResultMessageAfterSetTime(`${todo2update.name} 가 ${todo2update.status}(으)로 변경되었습니다.`, setTime);
     } else {
-        setTimeout(() => {
-            console.log("ID가 목록에 없습니다.");
-            setTimeout(()=> {
-                show("all")
-            }, 1000)
-        },3000)
+        printResultMessageAfterSetTime("ID가 목록에 없습니다.", setTime);
     }
 }
 const parseInput = input => input.split("$");
