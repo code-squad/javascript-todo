@@ -129,30 +129,28 @@ const addTodo = (args, todos) => {
 
 const updateTodo = (updatedSchedule, todos) => {
     // update$id$name$tags$status
-    for (todo of todos) {
+    todos.forEach(todo => {
         if (todo.id === Number(updatedSchedule[1])) {
-            if (updatedSchedule[2] !== 'nc') {
-                console.log(`${todo.name}가 ${updatedSchedule[2]}로 변경되었습니다.`);
-                todo.name = updatedSchedule[2];
-            }
-
-            if (updatedSchedule[3] !== 'nc') {
-                console.log(`${todo.tags}가 ${updatedSchedule[3]}로 변경되었습니다.`);
-                todo.tags = updatedSchedule[3];
-            }
-
-            if (updatedSchedule[4] !== 'nc') {
-                console.log(`${todo.status}가 ${updatedSchedule[4]}로 변경되었습니다.`);
-                todo.status = updatedSchedule[4];
-            }
+            printUpdate(todo,updatedSchedule)
         }
-    }
+    });
 
     setTimeout(() => {
         console.log(todos);
     }, 3000);
 
     checkOrder("show$status$all", todos);
+}
+
+const printUpdate = function(todo, updatedSchedule){
+        let keyWordList =  Object.keys(todo).slice(0, 2)
+
+        keyWordList.forEach((key, idx) => {
+            if (updatedSchedule[idx + 2] !== 'nc') {
+                console.log(`${todo[key]}가 ${updatedSchedule[idx + 2]}로 변경되었습니다.`);
+                todo[key] = updatedSchedule[idx + 2];
+            }
+        })
 }
 
 const deleteTodo = (args, todos) => {
