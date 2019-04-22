@@ -1,7 +1,7 @@
 //todos.js
 const originData = require('./todosList.json');
 const convertedData = JSON.parse(JSON.stringify(originData)).data;
-const idGenerator = () => Math.floor(Math.random() * (99999)) + 1;
+const idGenerator = (max, min) => Math.floor(Math.random() * (max - min)) + 1;
 
 const getArrByCondition = (arr, condition) => {
     return arr.reduce((acc, val) => {
@@ -41,7 +41,7 @@ const showData = (type) => {
 }
 
 const addData = (name, tags) => {
-    const id = idGenerator();
+    const id = idGenerator(99999, 1);
 
     if (isDuplicated(id, "id", convertedData)) {
         return addData(name, tags);
