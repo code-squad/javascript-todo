@@ -4,25 +4,28 @@ const rl = readline.createInterface({
     output: process.stdout,
     terminal: false
 });
+
 const datalist = require('./data');
 
-//----------------------------------------------------------------------------------------------------------
+const printResult = (value) => {
+    return console.log(value);
+}
 
 // Error Return Function
-const errorMessage = () => {
-  return console.log("입력하신 값이 존재하지않습니다. \n")
+const printError = () => {
+    return console.error('입력하신 값이 존재하지않습니다. \n');
 }
 
 
 // Index Check Functions
 const checker = (inputData) => {
-  return datalist.some(function(el) {
+  return datalist.some((el) => {
       return typeof inputData === "string" ? el.name === inputData : el.id === inputData;
 });
 }
 
 const getIndex = (inputDataId) => {
-    return datalist.map(function(item) { return item.id; }).indexOf(inputDataId);
+    return datalist.map((item) => { return item.id; }).indexOf(inputDataId);
 }
 
 
@@ -34,33 +37,31 @@ const optimizedFunc = (obj, str) => {
 
 // show$all setTimeout Function
 const setTimeoutShowAll = (printout) => {
-  console.log(printout);
+  printResult(printout);
     setTimeout(() => {
-        console.log((show('all')));
+      printResult((show('all')));
     }, 1000);
 }
 
-//----------------------------------------------------------------------------------------------------------
 const show = (showStatus) => {
-    let todoListName = optimizedFunc(datalist, 'todo');
-    let doingListName = optimizedFunc(datalist, 'doing');
-    let doneListName = optimizedFunc(datalist, 'done'); 
+    let todoList = optimizedFunc(datalist, 'todo');
+    let doingList = optimizedFunc(datalist, 'doing');
+    let doneList = optimizedFunc(datalist, 'done'); 
 
     switch(showStatus) {
       case 'all':
-        return `현재상태 : todo: ${todoListName.length}개, doing: ${doingListName.length}개, done: ${doneListName.length}개 \n`
+        return `현재상태 : todo: ${todoList.length}개, doing: ${doingList.length}개, done: ${doneList.length}개 \n`
       case 'todo':
-        return `todo리스트 : 총 ${todoListName.length} 건 : ${todoListName} \n`
+        return `todo리스트 : 총 ${todoList.length} 건 : ${todoList} \n`
       case 'doing':
-        return `doing리스트 : 총 ${doingListName.length} 건 : ${doingListName} \n`;
+        return `doing리스트 : 총 ${doingList.length} 건 : ${doingList} \n`;
       case 'done':
-        return `done리스트 : 총 ${doneListName.length} 건 : ${doneListName} \n`
+        return `done리스트 : 총 ${doneList.length} 건 : ${doneList} \n`
       default:
-        return 'The status that you enter does not exist!'
+        return '입력하신 값이 존재하지않습니다. \n';
  }
 }
 
-//----------------------------------------------------------------------------------------------------------
 // Add Property Function
 const addTodoList = (addName, addTag) => {
     let format = {};
@@ -72,7 +73,6 @@ const addTodoList = (addName, addTag) => {
     let printOut = `${format["name"]} 1개가 추가됐습니다.(id : ${format["id"]})`; 
     return setTimeoutShowAll(printOut);
 };
-//----------------------------------------------------------------------------------------------------------
 
 // Update Property Function
 const updateTodoFunc = (updateId, updateStatus) => {
@@ -85,11 +85,11 @@ const updateTodoFunc = (updateId, updateStatus) => {
 // Update Execution
 const updateTodoList = (updateId, updateStatus) => {
   setTimeout(() => {
-    return checker(updateId) ? updateTodoFunc(updateId, updateStatus) : errorMessage();
+    return checker(updateId) ? updateTodoFunc(updateId, updateStatus) : printError();
   }, 3000)
 };
 
-//----------------------------------------------------------------------------------------------------------
+
 
 // Delete Property Functions 
 const deleteToListFunc = (deletedId) => {
@@ -101,27 +101,25 @@ const deleteToListFunc = (deletedId) => {
 
 // Delete Execution
   const deleteTodoList = (deletedId) => {
-    return checker(deletedId) ? deleteToListFunc(deletedId) : errorMessage();
+    return checker(deletedId) ? deleteToListFunc(deletedId) : printError();
 }
-
-
-//----------------------------------------------------------------------------------------------------------
 
 
 // Execution Function
 const executeTodoList = () => {
  rl.question("명령하세요: ", function(answer) {
     let spliceStr = answer.match(/\w+/g);
-    if(spliceStr[0] === 'show') {
-       console.log(show(spliceStr[1]));
-   } else if(spliceStr[0] === 'add') {
-       addTodoList(spliceStr[1], (spliceStr[2])); 
-   } else if(spliceStr[0] === 'update') {
-       updateTodoList(Number(spliceStr[1]), spliceStr[2]);
-   } else if(spliceStr[0] === 'delete') {
-       deleteTodoList(Number(spliceStr[1]));
+    let todoInstruction = spliceStr[0];    
+    if(todoInstruction === 'show') {
+      printResult(show(spliceStr[1]));    // spliceStr[1]: all or todo or doing or done 
+   } else if(todoInstruction === 'add') {
+       addTodoList(spliceStr[1], (spliceStr[2])); // spliceStr[1] Name, spliceStr[2] Tag
+   } else if(todoInstruction === 'update') {
+       updateTodoList(Number(spliceStr[1]), spliceStr[2]); // spliceStr[1] ID, spliceStr[2] status
+   } else if(todoInstruction === 'delete') {
+       deleteTodoList(Number(spliceStr[1])); // spliceStr[1] ID
    } else {
-       errorMessage();
+       printError();
    }
 
     spliceStr[0] === 'update' ? setTimeout(() => { executeTodoList()}, 5000) : setTimeout(() => {executeTodoList()}, 2000)
