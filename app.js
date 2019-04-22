@@ -21,9 +21,9 @@ const executeCommand = (commandArr) => {
     }
 };
 
-const isValidCommand = (command) => {
+const isValidCommand = (command, obj) => {
     let result = false;
-    if (Object.keys(todos).includes(command)) result = true;
+    if (Object.keys(obj).includes(command)) result = true;
     return result;
 }
 
@@ -43,7 +43,7 @@ const runProgram = (readline) => {
             const commandArr = getCmdList(userInput);
             const primaryCommand = commandArr[0];
 
-            if (!isValidCommand(primaryCommand)) {
+            if (!isValidCommand(primaryCommand, todos)) {
                 console.log("올바르지 않은 명령어입니다")
                 readline.prompt();
             }
