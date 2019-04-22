@@ -1,7 +1,7 @@
-const processData   = require('./process_data');
-const print         = require('./print_message');
-const validate      = require('./validate');
-const random        = require('./generate_random');
+const processData   = require('./Step4_2_process_data');
+const print         = require('./Step4_2_print_message');
+const validate      = require('./Step4_2_validate');
+const random        = require('./Step4_2_generate_random');
 
 // 비동기로 처리..show all..
 const showCompletionStatus = (milliSecond) => {
