@@ -19,21 +19,21 @@ const showStatusLazy = () => {
 const isDuplicated = (val, key, convertedData) => {
     let result = false;
     convertedData.forEach((element) => {
-        if (val == element[key]) result = true;
+        if (val === element[key]) result = true;
     })
     return result;
 }
 
 const showData = (type) => {
-    if (type == 'all') {
-        const numOfTodos = getArrByCondition(convertedData, (val) => {return val.status == "todo"}).length;
-        const numOfDoings = getArrByCondition(convertedData, (val) => {return val.status == "doing"}).length;
-        const numOfDones = getArrByCondition(convertedData, (val) => {return val.status == "done"}).length;
+    if (type === 'all') {
+        const numOfTodos = getArrByCondition(convertedData, (val) => {return val.status === "todo"}).length;
+        const numOfDoings = getArrByCondition(convertedData, (val) => {return val.status === "doing"}).length;
+        const numOfDones = getArrByCondition(convertedData, (val) => {return val.status === "done"}).length;
 
         console.log(`현재상태 : todo: ${numOfTodos}개, doing: ${numOfDoings}개, done: ${numOfDones}개`);
 
     } else {
-        const objArr = getArrByCondition(convertedData, (val) => {return (type == val.status)});
+        const objArr = getArrByCondition(convertedData, (val) => {return (type === val.status)});
         let result = `${type} 리스트 : 총${objArr.length}건 :`;
         getArrByCondition(objArr, (val) => {result += `, '${val.name}, ${val.id}번'`; return true});
         console.log(`${result}`);
@@ -60,7 +60,7 @@ const addData = (name, tags) => {
 }
 
 const deleteData = (id)=> { 
-    const target = getArrByCondition(convertedData, (val) => {return val.id == id})[0];
+    const target = getArrByCondition(convertedData, (val) => {return val.id === id})[0];
     if (!target) {console.log('일치하는 id가 없습니다'); return;}
 
     convertedData.splice(convertedData.indexOf(target), 1);
@@ -69,7 +69,7 @@ const deleteData = (id)=> {
 };
 
 const updateData = (id, status)=> {
-    const target = getArrByCondition(convertedData, (val) => {return val.id == id})[0];
+    const target = getArrByCondition(convertedData, (val) => {return val.id === id})[0];
     if (!target) {console.log('일치하는 id가 없습니다'); return;}
 
     target.status = status;
