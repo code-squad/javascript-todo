@@ -5,7 +5,7 @@ const readline = require('readline').createInterface({
     output: process.stdout
 });
 
-const getCommandArrayByRegexp = (command) => {
+const getCmdList = (command) => {
     const regexpForSeperateCommand = /[^\$]+/g;
     return command.match(regexpForSeperateCommand);
 };
@@ -37,7 +37,7 @@ const runProgram = (readline) => {
     readline.on('line', (userInput) => {
         
         try {
-            const commandArr = getCommandArrayByRegexp(userInput);
+            const commandArr = getCmdList(userInput);
             const primaryCommand = commandArr[0];
 
             if (!isValidCommand(primaryCommand)) {
