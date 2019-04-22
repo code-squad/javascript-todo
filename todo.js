@@ -7,35 +7,29 @@ const rl=readline.createInterface({
     prompt: "명령하세요: "
 });
 
-const getRandomInt = ()=> {
-    const max = 10000;
+const getRandomInt = (max)=> {
     return Math.floor(Math.random() * Math.floor(max));
 }
 
 const isIdExistInTodos = (randomInt) => {
-    const idCheck = (obj) => obj.id === randomInt;
-    return todos.some(idCheck);
+    const checkId = (obj) => obj.id === randomInt;
+    return todos.some(checkId);
 } 
 
-const getID = () => {
-    let ID = getRandomInt();
+const getID = (max) => {
+    let ID = getRandomInt(max);
     while(isIdExistInTodos(ID)) {
-        ID = getRandomInt();
+        ID = getRandomInt(max);
     }
     return ID;
 }
 
 function getTodosSortedByStatus(todos){
-    const todosSortedByStatus = {};
-    for( obj of todos) {
-       if(todosSortedByStatus[obj.status] === undefined) {
-           todosSortedByStatus[obj.status] = [];
-           todosSortedByStatus[obj.status].push(obj);
-           continue;
-       } 
-        todosSortedByStatus[obj.status].push(obj);      
-    } 
-    return todosSortedByStatus;
+    return {
+        todo : todos.filter(todo => todo.status === "todo"),
+        doing : todos.filter(todo => todo.status === "doing"),
+        done : todos.filter(todo => todo.status === "done")
+    };
 }
 
 const isTodosEmpty = ()=>{
@@ -46,18 +40,18 @@ const isTodosEmpty = ()=>{
 
 function show(status){
     const todosSortedByStatus = getTodosSortedByStatus(todos);
-    let res = "현재상태는"; 
     if (status === "all") {
         if(isTodosEmpty()) console.log("현재 todolist 가 비어있습니다");
         else {
+            let resultOfAll = "현재상태는"; 
             for (let key in todosSortedByStatus ) {
-                res += " " + key + ": " + todosSortedByStatus[key].length;
+                resultOfAll += " " + key + ": " + todosSortedByStatus[key].length;
             }
-            console.log(res);
+            console.log(resultOfAll);
         }
     } else if (!(todosSortedByStatus[status]===undefined)) {
-        res = todosSortedByStatus[status].map(v => v.name);
-        console.log(res.join(", "));
+        const resultOfStatus = todosSortedByStatus[status].map(v => v.name);
+        console.log(resultOfStatus.join(", "));
     } else {
         console.log(`${status}가 목록에 없습니다`);
     }
@@ -78,13 +72,11 @@ const add = (inputName, inputTag) => {
 }
 
 const deleteTodo = (id) => {
-    let todo2delete;
-    todos.forEach((todo) => {
-        if(todo.id === Number(id)) todo2delete = todos.splice(todos.indexOf(todo),1)[0];
-    }); 
+    const todo2delete = todos.find(todo => todo.id === Number(id));
     if(todo2delete === undefined) { 
         console.log("ID가 목록에 없습니다."); 
     }else{
+        todos.splice(todos.indexOf(todo2delete),1)[0];
         console.log(`${todo2delete.name}가 ${todo2delete.status} 목록에서 삭제됐습니다.`)
     }
     setTimeout(() => {
