@@ -1,5 +1,5 @@
 const fs = require('fs');
-const todoList = JSON.parse(fs.readFileSync('todo.json'));
+const todoList = JSON.parse(fs.readFileSync('Step4_2_todo.json'));
 
 const saveTodoList = (input, command) => {
     if (command === 'add') {
