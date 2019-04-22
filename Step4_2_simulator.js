@@ -1,4 +1,4 @@
-const controlCommand = require('./control_command');
+const controlCommand = require('./Step4_2_control_command');
 const readLine = require('readline');
 
 const rl = readLine.createInterface( {
