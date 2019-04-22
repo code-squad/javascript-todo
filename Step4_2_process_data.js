@@ -44,7 +44,7 @@ const getTodoId = (id) => {
 module.exports = { 
     saveTodoList, 
     getStatusListByTodoList, 
-    getNameAndStatusById, 
+    getNameAndStatusById,
+    getIdListByTodoList,
     getTodoId,
-    getRandomID,
 };
