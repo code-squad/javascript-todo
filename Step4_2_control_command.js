@@ -1,6 +1,7 @@
 const processData   = require('./process_data');
 const print         = require('./print_message');
 const validate      = require('./validate');
+const random        = require('./generate_random');
 
 // 비동기로 처리..show all..
 const showCompletionStatus = (milliSecond) => {
@@ -15,7 +16,7 @@ const showTodoList = (paramArr) => {
 }
 
 const addTodo = (paramArr) => {
-    const randomId = processData.getRandomID();
+    const randomId = random.getRandomID();
     if (randomId === undefined) return print.errorMessage('Id Full');
     const inputName = paramArr[0];
     const inputTag  = paramArr[1].split('["').join('').split('"]').join('');
