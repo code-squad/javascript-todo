@@ -1,29 +1,11 @@
-const processData = require('./process_data');
-const print = require('./print_message');
+const processData   = require('./process_data');
+const print         = require('./print_message');
+const validate      = require('./validate');
 
 // 비동기로 처리..show all..
 const showCompletionStatus = (milliSecond) => {
     setTimeout( () => { controlCommand('show', ['all']); }, milliSecond );
 }
-
-const checkparamArr = (command, paramArr) => { 
-    switch(command) {
-        case 'show': case 'delete': return paramArr.length === 1;
-        case 'add':  case 'update': return paramArr.length === 2;
-    }
-}
-
-const checkCommand = (currentCommand) => {
-    return ['show', 'add', 'delete', 'update'].some( (command) => { return currentCommand === command } );
-}
-
-const checkStatus = (currentStatus) => {
-    return ['all', 'todo', 'doing', 'done'].some( (status) => { return currentStatus === status } );
-}
-
-const checkIdForm = (id) => { return isNaN(id) ? false : true; }
-
-const checkTagForm = (tag) => { return tag.match(/(?<=\[\")[a-z]*(?=\"\])/i) !== null; }
 
 const showTodoList = (paramArr) => {
     const viewType   = paramArr[0];
@@ -76,29 +58,29 @@ const updateTodo = (paramArr) => {
 }
 
 const controlCommand = (command, paramArr) => {
-    if (!checkCommand(command))             return print.errorMessage('command');
-    if (!checkparamArr(command, paramArr))  return print.errorMessage('paramArr'); 
+    if (!validate.checkCommand(command))             return print.errorMessage('command');
+    if (!validate.checkparamArr(command, paramArr))  return print.errorMessage('paramArr'); 
 
     switch(command) {
         case 'show': 
         {
-            if (!checkStatus(paramArr[0])) return print.errorMessage('status'); 
+            if (!validate.checkStatus(paramArr[0])) return print.errorMessage('status'); 
             return showTodoList(paramArr);
         }
         case 'add': 
         {
-            if(!checkTagForm(paramArr[1])) return print.errorMessage('tag'); 
+            if(!validate.checkTagForm(paramArr[1])) return print.errorMessage('tag'); 
             return addTodo(paramArr); 
         }
         case 'delete': 
         {
-            if (!checkIdForm(paramArr[0])) return print.errorMessage('id'); 
+            if (!validate.checkIdForm(paramArr[0])) return print.errorMessage('id'); 
             return deleteTodo(paramArr); 
         }
         case 'update': 
         {
-            if (!checkIdForm(paramArr[0])) return print.errorMessage('id'); 
-            if (!checkStatus(paramArr[1])) return print.errorMessage('status');
+            if (!validate.checkIdForm(paramArr[0])) return print.errorMessage('id'); 
+            if (!validate.checkStatus(paramArr[1])) return print.errorMessage('status');
             return updateTodo(paramArr); 
         }
     }
