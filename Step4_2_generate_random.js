@@ -1,4 +1,4 @@
-const processData = require('./process_data');
+const processData = require('./Step4_2_process_data');
 
 // 1 ~ 9999 까지
 const getRandomID = () => { 
