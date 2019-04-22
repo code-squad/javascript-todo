@@ -11,6 +11,9 @@ const getCmdList = (command) => {
 };
 
 const executeCommand = (commandArr) => {
+
+    if (arguments.length != 1) return;
+
     if (commandArr.length == 2) {
         todos[commandArr[0]](commandArr[1]);
     } else if (commandArr.length == 3) {
