@@ -88,7 +88,7 @@ const todo_shell = {
         
         message.add(addTodoObj.name,addTodoObj.id)
         todo_shell.delaySyncronizeDatabaseAndShowCurrentStatus(1000);
-
+        
     },
     updateTodo: function (objId, objKey, objValue) {
         const updatedData = data.find(v=>v.id === parseInt(objId));
