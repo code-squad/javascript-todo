@@ -41,24 +41,6 @@ const getTodoId = (id) => {
     return getIdListByTodoList().filter( (element) => { return id === element; } )[0];
 }
 
-// 1 ~ 9999 까지
-const getRandomID = () => { 
-    const limitLength = 9999;
-    const IdList = getIdListByTodoList();
-    if (IdList.length >= limitLength) return limitLength+1;
-    while (true) {
-        const randomID = Math.floor(Math.random() * limitLength) + 1;
-        let isExistsRandomID = false;
-        for (const value of IdList) {
-            if (value === randomID) {
-                isExistsRandomID = true;
-                break;
-            }
-        }
-        if (!isExistsRandomID) return randomID;
-    }
-}
-
 module.exports = { 
     saveTodoList, 
     getStatusListByTodoList, 
