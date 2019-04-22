@@ -16,7 +16,7 @@ const isIdExistInTodos = (randomInt) => {
     return todos.some(checkId);
 } 
 
-const getID = (max) => {
+const getId = (max) => {
     let ID = getRandomInt(max);
     while(isIdExistInTodos(ID)) {
         ID = getRandomInt(max);
@@ -57,13 +57,17 @@ function show(status){
     }
     rl.prompt()
 }
+class makeTodo {
+    constructor(name, id, tag){
+        this.name = name;
+        this.status = "todo";
+        this.id = id;
+        if(!(tag === undefined)) this.tag = tag.match(/[a-z0-9]+/g);
+    }
+}
 
 const add = (inputName, inputTag) => {
-    const todo = {};
-    todo.name = inputName;
-    if(!(inputTag === undefined)) todo.tag = inputTag.match(/[a-z0-9]+/g);
-    todo.status = "todo";
-    todo.id = getID();
+    const todo = new makeTodo(inputName, getId(10000), inputTag)
     todos.push(todo);
     console.log(`${todo.name} 이 1개가 추가되었습니다`)
     setTimeout(() => {
