@@ -1,3 +1,28 @@
+const data = module.require('./data.js');
+
+const inputCommand = () => {
+	const readline = require('readline');
+
+	const rl = readline.createInterface({
+		input: process.stdin,
+		output: process.stdout
+	});
+
+	rl.setPrompt('명령하세요 : ');
+
+	rl.prompt();
+	rl.on('line', input => {
+		const inputArray = input.split('$');
+		if (inputArray.length === 1) {
+			rl.prompt();
+		}
+
+		excute(inputArray);
+
+		rl.prompt();
+	});
+};
+// excute();
 // 입력받는 함수
 // 프롬프트 사용
 // 데이터 파싱
