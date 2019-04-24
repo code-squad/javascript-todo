@@ -3,9 +3,14 @@ function ManagingTodo() {
   this.countedStatus = { todo: 0, doing: 0, done: 0 };
 }
 
-ManagingTodo.prototype.addTodo = function(todo) {
-  this.managedlist.push(todo);
-  this.countedStatus[todo.status] += 1;
+ManagingTodo.prototype.addTodo = function(todos) {
+  if (!Array.isArray(todos)) {
+    todos = [todos];
+  }
+  todos.forEach(todo => {
+    this.managedlist.push(todo);
+    this.countedStatus[todo.status] += 1;
+  });
 };
 
 ManagingTodo.prototype.countStatus = function() {
