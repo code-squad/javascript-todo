@@ -1,16 +1,26 @@
 // 데이터베이스에서 스케쥴배열을 가져온다.
 const schedule_list = require('./data');
 
+
+const {log} = console;
+
+
 function App(){
-    this.controller = new Controller();
-    this.view = new View();
+    this.editor = new Editor();
+    this.viewer = new Viewer();
 }
+
 
 App.prototype.run = function(input){
     // 콘솔에서 입력받아서 parseCommand 함수를 실행하도록 한다.
     // 파즈커맨드에서 반환받은 값을 받탕으로 컨트롤러를 실행한다.
     [key, ...message] =  this.parseCommand(input)
-    this.controller[key+'Todo'](...message);
+    if(key === "show") {
+        [status] = message
+        return status === "all" ? this.viewer.showAll() : this.viewer.showFiltered(status);
+    }
+    this.editor[key+'Todo'](...message);
+    this.viewer.showAll()
     // exit을 입력받을때까지 끊임없이 동작하도록 한다.
 }
 
@@ -30,7 +40,7 @@ App.prototype.parseCommand = function(input){
 
 
 
-function Controller(){
+function Editor(){
 }
 
 // Controller.prototype.todoObject(name,tag) = {
@@ -42,49 +52,60 @@ function Controller(){
 
 //show$all
 //show$todo
-Controller.prototype.showTodo = function (status){
 
-    status === "all" ? View.prototype.showAll() : View.prototype.showFiltered(status); 
-    
-
-    // 인자를 분류하여 Show 객체의 showAll 또는 showFilter를 실행시켜준다.
-    // showFilter에는 status를 인자로 넘겨준다.
-}
 
 // add$name$tag명
-Controller.prototype.addTodo = function(name,tag){
+Editor.prototype.addTodo = function(name,tag){
     // parseCommand로 넘어온 입력값을 name, tag로 받아서 새로운 newtodoObject를 생성한다.
-    const newTodoObject = new Controller.prototype.todoObject(name,tag); 
+    // const newTodoObject = new Editor.prototype.todoObject(name,tag); 
     // database에서 가져온 데이터 배열에 push한다. 
+    log('addTodo is run')
 }
 
 //update$id$status
-Controller.prototype.updateTodo = function(id,status){
+Editor.prototype.updateTodo = function(id,status){
     // 넘어온 id에 맞는 schedule배열의 인자객체를 찾는다.
     //  그 인자객체의 status를 변경한다. 
+    log('updateTodo is run')
 }
 
-Controller.prototype.deleteTodo = function(id){
+Editor.prototype.deleteTodo = function(id){
     // 넘어온 id에 맞는 schedule 배열의 인자객체를 찾는다.
     // 그 인자객체를 삭제한다. 
+    log('deleteTodo is run')
+
 }
 
-Controller.prototype.getUniqueId = function(){
+Editor.prototype.getUniqueId = function(){
     // 유니크한  숫자를 만들고 반환한다. 
 }
 
-function View(){
+function Viewer(){
 
 }
 
-View.prototype.showAll = function(){
+
+//show$all
+Viewer.prototype.showAll = function(){
     // schdule_list에서 상태(todo,doing,done)에 맞게 값을 가지고 있는 객체,또는 배열을 만든다.
     // 객체또는 배열의 인자를  한줄로 출력한다. 
-    
+    const statusBox = schedule_list.reduce((accum,curr)=>{
+        accum[curr.status] = ++accum[curr.status] || 1;
+        return accum;
+   },{});
+   
+
+   const showAllresult = Object.entries(statusBox).map(el=>{
+       const [key,value] = el
+       return `${key}는 ${value}개`;
+   }).join(", ");
+
+   console.log(`현재상태 : ${showAllresult}`);
+    log('showall is run')
 }
 
 // show$status
-View.prototype.showFiltered = function(status){
+Viewer.prototype.showFiltered = function(status){
     // showTodo에서 넘겨받은 status를  scheduled_list에서 가지고 있는 객체를 찾아 배열로 만든다.
     // 배열의 인자들을 한줄로 출력한다. 
     console.log('showFIlter is run')
@@ -95,3 +116,4 @@ const schedule_manager = new App();
 
 schedule_manager.run('show$all');
 schedule_manager.run('show$todo');
+schedule_manager.run('add$운동하기$exercise');
