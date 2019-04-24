@@ -12,3 +12,5 @@ managingTodo.addTodo(new Todo('커피마시기', ['coffee', 'favorite'], 'doing'
 managingTodo.show('all');
 managingTodo.show('todo');
 managingTodo.show('doing');
+managingTodo.delete(1);
+managingTodo.delete('2');

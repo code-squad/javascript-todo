@@ -1,18 +1,15 @@
 function ManagingTodo() {
   this.managedlist = [];
+  this.countedStatus = { todo: 0, doing: 0, done: 0 };
 }
 
 ManagingTodo.prototype.addTodo = function(todo) {
   this.managedlist.push(todo);
+  this.countedStatus[todo.status] += 1;
 };
 
 ManagingTodo.prototype.countStatus = function() {
-  const countedStatusObj = this.managedlist.reduce((acc, cur) => {
-    acc[cur.status] = acc.hasOwnProperty(cur.status) ? acc[cur.status] + 1 : 1;
-    return acc;
-  }, {});
-
-  return Object.entries(countedStatusObj).reduce(
+  return Object.entries(this.countedStatus).reduce(
     (acc, cur) => (acc += `${cur[0]} : ${cur[1]}개 `),
     `현재상태 : `
   );
@@ -34,6 +31,22 @@ ManagingTodo.prototype.show = function(condition) {
     outputStr = this.filterbyStatus(condition);
   }
   console.log(outputStr);
+};
+
+ManagingTodo.prototype.delete = function(id) {
+  if (typeof id === 'string') {
+    id = parseInt(id);
+  }
+
+  this.managedlist = this.managedlist.filter(todo => {
+    if (todo.id === id) {
+      this.countedStatus[todo.status] -= 1;
+      return false;
+    }
+    return true;
+  });
+
+  this.show('all');
 };
 
 module.exports = ManagingTodo;
