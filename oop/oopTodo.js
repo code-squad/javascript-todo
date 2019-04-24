@@ -108,3 +108,8 @@ TodoUI.prototype.printError = function() {
 TodoUI.prototype.getIndex = function(inputId) {
     return datalist.map((element) => { return element["id"]}).indexOf(inputId);
 }
+
+
+TodoUI.prototype.statusChecker = function(objData, status) {
+    return objData.filter(list => list.status === status).map(list => { return list.name}); // list.name을 한 이유는? 그냥 list만 return 해도 될 듯
+}
