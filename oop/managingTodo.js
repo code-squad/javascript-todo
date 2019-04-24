@@ -1,4 +1,5 @@
 const Todo = require('./todo');
+const msg = require('./msg');
 
 function ManagingTodo() {
   this.managedlist = [];
@@ -6,14 +7,20 @@ function ManagingTodo() {
 }
 
 ManagingTodo.prototype.addTodo = function(todos) {
+  let outputMsg = '';
+
   if (!Array.isArray(todos)) {
     todos = [todos];
   }
+
   todos.forEach(todo => {
     const newTodo = new Todo(todo);
     this.managedlist.push(newTodo);
     this.countedStatus[newTodo.status] += 1;
+    outputMsg += msg.add(newTodo.name, newTodo.id);
   });
+
+  this.printMsg(outputMsg, 1000);
 };
 
 ManagingTodo.prototype.countStatus = function() {
@@ -42,6 +49,8 @@ ManagingTodo.prototype.show = function(condition) {
 };
 
 ManagingTodo.prototype.delete = function(id) {
+  let outputMsg = '';
+
   if (typeof id === 'string') {
     id = parseInt(id);
   }
@@ -49,12 +58,13 @@ ManagingTodo.prototype.delete = function(id) {
   this.managedlist = this.managedlist.filter(todo => {
     if (todo.id === id) {
       this.countedStatus[todo.status] -= 1;
+      outputMsg = msg.delete(todo.name, todo.status);
       return false;
     }
     return true;
   });
 
-  this.show('all');
+  this.printMsg(outputMsg, 1000);
 };
 
 ManagingTodo.prototype.update = function(id, changeStatus) {
@@ -67,7 +77,13 @@ ManagingTodo.prototype.update = function(id, changeStatus) {
   this.countedStatus[changeStatus] += 1;
   changeTodo.status = changeStatus;
 
-  this.show('all');
+  this.printMsg(msg.update(changeTodo.name, changeStatus), 1000);
 };
 
+ManagingTodo.prototype.printMsg = function(msg, time) {
+  console.log(msg);
+  setTimeout(() => {
+    this.show('all');
+  }, time);
+};
 module.exports = ManagingTodo;
