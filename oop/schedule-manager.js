@@ -1,8 +1,9 @@
-// 데이터베이스에서 스케쥴배열을 가져온다.
 const schedule_list = require('./data');
+// 데이터베이스에서 스케쥴배열을 가져온다.
 
 
 const {log} = console;
+
 
 
 function App(){
@@ -43,20 +44,30 @@ App.prototype.parseCommand = function(input){
 function Editor(){
 }
 
-// Controller.prototype.todoObject(name,tag) = {
-//     id : this.getUniqueId(),
-//     name: name,
-//     tag: tag,
-//     status: todo
-// }
 
 //show$all
 //show$todo
+Editor.prototype.TodoObject = function(name,tag){
+    // return {
+    //     id : 1,
+    //     // id : this.getUniqueId(),
+    //     name: name,
+    //     tag: tag,
+    //     status: 'todo'
+    // }
+    this.name = name
+    this.tag = tag
+    this.status = 'todo'
+    this.id = 1
 
+}
 
 // add$name$tag명
 Editor.prototype.addTodo = function(name,tag){
-    // parseCommand로 넘어온 입력값을 name, tag로 받아서 새로운 newtodoObject를 생성한다.
+    // run에서 넘어온 입력값을 name, tag로 받아서 새로운 newtodoObject를 생성한다.
+    const newTodoObject = new this.TodoObject(name,tag);
+    schedule_list.push(newTodoObject);
+ 
     // const newTodoObject = new Editor.prototype.todoObject(name,tag); 
     // database에서 가져온 데이터 배열에 push한다. 
     log('addTodo is run')
@@ -81,7 +92,6 @@ Editor.prototype.getUniqueId = function(){
 }
 
 function Viewer(){
-
 }
 
 
@@ -107,11 +117,8 @@ Viewer.prototype.showAll = function(){
 Viewer.prototype.showFiltered = function(status){
     // run에서 넘겨받은 status를  scheduled_list에서 가지고 있는 객체를 찾아 배열로 만든다.
 
-    const showFilteredResult = schedule_list.filter(todo => {
-        return todo.status === status;
-    }).map(todo => {
-        return `'${todo.name}, ${todo.id}번'`;
-    });
+    const showFilteredResult = schedule_list.filter(todo => todo.status === status)
+    .map(todo => `'${todo.name}, ${todo.id}번'`);
 
     // 배열의 인자들을 한줄로 출력한다. 
     console.log(`${status}리스트 : 총${showFilteredResult.length}건 : ${showFilteredResult.join(', ')}`);
