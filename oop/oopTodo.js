@@ -81,3 +81,11 @@ TodoUI.prototype.showTodoList = function(status) {
           return '입력하신 값이 존재하지않습니다. \n';
     }
 }
+
+
+TodoUI.prototype.showAll_printResult = function(result) {
+    printResult(result);
+    setTimeout(() => {
+        printResult((show('all')));
+    }, 1000);
+} 
