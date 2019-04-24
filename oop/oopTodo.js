@@ -30,25 +30,23 @@ TodoUI.prototype.addTodoList = function (todoElement, todoTag) {
 
 
 TodoUI.prototype.addTodoResult = function (newAddedObject) {
-    const addlistResult = `${newAddedObject["name"]} 1개가 추가됐습니다.(id : ${newAddedObject["id"]})`;
-    return this.setTimeoutShowAll(addlistResult);
+    const addlistResult = `${newAddedObject.name} 1개가 추가됐습니다.(id : ${newAddedObject.id})`;
+    return this.showAll_printResult(addlistResult);
 }
 
 // deleteTodo
 TodoUI.prototype.deleteTodoExecutor = function (deleteID) {
-    return this.checkValidation(deleteID) ? this.deleteTodoResult(deleteID) : this.printError()
+    return this.checkID(deleteID) ? this.deleteTodoList(deleteID) : this.printError()
 };
 
-
-TodoUI.prototype.deleteTodoList = function (deletedIndex) {
-    return datalist.splice(deletedIndex, 1);
-};
-
-TodoUI.prototype.deleteTodoResult = function (deletedID) {
+TodoUI.prototype.deleteTodoList = function (deletedID) {
     const deletedIndex = this.getIndex(deletedID);
-    this.deleteTodoList(deletedIndex);
-    const deletionResult = `${datalist[deletedIndex]['name']}가 ${datalist[deletedIndex]['status']}에서 삭제되었습니다.`
+    datalist.splice(deletedIndex, 1);
+    return this.deleteTodoResult(deletedIndex)
+};
 
+TodoUI.prototype.deleteTodoResult = function (deletedIndex) {
+    const deletionResult = `${datalist[deletedIndex].name}가 ${datalist[deletedIndex].status}에서 삭제되었습니다.`
     return this.showAll_printResult(deletionResult);
 };
 
@@ -95,9 +93,9 @@ TodoUI.prototype.showTodoList = function (status) {
 
 
 TodoUI.prototype.showAll_printResult = function (result) {
-    printResult(result);
+    this.printResult(result);
     setTimeout(() => {
-        this.printResult((show('all')));
+        this.printResult((this.showTodoList('all')));
     }, 1000);
 }
 
@@ -132,16 +130,16 @@ TodoUI.prototype.checkValidation = function (inputVal) {
     });
 }
 
-TodoUI.prototype.createNewID = (datalist, maxNumOfID) => {
+TodoUI.prototype.createNewID = function (datalist, maxNumOfID) {
     const newID = Math.floor(Math.random() * maxNumOfID) + 1;
-    const checkDuplicatedID = checkID(newID)
+    const checkDuplicatedID = this.checkID(newID);
     if (typeof checkDuplicatedID !== 'undefined') createNewID(datalist,maxNumOfID);
 
     return newID;
 }
 
 
-TodoUI.prototype.checkID = (inputID) => {
+TodoUI.prototype.checkID = function (inputID) {
     const [matchedListByID] = datalist.filter(list => {
         return list.id == inputID
     })
