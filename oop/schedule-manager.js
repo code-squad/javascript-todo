@@ -42,7 +42,10 @@ function Controller(){
 //show$all
 //show$todo
 Controller.prototype.showTodo = function (status){
-    console.log(status);
+
+    status === "all" ? Show.prototype.showAll() : Show.prototype.showFiltered(status); 
+    
+
     // 인자를 분류하여 Show 객체의 showAll 또는 showFilter를 실행시켜준다.
     // showFilter에는 status를 인자로 넘겨준다.
 }
@@ -76,14 +79,18 @@ function Show(){
 Show.prototype.showAll = function(){
     // schdule_list에서 상태(todo,doing,done)에 맞게 값을 가지고 있는 객체,또는 배열을 만든다.
     // 객체또는 배열의 인자를  한줄로 출력한다. 
+    console.log('showAll is run')
 }
 
 // show$status
 Show.prototype.showFiltered = function(status){
-    // scheduled_list에서 넘겨받은 status를 가지고 있는 객체를 찾아 배열로 만든다.
+    // showTodo에서 넘겨받은 status를  scheduled_list에서 가지고 있는 객체를 찾아 배열로 만든다.
     // 배열의 인자들을 한줄로 출력한다. 
+    console.log('showFIlter is run')
+
 }
 
 const schedule_manager = new App();
 
 schedule_manager.run('show$all');
+schedule_manager.run('show$todo');
