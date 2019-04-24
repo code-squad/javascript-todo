@@ -22,8 +22,8 @@ App.prototype.run = function(input){
 App.prototype.parseCommand = function(input){
     // run 에서 입력값을 받아서 입력값이 첫번쨰 커맨드를 key로 받고, 나머지를 key에 들어갈 인자로 분류한다.
     // key에 맞는 명령을 컨트롤러에서 실행하도록 하고, 이떄 분류한 나머지를 컨트롤러의 함수의 인자로 들어가도록한다. 
-    [key, ...message] = input.split('$');
-    return [key, ...message] 
+    return input.split('$');
+     
 }
 
 
