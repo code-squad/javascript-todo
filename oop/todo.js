@@ -1,6 +1,6 @@
 class Todo{
   constructor(id_, name_, status_){
-    this.id = _id;
+    this.id = id_;
     this.name = name_;
     this.status = status_;
   }

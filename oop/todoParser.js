@@ -1,6 +1,6 @@
 const Parser = require('./parser');
 
-const idChecker = id => typeof id === 'number'
+const numberCheck = id => typeof id === 'number' && !Number.isNaN(id)
 
 class TodoParser extends Parser {
   constructor(delimiter){
@@ -8,7 +8,7 @@ class TodoParser extends Parser {
   }
 
   checkUpdateCommand(id, status){
-    if( idChecker(id) || (status === undefined)) {
+    if( !numberCheck(id) || (status === undefined)) {
       throw new Error('Update 명령에는 id와 status가 필요합니다.');
     }
   }
@@ -27,7 +27,7 @@ class TodoParser extends Parser {
   }
 
   checkDeleteCommand(id){
-    if( idChecker(id) || (status === undefined)) {
+    if( !numberCheck(id)){
       throw new Error('Update 명령에는 id와 status가 필요합니다.');
     }
   }
@@ -40,12 +40,14 @@ class TodoParser extends Parser {
 
       switch(command){
         case 'update':
+          args[0] = Number.parseInt(args[0]);
           this.checkUpdateCommand(...args);
           break;
         case 'show':
           this.checkShowCommand(...args);
           break;
         case 'delete':
+          args[0] = Number.parseInt(args[0]);
           this.checkDeleteCommand(...args);
           break;
         case 'add':
