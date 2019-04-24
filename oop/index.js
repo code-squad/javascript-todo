@@ -9,5 +9,6 @@ managingTodo.addTodo(new Todo('꽃구경하기', ['flower', 'favorite'], 'done')
 managingTodo.addTodo(new Todo('저녁식사', ['dinner', 'food'], 'todo'));
 managingTodo.addTodo(new Todo('커피마시기', ['coffee', 'favorite'], 'doing'));
 
-console.log(managingTodo.showStatus('doing'));
-console.log(managingTodo.showAll());
+managingTodo.show('all');
+managingTodo.show('todo');
+managingTodo.show('doing');
