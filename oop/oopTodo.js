@@ -15,7 +15,7 @@ TodoUI.prototype.addTodoExecutor = function (todoElement, todoTag) {
 }
 
 TodoUI.prototype.addTodoList = function (todoElement, todoTag) {
-    
+    const id = this.createNewID(datalist, 10000)
     
     const newTodo = {
         'name': todoElement,
@@ -141,7 +141,7 @@ TodoUI.prototype.createNewID = (datalist, maxNumOfID) => {
 }
 
 
-const checkID = (inputID) => {
+TodoUI.prototype.checkID = (inputID) => {
     const [matchedListByID] = datalist.filter(list => {
         return list.id == inputID
     })
