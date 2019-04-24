@@ -1,26 +1,25 @@
 const Todo = require('./todo');
 const msg = require('./msg');
 
-function ManagingTodo() {
-  this.managedlist = [];
+function ManagingTodo(data) {
   this.countedStatus = { todo: 0, doing: 0, done: 0 };
+  this.managedlist = this.initManagedlist(data);
 }
 
-ManagingTodo.prototype.addTodo = function(todos) {
-  let outputMsg = '';
-
-  if (!Array.isArray(todos)) {
-    todos = [todos];
-  }
-
-  todos.forEach(todo => {
+ManagingTodo.prototype.initManagedlist = function(data) {
+  return data.map(todo => {
     const newTodo = new Todo(todo);
-    this.managedlist.push(newTodo);
     this.countedStatus[newTodo.status] += 1;
-    outputMsg += msg.add(newTodo.name, newTodo.id);
+    return newTodo;
   });
+};
 
-  this.printMsg(outputMsg, 1000);
+ManagingTodo.prototype.add = function(name, tags, status = 'todo') {
+  const newTodo = new Todo({ name, tags, status });
+  this.managedlist.push(newTodo);
+  this.countedStatus[newTodo.status] += 1;
+
+  this.printMsg(msg.add(newTodo.name, newTodo.id), 1000);
 };
 
 ManagingTodo.prototype.countStatus = function() {

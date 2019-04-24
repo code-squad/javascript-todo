@@ -1,6 +1,6 @@
 module.exports = {
   add(name, id) {
-    return `${name}이(가) 추가됐습니다.(id: ${id}) \n`;
+    return `${name}이(가) 추가됐습니다.(id: ${id})`;
   },
   delete(name, status) {
     return `${name}이(가) ${status} 목록에서 삭제됐습니다`;
