@@ -47,7 +47,7 @@ function Editor(){
 
 //show$all
 //show$todo
-Editor.prototype.TodoObject = function(name,tag){
+Editor.prototype.TodoObject = function(name,tag, newId){
     // return {
     //     id : 1,
     //     // id : this.getUniqueId(),
@@ -58,18 +58,20 @@ Editor.prototype.TodoObject = function(name,tag){
     this.name = name
     this.tag = tag
     this.status = 'todo'
-    this.id = 1
+    this.id = newId
 
 }
 
 // add$name$tag명
 Editor.prototype.addTodo = function(name,tag){
     // run에서 넘어온 입력값을 name, tag로 받아서 새로운 newtodoObject를 생성한다.
-    const newTodoObject = new this.TodoObject(name,tag);
-    schedule_list.push(newTodoObject);
- 
-    // const newTodoObject = new Editor.prototype.todoObject(name,tag); 
     // database에서 가져온 데이터 배열에 push한다. 
+
+    const newId = this.getUniqueId()
+    const newTodoObject = new this.TodoObject(name,tag,newId);
+    log(newTodoObject);
+    schedule_list.push(newTodoObject);
+    
     log('addTodo is run')
 }
 
@@ -88,7 +90,8 @@ Editor.prototype.deleteTodo = function(id){
 }
 
 Editor.prototype.getUniqueId = function(){
-    // 유니크한  숫자를 만들고 반환한다. 
+    // 유니크한  숫자를 만들고 반환한다.
+    return Date.now() 
 }
 
 function Viewer(){
