@@ -98,3 +98,8 @@ TodoUI.prototype.splitInputVal = function(inputData) {
 TodoUI.prototype.printResult = function(result) {
     return console.log(result);
 }
+
+
+TodoUI.prototype.printError = function() {
+    return console.error('입력하신 값이 존재하지않습니다. \n');
+}
