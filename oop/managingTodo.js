@@ -78,7 +78,9 @@ ManagingTodo.prototype.update = function(id, changeStatus) {
   this.countedStatus[changeStatus] += 1;
   changeTodo.status = changeStatus;
 
-  this.printMsg(msg.update(changeTodo.name, changeStatus), 1000);
+  setTimeout(() => {
+    this.printMsg(msg.update(changeTodo.name, changeStatus), 1000);
+  }, 3000);
 };
 
 ManagingTodo.prototype.printMsg = function(msg, time) {
