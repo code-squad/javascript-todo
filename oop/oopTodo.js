@@ -20,3 +20,10 @@ TodoUI.prototype.addTodoResult = function (newAddedObject) {
     let addlistResult = `${newAddedObject["name"]} 1개가 추가됐습니다.(id : ${newAddedObject["id"]})`; 
     return setTimeoutShowAll(addlistResult);
 } 
+
+// deleteTodo
+
+TodoUI.prototype.deleteTodoExecutor = function(deleteID) {
+    return checkValidation(deleteID) ? deleteTodoResult(deleteID) : printError()
+};
+
