@@ -15,19 +15,22 @@ TodoUI.prototype.addTodoExecutor = function (todoElement, todoTag) {
 }
 
 TodoUI.prototype.addTodoList = function (todoElement, todoTag) {
-    let listFormat = {};
-    listFormat.name = todoElement;
-    list.tag = Array(`${todoTag}`);
-    list.status = "todo";
-    list.id = parseInt(Math.random() * 10000);
-    datalist.push(format);
+    
+    
+    const newTodo = {
+        'name': todoElement,
+        'tag': todoTag,
+        'status': "todo",
+        'id': id
+    };
+    datalist.push(newTodo);
 
-    return this.addTodoResult(listFormat);
+    return this.addTodoResult(newTodo);
 }
 
 
 TodoUI.prototype.addTodoResult = function (newAddedObject) {
-    let addlistResult = `${newAddedObject["name"]} 1개가 추가됐습니다.(id : ${newAddedObject["id"]})`;
+    const addlistResult = `${newAddedObject["name"]} 1개가 추가됐습니다.(id : ${newAddedObject["id"]})`;
     return this.setTimeoutShowAll(addlistResult);
 }
 
@@ -42,9 +45,9 @@ TodoUI.prototype.deleteTodoList = function (deletedIndex) {
 };
 
 TodoUI.prototype.deleteTodoResult = function (deletedID) {
-    let deletedIndex = this.getIndex(deletedID);
+    const deletedIndex = this.getIndex(deletedID);
     this.deleteTodoList(deletedIndex);
-    let deletionResult = `${datalist[deletedIndex]['name']}가 ${datalist[deletedIndex]['status']}에서 삭제되었습니다.`
+    const deletionResult = `${datalist[deletedIndex]['name']}가 ${datalist[deletedIndex]['status']}에서 삭제되었습니다.`
 
     return this.showAll_printResult(deletionResult);
 };
@@ -64,17 +67,17 @@ TodoUI.prototype.updateTodoStatus = function (updatingIndex, updatedstatus) {
 
 
 TodoUI.prototype.updateTodoResult = function (id, updatedStatus) {
-    let getUpdatatingIndex = getIndex(id);
+    const getUpdatatingIndex = getIndex(id);
     this.updateTodoStatus(getUpdatatingIndex, updatedStatus);
-    let updateResult = `${datalist[getUpdatatingIndex].name} 가 ${updatedStatus}로 상태가 변경됬습니다.`;
+    const updateResult = `${datalist[getUpdatatingIndex].name} 가 ${updatedStatus}로 상태가 변경됬습니다.`;
     return this.showAll_printResult(updateResult);
 };
 
 
 TodoUI.prototype.showTodoList = function (status) {
-    let todoList = this.statusChecker(datalist, 'todo');
-    let doingList = this.statusChecker(datalist, 'doing');
-    let doneList = this.statusChecker(datalist, 'done');
+    const todoList = this.statusChecker(datalist, 'todo');
+    const doingList = this.statusChecker(datalist, 'doing');
+    const doneList = this.statusChecker(datalist, 'done');
 
     switch (status) {
         case 'all':
@@ -99,7 +102,7 @@ TodoUI.prototype.showAll_printResult = function (result) {
 }
 
 TodoUI.prototype.splitInputVal = function (inputData) {
-    let splitOnDollarSymbol = inputData.split("$");
+    const splitOnDollarSymbol = inputData.split("$");
     return splitOnDollarSymbol
 }
 
@@ -127,6 +130,14 @@ TodoUI.prototype.checkValidation = function (inputVal) {
     return inputVal.some((data) => {
         return typeof inputVal === 'string' ? data.name === inputVal : data.id === inputVal;
     });
+}
+
+TodoUI.prototype.createNewID = (datalist, maxNumOfID) => {
+    const newID = Math.floor(Math.random() * maxNumOfID) + 1;
+    const checkDuplicatedID = checkID(newID)
+    if (typeof checkDuplicatedID !== 'undefined') createNewID(datalist,maxNumOfID);
+
+    return newID;
 }
 
 
