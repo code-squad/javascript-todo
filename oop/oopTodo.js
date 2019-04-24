@@ -39,5 +39,13 @@ TodoUI.prototype.deleteTodoResult = function(deletedID) {
     
     return showAll_printResult(deletionResult);
     };
+
     
+// updateTodo
+
+TodoUI.prototype.updateTodoExecutor = function(id, updatedstatus) {
+    setTimeout(() => {
+        return checkValidation(id) ? updateTodoResult(id, updatedstatus) : printError()
+    }, 3000)
+};
 
