@@ -42,12 +42,9 @@ Model.prototype = {
     getIndex(id) {
         return this.todoList.findIndex(el => el.id === id)
     }
-
-
 }
 
-const View = function () {
-}
+const View = function () {}
 View.prototype = {
     showAll(countResult) {
         console.log('현재상태 : ' + Object.entries(countResult).map(([key, value]) => `${key}: ${value}개`).join(', '))
@@ -80,6 +77,7 @@ Controller.prototype = {
             done: this.model.countData('done')
         }
         this.view.showAll(countResult)
+        rl.prompt()
     },
     showEachData(status) {
         const countNumber = this.model.countData(status)
@@ -97,6 +95,7 @@ Controller.prototype = {
         this.model.addData(name, tags);
         const id = this.model.findData('name', name)[0].id
         this.view.showAddResult(name, id);
+        this.showFinalResult()
     },
     deleteData(id) {
         const {
@@ -105,17 +104,22 @@ Controller.prototype = {
         } = this.model.findData('id', id)[0]
         this.model.deleteData(id)
         this.view.showDeleteResult(name, status)
+        this.showFinalResult()
     },
     updateData(id, status) {
         this.model.updateData(id, status);
         const name = this.model.findData('id', id)[0].name
-        this.view.showUpdateResult(name, status)
+        setTimeout(() => {
+            this.view.showUpdateResult(name, status)
+            this.showFinalResult()
+        }, 3000);
     },
+    showFinalResult() {
+        setTimeout(() => { this.showAll() }, 1000);
+    }
 }
 
-
-const Util = function () {
-}
+const Util = function () {}
 Util.prototype = {
     parseCommand(command) {
         return command.split('$');
@@ -132,17 +136,23 @@ Util.prototype = {
     }
 }
 
+const util = new Util();
+const model = new Model();
+const view = new View();
+const controller = new Controller();
+
 const app = {
+    util: util,
+    controller: controller,
     start() {
         rl.setPrompt('명령하세요(종료하려면 "q"를 입력하세요) : ')
         rl.prompt()
         rl.on('line', (command) => {
             if (command === 'q') rl.close()
-            command = util.parseCommand(command)
-            const keyCommand = util.getKeyCommand(command);
+            command = this.util.parseCommand(command)
+            const keyCommand = this.util.getKeyCommand(command);
             const restCommand = command;
-            controller[keyCommand](...restCommand)
-            rl.prompt()
+            this.controller[keyCommand](...restCommand)
         })
         rl.on('close', () => {
             process.exit()
@@ -150,9 +160,6 @@ const app = {
     }
 }
 
-const util = new Util();
-const model = new Model();
-const view = new View();
-const controller = new Controller();
+
 
 app.start()
