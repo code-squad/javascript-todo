@@ -103,3 +103,8 @@ TodoUI.prototype.printResult = function(result) {
 TodoUI.prototype.printError = function() {
     return console.error('입력하신 값이 존재하지않습니다. \n');
 }
+
+
+TodoUI.prototype.getIndex = function(inputId) {
+    return datalist.map((element) => { return element["id"]}).indexOf(inputId);
+}
