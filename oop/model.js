@@ -28,4 +28,16 @@ module.exports = function Model() {
         fs.writeFileSync('todo.json', JSON.stringify(todoList));
         return objToDelete;
     }
+
+    this.updateTodoObject = (id, status) => {
+        let objToUpdate;
+        todoList.forEach((todoObj) => {
+            if(todoObj.id === parseInt(id)) {
+                todoObj.status = status;
+                fs.writeFileSync('todo.json', JSON.stringify(todoList));
+                objToUpdate = todoObj;
+            }
+        });
+        return objToUpdate;
+    }
 }

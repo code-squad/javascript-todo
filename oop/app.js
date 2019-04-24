@@ -11,8 +11,8 @@ const rl = readLine.createInterface({
         const command = inputArray[0];
         switch(command) {
             case 'show' :
-                const status = inputArray[1];
-                controller.show(status);
+                const statusShow = inputArray[1];
+                controller.show(statusShow);
                 break;
             case 'add' :
                 const name = inputArray[1];
@@ -20,8 +20,14 @@ const rl = readLine.createInterface({
                 controller.add(name, tag);
                 break;
             case 'delete' :
-                const id = inputArray[1];
-                controller.delete(id);
+                const idDelete = inputArray[1];
+                controller.delete(idDelete);
+                break;
+            case 'update' :
+                const idUpdate = inputArray[1];
+                const statusUpdate = inputArray[2];
+                controller.update(idUpdate, statusUpdate);
+                break;
         }
     });
 })();
