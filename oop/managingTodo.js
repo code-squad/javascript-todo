@@ -7,23 +7,23 @@ ManagingTodo.prototype.addTodo = function(todo) {
 };
 
 ManagingTodo.prototype.showAll = function() {
-  const countedStatus = this.managedlist.reduce((acc, cur) => {
+  const countedStatusObj = this.managedlist.reduce((acc, cur) => {
     acc[cur.status] = acc.hasOwnProperty(cur.status) ? acc[cur.status] + 1 : 1;
     return acc;
   }, {});
 
-  return Object.entries(countedStatus).reduce(
+  return Object.entries(countedStatusObj).reduce(
     (acc, cur) => (acc += `${cur[0]} : ${cur[1]}개 `),
     `현재상태 : `
   );
 };
 
 ManagingTodo.prototype.showStatus = function(status = 'todo') {
-  const filteredByStatus = this.managedlist
+  const filteredArrByStatus = this.managedlist
     .filter(todo => todo.status === status)
     .map(todo => todo.name);
 
-  return `총 ${filteredByStatus.length}건 : ${filteredByStatus.join(', ')}`;
+  return `${status} 총 ${filteredArrByStatus.length}건 : ${filteredArrByStatus.join(', ')}`;
 };
 
 module.exports = ManagingTodo;
