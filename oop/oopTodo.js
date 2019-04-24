@@ -1,3 +1,5 @@
+const data = require('./data');
+const datalist = data.todos;
 const readline = require('readline');
 const inputReadline = readline.createInterface({
     input: process.stdin,
@@ -5,10 +7,11 @@ const inputReadline = readline.createInterface({
 });
 
 
-const TodoUI = function () { };
+const TodoUI = function () {};
 
+// addTodo
 TodoUI.prototype.addTodoExecutor = function (todoElement, todoTag) {
-    addTodoList(todoElement, todoTag);
+    this.addTodoList(todoElement, todoTag);
 }
 
 TodoUI.prototype.addTodoList = function (todoElement, todoTag) {
@@ -19,19 +22,18 @@ TodoUI.prototype.addTodoList = function (todoElement, todoTag) {
     list.id = parseInt(Math.random() * 10000);
     datalist.push(format);
 
-    return addTodoResult(listFormat);
+    return this.addTodoResult(listFormat);
 }
 
 
 TodoUI.prototype.addTodoResult = function (newAddedObject) {
     let addlistResult = `${newAddedObject["name"]} 1개가 추가됐습니다.(id : ${newAddedObject["id"]})`;
-    return setTimeoutShowAll(addlistResult);
+    return this.setTimeoutShowAll(addlistResult);
 }
 
 // deleteTodo
-
 TodoUI.prototype.deleteTodoExecutor = function (deleteID) {
-    return checkValidation(deleteID) ? deleteTodoResult(deleteID) : printError()
+    return this.checkValidation(deleteID) ? this.deleteTodoResult(deleteID) : this.printError()
 };
 
 
@@ -40,19 +42,18 @@ TodoUI.prototype.deleteTodoList = function (deletedIndex) {
 };
 
 TodoUI.prototype.deleteTodoResult = function (deletedID) {
-    let deletedIndex = getIndex(deletedID);
-    deleteTodoList(deletedIndex);
+    let deletedIndex = this.getIndex(deletedID);
+    this.deleteTodoList(deletedIndex);
     let deletionResult = `${datalist[deletedIndex]['name']}가 ${datalist[deletedIndex]['status']}에서 삭제되었습니다.`
 
-    return showAll_printResult(deletionResult);
+    return this.showAll_printResult(deletionResult);
 };
 
 
 // updateTodo
-
 TodoUI.prototype.updateTodoExecutor = function (id, updatedstatus) {
     setTimeout(() => {
-        return checkValidation(id) ? updateTodoResult(id, updatedstatus) : printError()
+        return this.checkValidation(id) ? this.updateTodoResult(id, updatedstatus) : this.printError()
     }, 3000)
 };
 
@@ -64,16 +65,16 @@ TodoUI.prototype.updateTodoStatus = function (updatingIndex, updatedstatus) {
 
 TodoUI.prototype.updateTodoResult = function (id, updatedStatus) {
     let getUpdatatingIndex = getIndex(id);
-    updateTodoStatus(getUpdatatingIndex, updatedStatus);
+    this.updateTodoStatus(getUpdatatingIndex, updatedStatus);
     let updateResult = `${datalist[getUpdatatingIndex].name} 가 ${updatedStatus}로 상태가 변경됬습니다.`;
-    return showAll_printResult(updateResult);
+    return this.showAll_printResult(updateResult);
 };
 
 
 TodoUI.prototype.showTodoList = function (status) {
-    let todoList = statusChecker(datalist, 'todo');
-    let doingList = statusChecker(datalist, 'doing');
-    let doneList = statusChecker(datalist, 'done');
+    let todoList = this.statusChecker(datalist, 'todo');
+    let doingList = this.statusChecker(datalist, 'doing');
+    let doneList = this.statusChecker(datalist, 'done');
 
     switch (status) {
         case 'all':
@@ -93,7 +94,7 @@ TodoUI.prototype.showTodoList = function (status) {
 TodoUI.prototype.showAll_printResult = function (result) {
     printResult(result);
     setTimeout(() => {
-        printResult((show('all')));
+        this.printResult((show('all')));
     }, 1000);
 }
 
@@ -130,8 +131,9 @@ TodoUI.prototype.checkValidation = function (inputVal) {
 
 
 TodoUI.prototype.checkCommands = function (userInput, inputReadline) {
-    const splitUserInput = todoList.splitInputVal(userInput);
-    if (input.split('$').length < 2 || input.split('$').length > 3) {
+    console.log(userInput);
+    const splitUserInput = this.splitInputVal(userInput);
+    if (userInput.split('$').length < 2 || userInput.split('$').length > 3) {
         console.log("입력값을 확인해주세요");
         inputReadline.prompt();
         return;
@@ -140,39 +142,39 @@ TodoUI.prototype.checkCommands = function (userInput, inputReadline) {
     const [command, commandElement, TagORStatusOfcommandElement] = splitUserInput;
 
     if (command === 'show') {
-        todoList.printResult(todoList.showTodoList(commandElement));
+        this.printResult(this.showTodoList(commandElement));
 
     } else if (command === 'add') {
-        todoList.addTodoExecutor(commandElement, TagORStatusOfcommandElement);
+        this.addTodoExecutor(commandElement, TagORStatusOfcommandElement);
 
     } else if (command === 'update') {
-        todoList.updateTodoExecutor(Number(commandElement), TagORStatusOfcommandElement);
+        this.updateTodoExecutor(Number(commandElement), TagORStatusOfcommandElement);
 
     } else if (command === 'delete') {
-        todoList.deleteTodoExecutor(Number(commandElement));
+        this.deleteTodoExecutor(Number(commandElement));
 
     } else {
-        todoList.printError();
+        this.printError();
     }
 
 }
 
 
-const todoList = Object.create(TodoUI);
+const todoList = new TodoUI();
 
 
 todoList.executor = function () {
-    inputReadline.setPrompt('명령어를 입력하세요(종료하려면 q를 누르세요)');
-    inputReadline.prompt();
-    inputReadline.on('line', function (line) {
+inputReadline.setPrompt('명령어를 입력하세요(종료하려면 q를 누르세요): ');
+inputReadline.prompt();
+inputReadline.on('line', function (line) {
 
-        if (line === "q") inputReadline.close();
-        checkCommands(line, inputReadline);
-    })
+    if (line === "q") inputReadline.close();
+    todoList.checkCommands(line, inputReadline);
+})
 
-        .on('close', function () {
-            console.log('프로그램이 종료되었습니다.');
-            process.exit();
-        });
+    .on('close', function () {
+        console.log('프로그램이 종료되었습니다.');
+        process.exit();
+    });
 };
 todoList.executor();
