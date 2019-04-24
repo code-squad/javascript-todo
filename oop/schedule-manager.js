@@ -5,10 +5,11 @@ function App(){
 
 }
 
-App.prototype.run = function(){
+App.prototype.run = function(input){
     // 콘솔에서 입력받아서 parseCommand 함수를 실행하도록 한다.
     // 파즈커맨드에서 반환받은 값을 받탕으로 컨트롤러를 실행한다.
-    
+    [key, ...message] =  this.parseCommand(input)
+    Controller.prototype[key+'Todo'](...message)
     // exit을 입력받을때까지 끊임없이 동작하도록 한다.
 }
 
@@ -21,6 +22,8 @@ App.prototype.run = function(){
 App.prototype.parseCommand = function(input){
     // run 에서 입력값을 받아서 입력값이 첫번쨰 커맨드를 key로 받고, 나머지를 key에 들어갈 인자로 분류한다.
     // key에 맞는 명령을 컨트롤러에서 실행하도록 하고, 이떄 분류한 나머지를 컨트롤러의 함수의 인자로 들어가도록한다. 
+    [key, ...message] = input.split('$');
+    return [key, ...message] 
 }
 
 
@@ -29,16 +32,17 @@ App.prototype.parseCommand = function(input){
 function Controller(){
 }
 
-Controller.prototype.todoObject(name,tag) = {
-    id : this.getUniqueId(),
-    name: name,
-    tag: tag,
-    status: todo
-}
+// Controller.prototype.todoObject(name,tag) = {
+//     id : this.getUniqueId(),
+//     name: name,
+//     tag: tag,
+//     status: todo
+// }
 
 //show$all
 //show$todo
 Controller.prototype.showTodo = function (status){
+    console.log(status);
     // 인자를 분류하여 Show 객체의 showAll 또는 showFilter를 실행시켜준다.
     // showFilter에는 status를 인자로 넘겨준다.
 }
@@ -80,8 +84,6 @@ Show.prototype.showFiltered = function(status){
     // 배열의 인자들을 한줄로 출력한다. 
 }
 
-const show = new Show();
-const controller = new Controller();
 const schedule_manager = new App();
 
-schedule_manager.run();
+schedule_manager.run('show$all');
