@@ -9,6 +9,7 @@ const {log} = console;
 function App(){
     this.editor = new Editor();
     this.viewer = new Viewer();
+    
 }
 
 // 'show$todo'
@@ -25,7 +26,7 @@ App.prototype.run = function(input){
         return status === "all" ? this.viewer.showAll() : this.viewer.showFiltered(status);
     }
     this.editor[key+'Todo'](...message);
-    this.viewer[key+'Message']();
+    this.viewer[key+'Message'](...message);
     this.viewer.showAll()
     // exit을 입력받을때까지 끊임없이 동작하도록 한다.
 }
@@ -111,11 +112,7 @@ Viewer.prototype.showAll = function(){
    },{});
    
 
-   const showAllResult = Object.entries(statusBox).map(el=>{
-       const [key,value] = el
-       return `${key}는 ${value}개`;
-   }).join(", ");
-
+   const showAllResult = Object.entries(statusBox).map(([key,value]) => `${key}는 ${value}개`).join(", ");
    console.log(`현재상태 : ${showAllResult}`);
 }
 
