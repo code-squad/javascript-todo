@@ -1,3 +1,5 @@
+const Todo = require('./todo');
+
 function ManagingTodo() {
   this.managedlist = [];
   this.countedStatus = { todo: 0, doing: 0, done: 0 };
@@ -8,8 +10,9 @@ ManagingTodo.prototype.addTodo = function(todos) {
     todos = [todos];
   }
   todos.forEach(todo => {
-    this.managedlist.push(todo);
-    this.countedStatus[todo.status] += 1;
+    const newTodo = new Todo(todo);
+    this.managedlist.push(newTodo);
+    this.countedStatus[newTodo.status] += 1;
   });
 };
 

@@ -1,7 +1,7 @@
-function Todo(name, tags, status) {
-  this.name = name;
-  this.tags = tags;
-  this.status = status;
+function Todo(obj) {
+  this.name = obj.name;
+  this.tags = obj.tags;
+  this.status = obj.status;
   this.id = Todo.prototype.generateId();
 }
 
