@@ -26,7 +26,10 @@ Model.prototype = {
         const targetIndex = this.getIndex(id)
         this.todoList.splice(targetIndex, 1)
     },
-    updateData() { },
+    updateData(id, status) {
+        const targetIndex = this.getIndex(id)
+        this.todoList[targetIndex].status = status
+    },
     makeId() {
         return ((1 + Math.random()) * 0x10000 | 0).toString(16).substring(1)
     },
@@ -60,7 +63,9 @@ View.prototype = {
         console.log(`${name} ${status}가 목록에서 삭제되었습니다.`)
 
     },
-    showUpdateResult() { },
+    showUpdateResult(name, status) {
+        console.log(`${name}이(가) ${status}으로 상태가 변경되었습니다.`)
+    },
 }
 
 const Controller = function () {
@@ -101,7 +106,11 @@ Controller.prototype = {
         this.model.deleteData(id)
         this.view.showDeleteResult(name, status)
     },
-    updateData() { },
+    updateData(id, status) {
+        this.model.updateData(id, status);
+        const name = this.model.findData('id', id)[0].name
+        this.view.showUpdateResult(name, status)
+    },
 }
 
 
