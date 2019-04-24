@@ -9,10 +9,22 @@ const Model = function () {
 }
 Model.prototype = {
     findData() { },
-    addData() { },
+    addData(name, tags) {
+        tags = tags.replace(/\[|\]|\"|\'/g, '').split(',')
+        const id = this.makeId()
+        const todoData = {
+            name,
+            tags,
+            status: 'todo',
+            id
+        }
+        this.todoList.push(todoData)
+    },
     deleteData() { },
     updateData() { },
-    makeId() { }
+    makeId() {
+
+    }
 }
 
 const View = function () {
@@ -36,7 +48,11 @@ Controller.prototype = {
         if (type === 'all') this.showAll()
         this.showEachData()
     },
-    addData() { },
+    addData(name, tags) {
+        this.model.addData(name, tags);
+        const id = this.model.findData(name).id
+        this.view.showAddResult(name, id);
+    },
     deleteData() { },
     updateData() { },
 }
