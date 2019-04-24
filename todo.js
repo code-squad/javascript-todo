@@ -8,7 +8,9 @@ const Model = function () {
     this.todoList = []
 }
 Model.prototype = {
-    findData() { },
+    findData(key, value) {
+        return this.todoList.filter(todoData => todoData[key] === value)
+    },
     addData(name, tags) {
         tags = tags.replace(/\[|\]|\"|\'/g, '').split(',')
         const id = this.makeId()
@@ -23,7 +25,7 @@ Model.prototype = {
     deleteData() { },
     updateData() { },
     makeId() {
-
+        return ((1 + Math.random()) * 0x10000 | 0).toString(16).substring(1)
     }
 }
 
@@ -32,7 +34,9 @@ const View = function () {
 View.prototype = {
     showAll() { },
     showEachData() { },
-    showAddResult() { },
+    showAddResult(name, id) {
+        console.log(`${name} 1개가 추가되었습니다. (id : ${id})`)
+    },
     showDeleteResult() { },
     showUpdateResult() { },
 }
@@ -50,7 +54,7 @@ Controller.prototype = {
     },
     addData(name, tags) {
         this.model.addData(name, tags);
-        const id = this.model.findData(name).id
+        const id = this.model.findData('name', name)[0].id
         this.view.showAddResult(name, id);
     },
     deleteData() { },
