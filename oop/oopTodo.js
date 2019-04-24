@@ -61,3 +61,23 @@ TodoUI.prototype.updateTodoResult = function(id, updatedStatus) {
     let updateResult = `${datalist[getUpdatatingIndex].name} 가 ${updatedStatus}로 상태가 변경됬습니다.`;
     return showAll_printResult(updateResult);
 };
+
+
+TodoUI.prototype.showTodoList = function(status) {
+    let todoList = statusChecker(datalist, 'todo');
+    let doingList = statusChecker(datalist, 'doing');
+    let doneList = statusChecker(datalist, 'done');
+
+    switch(status) {
+        case 'all':
+          return `현재상태 : todo: ${todoList.length}개, doing: ${doingList.length}개, done: ${doneList.length}개 \n`
+        case 'todo':
+          return `todo리스트 : 총 ${todoList.length} 건 : ${todoList} \n`
+        case 'doing':
+          return `doing리스트 : 총 ${doingList.length} 건 : ${doingList} \n`;
+        case 'done':
+          return `done리스트 : 총 ${doneList.length} 건 : ${doneList} \n`
+        default:
+          return '입력하신 값이 존재하지않습니다. \n';
+    }
+}
