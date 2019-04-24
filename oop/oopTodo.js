@@ -50,7 +50,14 @@ TodoUI.prototype.updateTodoExecutor = function(id, updatedstatus) {
 };
 
 
-TodoUI.prototype.updateTodostatus = function(updatingIndex, updatedstatus) {
+TodoUI.prototype.updateTodoStatus = function(updatingIndex, updatedstatus) {
     return datalist[updatingIndex].status = updatedstatus;
 }; 
 
+
+TodoUI.prototype.updateTodoResult = function(id, updatedStatus) {
+    let getUpdatatingIndex = getIndex(id);
+    updateTodoStatus(getUpdatatingIndex, updatedStatus);
+    let updateResult = `${datalist[getUpdatatingIndex].name} 가 ${updatedStatus}로 상태가 변경됬습니다.`;
+    return showAll_printResult(updateResult);
+};
