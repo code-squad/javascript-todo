@@ -27,3 +27,8 @@ TodoUI.prototype.deleteTodoExecutor = function(deleteID) {
     return checkValidation(deleteID) ? deleteTodoResult(deleteID) : printError()
 };
 
+
+TodoUI.prototype.deleteTodoList = function(deletedIndex) {
+    return datalist.splice(deletedIndex, 1);
+};
+
