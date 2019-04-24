@@ -95,20 +95,26 @@ Viewer.prototype.showAll = function(){
    },{});
    
 
-   const showAllresult = Object.entries(statusBox).map(el=>{
+   const showAllResult = Object.entries(statusBox).map(el=>{
        const [key,value] = el
        return `${key}는 ${value}개`;
    }).join(", ");
 
-   console.log(`현재상태 : ${showAllresult}`);
-    log('showall is run')
+   console.log(`현재상태 : ${showAllResult}`);
 }
 
 // show$status
 Viewer.prototype.showFiltered = function(status){
-    // showTodo에서 넘겨받은 status를  scheduled_list에서 가지고 있는 객체를 찾아 배열로 만든다.
+    // run에서 넘겨받은 status를  scheduled_list에서 가지고 있는 객체를 찾아 배열로 만든다.
+
+    const showFilteredResult = schedule_list.filter(todo => {
+        return todo.status === status;
+    }).map(todo => {
+        return `'${todo.name}, ${todo.id}번'`;
+    });
+
     // 배열의 인자들을 한줄로 출력한다. 
-    console.log('showFIlter is run')
+    console.log(`${status}리스트 : 총${showFilteredResult.length}건 : ${showFilteredResult.join(', ')}`);
 
 }
 
