@@ -1,9 +1,10 @@
 const Todo = require('./todo');
 const msg = require('./msg');
 
-function ManagingTodo(data) {
+function ManagingTodo(data, prompt) {
   this.countedStatus = { todo: 0, doing: 0, done: 0 };
   this.managedlist = this.initManagedlist(data);
+  this.prompt = prompt;
 }
 
 ManagingTodo.prototype.initManagedlist = function(data) {
@@ -45,6 +46,7 @@ ManagingTodo.prototype.show = function(condition) {
     outputStr = this.filterbyStatus(condition);
   }
   console.log(outputStr);
+  this.prompt.prompt();
 };
 
 ManagingTodo.prototype.delete = function(id) {
