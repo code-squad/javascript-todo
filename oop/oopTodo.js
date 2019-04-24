@@ -141,6 +141,14 @@ TodoUI.prototype.createNewID = (datalist, maxNumOfID) => {
 }
 
 
+const checkID = (inputID) => {
+    const [matchedListByID] = datalist.filter(list => {
+        return list.id == inputID
+    })
+    return matchedListByID;
+}
+
+
 TodoUI.prototype.checkCommands = function (userInput, inputReadline) {
     console.log(userInput);
     const splitUserInput = this.splitInputVal(userInput);
