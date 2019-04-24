@@ -11,6 +11,10 @@ function App(){
     this.viewer = new Viewer();
 }
 
+// 'show$todo'
+// 'add$운동하기$exercise'
+// 'update$7$doing'
+// 'delete$7'
 
 App.prototype.run = function(input){
     // 콘솔에서 입력받아서 parseCommand 함수를 실행하도록 한다.
@@ -21,6 +25,7 @@ App.prototype.run = function(input){
         return status === "all" ? this.viewer.showAll() : this.viewer.showFiltered(status);
     }
     this.editor[key+'Todo'](...message);
+    this.viewer[key+'Message']();
     this.viewer.showAll()
     // exit을 입력받을때까지 끊임없이 동작하도록 한다.
 }
@@ -69,10 +74,8 @@ Editor.prototype.addTodo = function(name,tag){
 
     const newId = this.getUniqueId()
     const newTodoObject = new this.TodoObject(name,tag,newId);
-    log(newTodoObject);
     schedule_list.push(newTodoObject);
     
-    log('addTodo is run')
 }
 
 //update$id$status
@@ -127,9 +130,26 @@ Viewer.prototype.showFiltered = function(status){
     console.log(`${status}리스트 : 총${showFilteredResult.length}건 : ${showFilteredResult.join(', ')}`);
 
 }
+Viewer.prototype.addMessage = function(name,tag){
+    // 인자로 넘어온 name에 맞는 id를 찾으면 됨. 
+    // console.log(`${name}이 추가되었습니다. (id :${id}`);
+    log('add메세지출력')
+}
+Viewer.prototype.updateMessage = function(id,status){
+    // 인자로 넘어온 id의 이름만 찾으면 됨
+    // console.log(`${name}의 상태가 ${status}로 변경되었습니다.`);
+    log('update메세지출력')
+}
+Viewer.prototype.deleteMessage = function(id){
+    // 인자로 넘어온 id에 맞는 name, status를 찾으면 됨
+    // console.log(`${name} ${status}가 목록에서 삭제 되었습니다.`);
+    log('delete메세지출력')
+}
 
 const schedule_manager = new App();
 
 schedule_manager.run('show$all');
 schedule_manager.run('show$todo');
 schedule_manager.run('add$운동하기$exercise');
+schedule_manager.run('update$7$doing');
+schedule_manager.run('delete$7');
