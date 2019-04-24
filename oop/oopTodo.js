@@ -89,3 +89,8 @@ TodoUI.prototype.showAll_printResult = function(result) {
         printResult((show('all')));
     }, 1000);
 } 
+
+TodoUI.prototype.splitInputVal = function(inputData) {
+    let splitOnDollarSymbol = inputData.split("$");
+    return splitOnDollarSymbol
+}
