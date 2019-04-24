@@ -32,3 +32,12 @@ TodoUI.prototype.deleteTodoList = function(deletedIndex) {
     return datalist.splice(deletedIndex, 1);
 };
 
+TodoUI.prototype.deleteTodoResult = function(deletedID) {
+    let deletedIndex = getIndex(deletedID);
+    deleteTodoList(deletedIndex);
+    let deletionResult =  `${datalist[deletedIndex]['name']}가 ${datalist[deletedIndex]['status']}에서 삭제되었습니다.`
+    
+    return showAll_printResult(deletionResult);
+    };
+    
+
