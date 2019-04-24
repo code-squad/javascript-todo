@@ -57,4 +57,17 @@ ManagingTodo.prototype.delete = function(id) {
   this.show('all');
 };
 
+ManagingTodo.prototype.update = function(id, changeStatus) {
+  if (typeof id === 'string') {
+    id = parseInt(id);
+  }
+  const changeTodo = this.managedlist.find(todo => todo.id === id);
+
+  this.countedStatus[changeTodo.status] -= 1;
+  this.countedStatus[changeStatus] += 1;
+  changeTodo.status = changeStatus;
+
+  this.show('all');
+};
+
 module.exports = ManagingTodo;

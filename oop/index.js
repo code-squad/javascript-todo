@@ -16,4 +16,4 @@ managingTodo.show('all');
 managingTodo.show('todo');
 managingTodo.show('doing');
 managingTodo.delete(1);
-// managingTodo.update('3', 'doing');
+managingTodo.update('3', 'doing');
