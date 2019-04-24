@@ -19,6 +19,9 @@ const rl = readLine.createInterface({
                 const tag = inputArray[2];
                 controller.add(name, tag);
                 break;
+            case 'delete' :
+                const id = inputArray[1];
+                controller.delete(id);
         }
     });
 })();

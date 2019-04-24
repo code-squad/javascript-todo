@@ -21,8 +21,14 @@ module.exports = function Controller(input) {
 
     this.add = (name, tag) => {
         const todoObj = {'name': name, 'status': 'todo', 'tags': tag.match(/[a-z0-9]+/g), 'id': utility.getRandomID()};
-        model.addTodoList(todoObj);
+        model.addTodoObject(todoObj);
         console.log(`${todoObj.name} 1개가 추가됐습니다. (id: ${todoObj.id})`);
+        setTimeout( () => { this.show('all'); }, 1000);
+    }
+
+    this.delete = (id) => {
+        const objToDelete = model.deleteTodoObject(id);
+        console.log(`${objToDelete.name}이 ${objToDelete.status}가 목록에서 삭제됐습니다.`);
         setTimeout( () => { this.show('all'); }, 1000);
     }
 }

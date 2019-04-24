@@ -17,8 +17,15 @@ module.exports = function Model() {
                         }, []);
     }
 
-    this.addTodoList = (todoObj) => {
+    this.addTodoObject = (todoObj) => {
         todoList.push(todoObj);
         fs.writeFileSync('todo.json', JSON.stringify(todoList));
+    }
+
+    this.deleteTodoObject = (id) => {
+        const objToDelete = todoList.find(todoObj => todoObj.id === parseInt(id));
+        todoList.splice(todoList.indexOf(objToDelete), 1);
+        fs.writeFileSync('todo.json', JSON.stringify(todoList));
+        return objToDelete;
     }
 }
