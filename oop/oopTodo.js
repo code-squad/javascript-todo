@@ -15,3 +15,8 @@ TodoUI.prototype.addTodoList = function(todoElement, todoTag) {
     return addTodoResult(listFormat);
 }
 
+
+TodoUI.prototype.addTodoResult = function (newAddedObject) {
+    let addlistResult = `${newAddedObject["name"]} 1개가 추가됐습니다.(id : ${newAddedObject["id"]})`; 
+    return setTimeoutShowAll(addlistResult);
+} 
