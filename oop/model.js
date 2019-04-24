@@ -1,4 +1,5 @@
 const todoList = require('./todo.json')
+const fs = require('fs')
 
 module.exports = function Model() {
     this.getCountEachStatus = () => {
@@ -14,5 +15,10 @@ module.exports = function Model() {
                             listInStatus.push(`'${todoObj.name}, ${todoObj.id}번'`);
                             return listInStatus;
                         }, []);
-    } 
+    }
+
+    this.addTodoList = (todoObj) => {
+        todoList.push(todoObj);
+        fs.writeFileSync('todo.json', JSON.stringify(todoList));
+    }
 }
