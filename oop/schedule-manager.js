@@ -2,14 +2,15 @@
 const schedule_list = require('./data');
 
 function App(){
-
+    this.controller = new Controller();
+    this.view = new View();
 }
 
 App.prototype.run = function(input){
     // 콘솔에서 입력받아서 parseCommand 함수를 실행하도록 한다.
     // 파즈커맨드에서 반환받은 값을 받탕으로 컨트롤러를 실행한다.
     [key, ...message] =  this.parseCommand(input)
-    Controller.prototype[key+'Todo'](...message)
+    this.controller[key+'Todo'](...message);
     // exit을 입력받을때까지 끊임없이 동작하도록 한다.
 }
 
@@ -43,7 +44,7 @@ function Controller(){
 //show$todo
 Controller.prototype.showTodo = function (status){
 
-    status === "all" ? Show.prototype.showAll() : Show.prototype.showFiltered(status); 
+    status === "all" ? View.prototype.showAll() : View.prototype.showFiltered(status); 
     
 
     // 인자를 분류하여 Show 객체의 showAll 또는 showFilter를 실행시켜준다.
@@ -72,18 +73,18 @@ Controller.prototype.getUniqueId = function(){
     // 유니크한  숫자를 만들고 반환한다. 
 }
 
-function Show(){
+function View(){
 
 }
 
-Show.prototype.showAll = function(){
+View.prototype.showAll = function(){
     // schdule_list에서 상태(todo,doing,done)에 맞게 값을 가지고 있는 객체,또는 배열을 만든다.
     // 객체또는 배열의 인자를  한줄로 출력한다. 
-    console.log('showAll is run')
+    
 }
 
 // show$status
-Show.prototype.showFiltered = function(status){
+View.prototype.showFiltered = function(status){
     // showTodo에서 넘겨받은 status를  scheduled_list에서 가지고 있는 객체를 찾아 배열로 만든다.
     // 배열의 인자들을 한줄로 출력한다. 
     console.log('showFIlter is run')
