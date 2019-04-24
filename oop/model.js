@@ -7,4 +7,12 @@ module.exports = function Model() {
             return countEachStatus;
         }, {'todo' : 0, 'doing': 0, 'done': 0});
     }
+
+    this.getListInStatus = (status) => {
+        return todoList.filter((todoObj) => { return todoObj.status === status; })
+                        .reduce((listInStatus, todoObj) => {
+                            listInStatus.push(`'${todoObj.name}, ${todoObj.id}번'`);
+                            return listInStatus;
+                        }, []);
+    } 
 }
