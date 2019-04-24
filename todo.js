@@ -45,11 +45,19 @@ Controller.prototype = {
 const Util = function () {
 }
 Util.prototype = {
-    parseCommand() { },
-    getKeyCommand() { },
-    getRestCommand() { },
-
-
+    parseCommand(command) {
+        return command.split('$');
+    },
+    getKeyCommand(command) {
+        const KeyMap = {
+            'show': 'showData',
+            'add': 'addData',
+            'delete': 'deleteData',
+            'update': 'updateData'
+        }
+        const keyCommand = command.shift();
+        return KeyMap[keyCommand]
+    }
 }
 
 const app = {
@@ -60,7 +68,7 @@ const app = {
             if (command === 'q') rl.close()
             command = util.parseCommand(command)
             const keyCommand = util.getKeyCommand(command);
-            const restCommand = util.getRestCommand(command);
+            const restCommand = command;
             controller[keyCommand](...restCommand)
             rl.prompt()
         })
@@ -68,7 +76,6 @@ const app = {
             process.exit()
         })
     }
-
 }
 
 const util = new Util();
