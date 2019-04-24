@@ -49,3 +49,8 @@ TodoUI.prototype.updateTodoExecutor = function(id, updatedstatus) {
     }, 3000)
 };
 
+
+TodoUI.prototype.updateTodostatus = function(updatingIndex, updatedstatus) {
+    return datalist[updatingIndex].status = updatedstatus;
+}; 
+
