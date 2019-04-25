@@ -44,11 +44,19 @@ module.exports = class todo {
 		console.log(outputString);
 	}
 	// 	// add
-	// 	// 매개변수 name,tag
-	// 	// id생성
-	// 	// name과 id tag 로 만들어진 데이터 추가
-	// 	// showall 1초뒤에 실행
-	// 	add([name, tag],rl){
+	add(conditions, readline) {
+		const name = conditions[0];
+		const tag = conditions[1];
+
+		const id = this.getId();
+		const newData = {
+			name: name,
+			tags: tag,
+			status: 'todo',
+			id: id
+		};
+		todoList.push(newData);
+	}
 	// 		add$name$["tag1"]
 	// 		tag !==tag
 	// 		console err
