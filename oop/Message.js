@@ -7,18 +7,6 @@ const ERR_MSG = {
     "SAME_STATUS" : "같은 상태로 업데이트가 불가능합니다."
 }
 
-const NOTE_FUNC = ({inst, name, id, status, str}) => {
-    const NOTE_INST = {
-        "add" : `${name} 1개가 추가됐습니다.(id : ${id})`,
-        "update" : `${name}가 ${status}으로 상태가 변경됐습니다`,
-        "delete" : `${name} ${status}가 목록에서 삭제됐습니다`,
-        "showAll" : str,
-        "showStatus": str
-    }
-    console.log(NOTE_INST[inst])
-}
-
 module.exports = {
-    NOTE_FUNC,
     ERR_MSG
 }

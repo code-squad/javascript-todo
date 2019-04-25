@@ -1,12 +1,13 @@
 const Validation = require('./Validation.js')
 const validation = new Validation()
-const NOTE_FUNC = require('./Message').NOTE_FUNC
 const todoList = []
 let incrementId = 0
 
+const sleep = msec => new Promise(resolve => setTimeout(resolve, msec))
+
 function Todos() {}
 
-Todos.prototype.add = function (name, tag) {
+Todos.prototype.add = async function (name, tag) {
     const todo = {
         id: generateId(),
         name,
@@ -14,26 +15,31 @@ Todos.prototype.add = function (name, tag) {
         tag: tag.replace(/\[|\]|\"|\'|\s/g, "").split(",")
     }
     todoList.push(todo)
-    NOTE_FUNC({inst: "add", id: todo.id, name: todo.name})
+    console.log(`${todo.name} 1개가 추가됐습니다.(id : ${todo.id})`)
+    await sleep(1000)
+    this.show("all")
 }
 
-Todos.prototype.delete = function (id) {
+Todos.prototype.delete = async function (id) {
     let index = validation.isExisted(todoList, Number(id))
     if (index === -1) throw Error("NOT_EXIST_ID")
     let {name, status} = todoList[index]
     delete todoList[index]
-
-    NOTE_FUNC({inst: "delete", name, status })
+    console.log(`${name} ${status}가 목록에서 삭제됐습니다`)
+    await sleep(1000)
+    this.show("all")
 }
 
-Todos.prototype.update = function (id, status) {
+Todos.prototype.update = async function (id, status) {
     let index = validation.isExisted(todoList, Number(id))
     if (index === -1) throw Error("NOT_EXIST_ID")
     else if (!validation.isCorrectStatus(status)) throw Error("INCORRECT_STATUS")
     else if (validation.isSameStatus(todoList[index], status)) throw Error("SAME_STATUS")
     todoList[index].status = status
-
-    NOTE_FUNC({inst: "update", name: todoList[index].name, status})
+    await sleep(3000)
+    console.log(`${todoList[index].name}가 ${todoList[index].status}으로 상태가 변경됐습니다`)
+    await sleep(1000)
+    this.show("all")
 }
 
 Todos.prototype.show = function (status) {
@@ -43,7 +49,8 @@ Todos.prototype.show = function (status) {
         "doing": showStatus,
         "done": showStatus
     }
-    option[status](status)
+
+    console.log(option[status](status))
 }
 
 const generateId = function () {
@@ -58,7 +65,7 @@ const showAll = function () {
         "done": getCountByStatus("done")
     }
     str += Object.entries(counts).map(([k, v]) => `${k}: ${v}개`).join(", ")
-    NOTE_FUNC({inst:"showAll", str})
+    return str
 }
 
 const showStatus = function (status) {
@@ -67,7 +74,7 @@ const showStatus = function (status) {
     let list = getListByStatus(status)
     str += `${status}리스트 : 총${count}건 : `
     str += list.map(el => `'${el.name}, ${el.id}번'`).join(", ")
-    NOTE_FUNC({inst:"showStatus", str})
+    return str
 }
 
 const getCountByStatus = status => todoList.filter(el => el.status === status).length

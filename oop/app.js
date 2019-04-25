@@ -24,7 +24,7 @@ const getCommand = (command) => {
 rl.setPrompt("명령어를 입력하세요 : ")
 rl.prompt()
 
-rl.on("line", (command) => {
+rl.on("line", async (command) => {
     if (command === "quit") {
         rl.close()
     } 
@@ -34,11 +34,15 @@ rl.on("line", (command) => {
             if(todos[inst].length !== params.length) {
                 throw Error("LACK_PARAMETER")
             }
-            todos[inst](...params)
+            await todos[inst](...params)
         } catch(e) {
+            console.log(e)
             console.log('\x1b[31m%s\x1b[0m',"Error : " + ERR_MSG[e.message])
         }
+
         rl.prompt()
+        
+        
     }
 }).on("close", () => {
     process.exit()
