@@ -7,7 +7,8 @@ Todos.prototype.add = function (name, tag) {
     const todo = {
         id: generateId(),
         name,
-        tag
+        status: "todo",
+        tag: tag.replace(/\[|\]|\"|\'|\s/g, "").split(",")
     }
     todoList.push(todo)
 }
@@ -38,11 +39,20 @@ const generateId = function () {
 }
 
 const showAll = function () {
-    return todoList
+    let str = "현재 상태 : "
+    const counts = {
+        "todo": getCountByStatus("todo"),
+        "doing": getCountByStatus("doing"),
+        "done": getCountByStatus("done")
+    }
+    str += Object.entries(counts).map(([k, v]) => `${k}: ${v}개`).join(", ")
+    return str
 }
 
 const showStatus = function (status) {
     return todoList
 }
+
+const getCountByStatus = status => todoList.filter(el => el.status === status).length
 
 module.exports = Todos
