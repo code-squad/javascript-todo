@@ -1,32 +1,33 @@
-const Printer = require('./printer');
+const Printer = require('./printer')
 const Finder = require('./finder')
 
-module.exports = function ErrorHandler() {
-    const printer = new Printer();
-    const finder = new Finder();
+const printer = new Printer();
+const finder = new Finder();
 
-    this.usageErrorCheck = (input) => {
-        if(!(input.match(/\$/))) {
-            printer.printUsage();
-            return false;
-        }
-        return true;
-    }
+function ErrorHandler() {}
 
-    this.notExistIdErrorCheck = (idDelete) => {
-        if(!(finder.getObjectById(idDelete))) {
-            printer.printNotExistErrorMessage();
-            return false;
-        }
-        return true;
+ErrorHandler.prototype.usageErrorCheck = function (input) {
+    if(!(input.match(/\$/))) {
+        printer.printUsage();
+        return false;
     }
-    
-    this.sameStatusErrorCheck = (idUpdate, statusToChange) => {
-        if(finder.getObjectById(idUpdate).status === statusToChange) {
-            printer.printSameStatusErrorMessage();
-            return false;
-        }
-        return true;
-    }
+    return true;
 }
 
+ErrorHandler.prototype.notExistIdErrorCheck = function (idDelete) {
+    if(!(finder.getObjectById(idDelete))) {
+        printer.printNotExistErrorMessage();
+        return false;
+    }
+    return true;
+}
+
+ErrorHandler.prototype.sameStatusErrorCheck = function (idUpdate, statusToChange) {
+    if(finder.getObjectById(idUpdate).status === statusToChange) {
+        printer.printSameStatusErrorMessage();
+        return false;
+    }
+    return true;
+}
+
+module.exports = ErrorHandler;

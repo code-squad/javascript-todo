@@ -1,5 +1,5 @@
-module.exports = function Spliter() {
-    this.splitInput = (inputArray) => {
-        return inputArray.split('$');
-    } 
-}
+function Spliter() {}
+
+Spliter.prototype.splitInput = function (input) { return input.split('$'); } 
+
+module.exports = Spliter;

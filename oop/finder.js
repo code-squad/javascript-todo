@@ -1,11 +1,14 @@
 const todoList = require('./todo.json')
 
-module.exports = function Finder() {
-    this.getObjectById = (id) => {
-        return todoList.find((todoObj) => { return todoObj.id === parseInt(id) });
-    }
+function Finder() {}
 
-    this.getIndexById = (id) => {
-        return todoList.findIndex((todoObj) => { return todoObj.id === parseInt(id) });
-    }
+Finder.prototype.getObjectById = function (id) {
+    return todoList.find((todoObj) => { return todoObj.id === parseInt(id) });
 }
+
+Finder.prototype.getIndexById = function (id) {
+    return todoList.findIndex((todoObj) => { return todoObj.id === parseInt(id) });
+}
+
+module.exports = Finder;
+

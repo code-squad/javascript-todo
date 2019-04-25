@@ -1,3 +1,5 @@
-module.exports = function Utility() {
-    this.getRandomID = () => { return Date.now(); }    
-}
+function Utility() {}
+
+Utility.prototype.getRandomID = function () { return Date.now(); }    
+
+module.exports = Utility;
