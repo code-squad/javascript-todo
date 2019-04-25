@@ -13,9 +13,16 @@ Validation.prototype.isSameStatus = function(obj, status) {
     return obj.status !== status
 }
 
+Validation.prototype.isCorrectCommand = function(inst) {
+    const reg = /^add$|^delete$|^show$|^update$/
+    return reg.test(inst)
+}
+
 // 인자의 수가 부족 
 
 // 명령어가 잘못된 경우
 
 // 태그 ["ㅇㄴㅇ", "ㄴㅇㄴㅇㄴ"]
+
+module.exports = Validation
 
