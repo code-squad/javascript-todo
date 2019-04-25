@@ -12,32 +12,32 @@ const todoList = [
     { name: 'asdf4', tag: [ 'asdf' ], status: 'todo', id: 9544 }
 ];
 
-const todoForm = (name, tag, status, id) => {
+const todoForm = function (name, tag, status, id) {
     this.name = name;
     this.tag = [tag];
     this.status = status;
     this.id = id;
 }
 
-const showPrint = (value1, value2, value3) => {
+const showPrint = function(value1, value2, value3) {
     this.value1 = value1;
     this.value2 = value2;
     this.value3 = value3;
 }
 
-showPrint.prototype.printShowAll = () => {
+showPrint.prototype.printShowAll = function(){
     console.log(`현재 상태 : todo: ${this.value1}개, doing: ${this.value2}개, done: ${this.value3}개`)
 }
-showPrint.prototype.printShowElse = () => {
+showPrint.prototype.printShowElse = function(){
     console.log(`${this.value1}리스트 : 총 ${this.value2}건 : ${this.value3}`);
 }
-showPrint.prototype.printAdd = () => {
+showPrint.prototype.printAdd = function(){
     console.log(`${this.value1} 1개가 추가됐습니다. (id : ${this.value2})`);
 }
-showPrint.prototype.printUpdate = () => {
+showPrint.prototype.printUpdate = function(){
     console.log(`${this.value1} 가 ${this.value2}상태로 변경되었습니다.`);
 }
-showPrint.prototype.printDelete = () => {
+showPrint.prototype.printDelete = function(){
     console.log(`${this.value1} 가 todo에서 삭제되었습니다.`)
 }
 
@@ -103,9 +103,7 @@ const todoDelete = (input) => {
 // update
 const todoUpdate = (input) => {
     let [id, status] = input;
-    id = Number(id);
-
-    let target = todoList.filter(v => v["id"] === id);
+    let target = todoList.filter(v => v["id"] === id); //e2
     let targetName = target[0].name;
     let targetIdx = todoList.indexOf(target[0]);
     todoList[targetIdx].status = status;
@@ -115,31 +113,60 @@ const todoUpdate = (input) => {
     showAllTimer(4000);
 } 
 
+function error1(input) {
+    let firstWord = input.match(/\w+/); //["a"]
+    let seperator = input.match(/\$/g); // ["$","$""]
+    let zeroSeperator = (seperator===null);
+    if(zeroSeperator === true){
+        return false;
+    }else{
+        let oneSeperator = ((firstWord[0] === "delete" || firstWord[0] === "show") && (seperator.length===1));
+        let twoSeperator = ((firstWord[0] === "add" || firstWord[0] === "update") && (seperator.length===2));
+        return oneSeperator || twoSeperator ? true : false;
+    }
+    
+}
 
-//todoMain = (answer) => {
+function error2(ID) {
+    if(ID === NaN) {
+        return false;
+    } 
+    return !(todoList.filter(v => v["id"] === ID).length === 0) ? true : false;
+}
+
+function error3(ID, status) {
+    return !(todoList.filter(v => v["id"] === ID)[0]["status"] === status) ? true : false;
+}
+
+
+const arr = "delete$9547"
 todoMain = (answer) => {
-    // error - 1) $ 체크 answer (1) a-, u- : $x2 / s-, d : $x1 ;
-    // if( typeof answer.match(/ /) !== 'object' ) {
-    //     todoMainObj.printError("올바른 명령어를 입력해주세요");
-    // }
-
+    if(error1(answer) === false) {
+        console.log("제대로된 입력을 해주세요.");
+        return 
+    }
+    
     let tempArr = answer.match(/\w+/g);
-    let action = tempArr.shift(0);    
+    let action = tempArr.shift(0);   
 
     if(action === "add") {
         todoAdd(tempArr);
-    } else if(action === "delete") {
-    // error - 2) ID(tempArr[1]) !== todolist[i].ID x  
-        todoDelete(tempArr);
-    } else if(action === "update") {
-    // error - 2) ID(tempArr[1]) !== todolist[i].ID x  
-    // error - 3) status(tempArr[2]) === todolist[i].status x 
-        todoUpdate(tempArr);
+    } else if(action === "delete") { 
+        tempArr[0] = Number(tempArr[0])
+        let ID = tempArr[0]
+        error2(ID)==false ? console.log("ID 사용이 잘못되었습니다.") : todoDelete(tempArr)
+        
+    } else if(action === "update") { 
+        tempArr[0] = Number(tempArr[0])
+        let ID = tempArr[0]
+        let status = tempArr[1]
+        error2(ID)==false || error3(ID,status)==false ? console.log("ID혹은 Status가 잘못되었습니다.") : todoUpdate(tempArr)
+
     } else if(action === "show") {
         todoShow(tempArr);
+
     } else {
-    // error -4) msg print
-        todoMainObj.printError("올바른 명령어를 입력해주세요");
+        console.log("올바른 명령을 입력해주세요.");
     }
 
     console.log(todoList);
@@ -150,7 +177,7 @@ todoMain = (answer) => {
     action === 'update' ? setTimeout(reOrder, 5000) : setTimeout(reOrder, 2000);
 }
 
-//todoMain(arr)
+todoMain(arr)
 
 
  r.setPrompt('명령하세요 : ');
