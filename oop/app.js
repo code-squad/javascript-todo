@@ -29,7 +29,7 @@ rl.on("line", (command) => {
     } 
     else {
         try {
-            [inst, params] = getCommand(command)
+            [inst, params] = getCommand(command.trim())
             if(todos[inst].length !== params.length) {
                 throw Error("LACK_PARAMETER")
             }

@@ -50,9 +50,17 @@ const showAll = function () {
 }
 
 const showStatus = function (status) {
-    return todoList
+    let str = ""
+    let count = getCountByStatus(status)
+    let list = getListByStatus(status)
+    str += `${status}리스트 : 총${count}건 : `
+    str += list.map(el => `'${el.name}, ${el.id}번'`).join(", ")
+    return str
 }
 
 const getCountByStatus = status => todoList.filter(el => el.status === status).length
 
+const getListByStatus = status => {
+    return todoList.filter(el => el.status === status)
+}
 module.exports = Todos
