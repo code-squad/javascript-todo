@@ -1,9 +1,9 @@
 const Todo = require('./todo');
-const msg = require('./msg');
 
-function ManagingTodo(data, prompt) {
+function ManagingTodo(data, prompt, msg) {
   this.countedStatus = { todo: 0, doing: 0, done: 0 };
   this.managedlist = this.initManagedlist(data);
+  this.msg = msg;
   this.prompt = prompt;
 }
 
@@ -20,7 +20,7 @@ ManagingTodo.prototype.add = function(name, tags, status = 'todo') {
   this.managedlist.push(newTodo);
   this.countedStatus[newTodo.status] += 1;
 
-  this.printMsg(msg.add(newTodo.name, newTodo.id), 1000);
+  this.printMsg(this.msg.add(newTodo.name, newTodo.id), 1000);
 };
 
 ManagingTodo.prototype.countStatus = function() {
@@ -59,7 +59,7 @@ ManagingTodo.prototype.delete = function(id) {
   this.managedlist = this.managedlist.filter(todo => {
     if (todo.id === id) {
       this.countedStatus[todo.status] -= 1;
-      outputMsg = msg.delete(todo.name, todo.status);
+      outputMsg = this.msg.delete(todo.name, todo.status);
       return false;
     }
     return true;
@@ -79,7 +79,7 @@ ManagingTodo.prototype.update = function(id, changeStatus) {
   changeTodo.status = changeStatus;
 
   setTimeout(() => {
-    this.printMsg(msg.update(changeTodo.name, changeStatus), 1000);
+    this.printMsg(this.msg.update(changeTodo.name, changeStatus), 1000);
   }, 3000);
 };
 
