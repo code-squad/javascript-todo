@@ -3,6 +3,9 @@ const readLine = require('readline').createInterface( {
 	output:process.stdout,
 });
 
+function Program() {
+}
+
 Program.prototype = {
 
     runProgram : (readline) => {
@@ -18,3 +21,9 @@ Program.prototype = {
    }
 
 };
+
+
+const run = (() => {
+	const program = new Program();
+	program.runProgram(readLine);
+})();
