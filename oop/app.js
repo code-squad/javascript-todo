@@ -12,6 +12,7 @@ const rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout
 });
+const myTodo = new todo(rl);
 
 rl.setPrompt('명령하세요 : ');
 
@@ -19,8 +20,7 @@ rl.prompt();
 rl.on('line', input => {
 	const inputArray = input.split('$');
 	if (inputArray.length === 1) {
-		console.log('명령어가 올바르지 않습니다.');
-		rl.prompt();
+		return myTodo.printError('COMMAND_ERROR');
 	}
 	const action = inputArray.splice(0, 1)[0];
 	const condition = inputArray;
@@ -30,16 +30,15 @@ rl.on('line', input => {
 // };
 // 명령어 호출해주는 함수
 // 입력받은 명령을 호출
-const myTodo = new todo(rl);
 
 const excuteTodo = (action, condition) => {
 	const regExp = /^show$|^add$|^delete$|^update$/;
 	const matchRegExp = action.match(regExp);
 	if (matchRegExp === null) {
-		console.log('명령어가 올바르지 않습니다.');
-		return rl.prompt();
+		myTodo.printError('COMMAND_ERROR');
+	} else {
+		myTodo[action](...condition);
 	}
-	myTodo[action](...condition);
 	// readline.prompt();
 };
 
