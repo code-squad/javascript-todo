@@ -3,11 +3,12 @@ const datalist = data.todos;
 const readline = require('readline');
 const inputReadline = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
+    terminal: false
 });
 
 
-const TodoUI = function () {};
+const TodoUI = function () { };
 
 // addTodo
 TodoUI.prototype.addTodoExecutor = function (todoElement, todoTag) {
@@ -16,7 +17,7 @@ TodoUI.prototype.addTodoExecutor = function (todoElement, todoTag) {
 
 TodoUI.prototype.addTodoList = function (todoElement, todoTag) {
     const id = this.createNewID(datalist, 10000)
-    
+
     const newTodo = {
         'name': todoElement,
         'tag': todoTag,
@@ -30,7 +31,7 @@ TodoUI.prototype.addTodoList = function (todoElement, todoTag) {
 
 
 TodoUI.prototype.addTodoResult = function (newAddedObject) {
-    const addlistResult = `${newAddedObject.name} 1개가 추가됐습니다.(id : ${newAddedObject.id})`;
+    const addlistResult = `${newAddedObject.name} 1 개가 추가됐습니다.(id : ${newAddedObject.id})`;
     return this.showAll_printResult(addlistResult);
 }
 
@@ -68,25 +69,26 @@ TodoUI.prototype.updateTodoStatus = function (id, updatedStatus) {
 
 TodoUI.prototype.updateTodoResult = function (updatatingIndex, updatedStatus) {
     const updateResult = `${datalist[updatatingIndex].name} 가 ${updatedStatus}로 상태가 변경됬습니다.`;
-    return this.showAll_printResult(updateResult);
+    return setTimeout(() => {
+        this.showAll_printResult(updateResult);
+    }, 3000);
 };
 
-TodoUI.prototype.showElementGetter = function(){
+TodoUI.prototype.showElementGetter = function () {
     const todoList = this.checkStatus(datalist, 'todo');
     const doingList = this.checkStatus(datalist, 'doing');
     const doneList = this.checkStatus(datalist, 'done');
-    return {todoList, doingList, doneList}
+    return { todoList, doingList, doneList }
 }
 
 
 TodoUI.prototype.showTodoList = function (status) {
-    const showElementList = this.showElementGetter
-    this.showStatus(status, showElementList);
-   
+    const showElementList = this.showElementGetter()
+    return this.showStatusExecutor(status, showElementList);
 }
 
-TodoUI.prototype.showStatus = function(status, list) {
-    const {todoList, doingList, doneList} = list
+TodoUI.prototype.showStatusExecutor = function (status, showElementList) {
+    const { todoList, doingList, doneList } = showElementList
     switch (status) {
         case 'all':
             return `현재상태 : todo: ${todoList.length}개, doing: ${doingList.length}개, done: ${doneList.length}개 \n`
@@ -106,6 +108,7 @@ TodoUI.prototype.showAll_printResult = function (result) {
     this.printResult(result);
     setTimeout(() => {
         this.printResult((this.showTodoList('all')));
+        inputReadline.prompt();
     }, 1000);
 }
 
@@ -115,7 +118,7 @@ TodoUI.prototype.splitInputVal = function (inputData) {
 }
 
 TodoUI.prototype.printResult = function (result) {
-    return console.log(result);
+    console.log(result);
 }
 
 
@@ -137,7 +140,7 @@ TodoUI.prototype.checkStatus = function (objData, status) {
 TodoUI.prototype.createNewID = function (datalist, maxNumOfID) {
     const newID = Math.floor(Math.random() * maxNumOfID) + 1;
     const checkDuplicatedID = this.checkID(newID);
-    if (typeof checkDuplicatedID !== 'undefined') createNewID(datalist,maxNumOfID);
+    if (typeof checkDuplicatedID !== 'undefined') createNewID(datalist, maxNumOfID);
 
     return newID;
 }
@@ -152,10 +155,10 @@ TodoUI.prototype.checkID = function (inputID) {
 
 
 TodoUI.prototype.checkCommands = function (userInput, inputReadline) {
-    console.log(userInput);
     const splitUserInput = this.splitInputVal(userInput);
     if (userInput.split('$').length < 2 || userInput.split('$').length > 3) {
         console.log("입력값을 확인해주세요");
+        inputReadline.setPrompt('명령어를 입력하세요(종료하려면 q를 누르세요): ');
         inputReadline.prompt();
         return;
     }
@@ -164,7 +167,7 @@ TodoUI.prototype.checkCommands = function (userInput, inputReadline) {
 
     if (command === 'show') {
         this.printResult(this.showTodoList(commandElement));
-
+        inputReadline.prompt();
     } else if (command === 'add') {
         this.addTodoExecutor(commandElement, TagORStatusOfcommandElement);
 
@@ -180,22 +183,20 @@ TodoUI.prototype.checkCommands = function (userInput, inputReadline) {
 
 }
 
+TodoUI.prototype.mainExecutor = function () {
+    inputReadline.setPrompt('명령어를 입력하세요(종료하려면 q를 누르세요): ');
+    inputReadline.prompt();
+    inputReadline.on('line', function (line) {
+
+        if (line === "q") inputReadline.close();
+        todoList.checkCommands(line, inputReadline);
+    })
+
+        .on('close', function () {
+            console.log('프로그램이 종료되었습니다.');
+            process.exit();
+        });
+}
 
 const todoList = new TodoUI();
-
-
-todoList.executor = function () {
-inputReadline.setPrompt('명령어를 입력하세요(종료하려면 q를 누르세요): ');
-inputReadline.prompt();
-inputReadline.on('line', function (line) {
-
-    if (line === "q") inputReadline.close();
-    todoList.checkCommands(line, inputReadline);
-})
-
-    .on('close', function () {
-        console.log('프로그램이 종료되었습니다.');
-        process.exit();
-    });
-};
-todoList.executor();
+todoList.mainExecutor();
