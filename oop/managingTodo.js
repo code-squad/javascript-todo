@@ -76,8 +76,10 @@ ManagingTodo.prototype.update = function(id, changeStatus) {
   }
 
   const changeTodo = this.managedlist.find(todo => todo.id === id);
+  const changeTodoId = changeTodo === undefined ? undefined : changeTodo.id;
 
   try {
+    this.todoError.invalidId(changeTodoId);
     this.todoError.compareStatus(changeTodo.status, changeStatus);
   } catch (e) {
     throw e;

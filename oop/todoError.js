@@ -14,4 +14,10 @@ TodoError.prototype.compareStatus = function(originStr, changingStr) {
   }
 };
 
+TodoError.prototype.invalidId = function(id) {
+  if (id === undefined) {
+    throw new Error(this.msg.INVALID_ID());
+  }
+};
+
 module.exports = TodoError;
