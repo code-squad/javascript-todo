@@ -35,6 +35,7 @@ rl.on("line", (command) => {
             }
             todos[inst](...params)
         } catch(e) {
+            console.log(e.message)
             const error = {
                 "NO_SHELL" : "명령어에 $를 포함시켜주세요.",
                 "INCORRECT_INST" : "사용가능한 명령어는 add | update | delete | show 입니다.",
