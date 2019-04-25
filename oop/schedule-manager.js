@@ -1,4 +1,9 @@
 const schedule_list = require('./data');
+const readline = require('readline');
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
 // 데이터베이스에서 스케쥴배열을 가져온다.
 const { log } = console;
 
@@ -13,18 +18,26 @@ function App() {
 // 'delete$7'
 
 App.prototype = {
-    run(input) {
+    run() {
         // 콘솔에서 입력받아서 parseCommand 함수를 실행하도록 한다.
         // 파즈커맨드에서 반환받은 값을 받탕으로 컨트롤러를 실행한다.
-        [key, ...message] = this.parseCommand(input)
-        if (key === "show") {
-            [status] = message
-            return status === "all" ? this.viewer.showAll() : this.viewer.showFiltered(status);
-        }
-        this.editor[key + 'Todo'](...message);
-        this.viewer[key + 'Message'](...message);
-        this.viewer.showAll()
-        // exit을 입력받을때까지 끊임없이 동작하도록 한다.
+        
+
+        rl.question('명령을 입력하세요: ', (input)=>{
+            if(input === 'q') return rl.close();
+            [key, ...message] = this.parseCommand(input)
+            if (key === "show") {
+                [status] = message
+                status === "all" ? this.viewer.showAll() : this.viewer.showFiltered(status);
+                return this.run();
+            }
+            
+            const selectedObject =  this.editor[key + 'Todo'](...message);
+            this.viewer[key + 'Message'](selectedObject);
+            this.viewer.showAll()
+            // exit을 입력받을때까지 끊임없이 동작하도록 한다.
+            this.run();
+        });
     },
     // show$all
     // show$todo
@@ -60,6 +73,7 @@ Editor.prototype = {
         const _newId = this.getUniqueId()
         const newTodoObject = new this.TodoObject(_name, _tag, _newId);
         schedule_list.push(newTodoObject);
+        return newTodoObject
     },
     //update$id$status
     updateTodo(_id, _status) {
@@ -69,19 +83,20 @@ Editor.prototype = {
             if (todo.id === parseInt(_id)) return todo.status = _status
         });
 
-        // schedule_list = test
-        log('updateTodo is run')
+        return schedule_list.find(todo=>todo.id === parseInt(_id));
+
     },
 
     deleteTodo(_id) {
         // 넘어온 id에 맞는 schedule 배열의 인자객체를 찾는다.
-        // 그 인자객체를 삭제한다. 
+        // 그 인자객체를 삭제한다.
+        const returnedObj = schedule_list.find(todo=>todo.id === parseInt(_id));
+
         schedule_list.some((todo,index) => {
             if (todo.id === parseInt(_id)) return schedule_list.splice(index,1)
         });
+        return returnedObj;
 
-        log(schedule_list)
-        log('deleteTodo is run')
 
     },
 
@@ -125,20 +140,17 @@ Viewer.prototype = {
         console.log(`${_status}리스트 : 총${showFilteredResult.length}건 : ${showFilteredResult.join(', ')}`);
 
     },
-    addMessage(name, tag) {
+    addMessage(_obj) {
         // 인자로 넘어온 name에 맞는 id를 찾으면 됨. 
-        // console.log(`${name},이 추가되었습니다. (id :${id}`);
-        log('add메세지출력')
+        console.log(`${_obj.name}가 추가되었습니다. (id :${_obj.id})`);
     },
-    updateMessage(id, status) {
+    updateMessage(_obj) {
         // 인자로 넘어온 id의 이름만 찾으면 됨
-        // console.log(`${name}의 상태가 ${status}로 변경되었습니다.`);
-        log('update메세지출력')
+        console.log(`${_obj.name}의 상태가 ${_obj.status}로 변경되었습니다.`);
     },
-    deleteMessage(id) {
+    deleteMessage(_obj) {
         // 인자로 넘어온 id에 맞는 name, status를 찾으면 됨
-        // console.log(`${name} ${status}가 목록에서 삭제 되었습니다.`);
-        log('delete메세지출력')
+        console.log(`${_obj.name} ${_obj.status}가 목록에서 삭제 되었습니다.`);
     }
 
 }
@@ -147,6 +159,7 @@ const schedule_manager = new App();
 
 // schedule_manager.run('show$all');
 // schedule_manager.run('show$todo');
-// schedule_manager.run('add$운동하기$exercise');
+// schedule_manager.run('add$q운동하기$exercise');
 // schedule_manager.run('update$7$done');
-schedule_manager.run('delete$7');
+// schedule_manager.run('delete$7');
+schedule_manager.run();
