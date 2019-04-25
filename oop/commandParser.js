@@ -24,4 +24,3 @@ CommandParser.prototype = {
 };
 
 module.exports = CommandParser;
-
