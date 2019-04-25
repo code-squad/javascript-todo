@@ -9,7 +9,7 @@ module.exports = class todo {
 		if (matchRegExp === 'all') {
 			return this.printAll();
 		}
-		// printlist(matchRegExp);
+		this.printList(matchRegExp);
 	}
 
 	getStatusList() {
@@ -25,15 +25,22 @@ module.exports = class todo {
 	}
 	printAll() {
 		console.log('showAll');
-		const listOfStatus = getStatusList();
+		const listOfStatus = this.getStatusList();
 		console.log(listOfStatus);
 	}
 
-	// printList(status){
-	// 	const listOfStatus = getStatusList();
-
-	// 	console.log(status)
-	// }
+	printList(status) {
+		const listOfStatus = this.getStatusList();
+		const statusList = listOfStatus[`${status}`];
+		let outputString = `${status}리스트 : 총 ${statusList.length} 건 : `;
+		for (let i in statusList) {
+			outputString += statusList[i];
+			if (i < statusList.length - 1) {
+				outputString += ', ';
+			}
+		}
+		console.log(outputString);
+	}
 	// 	// add
 	// 	// 매개변수 name,tag
 	// 	// id생성
