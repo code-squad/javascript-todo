@@ -1,21 +1,21 @@
 const todoList = module.require('./data.js');
+const errorMessage = module.require('./errorMessage.js');
 module.require('date-utils');
 
 module.exports = class todo {
 	constructor(rl) {
 		this.readline = rl;
 	}
-	// show
-	//매개변수 all, status(todo,done,doing)
-	// 매개변수에 해당하는 데이터 출력
 	show(element) {
 		const regExp = /^all$|^todo$|^doing$|^done$/;
-		const matchRegExp = element.match(regExp)[0];
-		console.log(matchRegExp);
-		if (matchRegExp === 'all') {
-			return this.printAll();
+		const matchRegExp = element.match(regExp);
+		if (matchRegExp === null) {
+			this.printError('COMMAND_ERROR');
+		} else if (matchRegExp[0] === 'all') {
+			this.printAll();
+		} else {
+			this.printList(matchRegExp[0]);
 		}
-		this.printList(matchRegExp);
 	}
 
 	getStatusList() {
@@ -31,7 +31,11 @@ module.exports = class todo {
 	}
 	printAll() {
 		const listOfStatus = this.getStatusList();
-		console.log(listOfStatus);
+		let printResult = [];
+		for (let status in listOfStatus) {
+			printResult.push(`${status} : ${listOfStatus[status].length}개`);
+		}
+		console.log(`현재상태 : ${printResult.join(', ')}`);
 		this.readline.prompt();
 	}
 
@@ -48,35 +52,33 @@ module.exports = class todo {
 		console.log(outputString);
 		this.readline.prompt();
 	}
-	//  add
+
 	add(name, tag) {
-		console.log(name, tag);
+		console.log(tag + '-----');
+		const regExp = /^\[\'.*\'\]$/;
+		const matchRegExp = tag.match(regExp);
+		if (matchRegExp === null) {
+			return this.printError('TAG_ERROR');
+		}
+		const tagResult = tag.replace(/\[|\'|\]/g, '').split(',');
 		const id = this.getId();
 		const newData = {
 			name: name,
-			tags: tag,
+			tags: tagResult,
 			status: 'todo',
-			id: id
+			id: Number(id)
 		};
 		todoList.push(newData);
+		console.log(todoList);
 		setTimeout(() => {
 			this.printAll();
 		}, 1000);
 	}
-	// 		add$name$["tag1"]
-	// 		tag !==tag
-	// 		console err
 
 	getId() {
 		const id = new Date();
 		return id.toFormat('YYMMDDHHMISS');
 	}
-
-	// 	// delete
-	// 	// 매개변수 id
-	// 	// id에 해당하는 데이터 삭제
-	// 	// showall 1초뒤에 실행
-	// 	// 존재하지 않는 id경우 출력
 
 	findData(id) {
 		let index;
@@ -85,32 +87,37 @@ module.exports = class todo {
 				index = innerIndex;
 				return Number(id) === element.id;
 			}
-		})[0];
+		});
 
-		return [targetData, index];
+		return [targetData[0], index];
 	}
 
 	delete(id) {
-		const deletingData = this.findData(id)[0];
+		const deletingData = this.findData(id);
+		if (deletingData[0] === undefined) {
+			return this.printError('ID_ERROR');
+		}
 		const index = this.findData(id)[1];
-		// if(id === undefined){
-		// 	err
-		// 	console.log(존재하지 않음)
-		// 	rl.prompt()
-		// }
-		const deletingName = deletingData.name;
+		const deletingName = deletingData[0].name;
 		todoList.splice(index, 1);
 
-		console.log(`${deletingName}가 ${deletingData.status}에서 삭제됐습니다.`);
+		console.log(`${deletingName}가 ${deletingData[0].status}에서 삭제됐습니다.`);
 		setTimeout(() => {
 			this.printAll();
 		}, 1000);
 	}
 
-	// 	// update
 	update(id, status) {
 		const targetData = this.findData(id)[0];
 		const index = this.findData(id)[1];
+
+		if (targetData === undefined) {
+			return this.printError('ID_ERROR');
+		}
+
+		if (todoList[index].status === status) {
+			return this.printError('STATUS_ERROR');
+		}
 
 		todoList[index].status = status;
 
@@ -121,29 +128,9 @@ module.exports = class todo {
 			}, 1000);
 		}, 3000);
 	}
-	// 	// 매개변수 id, status
-	// 	// id에 해당하는 데이터를 status로 상태 변경
-	// 	// 3초 뒤에 name 이 status 로 변경되었ㅅ 출력
-	// 	// 1초뒤 show all
-	// 	// 존재하지 않는 id경우, 같은상태로 update경우 안내 출력
 
-	// 	update([id, status], rl){
-	// 		index = findIndex(id)
-	// 		if(id === undefined){
-	// 			err
-	// 			console.log(존재하지 않음)
-	// 			rl.prompt()
-	// 		}
-	// 		data.index.status = status;
-
-	// 		settimeout(3000);
-	// 		console.log(name, status)
-	// 		settimeout(1000)
-	// 		showall()
-	// 	}
-
-	// 	printError(element){
-	// 		console element;
-	// 	}
-	// 	//모듈로 꺼내기
+	printError(error) {
+		console.log(errorMessage[error]);
+		this.readline.prompt();
+	}
 };
