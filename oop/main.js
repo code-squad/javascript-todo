@@ -1,25 +1,27 @@
-// const readline = require('readline');
-// const rl = readline.createInterface({input: process.stdin, output: process.stdout});
+const readline = require('readline');
+const rl = readline.createInterface({input: process.stdin, output: process.stdout});
 const TodoParser = require('./todoParser');
 const todoParser = new TodoParser('$');
 
-// rl.setPrompt("> ");
-// rl.prompt();
+const TodoApp = require('./todoApp');
+const todoApp = new TodoApp();
 
-// rl.on('line', line => {
-//   const commandObj = todoParser.parsing(line);
+rl.setPrompt("명령하세요: ");
+rl.prompt();
 
-//   if(commandObj.command === 'exit'){
-//     rl.close();
-//   }
+rl.on('line', line => {
+  rl.pause();
 
-//   rl.prompt();
-// }).on('close', () => {
-//   process.exit(0);
-// });
+  try{
+    const commandObj = todoParser.parsing(line);
+    todoApp[commandObj.command](...commandObj.args);
+    rl.prompt();
+  } catch (err){
+    console.error(err.message);
+    rl.prompt();
+  }
 
-let line = '';
-
-line = 'add$1$name';
-
-const commandObj = todoParser.parsing(line);
+  rl.resume();
+}).on('close', () => {
+  process.exit(0);
+});
