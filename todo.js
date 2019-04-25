@@ -174,6 +174,7 @@ ErrorHandler.prototype = {
         console.log(`${name}의 status는 이미 ${status}입니다.`)
     },
     printOtherErrors() {
+        console.log('올바른 명령어를 사용해주세요.')
     }
 }
 
@@ -199,11 +200,16 @@ const app = {
                 this.controller[keyCommand](...restCommand)
             }
             catch (e) {
-                // console.log(e, e.message)
+                console.log(e, e.message)
                 const errorType = this.errorHandler.getErrorType(e.message)
-                this.errorHandler[errorType](e.message)
-                rl.prompt()
+                if (errorType) {
+                    this.errorHandler[errorType](e.message)
+                    rl.prompt()
 
+                } else {
+                    this.errorHandler.printOtherErrors();
+                    rl.prompt()
+                }
             }
         })
         rl.on('close', () => {
