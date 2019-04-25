@@ -55,5 +55,6 @@ module.exports = class Utils {
             if(!this.ids()) return false;
             if(!this.statuses()) return false;
         }
+        return true
     }
 }

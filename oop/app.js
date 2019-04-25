@@ -30,7 +30,10 @@ const showAll = () => {
     })
 };
 const promptRepeater = (fun) => {
-    if (!fun) rl.prompt();
+    if (!fun) {
+        rl.prompt();
+        return true;
+    }
 };
 
 
@@ -43,8 +46,8 @@ rl.on('line', (userInput) => {
             rl.close();
             break;
         default:
-            // const utils = new Utils(convertedData, userInput);
-            // promptRepeater(utils.validator());
+            const utils = new Utils(convertedData, userInput);
+            if (promptRepeater(utils.validator())) break;
 
             const inputParser = new InputParser(userInput);
             const appWord = inputParser.first;
