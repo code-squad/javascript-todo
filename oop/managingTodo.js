@@ -53,6 +53,7 @@ ManagingTodo.prototype.show = function(condition) {
 
 ManagingTodo.prototype.delete = function(id) {
   let outputMsg = '';
+  let deletedId;
 
   if (typeof id === 'string') {
     id = parseInt(id);
@@ -62,10 +63,17 @@ ManagingTodo.prototype.delete = function(id) {
     if (todo.id === id) {
       this.countedStatus[todo.status] -= 1;
       outputMsg = this.msg.delete(todo.name, todo.status);
+      deletedId = todo.id;
       return false;
     }
     return true;
   });
+
+  try {
+    this.todoError.invalidId(deletedId);
+  } catch (error) {
+    throw error;
+  }
 
   this.printMsg(outputMsg, 1000);
 };
@@ -81,8 +89,8 @@ ManagingTodo.prototype.update = function(id, changeStatus) {
   try {
     this.todoError.invalidId(changeTodoId);
     this.todoError.compareStatus(changeTodo.status, changeStatus);
-  } catch (e) {
-    throw e;
+  } catch (error) {
+    throw error;
   }
 
   this.countedStatus[changeTodo.status] -= 1;
