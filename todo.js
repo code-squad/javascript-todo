@@ -49,23 +49,25 @@ Model.prototype = {
     }
 }
 
-const View = function () { }
+const View = function () {
+    this.blueColor = '\x1b[36m%s\x1b[0m'
+}
 View.prototype = {
     showAll(countResult) {
-        console.log('현재상태 : ' + Object.entries(countResult).map(([key, value]) => `${key}: ${value}개`).join(', '))
+        console.log(this.blueColor, '현재상태 : ' + Object.entries(countResult).map(([key, value]) => `${key}: ${value}개`).join(', '))
     },
     showEachData(status, countNumber, targetData) {
         const str = targetData.map(el => `'${el.name}, ${el.id}번'`).join(', ')
-        console.log(`${status}리스트 : 총 ${countNumber}건 : ${str}`)
+        console.log(this.blueColor, `${status}리스트 : 총 ${countNumber}건 : ${str}`)
     },
     showAddResult(name, id) {
-        console.log(`${name} 1개가 추가되었습니다. (id : ${id})`)
+        console.log(this.blueColor, `${name} 1개가 추가되었습니다. (id : ${id})`)
     },
     showDeleteResult(name, status) {
-        console.log(`${name} ${status}가 목록에서 삭제되었습니다.`)
+        console.log(this.blueColor, `${name} ${status}가 목록에서 삭제되었습니다.`)
     },
     showUpdateResult(name, status) {
-        console.log(`${name}이(가) ${status}으로 상태가 변경되었습니다.`)
+        console.log(this.blueColor, `${name}이(가) ${status}으로 상태가 변경되었습니다.`)
     },
 }
 
@@ -157,6 +159,7 @@ Util.prototype = {
 
 const ErrorHandler = function () {
     this.controller = controller;
+    this.redColor = '\x1b[31m%s\x1b[0m'
 }
 ErrorHandler.prototype = {
     getErrorType(errorMsg) {
@@ -174,10 +177,10 @@ ErrorHandler.prototype = {
     },
 
     printDollarCharError() {
-        console.log('올바른 명령기호($)를 사용해 주세요.')
+        console.log(this.redColor, '올바른 명령기호($)를 사용해 주세요.')
     },
     printMatchedDataError() {
-        console.log('일치하는 id가 없습니다.')
+        console.log(this.redColor, '일치하는 id가 없습니다.')
     },
     printSameStatusError(id) {
         const idx = this.controller.model.getIndex(id);
@@ -185,19 +188,19 @@ ErrorHandler.prototype = {
             name,
             status
         } = this.controller.model.todoList[idx];
-        console.log(`${name}의 status는 이미 ${status}입니다.`)
+        console.log(this.redColor, `${name}의 status는 이미 ${status}입니다.`)
     },
     printOtherErrors() {
-        console.log('올바른 명령어를 사용해주세요.')
+        console.log(this.redColor, '올바른 명령어를 사용해주세요.')
     },
     printShowTypeError() {
-        console.log('show 명령의 옵션은 all/todo/doing/done 중 하나로 입력해 주세요.')
+        console.log(this.redColor, 'show 명령의 옵션은 all/todo/doing/done 중 하나로 입력해 주세요.')
     },
     printUpdateStatusError() {
-        console.log('update 명령의 status는 todo/doing/done 중 하나로 입력해 주세요.')
+        console.log(this.redColor, 'update 명령의 status는 todo/doing/done 중 하나로 입력해 주세요.')
     },
     printMaxArgsNumberError() {
-        console.log('인자 개수를 확인해주세요.')
+        console.log(this.redColor, '인자 개수를 확인해주세요.')
     }
 }
 
