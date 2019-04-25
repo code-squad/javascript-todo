@@ -20,7 +20,13 @@ CommandParser.prototype = {
 		} else {
 			// 예외처리
 		}
-	}
+    },
+    
+    isValidCommand : (command, arr) => {
+        let result = false;
+        if (arr.includes(command)) result = true;
+        return result;
+    },
 };
 
 module.exports = CommandParser;
