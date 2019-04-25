@@ -2,11 +2,13 @@ const todoList = module.require('./data.js');
 module.require('date-utils');
 
 module.exports = class todo {
+	constructor(rl) {
+		this.readline = rl;
+	}
 	// show
 	//매개변수 all, status(todo,done,doing)
 	// 매개변수에 해당하는 데이터 출력
 	show(element) {
-		console.log(element);
 		const regExp = /^all$|^todo$|^doing$|^done$/;
 		const matchRegExp = element.match(regExp)[0];
 		console.log(matchRegExp);
@@ -30,6 +32,7 @@ module.exports = class todo {
 	printAll() {
 		const listOfStatus = this.getStatusList();
 		console.log(listOfStatus);
+		this.readline.prompt();
 	}
 
 	printList(status) {
@@ -43,6 +46,7 @@ module.exports = class todo {
 			}
 		}
 		console.log(outputString);
+		this.readline.prompt();
 	}
 	//  add
 	add(name, tag) {
