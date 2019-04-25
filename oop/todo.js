@@ -1,4 +1,6 @@
 const todoList = module.require('./data.js');
+module.require('date-utils');
+
 module.exports = class todo {
 	// show
 	//매개변수 all, status(todo,done,doing)
@@ -66,9 +68,10 @@ module.exports = class todo {
 
 	// 	}
 
-	// 	getid(){
-	// 		return Math.random();
-	// 	}
+	getId() {
+		const id = new Date();
+		return id.toFormat('YYMMDDHHMISS');
+	}
 
 	// 	// delete
 	// 	// 매개변수 id
