@@ -26,9 +26,9 @@ TodoError.prototype.invalidInst = function(obj, inst) {
   }
 };
 
-TodoError.prototype.invalidCondition = function(conditionArr, condition) {
+TodoError.prototype.invalidStatus = function(conditionArr, condition) {
   if (conditionArr.includes(condition) === false) {
-    throw new Error(this.msg.INVALID_CONDITION());
+    throw new Error(this.msg.INVALID_STATUS());
   }
 };
 

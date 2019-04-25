@@ -40,20 +40,20 @@ ManagingTodo.prototype.filterbyStatus = function(status = 'todo') {
   return `${status} 총 ${filteredArrByStatus.length}건 : ${filteredArrByStatus.join(', ')}`;
 };
 
-ManagingTodo.prototype.show = function(condition) {
+ManagingTodo.prototype.show = function(status) {
   let outputStr = '';
-  const conditionArr = ['all', 'todo', 'done', 'doing'];
+  const searchStatusArr = ['all', ...Object.keys(this.countedStatus)];
 
   try {
-    this.todoError.invalidCondition(conditionArr, condition);
+    this.todoError.invalidStatus(searchStatusArr, status);
   } catch (error) {
     throw error;
   }
 
-  if (condition === 'all') {
+  if (status === 'all') {
     outputStr = this.countStatus();
   } else {
-    outputStr = this.filterbyStatus(condition);
+    outputStr = this.filterbyStatus(status);
   }
   console.log(outputStr);
   this.prompt.prompt();
@@ -87,6 +87,8 @@ ManagingTodo.prototype.delete = function(id) {
 };
 
 ManagingTodo.prototype.update = function(id, changeStatus) {
+  const statusArray = Object.keys(this.countedStatus);
+
   if (typeof id === 'string') {
     id = parseInt(id);
   }
@@ -95,6 +97,7 @@ ManagingTodo.prototype.update = function(id, changeStatus) {
   const changeTodoId = changeTodo === undefined ? undefined : changeTodo.id;
 
   try {
+    this.todoError.invalidStatus(statusArray, changeStatus);
     this.todoError.invalidId(changeTodoId);
     this.todoError.compareStatus(changeTodo.status, changeStatus);
   } catch (error) {
