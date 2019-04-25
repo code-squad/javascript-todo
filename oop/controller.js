@@ -1,11 +1,13 @@
 const Model = require('./model')
 const Utility = require('./utility')
 const ErrorHandler = require('./errorHandler')
+const Printer = require('./printer');
 
 module.exports = function Controller() {
     const model = new Model();
     const utility = new Utility();
     const errorHandler = new ErrorHandler();
+    const printer = new Printer();
     
     this.splitInput = (inputArray) => {
         return inputArray.split('$');
@@ -44,18 +46,17 @@ module.exports = function Controller() {
     this.show = (status) => {
         const countEachStatus = model.getCountEachStatus();
         if(status === 'all') {
-            console.log(`현재상태 : todo:${countEachStatus.todo}개, doing:${countEachStatus.doing}개, done:${countEachStatus.done}개`);
+            printer.printMessageShowAll(countEachStatus);
             return;
         }
         const listInStatus = model.getListInStatus(status);
-        console.log(`${status}리스트 : ${listInStatus.length}건 : ${listInStatus}`);
+        printer.printMessageShowStatus(status, listInStatus);
     }
 
     this.add = (name, tag) => {
-        console.log(tag);
-        const todoObj = {'name': name, 'status': 'todo', 'tags': tag.match(/[a-z0-9]+/g), 'id': utility.getRandomID()};
-        model.addTodoObject(todoObj);
-        console.log(`${todoObj.name} 1개가 추가됐습니다. (id: ${todoObj.id})`);
+        const objToAdd = {'name': name, 'status': 'todo', 'tags': tag.match(/[a-z0-9]+/g), 'id': utility.getRandomID()};
+        model.addTodoObject(objToAdd);
+        printer.printMessageAdd(objToAdd);
         setTimeout( () => { this.show('all'); }, 1000);
     }
 
@@ -65,7 +66,7 @@ module.exports = function Controller() {
             errorHandler.showNotExistIdErrorMessage();
             return;
         }*/
-        console.log(`${objToDelete.name}이 ${objToDelete.status}가 목록에서 삭제됐습니다.`);
+        printer.printMessageDelete(objToDelete);
         setTimeout( () => { this.show('all'); }, 1000);
     }
 
@@ -76,7 +77,7 @@ module.exports = function Controller() {
             return;
         }*/
         setTimeout(() => {
-            console.log(`${objToUpdate.name}이 ${objToUpdate.status}가 목록에서 삭제됐습니다.`);
+            printer.printMessageUpdate(objToUpdate);
             setTimeout( () => { this.show('all'); }, 1000);
         }, 3000)
     }
