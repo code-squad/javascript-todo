@@ -10,7 +10,6 @@ Validation.prototype.isExisted = function(arr, id) {
 }
 
 Validation.prototype.isSameStatus = function(obj, status) {
-    console.log(arguments)
     return obj["status"] === status
 }
 
