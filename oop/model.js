@@ -1,7 +1,9 @@
 const todoList = require('./todo.json')
+const Finder = require('./finder')
 const fs = require('fs')
 
 module.exports = function Model() {
+    const finder = new Finder();
     this.getCountEachStatus = () => {
         return todoList.reduce((countEachStatus, todoObj) => {
             countEachStatus[todoObj.status]++;
@@ -23,21 +25,16 @@ module.exports = function Model() {
     }
 
     this.deleteTodoObject = (id) => {
-        const objToDelete = todoList.find((todoObj) => { return todoObj.id === parseInt(id) });
+        const objToDelete = finder.getObjectById(id);
         todoList.splice(todoList.indexOf(objToDelete), 1);
         fs.writeFileSync('todo.json', JSON.stringify(todoList));
         return objToDelete;
     }
 
     this.updateTodoObject = (id, status) => {
-        let objToUpdate;
-        todoList.forEach((todoObj) => {
-            if(todoObj.id === parseInt(id)) {
-                todoObj.status = status;
-                fs.writeFileSync('todo.json', JSON.stringify(todoList));
-                objToUpdate = todoObj;
-            }
-       });      
-        return objToUpdate;
+        const index = finder.getIndexById(id);
+        todoList[index].status = status;
+        fs.writeFileSync('todo.json', JSON.stringify(todoList));
+        return todoList[index];
     }
 }

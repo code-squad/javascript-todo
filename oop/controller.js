@@ -61,20 +61,20 @@ module.exports = function Controller() {
 
     this.delete = (id) => {
         const objToDelete = model.deleteTodoObject(id);
-        if(!objToDelete) {
+        /*if(!objToDelete) {
             errorHandler.showNotExistIdErrorMessage();
             return;
-        }
+        }*/
         console.log(`${objToDelete.name}이 ${objToDelete.status}가 목록에서 삭제됐습니다.`);
         setTimeout( () => { this.show('all'); }, 1000);
     }
 
     this.update = (id, status) => {
         const objToUpdate = model.updateTodoObject(id, status);
-        if(!objToUpdate) {
+        /*if(!objToUpdate) {
             errorHandler.showNotExistIdErrorMessage();
             return;
-        }
+        }*/
         setTimeout(() => {
             console.log(`${objToUpdate.name}이 ${objToUpdate.status}가 목록에서 삭제됐습니다.`);
             setTimeout( () => { this.show('all'); }, 1000);

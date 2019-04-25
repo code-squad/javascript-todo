@@ -25,5 +25,5 @@ function test(input) {
 // test('show$done')
 // test('add$testTodo$[“testTag”, “testTag2"]')
 // test('update$378$done')
-// test('update$378$todo')
-test('delete$378')
+test('update$1556160260716$doing')
+//test('delete$1556104046871')
