@@ -8,8 +8,9 @@ const Model = function () {
     this.todoList = []
 }
 Model.prototype = {
-    findData(key, value) {
-        return this.todoList.filter(todoData => todoData[key] === value)
+    getId(key, value) {
+        const targetData = this.todoList.filter(todoData => todoData[key] === value).shift();
+        return targetData.id;
     },
     addData(name, tags) {
         tags = tags.replace(/\[|\]|\"|\'/g, '').split(',')
@@ -42,7 +43,9 @@ Model.prototype = {
         return this.findData('status', status).map(el => `'${el.name}, ${el.id}번'`).join(', ')
     },
     getIndex(id) {
-        return this.todoList.findIndex(el => el.id === id)
+        const idx = this.todoList.findIndex(el => el.id === id)
+        if (idx === -1) throw Error('MatchedDataError')
+        return idx
     }
 }
 
@@ -93,22 +96,24 @@ Controller.prototype = {
     },
     addData(name, tags) {
         this.model.addData(name, tags);
-        const id = this.model.findData('name', name)[0].id
+        const id = this.model.getId('name', name)
         this.view.showAddResult(name, id);
         this.showFinalResult()
     },
     deleteData(id) {
+        const idx = this.model.getIndex(id);
         const {
             name,
             status
-        } = this.model.findData('id', id)[0]
+        } = this.model.todoList[idx]
         this.model.deleteData(id)
         this.view.showDeleteResult(name, status)
         this.showFinalResult()
     },
     updateData(id, status) {
         this.model.updateData(id, status);
-        const name = this.model.findData('id', id)[0].name
+        const idx = this.model.getIndex(id)
+        const name = this.model.todoList[idx].name
         setTimeout(() => {
             this.view.showUpdateResult(name, status)
             this.showFinalResult()
@@ -122,6 +127,7 @@ Controller.prototype = {
 const Util = function () { }
 Util.prototype = {
     parseCommand(command) {
+        if (!/\$/.test(command)) throw Error('DollarCharError')
         return command.split('$');
     },
     getKeyCommand(command) {
@@ -154,8 +160,10 @@ ErrorHandler.prototype = {
     },
 
     printDollarCharError() {
+        console.log('올바른 명령기호($)를 사용해 주세요.')
     },
     printMatchedDataError() {
+        console.log('일치하는 id가 없습니다.')
     },
     printSameStatusError(id) {
         const idx = this.controller.model.getIndex(id);
@@ -192,6 +200,7 @@ const app = {
                 this.controller[keyCommand](...restCommand)
             }
             catch (e) {
+                console.log(e, e.message)
                 const errorType = this.errorHandler.getErrorType(e.message)
                 this.errorHandler[errorType](e.message)
                 rl.prompt()
