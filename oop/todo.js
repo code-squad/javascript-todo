@@ -5,9 +5,11 @@ module.exports = class todo {
 	// show
 	//매개변수 all, status(todo,done,doing)
 	// 매개변수에 해당하는 데이터 출력
-	show([element], readline) {
+	show(element) {
+		console.log(element);
 		const regExp = /^all$|^todo$|^doing$|^done$/;
 		const matchRegExp = element.match(regExp)[0];
+		console.log(matchRegExp);
 		if (matchRegExp === 'all') {
 			return this.printAll();
 		}
@@ -44,10 +46,10 @@ module.exports = class todo {
 		console.log(outputString);
 	}
 	// 	// add
-	add(conditions, readline) {
-		const name = conditions[0];
-		const tag = conditions[1];
-
+	add(name, tag) {
+		// const name = conditions[0];
+		// const tag = conditions[1];
+		console.log(name, tag);
 		const id = this.getId();
 		const newData = {
 			name: name,
