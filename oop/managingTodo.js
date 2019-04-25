@@ -42,6 +42,14 @@ ManagingTodo.prototype.filterbyStatus = function(status = 'todo') {
 
 ManagingTodo.prototype.show = function(condition) {
   let outputStr = '';
+  const conditionArr = ['all', 'todo', 'done', 'doing'];
+
+  try {
+    this.todoError.invalidCondition(conditionArr, condition);
+  } catch (error) {
+    throw error;
+  }
+
   if (condition === 'all') {
     outputStr = this.countStatus();
   } else {
