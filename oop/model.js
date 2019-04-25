@@ -1,11 +1,10 @@
+const FileSyncer = require('./FileSyncer')
 const todoList = require('./todo.json')
 const Finder = require('./finder')
-const FileSyncer = require('./FileSyncer')
-
 
 module.exports = function Model() {
-    const finder = new Finder();
     const fileSyncer = new FileSyncer();
+    const finder = new Finder();
 
     this.getCountEachStatus = () => {
         return todoList.reduce((countEachStatus, todoObj) => {

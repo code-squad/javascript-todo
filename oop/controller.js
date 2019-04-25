@@ -1,21 +1,19 @@
-const Model = require('./model')
-const Utility = require('./utility')
 const ErrorHandler = require('./errorHandler')
-const Printer = require('./printer');
+const Spliter = require('./spliter')
+const Printer = require('./printer')
+const Utility = require('./utility')
+const Model = require('./model')
 
 module.exports = function Controller() {
-    const model = new Model();
-    const utility = new Utility();
     const errorHandler = new ErrorHandler();
+    const spliter = new Spliter();
+    const utility = new Utility();
     const printer = new Printer();
+    const model = new Model();
     
-    this.splitInput = (inputArray) => {
-        return inputArray.split('$');
-    }
-
     this.instruct = (input) => {
         if(!(errorHandler.usageErrorCheck(input))) return;
-        const inputArray = this.splitInput(input);
+        const inputArray = spliter.splitInput(input);
         const command = inputArray[0];
         switch(command) {
             case 'show' :

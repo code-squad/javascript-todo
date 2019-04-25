@@ -1,7 +1,6 @@
 const Printer = require('./printer');
 const Finder = require('./finder')
 
-
 module.exports = function ErrorHandler() {
     const printer = new Printer();
     const finder = new Finder();
