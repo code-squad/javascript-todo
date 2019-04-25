@@ -11,12 +11,14 @@ const printHelpMessage = (() => {
 
 function addImpl(todos, name, tag, status = "todo") {
   try {
+    console.log(tag);
     const newtodo = {
       name,
       tag: JSON.parse(tag),
       status,
       id: uniqueIdGenerator()
     };
+    console.log(newtodo.tag);
     todos.push(newtodo);
     console.log(`${newtodo.name} 1개가 추가되었습니다. ( id : ${newtodo.id})`);
     setTimeout(() => showImpl(todos, "all"), 1000);
@@ -29,10 +31,11 @@ function deleteImpl(todos, targetId) {
   try {
     targetId = parseInt(targetId);
     const targetTodo = todos.find(todo => todo.id === targetId);
-    if (targetTodo === undefined) {
+    const targetIndex = todos.findIndex(todo => todo.id === targetId);
+    if (targetIndex === -1) {
       console.log("삭제할 대상이 없습니다. ");
     } else {
-      todos = todos.filter(todo => todo.id !== targetId);
+      todos.splice(targetIndex, 1);
       console.log(
         `${targetTodo.name} ${targetTodo.status}가 목록에서 삭제됐습니다.`
       );

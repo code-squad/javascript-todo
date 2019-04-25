@@ -1,4 +1,4 @@
-let todos = [];
+const todos = [];
 
 const ops = require("./todoFunction");
 const readline = require("readline");
