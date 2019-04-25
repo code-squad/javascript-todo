@@ -30,12 +30,15 @@ rl.on("line", (command) => {
     else {
         try {
             [inst, params] = getCommand(command)
-            console.log(inst)
-            console.log(params)
+            if(todos[inst].length !== params.length) {
+                throw Error("LACK_PARAMETER")
+            }
+            todos[inst](...params)
         } catch(e) {
             const error = {
                 "NO_SHELL" : "명령어에 $를 포함시켜주세요.",
-                "INCORRECT_INST" : "사용가능한 명령어는 add | update | delete | show 입니다."
+                "INCORRECT_INST" : "사용가능한 명령어는 add | update | delete | show 입니다.",
+                "LACK_PARAMETER" : "명령어를 실행하는데 매게변수가 부족합니다."
             }
             console.log('\x1b[31m%s\x1b[0m',"Error : " + error[e.message])
         }
