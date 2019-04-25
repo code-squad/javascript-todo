@@ -227,7 +227,6 @@ const app = {
                 this.controller[keyCommand](...restCommand);
             }
             catch (e) {
-                // console.log(e, e.message)
                 const errorType = this.errorHandler.getErrorType(e.message)
                 if (errorType) {
                     this.errorHandler[errorType](e.message)
