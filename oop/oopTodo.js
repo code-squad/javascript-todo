@@ -25,7 +25,7 @@ TodoUI.prototype.addTodoList = function (todoElement, todoTag) {
         'id': id
     };
     datalist.push(newTodo);
-
+    
     return this.addTodoResult(newTodo);
 }
 
@@ -43,6 +43,8 @@ TodoUI.prototype.deleteTodoExecutor = function (deleteID) {
 TodoUI.prototype.deleteTodoList = function (deletedID) {
     const deletedIndex = this.getIndex(deletedID);
     datalist.splice(deletedIndex, 1);
+    this.undo(this.history(deletedIndex));
+
     return this.deleteTodoResult(deletedIndex)
 };
 
@@ -62,6 +64,11 @@ TodoUI.prototype.updateTodoExecutor = function (id, updatedStatus) {
 
 TodoUI.prototype.updateTodoStatus = function (id, updatedStatus) {
     const updatatingIndex = this.getIndex(id);
+    if(this.checkDuplicatedStatus(updatatingIndex, updatedStatus)){
+        this.printResult('\n');
+        inputReadline.prompt();
+        return
+    };
     datalist[updatatingIndex].status = updatedStatus;
     return this.updateTodoResult(updatatingIndex, updatedStatus)
 };
@@ -151,6 +158,13 @@ TodoUI.prototype.checkID = function (inputID) {
         return list.id == inputID
     })
     return matchedListByID;
+}
+
+TodoUI.prototype.checkDuplicatedStatus = function(updatatingIndex, updatedStatus){
+    if(datalist[updatatingIndex].status === updatedStatus){
+        this.printResult('입력한 상태와 동일한 상태입니다')
+        return true;
+    }
 }
 
 
