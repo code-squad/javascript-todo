@@ -28,7 +28,6 @@ module.exports = class todo {
 		return listOfStatus;
 	}
 	printAll() {
-		console.log('showAll');
 		const listOfStatus = this.getStatusList();
 		console.log(listOfStatus);
 	}
@@ -45,10 +44,8 @@ module.exports = class todo {
 		}
 		console.log(outputString);
 	}
-	// 	// add
+	//  add
 	add(name, tag) {
-		// const name = conditions[0];
-		// const tag = conditions[1];
 		console.log(name, tag);
 		const id = this.getId();
 		const newData = {
@@ -58,25 +55,13 @@ module.exports = class todo {
 			id: id
 		};
 		todoList.push(newData);
+		setTimeout(() => {
+			this.printAll();
+		}, 1000);
 	}
 	// 		add$name$["tag1"]
 	// 		tag !==tag
 	// 		console err
-
-	// 		id = getid();
-	// 		data.push({
-	// 			name
-	// 			id
-	// 			tag
-	// 		}
-
-	// 		console.log(name, id, tag)
-
-	// 		settimeout(){
-	// 			printall();
-	// 		1000}
-
-	// 	}
 
 	getId() {
 		const id = new Date();
@@ -89,27 +74,37 @@ module.exports = class todo {
 	// 	// showall 1초뒤에 실행
 	// 	// 존재하지 않는 id경우 출력
 
-	// 	delete([id],rl){
-	// 		index = findIndex(id)
-	// 		if(id === undefined){
-	// 			err
-	// 			console.log(존재하지 않음)
-	// 			rl.prompt()
-	// 		}
-	// 		name = data.splice(index)
+	delete(id) {
+		let index;
+		const deletingData = todoList.filter((element, innerIndex) => {
+			if (Number(id) === element.id) {
+				index = innerIndex;
+				return Number(id) === element.id;
+			}
+		})[0];
+		// if(id === undefined){
+		// 	err
+		// 	console.log(존재하지 않음)
+		// 	rl.prompt()
+		// }
+		const deletingName = deletingData.name;
+		todoList.splice(index, 1);
 
-	// 		console.log(name, id)
+		console.log(`${deletingName}가 ${deletingData.status}에서 삭제됐습니다.`);
+		setTimeout(() => {
+			this.printAll();
+		}, 1000);
+	}
 
-	// 		settimeout(){
-	// 			printall();
-	// 		1000}
+	// findIndex(id){
+	// 	const  = todoList.filter((element) =>{
+
+	// 	});
+
+	// 	if(data.id === id){
+	// 		return indexOfData;
 	// 	}
-
-	// 	findIndex(id){
-	// 		if(data.id === id){
-	// 			return indexOfData;
-	// 		}
-	// 	}
+	// }
 
 	// 	// update
 	// 	// 매개변수 id, status
