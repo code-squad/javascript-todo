@@ -7,7 +7,6 @@ var TodoApp = function(){
 TodoApp.prototype = {
   init: function(){
     this._todoList = require('./todoList.js');
-    // this._todoList = [{id:1}, {id:2}, {id:5}];
 
     this._todoList.sort((lhs, rhs) => lhs.id < rhs.id );
     this._lastUsedId = this._todoList[this._todoList.length - 1].id + 1;
@@ -20,12 +19,12 @@ TodoApp.prototype = {
     })();
   },
 
-  add: function(name, status){
-    this._todoList.push(new Todo(this._uniqueIdGenerator(), name, status));
+  add: function(name, tag, status){
+    this._todoList.push(new Todo(this._uniqueIdGenerator(), name, JSON.parse(tag), status));
   },
 
   delete: function(id){
-    if(this.findTodoById(id)){
+    if(!this.findTodoById(id)){
       throw new Error('존재하지 않는 ID입니다.');
     }
     this._todoList = this._todoList.filter(todo => todo.id !== id );
@@ -35,7 +34,7 @@ TodoApp.prototype = {
     if(status === "all"){
       const seperatedObj = this._todoList.reduce((acc, todo) => {
                                                                   acc[todo.status] = acc[todo.status] + 1 || 1;
-                                                                  return acc
+                                                                  return acc;
                                                                 } , {});
       console.log(`현재 상태 : ${Object.entries(seperatedObj)
                                      .map(status => `${status[0]} : ${status[1]}`)
@@ -51,20 +50,28 @@ TodoApp.prototype = {
     }
   },
 
-  update: function(id, status){
+  update: function(id, newStatus){
+    if(!this.findTodoById(id)){
+      throw new Error('존재하지 않는 ID입니다.');
+    }
 
     const targetTodo = this._todoList.find(todo => todo.id === Number.parseInt(id));
     const idxOfTargetTodo = this._todoList.findIndex(todo => todo.id === id);
-    targetTodo.status = status;
+    
+    if(targetTodo.status === newStatus){
+      throw new Error(`${id}번 todo는 이미 ${newStatus} 상태입니다.`);
+    }
+
+    targetTodo.status = newStatus;
     this._todoList[idxOfTargetTodo] = targetTodo;
   },
 
-  _findTodoByKey: function(key, value){
-    return this._todoList.find(todo => todo[key] === value);
+  findTodoByKey: function(key, value){
+    return this._todoList.findIndex(todo => todo[key] === value) !== -1;
   },
 
   findTodoById: function(id){
-    return this._findTodoByKey("id", id);
+    return this.findTodoByKey("id", id);
   }
 
 }
