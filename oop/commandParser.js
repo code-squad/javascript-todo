@@ -1,4 +1,5 @@
 const Instruction = require('./instruction.js');
+const ExceptionHandling = require('./exceptionHandling.js');
 
 function CommandParser () {
 	
@@ -13,7 +14,7 @@ CommandParser.prototype = {
     
 	executeCmd : (command) => {
 		try {
-            
+
 			if (command.length === 2) {
 				Instruction.prototype[command[0]](command[1]);
 			} else if (command.length === 3) {
