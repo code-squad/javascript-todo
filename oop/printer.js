@@ -19,4 +19,16 @@ module.exports = function Printer() {
     this.printMessageUpdate = (objToUpdate) => {
         console.log(`${objToUpdate.name}이 ${objToUpdate.status}가 목록에서 삭제됐습니다.`);
     }
+
+    this.printUsage = () => {
+        console.log('[command]$[arg1]$[arg2]');
+    }
+
+    this.printNotExistErrorMessage = () => {
+        console.log('존재하지 않는 ID입니다.');
+    }
+
+    this.printSameStatusErrorMessage = () => {
+        console.log('이미 그 상태입니다.');
+    }
 }

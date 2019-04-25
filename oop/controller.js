@@ -14,12 +14,8 @@ module.exports = function Controller() {
     }
 
     this.instruct = (input) => {
+        if(!(errorHandler.usageErrorCheck(input))) return;
         const inputArray = this.splitInput(input);
-        if (inputArray === 1) {
-            errorHandler.showUsage();
-            return;
-        }
-
         const command = inputArray[0];
         switch(command) {
             case 'show' :
@@ -33,19 +29,22 @@ module.exports = function Controller() {
                 break;
             case 'delete' :
                 const idDelete = inputArray[1];
+                if(!(errorHandler.notExistIdErrorCheck(idDelete))) return;
                 this.delete(idDelete);
                 break;
             case 'update' :
                 const idUpdate = inputArray[1];
                 const statusUpdate = inputArray[2];
+                if(!(errorHandler.notExistIdErrorCheck(idUpdate))) return;
+                if(!(errorHandler.sameStatusErrorCheck(idUpdate, statusUpdate))) return;
                 this.update(idUpdate, statusUpdate);
                 break;
         }
     }
 
     this.show = (status) => {
-        const countEachStatus = model.getCountEachStatus();
         if(status === 'all') {
+            const countEachStatus = model.getCountEachStatus();
             printer.printMessageShowAll(countEachStatus);
             return;
         }
@@ -62,20 +61,12 @@ module.exports = function Controller() {
 
     this.delete = (id) => {
         const objToDelete = model.deleteTodoObject(id);
-        /*if(!objToDelete) {
-            errorHandler.showNotExistIdErrorMessage();
-            return;
-        }*/
         printer.printMessageDelete(objToDelete);
         setTimeout( () => { this.show('all'); }, 1000);
     }
 
     this.update = (id, status) => {
         const objToUpdate = model.updateTodoObject(id, status);
-        /*if(!objToUpdate) {
-            errorHandler.showNotExistIdErrorMessage();
-            return;
-        }*/
         setTimeout(() => {
             printer.printMessageUpdate(objToUpdate);
             setTimeout( () => { this.show('all'); }, 1000);

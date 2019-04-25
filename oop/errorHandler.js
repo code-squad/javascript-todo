@@ -1,11 +1,33 @@
+const Printer = require('./printer');
+const Finder = require('./finder')
+
+
 module.exports = function ErrorHandler() {
-    this.showUsage = () => {
-        console.log("[command]$[args1]$[args2]");
+    const printer = new Printer();
+    const finder = new Finder();
+
+    this.usageErrorCheck = (input) => {
+        if(!(input.match(/\$/))) {
+            printer.printUsage();
+            return false;
+        }
+        return true;
     }
-    this.showNotExistIdErrorMessage = () => {
-        console.log("존재하지 않는 아이디입니다.");
+
+    this.notExistIdErrorCheck = (idDelete) => {
+        if(!(finder.getObjectById(idDelete))) {
+            printer.printNotExistErrorMessage();
+            return false;
+        }
+        return true;
     }
-    this.showExistErrorMessage = (status) => {
-        console.log(`이 놈은 이미 ${status}`);
+    
+    this.sameStatusErrorCheck = (idUpdate, statusToChange) => {
+        if(finder.getObjectById(idUpdate).status === statusToChange) {
+            printer.printSameStatusErrorMessage();
+            return false;
+        }
+        return true;
     }
 }
+

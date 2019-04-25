@@ -1,9 +1,12 @@
 const todoList = require('./todo.json')
 const Finder = require('./finder')
-const fs = require('fs')
+const FileSyncer = require('./FileSyncer')
+
 
 module.exports = function Model() {
     const finder = new Finder();
+    const fileSyncer = new FileSyncer();
+
     this.getCountEachStatus = () => {
         return todoList.reduce((countEachStatus, todoObj) => {
             countEachStatus[todoObj.status]++;
@@ -21,20 +24,20 @@ module.exports = function Model() {
 
     this.addTodoObject = (todoObj) => {
         todoList.push(todoObj);
-        fs.writeFileSync('todo.json', JSON.stringify(todoList));
+        fileSyncer.save(todoList);
     }
 
     this.deleteTodoObject = (id) => {
         const objToDelete = finder.getObjectById(id);
         todoList.splice(todoList.indexOf(objToDelete), 1);
-        fs.writeFileSync('todo.json', JSON.stringify(todoList));
+        fileSyncer.save(todoList);
         return objToDelete;
     }
 
     this.updateTodoObject = (id, status) => {
         const index = finder.getIndexById(id);
         todoList[index].status = status;
-        fs.writeFileSync('todo.json', JSON.stringify(todoList));
+        fileSyncer.save(todoList);
         return todoList[index];
     }
 }

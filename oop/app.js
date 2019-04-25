@@ -20,11 +20,12 @@ function test(input) {
     controller.instruct(input);
 }
 
-// test('show$all')
+//test('show$all')
 // test('show$todo')
 // test('show$doing')
 // test('show$done')
-// test('add$testTodo$[“testTag”, “testTag2"]')
-// test('update$378$done')
-test('update$1556169821641$doing')
-//test('delete$1556160260716')
+ //test('add$testTodo$[“testTag”, “testTag2"]')
+//test('update$3882$doing')
+// test('update$1556104237170$doing')
+ //test('delete$1')
+//test('fdsafdasfdas')
