@@ -2,8 +2,13 @@ const readLine = require('readline').createInterface( {
 	input:process.stdin,
 	output:process.stdout,
 });
+const CommandParser = require('./commandParser.js');
+const Utils = require('./utils.js');
+const Instruction = require('./instruction.js');
+const ExceptionHandling = require('./exceptionHandling.js');
 
 function Program() {
+	this.cmdArr = ['show','delete','update','add'];
 }
 
 Program.prototype = {
@@ -12,7 +17,7 @@ Program.prototype = {
        readline.setPrompt('명령하세요: ');
        readline.prompt();
        readline.on('line', (userInput) => {	    
-                  
+
         try {
 				
             if (!ExceptionHandling.prototype.isValidSeperator(userInput)) {ExceptionHandling.prototype.missingSeperatorException();}
@@ -45,5 +50,5 @@ Program.prototype = {
 
 const run = (() => {
 	const program = new Program();
-	program.runProgram(readLine);
+	program.runProgram(readLine, program.cmdArr);
 })();
