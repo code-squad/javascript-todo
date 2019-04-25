@@ -9,7 +9,7 @@ const printHelpMessage = (() => {
   return () => console.log(helpMessage);
 })();
 
-function addImpl(todos, name, tag, status = "todo") {
+function addTodo(todos, name, tag, status = "todo") {
   try {
     console.log(tag);
     const newtodo = {
@@ -21,13 +21,13 @@ function addImpl(todos, name, tag, status = "todo") {
     console.log(newtodo.tag);
     todos.push(newtodo);
     console.log(`${newtodo.name} 1개가 추가되었습니다. ( id : ${newtodo.id})`);
-    setTimeout(() => showImpl(todos, "all"), 1000);
+    setTimeout(() => showTodo(todos, "all"), 1000);
   } catch (error) {
     console.error(`생성 실패 : ${error.message}`);
   }
 }
 
-function deleteImpl(todos, targetId) {
+function deleteTodo(todos, targetId) {
   try {
     targetId = parseInt(targetId);
     const targetTodo = todos.find(todo => todo.id === targetId);
@@ -39,14 +39,14 @@ function deleteImpl(todos, targetId) {
       console.log(
         `${targetTodo.name} ${targetTodo.status}가 목록에서 삭제됐습니다.`
       );
-      setTimeout(() => showImpl(todos, "all"), 1000);
+      setTimeout(() => showTodo(todos, "all"), 1000);
     }
   } catch (error) {
     console.error(`삭제 실패 : ${error.message}`);
   }
 }
 
-function updateImpl(todos, targetId, changeStatus) {
+function updateTodo(todos, targetId, changeStatus) {
   try {
     targetId = parseInt(targetId);
     const targetTodo = todos.find(todo => todo.id === targetId);
@@ -60,7 +60,7 @@ function updateImpl(todos, targetId, changeStatus) {
             targetTodo.status
           }으로 상태가 변경되었습니다.`
         );
-        setTimeout(() => showImpl(todos, "all"), 1000);
+        setTimeout(() => showTodo(todos, "all"), 1000);
       }, 3000);
     }
   } catch (error) {
@@ -88,7 +88,7 @@ function printResult(data, text) {
   console.log(str);
 }
 
-function showImpl(todos, status) {
+function showTodo(todos, status) {
   let result;
   if (status === "all") {
     result = todos.reduce((p, c) => {
@@ -103,9 +103,9 @@ function showImpl(todos, status) {
 }
 
 module.exports = {
-  add: addImpl,
-  delete: deleteImpl,
-  update: updateImpl,
-  show: showImpl,
+  add: addTodo,
+  delete: deleteTodo,
+  update: updateTodo,
+  show: showTodo,
   help: printHelpMessage
 };
