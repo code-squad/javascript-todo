@@ -1,16 +1,16 @@
 const Todo = require('./todo');
 
-class TodoApp {
-  constructor(){
+var TodoApp = function(){
+  this.init();
+}
+
+TodoApp.prototype = {
+  init: function(){
     this._todoList = require('./todoList.js');
     // this._todoList = [{id:1}, {id:2}, {id:5}];
 
-    this._init = function () {
-      this._todoList.sort((lhs, rhs) => lhs.id < rhs.id );
-      this._lastUsedId = this._todoList[this._todoList.length - 1].id + 1;
-    }
-
-    this._init();
+    this._todoList.sort((lhs, rhs) => lhs.id < rhs.id );
+    this._lastUsedId = this._todoList[this._todoList.length - 1].id + 1;
 
     this._uniqueIdGenerator = ( () => {
       var nextId = this._lastUsedId;
@@ -18,17 +18,20 @@ class TodoApp {
         return nextId++;
       }
     })();
-  }
+  },
 
-  add(name, status){
+  add: function(name, status){
     this._todoList.push(new Todo(this._uniqueIdGenerator(), name, status));
-  }
+  },
 
-  delete(id){
+  delete: function(id){
+    if(this.findTodoById(id)){
+      throw new Error('존재하지 않는 ID입니다.');
+    }
     this._todoList = this._todoList.filter(todo => todo.id !== id );
-  }
+  },
 
-  show(status){
+  show: function(status){
     if(status === "all"){
       const seperatedObj = this._todoList.reduce((acc, todo) => {
                                                                   acc[todo.status] = acc[todo.status] + 1 || 1;
@@ -46,13 +49,22 @@ class TodoApp {
 
       console.log(`${status} 리스트 : 총 ${filterResult.cnt}건 : ${filterResult.msg.join(', ')}`);
     }
-  }
+  },
 
-  update(id, status){
+  update: function(id, status){
+
     const targetTodo = this._todoList.find(todo => todo.id === Number.parseInt(id));
     const idxOfTargetTodo = this._todoList.findIndex(todo => todo.id === id);
     targetTodo.status = status;
     this._todoList[idxOfTargetTodo] = targetTodo;
+  },
+
+  _findTodoByKey: function(key, value){
+    return this._todoList.find(todo => todo[key] === value);
+  },
+
+  findTodoById: function(id){
+    return this._findTodoByKey("id", id);
   }
 
 }
