@@ -37,10 +37,10 @@ Model.prototype = {
         return ((1 + Math.random()) * 0x10000 | 0).toString(16).substring(1)
     },
     countData(status) {
-        return this.todoList.filter(todoData => todoData.status === status).length
+        return this.getMatchedData(status).length
     },
     getMatchedData(status) {
-        return this.findData('status', status).map(el => `'${el.name}, ${el.id}번'`).join(', ')
+        return this.todoList.filter(todoData => todoData.status === status)
     },
     getIndex(id) {
         const idx = this.todoList.findIndex(el => el.id === id)
@@ -55,7 +55,8 @@ View.prototype = {
         console.log('현재상태 : ' + Object.entries(countResult).map(([key, value]) => `${key}: ${value}개`).join(', '))
     },
     showEachData(status, countNumber, targetData) {
-        console.log(`${status}리스트 : 총 ${countNumber}건 : ${targetData}`)
+        const str = targetData.map(el => `'${el.name}, ${el.id}번'`).join(', ')
+        console.log(`${status}리스트 : 총 ${countNumber}건 : ${str}`)
     },
     showAddResult(name, id) {
         console.log(`${name} 1개가 추가되었습니다. (id : ${id})`)
@@ -86,6 +87,7 @@ Controller.prototype = {
         const countNumber = this.model.countData(status)
         const targetData = this.model.getMatchedData(status)
         this.view.showEachData(status, countNumber, targetData)
+        rl.prompt()
     },
     showData(type) {
         if (type === 'all') {
@@ -152,9 +154,7 @@ ErrorHandler.prototype = {
         const ErrorType = {
             DollarCharError: 'printDollarCharError',
             MatchedDataError: 'printMatchedDataError',
-            SameStatusError: 'printSameStatusError',
-            OtherErrors: 'printOtherErrors'
-
+            SameStatusError: 'printSameStatusError'
         }
         return ErrorType[errorMsg]
     },
@@ -192,7 +192,6 @@ const app = {
         rl.prompt()
         rl.on('line', (command) => {
             if (command === 'q') rl.close()
-
             try {
                 command = this.util.parseCommand(command)
                 const keyCommand = this.util.getKeyCommand(command);
@@ -200,7 +199,7 @@ const app = {
                 this.controller[keyCommand](...restCommand)
             }
             catch (e) {
-                console.log(e, e.message)
+                // console.log(e, e.message)
                 const errorType = this.errorHandler.getErrorType(e.message)
                 this.errorHandler[errorType](e.message)
                 rl.prompt()
@@ -212,7 +211,5 @@ const app = {
         })
     }
 }
-
-
 
 app.start()
