@@ -1,3 +1,7 @@
+const originData = require('./todosdata.json');
+const convertedData = JSON.parse(JSON.stringify(originData)).data;
+const Utils = require('./utils.js');
+
 function Instruction() {
 	
 }
