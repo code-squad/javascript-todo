@@ -22,18 +22,17 @@ class TodoParser extends Parser {
   checkShowCommand(status){
     const availableStatus = ['all', 'todo', 'doing', 'done'];
     if( availableStatus.indexOf(status) === -1){
-      throw new Error('Update 명령에는 id와 status가 필요합니다.');
+      throw new Error(`Show로 검색할 수 있는 값은 ${availableStatus.join(', ')} 입니다.`);
     }
   }
 
   checkDeleteCommand(id){
     if( !numberCheck(id)){
-      throw new Error('Update 명령에는 id와 status가 필요합니다.');
+      throw new Error('Delete 명령에는 id와 status가 필요합니다.');
     }
   }
 
   parsing(line){ 
-    try{
       const parsedLine = super.parsing(line);
       const command = parsedLine[0].toLowerCase();
       const args = parsedLine.splice(1);
@@ -53,14 +52,13 @@ class TodoParser extends Parser {
         case 'add':
           this.checkAddCommand(...args);
           break;
+        default:
+          throw new Error('존재하지 않는 명령입니다.');
       }
       return {
         command,
         args,
       };
-    } catch(err){
-      console.error(`에러: ${err.message}`);
-    }
   }
 }
 
