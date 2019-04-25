@@ -1,8 +1,24 @@
 const readline = require("readline")
+const Todos = require("./Todos.js")
+const Validation = require("./Validation.js")
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 })
+
+const todos = new Todos()
+const validation = new Validation()
+
+const getCommand = (command) => {
+    if (!validation.isContained(command, "$")) {
+        throw Error("NO_SHELL")
+    }
+    const [inst, ...rest] = command.split("$")
+    if (!validation.isCorrectCommand(inst)) {
+        throw Error("INCORRECT_INST")
+    }
+    return [inst, rest]
+}
 
 rl.setPrompt("명령어를 입력하세요 : ")
 rl.prompt()
@@ -12,7 +28,17 @@ rl.on("line", (command) => {
         rl.close()
     } 
     else {
-        console.log(command)
+        try {
+            [inst, params] = getCommand(command)
+            console.log(inst)
+            console.log(params)
+        } catch(e) {
+            const error = {
+                "NO_SHELL" : "명령어에 $를 포함시켜주세요.",
+                "INCORRECT_INST" : "사용가능한 명령어는 add | update | delete | show 입니다."
+            }
+            console.log('\x1b[31m%s\x1b[0m',"Error : " + error[e.message])
+        }
         rl.prompt()
     }
 }).on("close", () => {
