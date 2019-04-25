@@ -24,4 +24,8 @@ MSG.prototype.INVALID_ID = function() {
   return `입력 하신 id가 존재하지 않습니다. 다시 입력해주세요.`;
 };
 
+MSG.prototype.INVALID_INST = function() {
+  return `입력 하신 명령어가 존재하지 않습니다. 다시 입력해주세요.`;
+};
+
 module.exports = MSG;

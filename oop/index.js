@@ -28,6 +28,7 @@ inputPrompt.on('line', userInput => {
     const userInputArr = userInput.split('$');
     const methodName = userInputArr.splice(0, 1);
 
+    todoError.invalidInst(managingTodo, methodName);
     managingTodo[methodName](...userInputArr);
   } catch (error) {
     console.log(error.message);

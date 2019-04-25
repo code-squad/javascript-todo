@@ -20,4 +20,10 @@ TodoError.prototype.invalidId = function(id) {
   }
 };
 
+TodoError.prototype.invalidInst = function(obj, inst) {
+  if (obj[inst] === undefined) {
+    throw new Error(this.msg.INVALID_INST());
+  }
+};
+
 module.exports = TodoError;
