@@ -3,7 +3,7 @@ module.exports = class Utils {
         this._data = data;
         this.dollor = order.match(/\$/g);
         this.appWord = order.match(/[a-z]*(?=\$)/);
-        this.status = order.match(/(?<=show\$)[a-z]*$/);
+        this.status = order.match(/(?<=\$)[a-z]*$/);
         this.id = order.match(/(?<=\$)\d*/);
         this.tag = order.match(/(?<=\[\")\w*(?=\"\])/);
     }
@@ -20,14 +20,14 @@ module.exports = class Utils {
         return true
     }
     tags(){
-        if(this.tag[0]){
+        if(!this.tag){
             console.log('가능한 tag가 아닙니다.')
             return false
         }
         return true
     }
     ids(){
-        if(!this._data.some((el) => el['id'] === this.id[0])) {
+        if(!this._data.some((el) => el['id'] === Number(this.id[0]))) {
             console.log('존재하지 않는 id입니다.')
             return false
         }
@@ -43,10 +43,7 @@ module.exports = class Utils {
     }
     validator() {
         this.dollors();
-        if(!this.appWords()) {
-            console.log('sdfsadf') 
-            return false
-        }
+        if(!this.appWords()) return false
 
         if(this.appWord[0] === 'show'){
             if(!this.statuses()) return false;
@@ -60,7 +57,3 @@ module.exports = class Utils {
         }
     }
 }
-
-
-// const validator = new Validator(todosData,'delete$7788');
-// console.log(validator.checkValidTag());
