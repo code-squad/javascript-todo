@@ -78,14 +78,21 @@ module.exports = class todo {
 	// 	// showall 1초뒤에 실행
 	// 	// 존재하지 않는 id경우 출력
 
-	delete(id) {
+	findData(id) {
 		let index;
-		const deletingData = todoList.filter((element, innerIndex) => {
+		const targetData = todoList.filter((element, innerIndex) => {
 			if (Number(id) === element.id) {
 				index = innerIndex;
 				return Number(id) === element.id;
 			}
 		})[0];
+
+		return [targetData, index];
+	}
+
+	delete(id) {
+		const deletingData = this.findData(id)[0];
+		const index = this.findData(id)[1];
 		// if(id === undefined){
 		// 	err
 		// 	console.log(존재하지 않음)
@@ -100,17 +107,20 @@ module.exports = class todo {
 		}, 1000);
 	}
 
-	// findIndex(id){
-	// 	const  = todoList.filter((element) =>{
-
-	// 	});
-
-	// 	if(data.id === id){
-	// 		return indexOfData;
-	// 	}
-	// }
-
 	// 	// update
+	update(id, status) {
+		const targetData = this.findData(id)[0];
+		const index = this.findData(id)[1];
+
+		todoList[index].status = status;
+
+		setTimeout(() => {
+			console.log(`"${targetData.name}"가(이) ${status}로 변경되었습니다.`);
+			setTimeout(() => {
+				this.printAll();
+			}, 1000);
+		}, 3000);
+	}
 	// 	// 매개변수 id, status
 	// 	// id에 해당하는 데이터를 status로 상태 변경
 	// 	// 3초 뒤에 name 이 status 로 변경되었ㅅ 출력
