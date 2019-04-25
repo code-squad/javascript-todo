@@ -1,6 +1,6 @@
 const Parser = require('./parser');
 
-const numberCheck = id => typeof id === 'number' && !Number.isNaN(id)
+const numberCheck = id => typeof id === 'number' && !Number.isNaN(id);
 
 function checkIsArrayLiteral(str){
   try{
@@ -8,6 +8,11 @@ function checkIsArrayLiteral(str){
   } catch(err){
     return false;
   }
+}
+
+function checkValidStatus(status){
+  const availableStatus = ['all', 'todo', 'doing', 'done'];
+  return availableStatus.indexOf(status) !== -1;
 }
 
 class TodoParser extends Parser {
@@ -19,21 +24,27 @@ class TodoParser extends Parser {
     if( !numberCheck(id) || (status === undefined)) {
       throw new Error('Update 명령에는 id와 status가 필요합니다.');
     }
+    if( !checkValidStatus(status) ){
+      throw new Error('사용할 수 없는 상태값입니다.');
+    }
   }
 
   checkAddCommand(name, tag, status){
     if( name === undefined || tag === undefined || status === undefined) {
       throw new Error('Add 명령에는 name, tag, status가 필요합니다.');
     }
-    if( checkIsArrayLiteral(tag)){
+    if( !checkIsArrayLiteral(tag)){
       throw new Error('Tag는 JavaScript 배열 형태여야 합니다.');
+    }
+    if( !checkValidStatus(status) ){
+      throw new Error('사용할 수 없는 상태값입니다.');
     }
   }
 
   checkShowCommand(status){
     const availableStatus = ['all', 'todo', 'doing', 'done'];
-    if( availableStatus.indexOf(status) === -1){
-      throw new Error(`Show로 검색할 수 있는 값은 ${availableStatus.join(', ')} 입니다.`);
+    if( !checkValidStatus(status) ){
+      throw new Error('사용할 수 없는 상태값입니다.');
     }
   }
 
