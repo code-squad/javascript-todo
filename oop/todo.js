@@ -10,7 +10,7 @@ module.exports = class todo {
 		const regExp = /^all$|^todo$|^doing$|^done$/;
 		const matchRegExp = element.match(regExp);
 		if (matchRegExp === null) {
-			this.printError('COMMAND_ERROR');
+			throw new Error(errorMessage.COMMAND_ERROR);
 		} else if (matchRegExp[0] === 'all') {
 			this.printAll();
 		} else {
@@ -47,7 +47,7 @@ module.exports = class todo {
 	}
 
 	add(name, tag) {
-		const tagResult = tag.replace(/\[|\'|\]/g, '').split(',');
+		const tagResult = tag.replace(/\[|\'|\"|\]/g, '').split(',');
 		const id = this.getId();
 		const newData = {
 			name: name,
@@ -56,7 +56,7 @@ module.exports = class todo {
 			id: id
 		};
 		todoList.push(newData);
-
+		console.log(`${newData.name} 1개가 추가되었습니다. (id : ${newData.id})`);
 		setTimeout(() => {
 			this.printAll();
 		}, 1000);
@@ -67,7 +67,9 @@ module.exports = class todo {
 		return Number(id.toFormat('YYMMDDHHMISS'));
 	}
 
-	findData(id) {
+	checkValidId(id) {
+		// todoList.fi
+
 		let index;
 		const targetData = todoList.filter((element, innerIndex) => {
 			if (Number(id) === element.id) {
@@ -80,11 +82,11 @@ module.exports = class todo {
 	}
 
 	delete(id) {
-		const deletingData = this.findData(id);
+		const deletingData = this.checkValidId(id);
 		if (deletingData[0] === undefined) {
-			return this.printError('ID_ERROR');
+			throw new Error(errorMessage.ID_ERROR);
 		}
-		const index = this.findData(id)[1];
+		const index = this.checkValidId(id)[1];
 		const deletingName = deletingData[0].name;
 		todoList.splice(index, 1);
 
@@ -95,15 +97,15 @@ module.exports = class todo {
 	}
 
 	update(id, status) {
-		const targetData = this.findData(id)[0];
-		const index = this.findData(id)[1];
+		const targetData = this.checkValidId(id)[0];
+		const index = this.checkValidId(id)[1];
 
 		if (targetData === undefined) {
-			return this.printError('ID_ERROR');
+			throw new Error(errorMessage.ID_ERROR);
 		}
 
 		if (todoList[index].status === status) {
-			return this.printError('STATUS_ERROR');
+			throw new Error(errorMessage.STATUS_ERROR);
 		}
 
 		todoList[index].status = status;
@@ -116,8 +118,8 @@ module.exports = class todo {
 		}, 3000);
 	}
 
-	printError(error) {
-		console.log(errorMessage[error]);
-		this.readline.prompt();
-	}
+	// printError(error) {
+	// 	console.log(errorMessage[error]);
+	// 	this.readline.prompt();
+	// }
 };
