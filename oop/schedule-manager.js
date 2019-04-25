@@ -45,32 +45,42 @@ App.prototype = {
 
 
 
-function Editor() {}
+function Editor() { }
 
 Editor.prototype = {
-    TodoObject : function(name, tag, newId) {
-        this.name = name
-        this.tag = tag
+    TodoObject: function (_name, _tag, _newId) {
+        this.name = _name
+        this.tag = _tag
         this.status = 'todo'
-        this.id = newId
-    
+        this.id = _newId
+
     },
 
-    addTodo(name, tag) {
-        const newId = this.getUniqueId()
-        const newTodoObject = new this.TodoObject(name, tag, newId);
+    addTodo(_name, _tag) {
+        const _newId = this.getUniqueId()
+        const newTodoObject = new this.TodoObject(_name, _tag, _newId);
         schedule_list.push(newTodoObject);
     },
     //update$id$status
-    updateTodo(id, status) {
+    updateTodo(_id, _status) {
         // 넘어온 id에 맞는 schedule배열의 인자객체를 찾는다.
         //  그 인자객체의 status를 변경한다. 
+        schedule_list.some(todo => {
+            if (todo.id === parseInt(_id)) return todo.status = _status
+        });
+
+        // schedule_list = test
         log('updateTodo is run')
     },
 
-    deleteTodo(id) {
+    deleteTodo(_id) {
         // 넘어온 id에 맞는 schedule 배열의 인자객체를 찾는다.
         // 그 인자객체를 삭제한다. 
+        schedule_list.some((todo,index) => {
+            if (todo.id === parseInt(_id)) return schedule_list.splice(index,1)
+        });
+
+        log(schedule_list)
         log('deleteTodo is run')
 
     },
@@ -105,14 +115,14 @@ Viewer.prototype = {
     },
 
     // show$status
-    showFiltered(status) {
+    showFiltered(_status) {
         // run에서 넘겨받은 status를  scheduled_list에서 가지고 있는 객체를 찾아 배열로 만든다.
 
-        const showFilteredResult = schedule_list.filter(todo => todo.status === status)
+        const showFilteredResult = schedule_list.filter(todo => todo.status === _status)
             .map(todo => `'${todo.name}, ${todo.id}번'`);
 
         // 배열의 인자들을 한줄로 출력한다. 
-        console.log(`${status}리스트 : 총${showFilteredResult.length}건 : ${showFilteredResult.join(', ')}`);
+        console.log(`${_status}리스트 : 총${showFilteredResult.length}건 : ${showFilteredResult.join(', ')}`);
 
     },
     addMessage(name, tag) {
@@ -135,8 +145,8 @@ Viewer.prototype = {
 
 const schedule_manager = new App();
 
-schedule_manager.run('show$all');
-schedule_manager.run('show$todo');
-schedule_manager.run('add$운동하기$exercise');
-schedule_manager.run('update$7$doing');
+// schedule_manager.run('show$all');
+// schedule_manager.run('show$todo');
+// schedule_manager.run('add$운동하기$exercise');
+// schedule_manager.run('update$7$done');
 schedule_manager.run('delete$7');
