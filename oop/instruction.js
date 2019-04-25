@@ -57,9 +57,18 @@ Instruction.prototype = {
 		convertedData.splice(convertedData.indexOf(targetObj), 1);
 		let message = `${targetObj.name}이 ${targetObj.status}에서 삭제되었습니다.`;
 		console.log(message);
-	},
+    },
+    
+    update :(id, status) => {
+		const targetObj = Utils.prototype.getArrByCondition(convertedData, (val) => { return id == val.id;})[0];		
+		targetObj.status = status;
 
-    update: () => {}
+		const message = `${targetObj.name}가 ${targetObj.status}로 상태가 변경되었습니다`;
+		
+		setTimeout(() => {
+        console.log(message);
+	    }, 3000); 
+	},
 };
 
 module.exports = Instruction;
