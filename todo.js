@@ -27,8 +27,10 @@ Model.prototype = {
         this.todoList.splice(targetIndex, 1)
     },
     updateData(id, status) {
-        const targetIndex = this.getIndex(id)
-        this.todoList[targetIndex].status = status
+        const targetIndex = this.getIndex(id);
+        let targetData = this.todoList[targetIndex];
+        if (targetData.status === status) throw Error(id)
+        targetData.status = status
     },
     makeId() {
         return ((1 + Math.random()) * 0x10000 | 0).toString(16).substring(1)
@@ -44,21 +46,19 @@ Model.prototype = {
     }
 }
 
-const View = function () {}
+const View = function () { }
 View.prototype = {
     showAll(countResult) {
         console.log('현재상태 : ' + Object.entries(countResult).map(([key, value]) => `${key}: ${value}개`).join(', '))
     },
     showEachData(status, countNumber, targetData) {
         console.log(`${status}리스트 : 총 ${countNumber}건 : ${targetData}`)
-
     },
     showAddResult(name, id) {
         console.log(`${name} 1개가 추가되었습니다. (id : ${id})`)
     },
     showDeleteResult(name, status) {
         console.log(`${name} ${status}가 목록에서 삭제되었습니다.`)
-
     },
     showUpdateResult(name, status) {
         console.log(`${name}이(가) ${status}으로 상태가 변경되었습니다.`)
@@ -119,7 +119,7 @@ Controller.prototype = {
     }
 }
 
-const Util = function () {}
+const Util = function () { }
 Util.prototype = {
     parseCommand(command) {
         return command.split('$');
@@ -133,6 +133,39 @@ Util.prototype = {
         }
         const keyCommand = command.shift();
         return KeyMap[keyCommand]
+    },
+}
+
+const ErrorHandler = function () {
+    this.controller = controller;
+}
+ErrorHandler.prototype = {
+    getErrorType(errorMsg) {
+        if (errorMsg.length === 4) errorMsg = 'SameStatusError'
+
+        const ErrorType = {
+            DollarCharError: 'printDollarCharError',
+            MatchedDataError: 'printMatchedDataError',
+            SameStatusError: 'printSameStatusError',
+            OtherErrors: 'printOtherErrors'
+
+        }
+        return ErrorType[errorMsg]
+    },
+
+    printDollarCharError() {
+    },
+    printMatchedDataError() {
+    },
+    printSameStatusError(id) {
+        const idx = this.controller.model.getIndex(id);
+        const {
+            name,
+            status
+        } = this.controller.model.todoList[idx];
+        console.log(`${name}의 status는 이미 ${status}입니다.`)
+    },
+    printOtherErrors() {
     }
 }
 
@@ -140,19 +173,30 @@ const util = new Util();
 const model = new Model();
 const view = new View();
 const controller = new Controller();
+const errorHandler = new ErrorHandler();
 
 const app = {
     util: util,
     controller: controller,
+    errorHandler: errorHandler,
     start() {
         rl.setPrompt('명령하세요(종료하려면 "q"를 입력하세요) : ')
         rl.prompt()
         rl.on('line', (command) => {
             if (command === 'q') rl.close()
-            command = this.util.parseCommand(command)
-            const keyCommand = this.util.getKeyCommand(command);
-            const restCommand = command;
-            this.controller[keyCommand](...restCommand)
+
+            try {
+                command = this.util.parseCommand(command)
+                const keyCommand = this.util.getKeyCommand(command);
+                const restCommand = command;
+                this.controller[keyCommand](...restCommand)
+            }
+            catch (e) {
+                const errorType = this.errorHandler.getErrorType(e.message)
+                this.errorHandler[errorType](e.message)
+                rl.prompt()
+
+            }
         })
         rl.on('close', () => {
             process.exit()
