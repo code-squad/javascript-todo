@@ -6,11 +6,17 @@ Validation.prototype.isContained = function(string, key) {
 
 Validation.prototype.isExisted = function(arr, id) {
     if (!Number.isFinite(id)) return false;
-    return arr.findIndex((el) => {el.id === id}) === -1 ? false : true
+    return arr.findIndex((el) => el.id === id)
 }
 
 Validation.prototype.isSameStatus = function(obj, status) {
-    return obj.status !== status
+    console.log(arguments)
+    return obj["status"] === status
+}
+
+Validation.prototype.isCorrectStatus = function(status) {
+    const reg = /^done$|^doing$|^todo$/
+    return reg.test(status)
 }
 
 Validation.prototype.isCorrectCommand = function(inst) {

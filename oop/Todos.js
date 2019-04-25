@@ -1,3 +1,5 @@
+const Validation = require('./Validation.js')
+const validation = new Validation()
 const todoList = []
 let incrementId = 0
 
@@ -14,13 +16,17 @@ Todos.prototype.add = function (name, tag) {
 }
 
 Todos.prototype.delete = function (id) {
-    console.log(id)
-    console.log("delete")
+    let index = validation.isExisted(todoList, Number(id))
+    if (index === -1) throw Error("NOT_EXIST_ID")
+    delete todoList[index]    
 }
 
 Todos.prototype.update = function (id, status) {
-    console.log(id, status)
-    console.log("update")
+    let index = validation.isExisted(todoList, Number(id))
+    if (index === -1) throw Error("NOT_EXIST_ID")
+    else if (!validation.isCorrectStatus(status)) throw Error("INCORRECT_STATUS")
+    else if (validation.isSameStatus(todoList[index], status)) throw Error("SAME_STATUS")
+    todoList[index].status = status
 }
 
 Todos.prototype.show = function (status) {
