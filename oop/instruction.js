@@ -1,9 +1,10 @@
 const originData = require('./todosdata.json');
 const convertedData = JSON.parse(JSON.stringify(originData)).data;
 const Utils = require('./utils.js');
+const ExceptionHandling = require('./exceptionHandling.js');
 
 function Instruction() {
-
+	
 }
 
 Instruction.prototype = {
@@ -51,16 +52,31 @@ Instruction.prototype = {
     },
 
     delete : (id) => {
-		const targetObj = Utils.prototype.getArrByCondition(convertedData, (val) => { return id == val.id;})[0];		
-		if (!targetObj) return;
+		const targetObj = Utils.prototype.getArrByCondition(convertedData, (val) => { return id == val.id;})[0];
+		
+		try {
+			if (!targetObj) ExceptionHandling.prototype.notExistIdException();
+		} catch (e) {
+			console.error(e.message);
+			return;
+		}
 		
 		convertedData.splice(convertedData.indexOf(targetObj), 1);
 		let message = `${targetObj.name}이 ${targetObj.status}에서 삭제되었습니다.`;
 		console.log(message);
+
     },
     
     update :(id, status) => {
-		const targetObj = Utils.prototype.getArrByCondition(convertedData, (val) => { return id == val.id;})[0];		
+		const targetObj = Utils.prototype.getArrByCondition(convertedData, (val) => { return id == val.id;})[0];	
+		try {
+			if (!targetObj) ExceptionHandling.prototype.notExistIdException();
+			if (targetObj.status === status) ExceptionHandling.prototype.sameStatusException();
+		} catch (e) {
+			console.error(e.message);
+			return;
+		}
+
 		targetObj.status = status;
 
 		const message = `${targetObj.name}가 ${targetObj.status}로 상태가 변경되었습니다`;
