@@ -44,32 +44,32 @@ class TodoParser extends Parser {
   }
 
   parsing(line){ 
-      const parsedLine = super.parsing(line);
-      const command = parsedLine[0].toLowerCase();
-      const args = parsedLine.splice(1);
+    const parsedLine = super.parsing(line);
+    const command = parsedLine[0].toLowerCase();
+    const args = parsedLine.splice(1);
 
-      switch(command){
-        case 'update':
-          args[0] = Number.parseInt(args[0]);
-          this.checkUpdateCommand(...args);
-          break;
-        case 'show':
-          this.checkShowCommand(...args);
-          break;
-        case 'delete':
-          args[0] = Number.parseInt(args[0]);
-          this.checkDeleteCommand(...args);
-          break;
-        case 'add':
-          this.checkAddCommand(...args);
-          break;
-        default:
-          throw new Error('존재하지 않는 명령입니다.');
-      }
-      return {
-        command,
-        args,
-      };
+    switch(command){
+      case 'update':
+        args[0] = Number.parseInt(args[0]);
+        this.checkUpdateCommand(...args);
+        break;
+      case 'show':
+        this.checkShowCommand(...args);
+        break;
+      case 'delete':
+        args[0] = Number.parseInt(args[0]);
+        this.checkDeleteCommand(...args);
+        break;
+      case 'add':
+        this.checkAddCommand(...args);
+        break;
+      default:
+        throw new Error('존재하지 않는 명령입니다.');
+    }
+    return {
+      command,
+      args,
+    };
   }
 }
 
