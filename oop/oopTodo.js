@@ -52,31 +52,41 @@ TodoUI.prototype.deleteTodoResult = function (deletedIndex) {
 
 
 // updateTodo
-TodoUI.prototype.updateTodoExecutor = function (id, updatedstatus) {
+TodoUI.prototype.updateTodoExecutor = function (id, updatedStatus) {
     setTimeout(() => {
-        return this.checkValidation(id) ? this.updateTodoResult(id, updatedstatus) : this.printError()
+        return this.checkID(id) ? this.updateTodoStatus(id, updatedStatus) : this.printError()
     }, 3000)
 };
 
 
-TodoUI.prototype.updateTodoStatus = function (updatingIndex, updatedstatus) {
-    return datalist[updatingIndex].status = updatedstatus;
+TodoUI.prototype.updateTodoStatus = function (id, updatedStatus) {
+    const updatatingIndex = this.getIndex(id);
+    datalist[updatatingIndex].status = updatedStatus;
+    return this.updateTodoResult(updatatingIndex, updatedStatus)
 };
 
 
-TodoUI.prototype.updateTodoResult = function (id, updatedStatus) {
-    const getUpdatatingIndex = getIndex(id);
-    this.updateTodoStatus(getUpdatatingIndex, updatedStatus);
-    const updateResult = `${datalist[getUpdatatingIndex].name} 가 ${updatedStatus}로 상태가 변경됬습니다.`;
+TodoUI.prototype.updateTodoResult = function (updatatingIndex, updatedStatus) {
+    const updateResult = `${datalist[updatatingIndex].name} 가 ${updatedStatus}로 상태가 변경됬습니다.`;
     return this.showAll_printResult(updateResult);
 };
 
+TodoUI.prototype.showElementGetter = function(){
+    const todoList = this.checkStatus(datalist, 'todo');
+    const doingList = this.checkStatus(datalist, 'doing');
+    const doneList = this.checkStatus(datalist, 'done');
+    return {todoList, doingList, doneList}
+}
+
 
 TodoUI.prototype.showTodoList = function (status) {
-    const todoList = this.statusChecker(datalist, 'todo');
-    const doingList = this.statusChecker(datalist, 'doing');
-    const doneList = this.statusChecker(datalist, 'done');
+    const showElementList = this.showElementGetter
+    this.showStatus(status, showElementList);
+   
+}
 
+TodoUI.prototype.showStatus = function(status, list) {
+    const {todoList, doingList, doneList} = list
     switch (status) {
         case 'all':
             return `현재상태 : todo: ${todoList.length}개, doing: ${doingList.length}개, done: ${doneList.length}개 \n`
@@ -119,16 +129,10 @@ TodoUI.prototype.getIndex = function (inputId) {
 }
 
 
-TodoUI.prototype.statusChecker = function (objData, status) {
+TodoUI.prototype.checkStatus = function (objData, status) {
     return objData.filter(list => list.status === status).map(list => { return list.name }); // list.name을 한 이유는? 그냥 list만 return 해도 될 듯
 }
 
-
-TodoUI.prototype.checkValidation = function (inputVal) {
-    return inputVal.some((data) => {
-        return typeof inputVal === 'string' ? data.name === inputVal : data.id === inputVal;
-    });
-}
 
 TodoUI.prototype.createNewID = function (datalist, maxNumOfID) {
     const newID = Math.floor(Math.random() * maxNumOfID) + 1;
