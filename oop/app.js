@@ -13,7 +13,7 @@ function Program() {
 
 Program.prototype = {
 
-    runProgram : (readline) => {
+    runProgram : (readline, cmdArr) => {
        readline.setPrompt('명령하세요: ');
        readline.prompt();
        readline.on('line', (userInput) => {	    
