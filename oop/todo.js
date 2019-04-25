@@ -68,8 +68,6 @@ module.exports = class todo {
 	}
 
 	checkValidId(id) {
-		// todoList.fi
-
 		let index;
 		const targetData = todoList.filter((element, innerIndex) => {
 			if (Number(id) === element.id) {
@@ -77,49 +75,36 @@ module.exports = class todo {
 				return Number(id) === element.id;
 			}
 		});
+		if (targetData[0] === undefined) {
+			throw new Error(errorMessage.ID_ERROR);
+		}
 
-		return [targetData[0], index];
+		return index;
 	}
 
 	delete(id) {
-		const deletingData = this.checkValidId(id);
-		if (deletingData[0] === undefined) {
-			throw new Error(errorMessage.ID_ERROR);
-		}
-		const index = this.checkValidId(id)[1];
-		const deletingName = deletingData[0].name;
-		todoList.splice(index, 1);
+		const index = this.checkValidId(id);
+		const deletingName = todoList[index].name;
 
-		console.log(`${deletingName}가 ${deletingData[0].status}에서 삭제됐습니다.`);
+		console.log(`${deletingName}가 ${todoList[index].status}에서 삭제됐습니다.`);
+		todoList.splice(index, 1);
 		setTimeout(() => {
 			this.printAll();
 		}, 1000);
 	}
 
 	update(id, status) {
-		const targetData = this.checkValidId(id)[0];
-		const index = this.checkValidId(id)[1];
-
-		if (targetData === undefined) {
-			throw new Error(errorMessage.ID_ERROR);
-		}
-
+		const index = this.checkValidId(id);
 		if (todoList[index].status === status) {
 			throw new Error(errorMessage.STATUS_ERROR);
 		}
-
 		todoList[index].status = status;
 
 		setTimeout(() => {
-			console.log(`"${targetData.name}"가(이) ${status}로 변경되었습니다.`);
+			console.log(`"${todoList[index].name}"가(이) ${status}로 변경되었습니다.`);
 			setTimeout(() => {
 				this.printAll();
 			}, 1000);
 		}, 3000);
 	}
-
-	// printError(error) {
-	// 	console.log(errorMessage[error]);
-	// 	this.readline.prompt();
-	// }
 };
