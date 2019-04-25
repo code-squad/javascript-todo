@@ -47,21 +47,16 @@ module.exports = class todo {
 	}
 
 	add(name, tag) {
-		const regExp = /^\[\'.*\'\]$/;
-		const matchRegExp = tag.match(regExp);
-		if (matchRegExp === null) {
-			return this.printError('TAG_ERROR');
-		}
 		const tagResult = tag.replace(/\[|\'|\]/g, '').split(',');
 		const id = this.getId();
 		const newData = {
 			name: name,
 			tags: tagResult,
 			status: 'todo',
-			id: Number(id)
+			id: id
 		};
 		todoList.push(newData);
-		console.log(todoList);
+
 		setTimeout(() => {
 			this.printAll();
 		}, 1000);
@@ -69,7 +64,7 @@ module.exports = class todo {
 
 	getId() {
 		const id = new Date();
-		return id.toFormat('YYMMDDHHMISS');
+		return Number(id.toFormat('YYMMDDHHMISS'));
 	}
 
 	findData(id) {
