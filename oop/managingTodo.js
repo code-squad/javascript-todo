@@ -1,10 +1,12 @@
 const Todo = require('./todo');
+const TodoError = require('./todoError');
 
 function ManagingTodo(data, prompt, msg) {
   this.countedStatus = { todo: 0, doing: 0, done: 0 };
   this.managedlist = this.initManagedlist(data);
   this.msg = msg;
   this.prompt = prompt;
+  this.todoError = new TodoError(msg);
 }
 
 ManagingTodo.prototype.initManagedlist = function(data) {
@@ -72,7 +74,14 @@ ManagingTodo.prototype.update = function(id, changeStatus) {
   if (typeof id === 'string') {
     id = parseInt(id);
   }
+
   const changeTodo = this.managedlist.find(todo => todo.id === id);
+
+  try {
+    this.todoError.compareStatus(changeTodo.status, changeStatus);
+  } catch (e) {
+    throw e;
+  }
 
   this.countedStatus[changeTodo.status] -= 1;
   this.countedStatus[changeStatus] += 1;

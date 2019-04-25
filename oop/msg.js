@@ -12,5 +12,8 @@ MSG.prototype.update = function(name, status) {
 MSG.prototype.DONT_HAVE_SEPERATOR = function(seperator) {
   return `${seperator}가 없습니다. 다시 입력해주세요.`;
 };
+MSG.prototype.SAME_STATUS = function(originStr, changingStr) {
+  return `원래의 상태 '${originStr}'가 변경 할 상태 '${changingStr}'와 같습니다. 다시 입력해주세요.`;
+};
 
 module.exports = MSG;

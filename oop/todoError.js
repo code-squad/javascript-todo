@@ -8,4 +8,10 @@ TodoError.prototype.includeSeperator = function(str, seperator) {
   }
 };
 
+TodoError.prototype.compareStatus = function(originStr, changingStr) {
+  if (originStr === changingStr) {
+    throw new Error(this.msg.SAME_STATUS(originStr, changingStr));
+  }
+};
+
 module.exports = TodoError;
