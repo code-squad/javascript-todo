@@ -1,33 +1,29 @@
 const Controller = require('./controller');
+const ErrorHandler = require('./errorHandler')
 const readLine = require('readline');
 const rl = readLine.createInterface({
     input:process.stdin,
 });
 
-(() => {
-    rl.on('line', (input) => {
-        const controller = new Controller(input);
-        const inputArray = controller.splitInput();
-        const command = inputArray[0];
-        switch(command) {
-            case 'show' :
-                const statusShow = inputArray[1];
-                controller.show(statusShow);
-                break;
-            case 'add' :
-                const name = inputArray[1];
-                const tag = inputArray[2];
-                controller.add(name, tag);
-                break;
-            case 'delete' :
-                const idDelete = inputArray[1];
-                controller.delete(idDelete);
-                break;
-            case 'update' :
-                const idUpdate = inputArray[1];
-                const statusUpdate = inputArray[2];
-                controller.update(idUpdate, statusUpdate);
-                break;
-        }
-    });
-})();
+// (() => {
+//     rl.on('line', (input) => {
+//         const errorHandler = new ErrorHandler();
+//         const controller = new Controller();
+//         controller.instruct(input);
+//     });
+// })();
+
+function test(input) {
+    console.log(input);
+    const errorHandler = new ErrorHandler();
+    const controller = new Controller();
+    controller.instruct(input);
+}
+
+// test('show$all')
+// test('show$todo')
+// test('show$done')
+// test('add$testTodo$[“testTag”, “testTag2"]')
+// test('update$378$done')
+// test('update$378$todo')
+test('delete$378')

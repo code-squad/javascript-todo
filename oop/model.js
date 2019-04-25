@@ -23,7 +23,7 @@ module.exports = function Model() {
     }
 
     this.deleteTodoObject = (id) => {
-        const objToDelete = todoList.find(todoObj => todoObj.id === parseInt(id));
+        const objToDelete = todoList.find((todoObj) => { return todoObj.id === parseInt(id) });
         todoList.splice(todoList.indexOf(objToDelete), 1);
         fs.writeFileSync('todo.json', JSON.stringify(todoList));
         return objToDelete;
@@ -37,7 +37,7 @@ module.exports = function Model() {
                 fs.writeFileSync('todo.json', JSON.stringify(todoList));
                 objToUpdate = todoObj;
             }
-        });
+       });      
         return objToUpdate;
     }
 }
