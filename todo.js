@@ -94,6 +94,7 @@ Controller.prototype = {
             this.showAll()
             return
         }
+        if (!/^(todo|doing|done)$/.test(type)) throw Error('ShowTypeError')
         this.showEachData(type)
     },
     addData(name, tags) {
@@ -113,6 +114,7 @@ Controller.prototype = {
         this.showFinalResult()
     },
     updateData(id, status) {
+        if (!/^(todo|doing|done)$/.test(status)) throw Error('UpdateStatusError')
         this.model.updateData(id, status);
         const idx = this.model.getIndex(id)
         const name = this.model.todoList[idx].name
@@ -142,6 +144,15 @@ Util.prototype = {
         const keyCommand = command.shift();
         return KeyMap[keyCommand]
     },
+    checkArgsNumber(keyCommand, restCommand) {
+        const argsNumber = {
+            showData: 1,
+            addData: 2,
+            deleteData: 1,
+            updateData: 2
+        }
+        if (argsNumber[keyCommand] !== restCommand.length) throw Error('MaxArgsNumberError')
+    }
 }
 
 const ErrorHandler = function () {
@@ -154,7 +165,10 @@ ErrorHandler.prototype = {
         const ErrorType = {
             DollarCharError: 'printDollarCharError',
             MatchedDataError: 'printMatchedDataError',
-            SameStatusError: 'printSameStatusError'
+            SameStatusError: 'printSameStatusError',
+            ShowTypeError: 'printShowTypeError',
+            UpdateStatusError: 'printUpdateStatusError',
+            MaxArgsNumberError: 'printMaxArgsNumberError'
         }
         return ErrorType[errorMsg]
     },
@@ -175,6 +189,15 @@ ErrorHandler.prototype = {
     },
     printOtherErrors() {
         console.log('올바른 명령어를 사용해주세요.')
+    },
+    printShowTypeError() {
+        console.log('show 명령의 옵션은 all/todo/doing/done 중 하나로 입력해 주세요.')
+    },
+    printUpdateStatusError() {
+        console.log('update 명령의 status는 todo/doing/done 중 하나로 입력해 주세요.')
+    },
+    printMaxArgsNumberError() {
+        console.log('인자 개수를 확인해주세요.')
     }
 }
 
@@ -197,15 +220,15 @@ const app = {
                 command = this.util.parseCommand(command)
                 const keyCommand = this.util.getKeyCommand(command);
                 const restCommand = command;
-                this.controller[keyCommand](...restCommand)
+                this.util.checkArgsNumber(keyCommand, restCommand);
+                this.controller[keyCommand](...restCommand);
             }
             catch (e) {
-                console.log(e, e.message)
+                // console.log(e, e.message)
                 const errorType = this.errorHandler.getErrorType(e.message)
                 if (errorType) {
                     this.errorHandler[errorType](e.message)
                     rl.prompt()
-
                 } else {
                     this.errorHandler.printOtherErrors();
                     rl.prompt()
