@@ -1,3 +1,5 @@
+const Instruction = require('./instruction.js');
+
 function CommandParser () {
 	
 }
