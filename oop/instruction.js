@@ -46,10 +46,19 @@ Instruction.prototype = {
             id,
         };
         convertedData.push(obj);
-        console.log(`${obj.name} 1개가 추가됐습니다.(id : ${obj.id})`);
+        const message = `${obj.name} 1개가 추가됐습니다.(id : ${obj.id})`;
+		console.log(message);
     },
 
-    delete: () => {},
+    delete : (id) => {
+		const targetObj = Utils.prototype.getArrByCondition(convertedData, (val) => { return id == val.id;})[0];		
+		if (!targetObj) return;
+		
+		convertedData.splice(convertedData.indexOf(targetObj), 1);
+		let message = `${targetObj.name}이 ${targetObj.status}에서 삭제되었습니다.`;
+		console.log(message);
+	},
+
     update: () => {}
 };
 
