@@ -2,6 +2,14 @@ const Parser = require('./parser');
 
 const numberCheck = id => typeof id === 'number' && !Number.isNaN(id)
 
+function checkIsArrayLiteral(str){
+  try{
+    return Array.isArray(JSON.parse(str));
+  } catch(err){
+    return false;
+  }
+}
+
 class TodoParser extends Parser {
   constructor(delimiter){
     super(delimiter);
@@ -13,9 +21,12 @@ class TodoParser extends Parser {
     }
   }
 
-  checkAddCommand(name, status){
-    if( name === undefined || (status === undefined)) {
-      throw new Error('Add 명령에는 name과 status가 필요합니다.');
+  checkAddCommand(name, tag, status){
+    if( name === undefined || tag === undefined || status === undefined) {
+      throw new Error('Add 명령에는 name, tag, status가 필요합니다.');
+    }
+    if( checkIsArrayLiteral(tag)){
+      throw new Error('Tag는 JavaScript 배열 형태여야 합니다.');
     }
   }
 
