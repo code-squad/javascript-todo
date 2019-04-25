@@ -32,4 +32,8 @@ MSG.prototype.INVALID_STATUS = function() {
   return `입력 하신 상태가 존재하지 않습니다. 다시 입력해주세요.`;
 };
 
+MSG.prototype.NOT_ARRAY = function(notArray) {
+  return `입력하신 ${notArray}를 배열의 형태로 입력해주세요.`;
+};
+
 module.exports = MSG;

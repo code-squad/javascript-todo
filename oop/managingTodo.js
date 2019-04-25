@@ -18,7 +18,17 @@ ManagingTodo.prototype.initManagedlist = function(data) {
 };
 
 ManagingTodo.prototype.add = function(name, tags, status = 'todo') {
+  try {
+    this.todoError.invalidStatus(Object.keys(this.countedStatus), status);
+    this.todoError.isArray(tags);
+  } catch (error) {
+    throw error;
+  }
+
+  tags = tags.replace(/[\[\]\"\'\s]/g, '').split(','); // 통과된 입력을 올바른 배열로 변환
+
   const newTodo = new Todo({ name, tags, status });
+
   this.managedlist.push(newTodo);
   this.countedStatus[newTodo.status] += 1;
 
@@ -87,8 +97,6 @@ ManagingTodo.prototype.delete = function(id) {
 };
 
 ManagingTodo.prototype.update = function(id, changeStatus) {
-  const statusArray = Object.keys(this.countedStatus);
-
   if (typeof id === 'string') {
     id = parseInt(id);
   }
@@ -97,7 +105,7 @@ ManagingTodo.prototype.update = function(id, changeStatus) {
   const changeTodoId = changeTodo === undefined ? undefined : changeTodo.id;
 
   try {
-    this.todoError.invalidStatus(statusArray, changeStatus);
+    this.todoError.invalidStatus(Object.keys(this.countedStatus), changeStatus);
     this.todoError.invalidId(changeTodoId);
     this.todoError.compareStatus(changeTodo.status, changeStatus);
   } catch (error) {
