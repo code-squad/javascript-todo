@@ -34,6 +34,7 @@ Instruction.prototype = {
 			console.log(message);
 		}
     },
+    
     add : () => {},
     delete : () => {},
     update :() => {}
