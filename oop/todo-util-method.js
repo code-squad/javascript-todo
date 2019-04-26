@@ -14,7 +14,12 @@ const findDataIdObj = (input) => {
     return [targetIdx, targetName];
 }
 
+const makingID = () => {
+    return Math.floor(Math.random() * 10000);
+}
+
 module.exports = {
     todoForm,
-    findDataIdObj
+    findDataIdObj,
+    makingID
 }

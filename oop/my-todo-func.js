@@ -4,15 +4,16 @@ const todoList = require('./data.js');
 const todoProto = require('./todo-prototype.js');
 const util = require('./todo-util-method.js');
 
+const Print = new todoProto.ShowPrint();
+const Error = new todoProto.ErrorCheck();
+
 let r = readline.createInterface({
     input:process.stdin,
     output:process.stdout
 });
 
 
-const Print = new todoProto.ShowPrint();
-const Error = new todoProto.ErrorCheck();
-
+// show
 const todoShow = (input) => {
     let status = input[0];
     status === 'all' ? todoShowAll() : todoShowElse(status);
@@ -39,7 +40,7 @@ const showAllTimer = (input) => {
 // add
 const todoAdd = (input) => {
     let [name, tag] = input;
-    let id = makingID();
+    let id = util.makingID();
     let newTodoList = new util.todoForm(name, tag, 'todo', id);
     todoList.push(newTodoList);
     
@@ -47,9 +48,6 @@ const todoAdd = (input) => {
     showAllTimer(1000);
 }
 
-const makingID = () => {
-    return Math.floor(Math.random() * 10000);
-}
 
 
 // delete
@@ -61,6 +59,7 @@ const todoDelete = (id) => {
     showAllTimer(1000);
 }
 
+
 // update
 const todoUpdate = (id, status) => {
     let [targetIdx, targetName] = util.findDataIdObj(id)
@@ -71,10 +70,7 @@ const todoUpdate = (id, status) => {
 } 
 
 
-
-
-
-const arr = "add$asdf$asdf"
+// input & ErrorCheck
 todoMain = (answer) => {
     if(Error.syntaxError(answer) === false) {
         Print.printError(errorMsg.syntaxError);
@@ -104,15 +100,11 @@ todoMain = (answer) => {
         Print.printError(errorMsg.ELSE_ERROR);
     }
 
-    console.log(todoList);
-
     const reOrder = () => {
         r.prompt()    
      }
     action === 'update' ? setTimeout(reOrder, 5000) : setTimeout(reOrder, 2000);
 }
-
-todoMain(arr)
 
 
  r.setPrompt('명령하세요 : ');

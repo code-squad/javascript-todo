@@ -1,4 +1,4 @@
-
+// PrintOut
 const ShowPrint = function() {}
 
 ShowPrint.prototype.printShowAll = function(todo, doing, done){
@@ -21,6 +21,7 @@ ShowPrint.prototype.printError = function(errorKey){
 }
 
 
+// Error Valid Check
 const ErrorCheck = function() {}
 
 ErrorCheck.prototype.syntaxError = function(input) {
@@ -45,6 +46,8 @@ ErrorCheck.prototype.unknownIDError = function(ID) {
 ErrorCheck.prototype.duplicatedStatusError = function(ID, status) {
     return !(todoList.filter(v => v["id"] === ID)[0]["status"] === status) ? true : false;
 }
+
+
 
 
 module.exports = {
