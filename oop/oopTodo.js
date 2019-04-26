@@ -60,9 +60,7 @@ TodoUI.prototype.deleteTodoResult = function (splicedData) {
 
 // updateTodo
 TodoUI.prototype.updateTodoExecutor = function (id, updatedStatus) {
-    setTimeout(() => {
         return this.checkID(id) ? this.updateTodoStatus(id, updatedStatus) : this.printError()
-    }, 3000)
 };
 
 
@@ -134,7 +132,9 @@ TodoUI.prototype.printResult = function (result) {
 
 
 TodoUI.prototype.printError = function () {
-    return console.error('입력하신 값이 존재하지않습니다. \n');
+    console.error('입력하신 값이 존재하지않습니다. \n');
+    inputReadline.prompt();
+    return;
 }
 
 
@@ -144,7 +144,7 @@ TodoUI.prototype.getIndex = function (inputId) {
 
 
 TodoUI.prototype.checkStatus = function (objData, status) {
-    return objData.filter(list => list.status === status).map(list => { return list.name }); // list.name을 한 이유는? 그냥 list만 return 해도 될 듯
+    return objData.filter(list => list.status === status).map(list => { return list.name });
 }
 
 
@@ -174,7 +174,7 @@ TodoUI.prototype.checkDuplicatedStatus = function (updatatingIndex, updatedStatu
 
 TodoUI.prototype.checkCommands = function (userInput, inputReadline) {
     const splitUserInput = this.splitInputVal(userInput);
-    if (userInput.split('$').length < 2 || userInput.split('$').length > 3) {
+    if (userInput.split('$').length < 1 || userInput.split('$').length > 3) {
         console.log("입력값을 확인해주세요");
         inputReadline.setPrompt('명령어를 입력하세요(종료하려면 q를 누르세요): ');
         inputReadline.prompt();
