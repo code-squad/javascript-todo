@@ -4,7 +4,6 @@ const readline = require('readline');
 const inputReadline = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    terminal: false
 });
 
 
@@ -51,6 +50,7 @@ TodoUI.prototype = {
         const deletedIndex = this.getIndex(deletedID);
         const [splicedData] = datalist.splice(deletedIndex, 1);
         this.undoable(splicedData);
+        this.manageMaxPastList();
 
         return this.deleteTodoResult(splicedData)
     },
@@ -111,7 +111,7 @@ TodoUI.prototype = {
             case 'done':
                 return `done리스트 : 총 ${doneList.length} 건 : ${doneList} \n`
             default:
-                return '입력하신 값이 존재하지않습니다. \n';
+                return '명령어를 올바로 입력해주세요. \n';
         }
     },
 
@@ -170,7 +170,7 @@ TodoUI.prototype = {
     },
 
 
-    checkCommands(userInput, inputReadline) {
+    checkCommands(userInput) {
         const splitUserInput = this.splitInputVal(userInput);
         if (userInput.split('$').length < 1 || userInput.split('$').length > 3) {
             console.log("입력값을 확인해주세요");
@@ -210,6 +210,16 @@ TodoUI.prototype = {
         this.past.push(splicedData);
     },
 
+    manageMaxPastList() {
+        if(this.past.length < 4){
+            return
+        }
+        else {
+            this.past.shift();
+            this.manageMaxPastList();
+        }
+    },
+
     undo() {
         if (this.past.length === 0) {
             console.log('undo할 값이 없습니다!');
@@ -246,7 +256,7 @@ TodoUI.prototype = {
         inputReadline.on('line', function (line) {
 
             if (line === "q") inputReadline.close();
-            todoList.checkCommands(line, inputReadline);
+            todoList.checkCommands(line);
         })
 
             .on('close', function () {
