@@ -7,7 +7,7 @@ process.on("userInput", (userInput) =>{
     let args = userInput.slice(1)
     if(command === 'add'){
       const newTodo = new Todo.Todo(...args)  
-      newTodo.save()
+      newTodo.add()
       IC.rl.prompt();
       return
     } else{

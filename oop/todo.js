@@ -19,10 +19,13 @@ const Todo = function (name, tag) {
 
 
 Todo.prototype = {
-  save : function(){
-    todos.push(this)
+  save: function (){
     let data = JSON.stringify(todos)
     fs.writeFileSync("data.json" ,data)
+  },
+  add : function(){
+    todos.push(this)
+    this.save()
   },
   update : function(id, status){
     index = todos.findIndex(element => element.id === id*1)
@@ -35,8 +38,7 @@ Todo.prototype = {
     this.status = status
     this.id = id
     todos.splice(index, 1, this)
-    let data = JSON.stringify(todos)
-    fs.writeFileSync("data.json" ,data)
+    this.save()
   } ,
   delete : function(id) {
       console.log('delete', id)
