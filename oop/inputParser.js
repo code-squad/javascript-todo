@@ -1,13 +1,12 @@
 module.exports = class InputParser {
-    constructor(order, data) {
-        this.data = data
-        this.sepOrder = order.split('$');
-        this.firstPara = this.sepOrder[0];
-        this.secondPara = this.sepOrder[1];
-        this.thirdPara = this.sepOrder[2];
+    constructor(order) {
+        this.splitedOrder = order.split('$');
     }
-    show() { return [this.secondPara]}
-    add() { return [this.secondPara, this.thirdPara] }
-    delete() { return [this.secondPara] }
-    update() { return [this.secondPara, this.thirdPara] }
+    excute(todos) {
+        if (this.splitedOrder[0] === 'show' || this.splitedOrder[0] === 'delete') {
+            return todos[this.splitedOrder[0]](this.splitedOrder[1]);
+        } else {
+            return todos[this.splitedOrder[0]](this.splitedOrder[1], this.splitedOrder[2]);
+        }
+    }
 }

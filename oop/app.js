@@ -12,13 +12,13 @@ const convertedData = JSON.parse(JSON.stringify(originData)).data;
 
 todos = new Todos(convertedData);
 
-const showResult = (appWord, inputParaArr) => {
+const showResult = (todosReturn, appWord) => {
     return new Promise((resolve) => {
         let timeDelay = 0;
         if (appWord === 'update')
             timeDelay = 3000;
         setTimeout(() => {
-            resolve(todos[appWord].apply(todos, inputParaArr));
+            resolve(todosReturn);
         }, timeDelay);
     })
 };
@@ -50,10 +50,9 @@ rl.on('line', (userInput) => {
             if (promptRepeater(validator.excute())) return;
 
             const inputParser = new InputParser(userInput);
-            const appWord = inputParser.firstPara;
-            const inputParaArr = inputParser[appWord]();
+            const appWord = inputParser.splitedOrder[0];
 
-            showResult(appWord, inputParaArr)
+            showResult(inputParser.excute(todos), appWord)
                 .then((textResult) => {
                     console.log(textResult);
                     if (appWord != 'show') {
