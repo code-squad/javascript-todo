@@ -5,9 +5,9 @@ const inputReadline = readline.createInterface({
     output:process.stdout
 });
 
-const TodoList = require('./todo-proto.js');
+const TodoMain = require('./todo-proto.js');
 
-const todoTest = new TodoList();
+const todoMain = new TodoMain();
 
 inputReadline.setPrompt('명령하세요');
 inputReadline.prompt();
@@ -17,7 +17,7 @@ inputReadline.on('line', (line) => {
         r.close();
     }
 
-    todoTest.checkInput(line, inputReadline);
+    todoMain.checkInput(line, inputReadline);
     // r.prompt();
 })
 inputReadline.on('close', function(){
