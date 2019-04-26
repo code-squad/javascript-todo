@@ -1,8 +1,8 @@
 function Controller(model, utility, printer, errorHandler) {
-    this.model = model;
-    this.utility = utility;
-    this.printer = printer;
-    this.errorHandler = errorHandler;
+    this.model          = model;
+    this.utility        = utility;
+    this.printer        = printer;
+    this.errorHandler   = errorHandler;
 }
 
 Controller.prototype.instruct = function (input) {

@@ -1,20 +1,26 @@
 const todoList = require('./todo.json')
 const fs = require('fs')
 
-function Utility() {}
+const Utility = {
+    splitInput(input) {
+        return input.split('$');
+    },
 
-Utility.prototype.splitInput = function (input) { return input.split('$'); } 
+    getRandomID() {
+        return Date.now();
+    },
 
-Utility.prototype.getRandomID = function () { return Date.now(); }    
+    save(todoList) {
+        fs.writeFileSync('todo.json', JSON.stringify(todoList))
+    },
 
-Utility.prototype.save = function (todoList) { fs.writeFileSync('todo.json', JSON.stringify(todoList)) };
+    getObjectById(id) {
+        return todoList.find((todoObj) => { return todoObj.id === parseInt(id) });
+    },
 
-Utility.prototype.getObjectById = function (id) {
-    return todoList.find((todoObj) => { return todoObj.id === parseInt(id) });
-}
-
-Utility.prototype.getIndexById = function (id) {
-    return todoList.findIndex((todoObj) => { return todoObj.id === parseInt(id) });
+    getIndexById(id) {
+        return todoList.findIndex((todoObj) => { return todoObj.id === parseInt(id) });
+    },
 }
 
 module.exports = Utility;
