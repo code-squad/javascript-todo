@@ -5,7 +5,7 @@ const readLine = require('readline').createInterface( {
 const CommandParser = require('./commandParser.js');
 const Utils = require('./utils.js');
 const Instruction = require('./instruction.js');
-const ExceptionHandling = require('./exceptionHandling.js');
+const CustomException = require('./CustomException.js');
 
 function RunTodoApp() {
     this.cmdArr = ['show','delete','update','add'];
@@ -23,21 +23,20 @@ RunTodoApp.prototype = {
        readline.on('line', (userInput) => {	    
 
         try {
-				
-            if (!ExceptionHandling.prototype.isValidSeperator(userInput)) {ExceptionHandling.prototype.missingSeperatorException();}
-            const cmdList = CommandParser.prototype.getCmdList(userInput);
+           
+            this.customException.missingSeperatorException(userInput);
+            const cmdList = this.commandParser.getCmdList(userInput);
             
-            if (!CommandParser.prototype.isValidCommand(cmdList[0], cmdArr)) {ExceptionHandling.prototype.CommandMissingException();}
-            
-            CommandParser.prototype.executeCmd(cmdList);
+            this.customException.CommandMissingException(cmdList[0], this.cmdArr);
+            this.commandParser.executeCmd(cmdList);
 
-            Utils.prototype.delay(0)
-            .then(() => {if (cmdList[0] === 'update') return Utils.prototype.delay(3500);})
-            .then(() => {return Utils.prototype.delay(1000);})
-            .then(() => {if (cmdList[0] !== 'show') Instruction.prototype.show('all');})
+            this.utils.delay(0)
+            .then(() => {if (cmdList[0] === 'update') return this.utils.delay(3500);})
+            .then(() => {return this.utils.delay(1000);})
+            .then(() => {if (cmdList[0] !== 'show') this.instruction.show('all');})
             .catch(function(e) {console.log(e);})
             .then(() => {readLine.prompt();});
-        
+       
         } catch(e) {
             console.error(e.message);
             readLine.prompt();

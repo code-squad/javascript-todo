@@ -42,7 +42,7 @@ Instruction.prototype = {
 	},
     
     add (name, tags) {
-	    const id = this.utils.getRadomId(this.maxIdNum, this.minIdNum);
+	    const id = this.utils.getRandomId(this.maxIdNum, this.minIdNum);
 		let obj = {
 			name, 
 			tags, 

@@ -16,11 +16,11 @@ CommandParser.prototype = {
 		try {
 			
 			if (command.length === 2) {
-				instruction[command[0]](command[1]);
+				this.instruction[command[0]](command[1]);
 			} else if (command.length === 3) {
-				instruction[command[0]](command[1], command[2]);
+				this.instruction[command[0]](command[1], command[2]);
 			} else {
-				customException.CommandMissingException();
+				this.customException.CommandMissingException();
 			}		
 			
 		} catch (e) {
