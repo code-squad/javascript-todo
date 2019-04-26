@@ -14,8 +14,8 @@ rl.setPrompt('명령하세요 : ');
 rl.prompt();
 rl.on('line', input => {
 	const inputArray = input.split('$');
-	if (inputArray.length === 1 || inputArray.length > 3) {
-		return myTodo.printError('COMMAND_ERROR');
+	if (inputArray.length > 3) {
+		throw new Error('COMMAND_ERROR');
 	}
 	const action = inputArray.splice(0, 1)[0];
 	const condition = inputArray;

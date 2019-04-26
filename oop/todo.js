@@ -60,8 +60,11 @@ module.exports = class todo {
 			id: id
 		};
 		this.todoList.push(newData);
+		const prevData = {};
+		Object.assign(prevData, newData);
+		prevData.status = '삭제';
 		console.log(`${newData.name} 1개가 추가되었습니다. (id : ${newData.id})`);
-		todoLog.addLog('add', { status: '삭제' }, newData, this.todoList.length - 1);
+		todoLog.addLog('add', prevData, newData, this.todoList.length - 1);
 		setTimeout(() => {
 			this.printAll();
 		}, commonDelaySecond);
@@ -92,7 +95,10 @@ module.exports = class todo {
 		const deletingName = this.todoList[index].name;
 
 		console.log(`${deletingName}가 ${this.todoList[index].status}에서 삭제됐습니다.`);
-		todoLog.addLog('delete', this.todoList[index], { status: '삭제' }, index);
+		const nextData = {};
+		Object.assign(nextData, this.todoList[index]);
+		nextData.status = '삭제';
+		todoLog.addLog('delete', this.todoList[index], nextData, index);
 		this.todoList.splice(index, 1);
 		setTimeout(() => {
 			this.printAll();
@@ -104,7 +110,8 @@ module.exports = class todo {
 		if (this.todoList[index].status === status) {
 			throw new Error('STATUS_ERROR');
 		}
-		const prevData = this.todoList[index];
+		const prevData = {};
+		Object.assign(prevData, this.todoList[index]);
 		this.todoList[index].status = status;
 		todoLog.addLog('update', prevData, this.todoList[index], index);
 
@@ -118,8 +125,10 @@ module.exports = class todo {
 
 	undo() {
 		todoLog.undo();
+		this.readline.prompt();
 	}
 	redo() {
 		todoLog.redo();
+		this.readline.prompt();
 	}
 };
