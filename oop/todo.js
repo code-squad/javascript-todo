@@ -1,6 +1,7 @@
-const Todo = function (todos) {
-  this.todos;
-}
+const fs = require('fs');
+const data = fs.readFileSync("./data.json")
+const todos = JSON.parse(data)
+
 const IdManager = function () {
 
 }
@@ -8,14 +9,34 @@ const IdManager = function () {
 
 const idManager = new IdManager()
 
+const Todo = function (name, tag) {
+  this.name = name
+  this.tag = JSON.parse(tag)
+  this.status = 'todo'
+  let id = this.createId(name)
+  this.id = id
+}
+
+
 Todo.prototype = {
-  add : function(name, tag){
-      console.log('add', name, tag)
-      let id = this.createId(name)
-      this.todos.push( {name: name, id: id, tag: tag.match(/[a-z0-9]+/g)})
+  save : function(){
+    todos.push(this)
+    let data = JSON.stringify(todos)
+    fs.writeFileSync("data.json" ,data)
   },
   update : function(id, status){
-      console.log('update', id, status )
+    index = todos.findIndex(element => element.id === id*1)
+    if(index === -1){
+      console.log('잘못된 id값입니다. 다시 확인해주세요')
+    }
+    let {name, tags} = todos[index]
+    this.name = name
+    this.tag = tags
+    this.status = status
+    this.id = id
+    todos.splice(index, 1, this)
+    let data = JSON.stringify(todos)
+    fs.writeFileSync("data.json" ,data)
   } ,
   delete : function(id) {
       console.log('delete', id)
@@ -38,7 +59,6 @@ Todo.getInstruction = function (userInput) {
   // todo[userInput[0]](...userInput)
 }
 
-const instance = new Todo();
 
 //Todo.add(name, id, tag)
 
