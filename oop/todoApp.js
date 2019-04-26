@@ -1,5 +1,21 @@
 const Todo = require('./todo');
 
+Array.prototype.groupBy = function(prop) {
+  return this.reduce((groups, element) => {
+    var value = element[prop];
+    groups[value] = groups[value] || [];
+    groups[value].push(value);
+    return groups;
+  }, {});
+};
+
+Object.prototype.count = function(){
+  return Object.keys(this).reduce((groups, prop) => {
+    groups[prop] = (this[prop] instanceof Array ? this[prop].length : 1 );
+    return groups; 
+  }, {});
+};
+
 var TodoApp = function(){
   this.init();
 }
@@ -32,21 +48,16 @@ TodoApp.prototype = {
 
   show: function(status){
     if(status === "all"){
-      const seperatedObj = this._todoList.reduce((acc, todo) => {
-                                                                  acc[todo.status] = acc[todo.status] + 1 || 1;
-                                                                  return acc;
-                                                                } , {});
-      console.log(`현재 상태 : ${Object.entries(seperatedObj)
+      const countGroupByStatus = this._todoList.groupBy("status").count();
+
+      console.log(`현재 상태 : ${Object.entries(countGroupByStatus)
                                      .map(status => `${status[0]} : ${status[1]}`)
                                      .join(', ')}`);
     } else {
-      const filterResult = this._todoList.filter(todo => todo.status === status)
-                                    .reduce((acc, todo) => { acc.cnt++;
-                                                             acc.msg.push(todo.name);
-                                                             return acc;
-                                                            } , {cnt: 0, msg: []});
+      const filteredTodoNames = this._todoList.filter(todo => todo.status === status)
+                                              .map(todo => todo.name);
 
-      console.log(`${status} 리스트 : 총 ${filterResult.cnt}건 : ${filterResult.msg.join(', ')}`);
+      console.log(`${status} 리스트 : 총 ${filteredTodoNames.length}건 : ${filteredTodoNames.join(', ')}`);
     }
   },
 
