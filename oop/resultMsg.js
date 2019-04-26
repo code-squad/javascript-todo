@@ -22,6 +22,15 @@ ResultMsg.prototype = {
   },
   showStatus : function(result, option, counted) {
     return `${option}리스트 : 총${counted[option]}건 : ${result.reduce((acc, cur)=> acc + ', ' + cur)}`
+  },
+  invalidCommand : function(){
+    return `변경가능한 status는 todo, doing, done 입니다`
+  },
+  invalidArgsCounts : function() {
+    return `인자의 갯수가 잘못되었습니다.`
+  },
+  noSeperator : function() {
+    return `구분자가 없습니다.`
   }
 }
 
