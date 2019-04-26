@@ -1,4 +1,5 @@
 let readline = require('readline');
+let errorMsg = require('./errorMsg.js');
 
 let r = readline.createInterface({
     input:process.stdin,
@@ -28,27 +29,30 @@ const findDataIdObj = (input) => {
 
 
 
-const showPrint = function() {}
+const ShowPrint = function() {}
 
-showPrint.prototype.printShowAll = function(todo, doing, done){
+ShowPrint.prototype.printShowAll = function(todo, doing, done){
     console.log(`현재 상태 : todo: ${todo}개, doing: ${doing}개, done: ${done}개`)
 }
-showPrint.prototype.printShowElse = function(temp_length, temp){
+ShowPrint.prototype.printShowElse = function(temp_length, temp){
     console.log(`${this.value1}리스트 : 총 ${temp_length}건 : ${temp}`);
 }
-showPrint.prototype.printAdd = function(name,id){
+ShowPrint.prototype.printAdd = function(name,id){
     console.log(`${name} 1개가 추가됐습니다. (id : ${id})`);
 }
-showPrint.prototype.printUpdate = function(targetName, status){
+ShowPrint.prototype.printUpdate = function(targetName, status){
     console.log(`${targetName} 가 ${status}상태로 변경되었습니다.`);
 }
-showPrint.prototype.printDelete = function(targetName){
+ShowPrint.prototype.printDelete = function(targetName){
     console.log(`${targetName} 가 todo에서 삭제되었습니다.`)
 }
+ShowPrint.prototype.printError = function(errorKey){
+    console.log(errorKey)
+}
 
-const errorCheck = function() {}
+const ErrorCheck = function() {}
 
-errorCheck.prototype.syntaxError = function(input) {
+ErrorCheck.prototype.syntaxError = function(input) {
     let firstWord = input.match(/\w+/); 
     let seperator = input.match(/\$/g); 
     let zeroSeperator = (seperator===null);
@@ -61,18 +65,18 @@ errorCheck.prototype.syntaxError = function(input) {
     }
     
 }
-errorCheck.prototype.unknownIDError = function(ID) {
+ErrorCheck.prototype.unknownIDError = function(ID) {
     if(ID === NaN) {
         return false;
     } 
     return !(todoList.filter(v => v["id"] === ID).length === 0) ? true : false;
 }
-errorCheck.prototype.duplicatedStatusError = function(ID, status) {
+ErrorCheck.prototype.duplicatedStatusError = function(ID, status) {
     return !(todoList.filter(v => v["id"] === ID)[0]["status"] === status) ? true : false;
 }
 
-const Print = new showPrint();
-const Error = new errorCheck();
+const Print = new ShowPrint();
+const Error = new ErrorCheck();
 
 const todoShow = (input) => {
     let status = input[0];
@@ -84,7 +88,7 @@ const todoShowAll = () => {
     let doing = todoList.filter(v => v.status === 'doing').length;
     let done = todoList.filter(v => v.status === 'done').length;
 
-    //const Print = new showPrint(todo, doing, done);
+    //const Print = new ShowPrint(todo, doing, done);
     Print.printShowAll(todo,doing,done);
 }
 
@@ -139,7 +143,7 @@ const todoUpdate = (id, status) => {
 const arr = "add"
 todoMain = (answer) => {
     if(Error.syntaxError(answer) === false) {
-        console.log("문법적으로 유효하지 않은 입력값입니다.");
+        Print.printError(errorMsg.syntaxError);
         return 
     }
     
@@ -151,19 +155,19 @@ todoMain = (answer) => {
     } else if(action === "delete") { 
         tempArr[0] = Number(tempArr[0])
         let ID = tempArr[0]
-        Error.unknownIDError(ID)==false ? console.log("ID 사용이 잘못되었습니다.") : todoDelete(ID);
+        Error.unknownIDError(ID)==false ? Print.printError(errorMsg.unknownIDError) : todoDelete(ID);
         
     } else if(action === "update") { 
         tempArr[0] = Number(tempArr[0])
         let ID = tempArr[0]
         let status = tempArr[1]
-        Error.unknownIDError(ID)==false || Error.duplicatedStatusError(ID,status)==false ? console.log("ID혹은 Status가 잘못되었습니다.") : todoUpdate(ID, status)
+        Error.unknownIDError(ID)==false || Error.duplicatedStatusError(ID,status)==false ? Print.printError(errorMsg.unknownID_duplicatedError) : todoUpdate(ID, status)
 
     } else if(action === "show") {
         todoShow(tempArr);
 
     } else {
-        console.log("올바른 명령을 입력해주세요.");
+        Print.printError(errorMsg.ELSE_ERROR);
     }
 
     console.log(todoList);
