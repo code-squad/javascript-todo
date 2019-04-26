@@ -6,68 +6,75 @@ const rl = readline.createInterface({
 });
 
 function App() {
-    this.origin = this
-    this.editor = new Editor(this.origin);
-    this.viewer = new Viewer(this.origin);
+    this.editor = new Editor();
+    this.viewer = new Viewer();
     this.errorChecker = new ErrorChecker();
 }
 
-// show$todo
-// add$운동하기$exercise
-// update$7$doing
-// delete$7
-schedule_list
+
 
 App.prototype = {
 
-     run() {
-        const self = this
-
-        function delayShow(){
-            return new Promise(function(resolve, reject){
-                setTimeout(() => {
-                    self.viewer.showAll();
-                    self.run();
-                }, 1000);
-
-            })
-        }
+    run() {
 
         rl.question('명령을 입력하세요: ', async (input) => {
             if (input === 'q') return rl.close();
-            try{
-                [key, ...message] = self.parseCommand(input)
+            try {
+                [key, ...message] = this.parseCommand(input)
+
                 this.errorChecker.$check(message)
-                
-                if (key === "show") {
-                    [status] = message
-                    status === "all" ? self.viewer.showAll() : self.viewer.showFiltered(status);
-                    return self.run();
-                }
-               
-                
-                const selectedObject = self.editor[key + 'Todo'](...message);
-                
-                await self.viewer[key + 'Message'](selectedObject)
-                await delayShow();    
+
+                this[key](...message);
             }
-            catch(e){
+            catch (e) {
                 console.log(e.message);
-                self.run();
+                this.run();
             }
-            
+
         });
     },
 
     parseCommand(input) {
         return input.split('$');
+    },
+
+    show(_status) {
+        _status === "all" ? this.viewer.showAll() : this.viewer.showFiltered(_status);
+        return this.run();
+
+    },
+    add(_name, _tag) {
+        const [returnedName, returnedId] = this.editor.addTodo(_name, _tag);
+
+        this.viewer.addMessage(returnedName, returnedId)
+        this.delayShow(1000);
+    },
+    update(_id, _status) {
+        const [returnedName, returnedStatus] = this.editor.updateTodo(_id, _status);
+        setTimeout(() => {
+            this.viewer.updateMessage(returnedName, returnedStatus)
+            this.delayShow(1000);
+        }, 3000)
+
+    },
+    delete(_id) {
+        const [returnedName, returnedStatus] = this.editor.deleteTodo(_id);
+
+        this.viewer.deleteMessage(returnedName, returnedStatus)
+        this.delayShow(1000);
+    },
+    delayShow(time) {
+        setTimeout(() => {
+            this.viewer.showAll();
+            this.run();
+        }, time);
     }
 }
 
 
 function Editor() {
     this.errorChecker = new ErrorChecker();
- }
+}
 
 Editor.prototype = {
     TodoObject: function (_name, _tag, _newId) {
@@ -81,29 +88,35 @@ Editor.prototype = {
         const _newId = this.getUniqueId()
         const newTodoObject = new this.TodoObject(_name, _tag, _newId);
         schedule_list.push(newTodoObject);
-        return newTodoObject
+        return [newTodoObject.name, newTodoObject.id];
     },
 
     updateTodo(_id, _status) {
-        // if(!(ERROR.validId)) return this.app.run()
-        
+
+        const selectedObject = schedule_list.find(todo => todo.id === parseInt(_id));
+
+
         return schedule_list.some(todo => {
-            if (todo.id === parseInt(_id)){
-                this.errorChecker.statusCheck(todo.status,_status)
-                return todo.status = _status  
-            } 
-        }) ? schedule_list.find(todo => todo.id === parseInt(_id)) : this.errorChecker.foundIdError();
-        
+            if (todo.id === parseInt(_id)) {
+                this.errorChecker.statusCheck(todo.status, _status)
+                return todo.status = _status
+            }
+        }) ? Object.entries(selectedObject).filter(([key, value]) =>
+        key === 'name' || key === 'status'
+    ).map(([key, value]) => value) : this.errorChecker.foundIdError();
+
 
     },
 
     deleteTodo(_id) {
 
-        const returnedObj = schedule_list.find(todo => todo.id === parseInt(_id));
-
+        const selectedObject = schedule_list.find(todo => todo.id === parseInt(_id));
+        const selectedArray = Object.entries(selectedObject).filter(([key, value]) =>
+        key === 'name' || key === 'status'
+        ).map(([key, value]) => value);
         return schedule_list.some((todo, index) => {
             if (todo.id === parseInt(_id)) return schedule_list.splice(index, 1)
-        }) ? returnedObj : this.errorChecker.foundIdError();
+        }) ? selectedArray : this.errorChecker.foundIdError();
     },
 
     getUniqueId() {
@@ -133,34 +146,29 @@ Viewer.prototype = {
         console.log(`${_status}리스트 : 총${showFilteredResult.length}건 : ${showFilteredResult.join(', ')}`);
 
     },
-    addMessage(_obj) {
-        console.log(`${_obj.name}가 추가되었습니다. (id :${_obj.id})`);
+    addMessage(_name, _id) {
+        console.log(`${_name}가 추가되었습니다. (id :${_id})`);
     },
-    updateMessage(_obj) {
-        return new Promise(function(resolve, reject){
-            setTimeout(() => {
-                console.log(`${_obj.name}의 상태가 ${_obj.status}로 변경되었습니다.`);
-                resolve();
-            }, 3000)
-        })
+    updateMessage(_name, _status) {
+        console.log(`${_name}의 상태가 ${_status}로 변경되었습니다.`);
     },
-    deleteMessage(_obj) {
-        console.log(`${_obj.name} ${_obj.status}가 목록에서 삭제 되었습니다.`);
+    deleteMessage(_name, _status) {
+        console.log(`${_name} ${_status}가 목록에서 삭제 되었습니다.`);
     }
 }
 
-function ErrorChecker(){}
+function ErrorChecker() { }
 
 ErrorChecker.prototype = {
-    $check(_message){
-        if(_message.length === 0) throw new Error('InputError : $ is not exist ')
+    $check(_message) {
+        if (_message.length === 0) throw new Error('InputError : $ is not exist ')
     },
 
-    statusCheck(_todo_status , _status){
-        if(_todo_status === _status) throw new Error('StatusError : status is same')
+    statusCheck(_todo_status, _status) {
+        if (_todo_status === _status) throw new Error('StatusError : status is same')
     },
 
-    foundIdError(){
+    foundIdError() {
         throw new Error('IdError : id is not exist')
     }
 
