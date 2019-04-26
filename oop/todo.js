@@ -1,6 +1,9 @@
 const errorMessage = module.require('./errorMessage.js');
 module.require('date-utils');
 
+const commonDelaySecond = 1000;
+const updateDelaySecond = 3000;
+
 module.exports = class todo {
 	constructor(todoList, rl) {
 		this.readline = rl;
@@ -59,7 +62,7 @@ module.exports = class todo {
 		console.log(`${newData.name} 1개가 추가되었습니다. (id : ${newData.id})`);
 		setTimeout(() => {
 			this.printAll();
-		}, 1000);
+		}, commonDelaySecond);
 	}
 
 	getId() {
@@ -90,7 +93,7 @@ module.exports = class todo {
 		todoList.splice(index, 1);
 		setTimeout(() => {
 			this.printAll();
-		}, 1000);
+		}, commonDelaySecond);
 	}
 
 	update(id, status) {
@@ -104,7 +107,7 @@ module.exports = class todo {
 			console.log(`"${todoList[index].name}"가(이) ${status}로 변경되었습니다.`);
 			setTimeout(() => {
 				this.printAll();
-			}, 1000);
-		}, 3000);
+			}, commonDelaySecond);
+		}, updateDelaySecond);
 	}
 };
