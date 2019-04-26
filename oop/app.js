@@ -1,7 +1,7 @@
 const readline = require("readline")
 const Todos = require("./Todos.js")
 const Validation = require("./Validation.js")
-const ERR_MSG = require("./Message").ERR_MSG 
+const ERR_MSG = require("./ErrorConstant").ERR_MSG 
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -11,6 +11,7 @@ const todos = new Todos()
 const validation = new Validation()
 
 const getCommand = (command) => {
+
     if (!validation.isContained(command, "$")) {
         throw Error("NO_SHELL")
     }
@@ -31,12 +32,15 @@ rl.on("line", async (command) => {
     else {
         try {
             [inst, params] = getCommand(command.trim())
-            if(todos[inst].length !== params.length) {
-                throw Error("LACK_PARAMETER")
+            const paramErrorFlag = params.some((el) => {
+                return el === undefined && el === null && !el
+            })
+            if((todos[inst].length !== params.length) || paramErrorFlag) {
+                throw Error("PARAMETER_ERROR")
             }
+
             await todos[inst](...params)
         } catch(e) {
-            console.log(e)
             console.log('\x1b[31m%s\x1b[0m',"Error : " + ERR_MSG[e.message])
         }
 

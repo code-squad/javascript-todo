@@ -8,6 +8,7 @@ const sleep = msec => new Promise(resolve => setTimeout(resolve, msec))
 function Todos() {}
 
 Todos.prototype.add = async function (name, tag) {
+    if(validation.checkTagShape(tag)) throw Error("TAG_SHAPE_ERROR")
     const todo = {
         id: generateId(),
         name,

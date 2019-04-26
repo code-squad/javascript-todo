@@ -23,11 +23,11 @@ Validation.prototype.isCorrectCommand = function(inst) {
     return reg.test(inst)
 }
 
-// 인자의 수가 부족 
+Validation.prototype.checkTagShape = function(tag) {
+    const reg = new RegExp(/(^\[(("[a-z0-9]+")|('[a-z0-9]+'))\]$)|(^\[((("[a-z0-9]+")|('[a-z0-9]+')),\s*)+(("[a-z0-9]+")|('[a-z0-9]+'))\]$)/gi)
+    return !reg.test(tag)
+}
 
-// 명령어가 잘못된 경우
-
-// 태그 ["ㅇㄴㅇ", "ㄴㅇㄴㅇㄴ"]
 
 module.exports = Validation
 
