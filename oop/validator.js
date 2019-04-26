@@ -1,4 +1,4 @@
-module.exports = class Utils {
+module.exports = class Validator {
     constructor(data, order) {
         this._data = data;
         this.dollor = order.match(/\$/g);
@@ -41,7 +41,7 @@ module.exports = class Utils {
         }
         return true
     }
-    validator() {
+    excute() {
         this.dollors();
         if(!this.appWords()) return false
 

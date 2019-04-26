@@ -2,7 +2,7 @@
 
 const Todos = require('./todos');
 const InputParser = require('./inputParser');
-const Utils = require('./utils');
+const Validator = require('./validator');
 
 const readline = require('readline');
 const rl = readline.createInterface(process.stdin, process.stdout);
@@ -46,8 +46,8 @@ rl.on('line', (userInput) => {
             rl.close();
             break;
         default:
-            const utils = new Utils(convertedData, userInput);
-            if (promptRepeater(utils.validator())) break;
+            const validator = new Validator(convertedData, userInput);
+            if (promptRepeater(validator.excute())) return;
 
             const inputParser = new InputParser(userInput);
             const appWord = inputParser.firstPara;
