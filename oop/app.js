@@ -1,22 +1,27 @@
 const IC = require("./IController");
-const Todo = require("./todo");
+const TodoHandler = require("./todoHandler");
+const TodoChecker = require('./todoChecker')
+const ResultMsg = require('./resultMsg')
 
+const resultMsg = new ResultMsg()
+const todoChecker = new TodoChecker(resultMsg)
+const todoHandler = new TodoHandler(todoChecker, resultMsg)
 
 process.on("userInput", async (userInput) =>{
     let command = userInput[0]
     let args = userInput.slice(1)
-    if(command === 'add'){
-      const newTodo = new Todo.Todo(...args)  
-      await newTodo.add()
+    try {
+      if(command === 'add'){
+        await todoHandler.add(...args)
+        IC.rl.prompt();
+        return
+      }
+      
+      await todoHandler[command](...args)
       IC.rl.prompt();
-      return
-    } else{
-      defaultTodo = new Todo.Todo('default', "[]")
-    }
-    await defaultTodo[command](...args)
+    } catch(e){
 
-    IC.rl.prompt();
-    
+    }
 })
 
 IC.ready();
