@@ -1,13 +1,13 @@
-let readline = require('readline');
+const readline = require('readline');
 
-let inputReadline = readline.createInterface({
+const inputReadline = readline.createInterface({
     input:process.stdin,
     output:process.stdout
 });
 
-let todoList = require('./todo-proto.js');
+const TodoList = require('./todo-proto.js');
 
-let todoTest = new todoList();
+const todoTest = new TodoList();
 
 inputReadline.setPrompt('명령하세요');
 inputReadline.prompt();
