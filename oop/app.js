@@ -8,12 +8,16 @@ const Instruction = require('./instruction.js');
 const ExceptionHandling = require('./exceptionHandling.js');
 
 function RunTodoApp() {
-	this.cmdArr = ['show','delete','update','add'];
+    this.cmdArr = ['show','delete','update','add'];
+    this.commandParser = new CommandParser();
+	this.utils = new Utils();
+	this.instruction = new Instruction();
+	this.customException = new CustomException();
 }
 
 RunTodoApp.prototype = {
 
-    runProgram : (readline) => {
+    runProgram (readline) {
        readline.setPrompt('명령하세요: ');
        readline.prompt();
        readline.on('line', (userInput) => {	    
