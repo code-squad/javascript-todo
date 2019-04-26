@@ -1,5 +1,4 @@
-const errorMessage = module.require('./errorMessage.js');
-module.require('date-utils');
+require('date-utils');
 
 const commonDelaySecond = 1000;
 const updateDelaySecond = 3000;
@@ -13,7 +12,7 @@ module.exports = class todo {
 		const regExp = /^all$|^todo$|^doing$|^done$/;
 		const matchRegExp = element.match(regExp);
 		if (matchRegExp === null) {
-			throw new Error(errorMessage.COMMAND_ERROR);
+			throw new Error('COMMAND_ERROR');
 		} else if (matchRegExp[0] === 'all') {
 			this.printAll();
 		} else {
@@ -79,7 +78,7 @@ module.exports = class todo {
 			}
 		});
 		if (targetData[0] === undefined) {
-			throw new Error(errorMessage.ID_ERROR);
+			throw new Error('ID_ERROR');
 		}
 
 		return index;
@@ -99,7 +98,7 @@ module.exports = class todo {
 	update(id, status) {
 		const index = this.checkValidId(id);
 		if (todoList[index].status === status) {
-			throw new Error(errorMessage.STATUS_ERROR);
+			throw new Error('STATUS_ERROR');
 		}
 		todoList[index].status = status;
 

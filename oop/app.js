@@ -34,7 +34,7 @@ const excuteTodo = (action, condition) => {
 			myTodo[action](...condition);
 		}
 	} catch (e) {
-		console.log(e.message);
+		console.log(errorMessage[e.message]);
 		rl.prompt();
 	}
 };
