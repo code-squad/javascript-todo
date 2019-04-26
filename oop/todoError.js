@@ -30,7 +30,7 @@ TodoError.prototype = {
   },
 
   invalidStatus(conditionArr, condition) {
-    if (conditionArr.includes(condition) === false) {
+    if (!conditionArr.includes(condition)) {
       return false;
     }
     return true;
