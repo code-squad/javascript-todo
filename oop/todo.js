@@ -51,6 +51,9 @@ module.exports = class todo {
 	}
 
 	add(name, tag) {
+		if (name === undefined || tag === undefined || name === '' || tag === '') {
+			throw new Error('COMMAND_ERROR');
+		}
 		const tagResult = tag.replace(/\[|\'|\"|\]/g, '').split(',');
 		const id = this.getId();
 		const newData = {
