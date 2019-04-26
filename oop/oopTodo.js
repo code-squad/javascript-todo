@@ -12,7 +12,7 @@ const TodoUI = function () {
     this.past = [];
     this.present = [];
     this.future = [];
- };
+};
 
 // addTodo
 TodoUI.prototype.addTodoExecutor = function (todoElement, todoTag) {
@@ -29,7 +29,7 @@ TodoUI.prototype.addTodoList = function (todoElement, todoTag) {
         'id': id
     };
     datalist.push(newTodo);
-    
+
     return this.addTodoResult(newTodo);
 }
 
@@ -68,7 +68,7 @@ TodoUI.prototype.updateTodoExecutor = function (id, updatedStatus) {
 
 TodoUI.prototype.updateTodoStatus = function (id, updatedStatus) {
     const updatatingIndex = this.getIndex(id);
-    if(this.checkDuplicatedStatus(updatatingIndex, updatedStatus)){
+    if (this.checkDuplicatedStatus(updatatingIndex, updatedStatus)) {
         this.printResult('\n');
         inputReadline.prompt();
         return
@@ -164,8 +164,8 @@ TodoUI.prototype.checkID = function (inputID) {
     return matchedListByID;
 }
 
-TodoUI.prototype.checkDuplicatedStatus = function(updatatingIndex, updatedStatus){
-    if(datalist[updatatingIndex].status === updatedStatus){
+TodoUI.prototype.checkDuplicatedStatus = function (updatatingIndex, updatedStatus) {
+    if (datalist[updatatingIndex].status === updatedStatus) {
         this.printResult('입력한 상태와 동일한 상태입니다')
         return true;
     }
@@ -184,21 +184,27 @@ TodoUI.prototype.checkCommands = function (userInput, inputReadline) {
     const [command, commandElement, TagORStatusOfcommandElement] = splitUserInput;
 
     if (command === 'show') {
-        this.printResult(this.showTodoList(commandElement));
+        console.log(this.showTodoList(commandElement));
         inputReadline.prompt();
-    } else if (command === 'add') {
+    }
+    else if (command === 'add') {
         this.addTodoExecutor(commandElement, TagORStatusOfcommandElement);
-
-    } else if (command === 'update') {
+    }
+    else if (command === 'update') {
         this.updateTodoExecutor(Number(commandElement), TagORStatusOfcommandElement);
-
-    } else if (command === 'delete') {
+    }
+    else if (command === 'delete') {
         this.deleteTodoExecutor(Number(commandElement));
-
-    } else {
+    }
+    else if (command === 'undo') {
+        this.undo();
+    }
+    else if (command === 'redo') {
+        this.redo();
+    }
+    else {
         this.printError();
     }
-
 }
 
 
