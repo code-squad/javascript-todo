@@ -62,12 +62,13 @@ TodoApp.prototype = {
   },
 
   update: function(id, newStatus){
-    if(!this.findTodoById(id)){
+    id = Number.parseInt(id);
+    const idxOfTargetTodo = this._todoList.findIndex(todo => todo.id === id);
+    if(idxOfTargetTodo === -1){
       throw new Error('존재하지 않는 ID입니다.');
     }
 
-    const targetTodo = this._todoList.find(todo => todo.id === Number.parseInt(id));
-    const idxOfTargetTodo = this._todoList.findIndex(todo => todo.id === id);
+    const targetTodo = this._todoList[idxOfTargetTodo];
     
     if(targetTodo.status === newStatus){
       throw new Error(`${id}번 todo는 이미 ${newStatus} 상태입니다.`);
