@@ -11,17 +11,15 @@ rl.prompt();
 
 rl.on('line', line => {
   rl.pause();
-
   try{
     const commandObj = todoParser.parsing(line);
     todoApp[commandObj.command](...commandObj.args);
-    rl.prompt();
   } catch (err){
     console.error(err.message);
+  } finally{
     rl.prompt();
+    rl.resume();
   }
-
-  rl.resume();
 }).on('close', () => {
   process.exit(0);
 });
