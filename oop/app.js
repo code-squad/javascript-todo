@@ -30,7 +30,7 @@ const showAll = () => {
     })
 };
 const promptRepeater = (fun) => {
-    if (!fun) {
+    if (fun) {
         rl.prompt();
         return true;
     }
