@@ -1,11 +1,9 @@
 const ErrorHandler = require('./errorHandler')
-const Spliter = require('./spliter')
 const Printer = require('./printer')
 const Utility = require('./utility')
 const Model = require('./model')
 
 const errorHandler = new ErrorHandler();
-const spliter = new Spliter();
 const utility = new Utility();
 const printer = new Printer();
 const model = new Model();
@@ -14,7 +12,7 @@ function Controller() {}
 
 Controller.prototype.instruct = function (input) {
     if(!(errorHandler.usageErrorCheck(input))) return;
-    const inputArray = spliter.splitInput(input);
+    const inputArray = utility.splitInput(input);
     const command = inputArray[0];
     switch(command) {
         case 'show' :

@@ -1,9 +1,7 @@
-const FileSyncer = require('./FileSyncer')
+const Utility = require('./utility')
 const todoList = require('./todo.json')
-const Finder = require('./finder')
 
-const fileSyncer = new FileSyncer();
-const finder = new Finder();
+const utility = new Utility();
 
 function Model() {}
 
@@ -24,20 +22,20 @@ Model.prototype.getListInStatus = function (status) {
 
 Model.prototype.addTodoObject = function (todoObj) {
     todoList.push(todoObj);
-    fileSyncer.save(todoList);
+    utility.save(todoList);
 }
 
 Model.prototype.deleteTodoObject = function (id) {
-    const objToDelete = finder.getObjectById(id);
+    const objToDelete = utility.getObjectById(id);
     todoList.splice(todoList.indexOf(objToDelete), 1);
-    fileSyncer.save(todoList);
+    utility.save(todoList);
     return objToDelete;
 }
 
 Model.prototype.updateTodoObject = function (id, status) {
-    const index = finder.getIndexById(id);
+    const index = utility.getIndexById(id);
     todoList[index].status = status;
-    fileSyncer.save(todoList);
+    utility.save(todoList);
     return todoList[index];
 }
 
