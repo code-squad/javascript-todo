@@ -6,19 +6,21 @@ const rl = readline.createInterface({
 });
 
 function App() {
-    this.editor = new Editor();
-    this.viewer = new Viewer();
+    this.origin = this
+    this.editor = new Editor(this.origin);
+    this.viewer = new Viewer(this.origin);
+    this.errorChecker = new ErrorChecker();
 }
 
 // show$todo
 // add$운동하기$exercise
 // update$7$doing
 // delete$7
-
+schedule_list
 
 App.prototype = {
 
-    run() {
+     run(input) {
         const self = this
 
         function delayShow(){
@@ -34,17 +36,22 @@ App.prototype = {
 
         rl.question('명령을 입력하세요: ', async (input) => {
             if (input === 'q') return rl.close();
-            [key, ...message] = self.parseCommand(input)
-            if (key === "show") {
-                [status] = message
-                status === "all" ? self.viewer.showAll() : self.viewer.showFiltered(status);
-                return self.run();
-            }
-           
-            const selectedObject = self.editor[key + 'Todo'](...message);
+                [key, ...message] = self.parseCommand(input)
+                if(!this.errorChecker.$check(message))return self.run();
+                
+                if (key === "show") {
+                    [status] = message
+                    status === "all" ? self.viewer.showAll() : self.viewer.showFiltered(status);
+                    return self.run();
+                }
+               
+                
+                const selectedObject = self.editor[key + 'Todo'](...message);
+                
+                await self.viewer[key + 'Message'](selectedObject)
+                await delayShow();    
+
             
-            await self.viewer[key + 'Message'](selectedObject)
-            await delayShow();
         });
     },
 
@@ -54,7 +61,10 @@ App.prototype = {
 }
 
 
-function Editor() { }
+function Editor(_origin) {
+    this.app = _origin;
+    this.errorChecker = new ErrorChecker();
+ }
 
 Editor.prototype = {
     TodoObject: function (_name, _tag, _newId) {
@@ -72,9 +82,13 @@ Editor.prototype = {
     },
 
     updateTodo(_id, _status) {
-
+        // if(!(ERROR.validId)) return this.app.run()
+        
         schedule_list.some(todo => {
-            if (todo.id === parseInt(_id)) return todo.status = _status
+            if (todo.id === parseInt(_id)){
+                if(!(this.errorChecker.statusCheck(todo.status,_status))) return this.app.run()
+                return todo.status = _status  
+            } 
         });
 
         return schedule_list.find(todo => todo.id === parseInt(_id));
@@ -136,5 +150,39 @@ Viewer.prototype = {
     }
 }
 
+function ErrorChecker(){}
+
+ErrorChecker.prototype = {
+    $check(_message){
+        if(_message.length === 0){
+            console.log('$가 아닌 다른값을 입력하셨습니다.');
+            return false;
+        } else{
+            return true;
+        }
+    },
+
+    statusCheck(_todo_status , _status){
+        if(_todo_status === _status){
+            console.log('기존의 status와 같은 status를 입력하셨습니다.')
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+}
+
+
+
+
 const schedule_manager = new App();
-schedule_manager.run();
+schedule_manager.run()
+// schedule_manager.run('show$todo');
+// schedule_manager.run('add$운동하기$exercise');
+// schedule_manager.run('update$9$doing');
+// schedule_manager.run('delete$7');
+// show$todo
+// add$운동하기$exercise
+// update$7$doing
+// delete$7
