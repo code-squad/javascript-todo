@@ -115,4 +115,11 @@ module.exports = class todo {
 			}, commonDelaySecond);
 		}, updateDelaySecond);
 	}
+
+	undo() {
+		todoLog.undo();
+	}
+	redo() {
+		todoLog.redo();
+	}
 };

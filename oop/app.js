@@ -24,7 +24,7 @@ rl.on('line', input => {
 });
 
 const excuteTodo = (action, condition) => {
-	const regExp = /^show$|^add$|^delete$|^update$/;
+	const regExp = /^show$|^add$|^delete$|^update$|^undo$|^redo$/;
 	const matchRegExp = action.match(regExp);
 
 	try {
