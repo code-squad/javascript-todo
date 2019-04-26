@@ -8,7 +8,11 @@ const inputReadline = readline.createInterface({
 });
 
 
-const TodoUI = function () { };
+const TodoUI = function () {
+    this.past = [];
+    this.present = [];
+    this.future = [];
+ };
 
 // addTodo
 TodoUI.prototype.addTodoExecutor = function (todoElement, todoTag) {
