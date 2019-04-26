@@ -1,4 +1,4 @@
-const todo = module.require('./todo.js');
+const Todo = module.require('./todo.js');
 const readline = require('readline');
 const errorMessage = module.require('./errorMessage.js');
 
@@ -6,7 +6,7 @@ const rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout
 });
-const myTodo = new todo(rl);
+const myTodo = new Todo(rl);
 
 rl.setPrompt('명령하세요 : ');
 
