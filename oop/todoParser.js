@@ -15,21 +15,23 @@ function checkValidStatus(status){
   return availableStatus.indexOf(status) !== -1;
 }
 
-class TodoParser extends Parser {
-  constructor(delimiter){
-    super(delimiter);
-  }
+const TodoParser = function(delimiter){
+  Parser.call(this, delimiter);
+};
 
-  checkUpdateCommand(id, status){
+TodoParser.prototype = Object.create(Parser.prototype);
+
+
+TodoParser.prototype.checkUpdateCommand = function(id, status){
     if( !numberCheck(id) || (status === undefined)) {
       throw new Error('Update 명령에는 id와 status가 필요합니다.');
     }
     if( !checkValidStatus(status) ){
       throw new Error('사용할 수 없는 상태값입니다.');
     }
-  }
+  };
 
-  checkAddCommand(name, tag, status){
+TodoParser.prototype.checkAddCommand = function(name, tag, status){
     if( name === undefined || tag === undefined || status === undefined) {
       throw new Error('Add 명령에는 name, tag, status가 필요합니다.');
     }
@@ -39,23 +41,23 @@ class TodoParser extends Parser {
     if( !checkValidStatus(status) ){
       throw new Error('사용할 수 없는 상태값입니다.');
     }
-  }
+  };
 
-  checkShowCommand(status){
+TodoParser.prototype.checkShowCommand = function(status){
     const availableStatus = ['all', 'todo', 'doing', 'done'];
     if( !checkValidStatus(status) ){
       throw new Error('사용할 수 없는 상태값입니다.');
     }
-  }
+  };
 
-  checkDeleteCommand(id){
+TodoParser.prototype.checkDeleteCommand = function(id){
     if( !numberCheck(id)){
       throw new Error('Delete 명령에는 id와 status가 필요합니다.');
     }
-  }
+  };
 
-  parsing(line){ 
-    const parsedLine = super.parsing(line);
+TodoParser.prototype.parsingAfterSyntaxCheck = function(line){ 
+    const parsedLine = this.parsing(line);
     const command = parsedLine[0].toLowerCase();
     const args = parsedLine.splice(1);
 
@@ -81,7 +83,6 @@ class TodoParser extends Parser {
       command,
       args,
     };
-  }
-}
+};
 
 module.exports = TodoParser;
