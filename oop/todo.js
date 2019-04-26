@@ -1,4 +1,6 @@
 require('date-utils');
+const Log = module.require('./Log.js');
+const todoLog = new Log();
 
 const commonDelaySecond = 1000;
 const updateDelaySecond = 3000;
@@ -21,7 +23,7 @@ module.exports = class todo {
 	}
 
 	getStatusList() {
-		const listOfStatus = todoList.reduce((acc, cur) => {
+		const listOfStatus = this.todoList.reduce((acc, cur) => {
 			if (acc[cur.status] === undefined) {
 				acc[cur.status] = [cur.name];
 			} else {
@@ -57,8 +59,9 @@ module.exports = class todo {
 			status: 'todo',
 			id: id
 		};
-		todoList.push(newData);
+		this.todoList.push(newData);
 		console.log(`${newData.name} 1개가 추가되었습니다. (id : ${newData.id})`);
+		todoLog.addLog('add', { status: '삭제' }, newData, this.todoList.length - 1);
 		setTimeout(() => {
 			this.printAll();
 		}, commonDelaySecond);
@@ -71,7 +74,7 @@ module.exports = class todo {
 
 	checkValidId(id) {
 		let index;
-		const targetData = todoList.filter((element, innerIndex) => {
+		const targetData = this.todoList.filter((element, innerIndex) => {
 			if (Number(id) === element.id) {
 				index = innerIndex;
 				return Number(id) === element.id;
@@ -86,10 +89,11 @@ module.exports = class todo {
 
 	delete(id) {
 		const index = this.checkValidId(id);
-		const deletingName = todoList[index].name;
+		const deletingName = this.todoList[index].name;
 
-		console.log(`${deletingName}가 ${todoList[index].status}에서 삭제됐습니다.`);
-		todoList.splice(index, 1);
+		console.log(`${deletingName}가 ${this.todoList[index].status}에서 삭제됐습니다.`);
+		todoLog.addLog('delete', this.todoList[index], { status: '삭제' }, index);
+		this.todoList.splice(index, 1);
 		setTimeout(() => {
 			this.printAll();
 		}, commonDelaySecond);
@@ -97,13 +101,15 @@ module.exports = class todo {
 
 	update(id, status) {
 		const index = this.checkValidId(id);
-		if (todoList[index].status === status) {
+		if (this.todoList[index].status === status) {
 			throw new Error('STATUS_ERROR');
 		}
-		todoList[index].status = status;
+		const prevData = this.todoList[index];
+		this.todoList[index].status = status;
+		todoLog.addLog('update', prevData, this.todoList[index], index);
 
 		setTimeout(() => {
-			console.log(`"${todoList[index].name}"가(이) ${status}로 변경되었습니다.`);
+			console.log(`"${this.todoList[index].name}"가(이) ${status}로 변경되었습니다.`);
 			setTimeout(() => {
 				this.printAll();
 			}, commonDelaySecond);
