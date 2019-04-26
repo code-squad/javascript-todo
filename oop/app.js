@@ -50,7 +50,7 @@ rl.on('line', (userInput) => {
             if (promptRepeater(utils.validator())) break;
 
             const inputParser = new InputParser(userInput);
-            const appWord = inputParser.first;
+            const appWord = inputParser.firstPara;
             const inputParaArr = inputParser[appWord]();
 
             showResult(appWord, inputParaArr)
