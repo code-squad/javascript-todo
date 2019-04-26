@@ -1,128 +1,130 @@
 const Todo = require('./todo');
 
-function ManagingTodo(data, prompt, msgObj, todoError) {
-  this.countedStatus = { todo: 0, doing: 0, done: 0 };
-  this.managedlist = this.initManagedlist(data);
-  this.msgObj = msgObj;
-  this.prompt = prompt;
-  this.todoError = todoError;
-}
-
-ManagingTodo.prototype.initManagedlist = function(data) {
-  return data.map(todo => {
-    const newTodo = new Todo(todo);
-    this.countedStatus[newTodo.status] += 1;
-    return newTodo;
-  });
-};
-
-ManagingTodo.prototype.add = function(name, tags = '[]', status = 'todo') {
-  if (!this.todoError.invalidStatus(Object.keys(this.countedStatus), status)) {
-    throw new Error(this.msgObj.getInvalidStatusError());
+class ManagingTodo {
+  constructor(data, prompt, msgObj, todoError) {
+    this.countedStatus = { todo: 0, doing: 0, done: 0 };
+    this.managedlist = this.initManagedlist(data);
+    this.msgObj = msgObj;
+    this.prompt = prompt;
+    this.todoError = todoError;
   }
 
-  if (!this.todoError.isArray(tags)) {
-    throw new Error(this.msgObj.getIsNotArrayError(tags));
+  initManagedlist(data) {
+    return data.map(todo => {
+      const newTodo = new Todo(todo);
+      this.countedStatus[newTodo.status] += 1;
+      return newTodo;
+    });
   }
 
-  tags = tags.replace(/[\[\]\"\'\s]/g, '').split(','); // 통과된 입력을 올바른 배열로 변환
-
-  const newTodo = new Todo({ name, tags, status });
-
-  this.managedlist.push(newTodo);
-  this.countedStatus[newTodo.status] += 1;
-
-  this.printMsg(this.msgObj.add(newTodo.name, newTodo.id), 1000);
-};
-
-ManagingTodo.prototype.countStatus = function() {
-  return Object.entries(this.countedStatus).reduce(
-    (acc, cur) => (acc += `${cur[0]} : ${cur[1]}개 `),
-    `현재상태 : `
-  );
-};
-
-ManagingTodo.prototype.filterbyStatus = function(status = 'todo') {
-  const filteredArrByStatus = this.managedlist
-    .filter(todo => todo.status === status)
-    .map(todo => todo.name);
-
-  return `${status} 총 ${filteredArrByStatus.length}건 : ${filteredArrByStatus.join(', ')}`;
-};
-
-ManagingTodo.prototype.show = function(status) {
-  let outputStr = '';
-  const searchStatusArr = ['all', ...Object.keys(this.countedStatus)];
-
-  if (!this.todoError.invalidStatus(searchStatusArr, status)) {
-    throw new Error(this.msgObj.getInvalidStatusError());
-  }
-
-  if (status === 'all') {
-    outputStr = this.countStatus();
-  } else {
-    outputStr = this.filterbyStatus(status);
-  }
-  console.log(outputStr);
-  this.prompt.prompt();
-};
-
-ManagingTodo.prototype.delete = function(id) {
-  let outputMsg = '';
-  let deletedId;
-
-  if (typeof id === 'string') {
-    id = parseInt(id);
-  }
-
-  this.managedlist = this.managedlist.filter(todo => {
-    if (todo.id === id) {
-      this.countedStatus[todo.status] -= 1;
-      outputMsg = this.msgObj.delete(todo.name, todo.status);
-      deletedId = todo.id;
-      return false;
+  add(name, tags = '[]', status = 'todo') {
+    if (!this.todoError.invalidStatus(Object.keys(this.countedStatus), status)) {
+      throw new Error(this.msgObj.getInvalidStatusError());
     }
-    return true;
-  });
 
-  if (!this.todoError.invalidId(deletedId)) {
-    throw new Error(this.msgObj.getInvalidIdError());
+    if (!this.todoError.isArray(tags)) {
+      throw new Error(this.msgObj.getIsNotArrayError(tags));
+    }
+
+    tags = tags.replace(/[\[\]\"\'\s]/g, '').split(','); // 통과된 입력을 올바른 배열로 변환
+
+    const newTodo = new Todo({ name, tags, status });
+
+    this.managedlist.push(newTodo);
+    this.countedStatus[newTodo.status] += 1;
+
+    this.printMsg(this.msgObj.add(newTodo.name, newTodo.id), 1000);
   }
 
-  this.printMsg(outputMsg, 1000);
-};
-
-ManagingTodo.prototype.update = function(id, changeStatus) {
-  if (typeof id === 'string') {
-    id = parseInt(id);
+  countStatus() {
+    return Object.entries(this.countedStatus).reduce(
+      (acc, cur) => (acc += `${cur[0]} : ${cur[1]}개 `),
+      `현재상태 : `
+    );
   }
 
-  const changeTodo = this.managedlist.find(todo => todo.id === id);
-  const changeTodoId = changeTodo === undefined ? undefined : changeTodo.id;
+  filterbyStatus(status = 'todo') {
+    const filteredArrByStatus = this.managedlist
+      .filter(todo => todo.status === status)
+      .map(todo => todo.name);
 
-  if (!this.todoError.invalidStatus(Object.keys(this.countedStatus), changeStatus)) {
-    throw new Error(this.msgObj.getInvalidStatusError());
-  }
-  if (!this.todoError.invalidId(changeTodoId)) {
-    throw new Error(this.msgObj.getInvalidIdError());
-  }
-  if (!this.todoError.compareStatus(changeTodo.status, changeStatus)) {
-    throw new Error(this.msgObj.getSameStatusError(changeTodo.status, changeStatus));
+    return `${status} 총 ${filteredArrByStatus.length}건 : ${filteredArrByStatus.join(', ')}`;
   }
 
-  this.countedStatus[changeTodo.status] -= 1;
-  this.countedStatus[changeStatus] += 1;
-  changeTodo.status = changeStatus;
+  show(status) {
+    let outputStr = '';
+    const searchStatusArr = ['all', ...Object.keys(this.countedStatus)];
 
-  setTimeout(() => {
-    this.printMsg(this.msgObj.update(changeTodo.name, changeStatus), 1000);
-  }, 3000);
-};
+    if (!this.todoError.invalidStatus(searchStatusArr, status)) {
+      throw new Error(this.msgObj.getInvalidStatusError());
+    }
 
-ManagingTodo.prototype.printMsg = function(msg, time) {
-  console.log(msg);
-  setTimeout(() => {
-    this.show('all');
-  }, time);
-};
+    if (status === 'all') {
+      outputStr = this.countStatus();
+    } else {
+      outputStr = this.filterbyStatus(status);
+    }
+    console.log(outputStr);
+    this.prompt.prompt();
+  }
+
+  delete(id) {
+    let outputMsg = '';
+    let deletedId;
+
+    if (typeof id === 'string') {
+      id = parseInt(id);
+    }
+
+    this.managedlist = this.managedlist.filter(todo => {
+      if (todo.id === id) {
+        this.countedStatus[todo.status] -= 1;
+        outputMsg = this.msgObj.delete(todo.name, todo.status);
+        deletedId = todo.id;
+        return false;
+      }
+      return true;
+    });
+
+    if (!this.todoError.invalidId(deletedId)) {
+      throw new Error(this.msgObj.getInvalidIdError());
+    }
+
+    this.printMsg(outputMsg, 1000);
+  }
+
+  update(id, changeStatus) {
+    if (typeof id === 'string') {
+      id = parseInt(id);
+    }
+
+    const changeTodo = this.managedlist.find(todo => todo.id === id);
+    const changeTodoId = changeTodo === undefined ? undefined : changeTodo.id;
+
+    if (!this.todoError.invalidStatus(Object.keys(this.countedStatus), changeStatus)) {
+      throw new Error(this.msgObj.getInvalidStatusError());
+    }
+    if (!this.todoError.invalidId(changeTodoId)) {
+      throw new Error(this.msgObj.getInvalidIdError());
+    }
+    if (!this.todoError.compareStatus(changeTodo.status, changeStatus)) {
+      throw new Error(this.msgObj.getSameStatusError(changeTodo.status, changeStatus));
+    }
+
+    this.countedStatus[changeTodo.status] -= 1;
+    this.countedStatus[changeStatus] += 1;
+    changeTodo.status = changeStatus;
+
+    setTimeout(() => {
+      this.printMsg(this.msgObj.update(changeTodo.name, changeStatus), 1000);
+    }, 3000);
+  }
+
+  printMsg(msg, time) {
+    console.log(msg);
+    setTimeout(() => {
+      this.show('all');
+    }, time);
+  }
+}
 module.exports = ManagingTodo;
