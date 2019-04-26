@@ -16,15 +16,34 @@ function App() {
 App.prototype = {
 
     run() {
+        const self = this;
+
+        function delayShow(time){
+            return new Promise(function(resolve, reject){
+                setTimeout(() => {
+                    self.viewer.showAll()
+                    self.run();
+                },time);
+            })
+        }
 
         rl.question('명령을 입력하세요: ', async (input) => {
             if (input === 'q') return rl.close();
             try {
-                [key, ...message] = this.parseCommand(input)
-
+                [key, ...message] = self.parseCommand(input)
                 this.errorChecker.$check(message)
-
-                this[key](...message);
+    
+                if (key === "show") {
+                    [status] = message
+                    status === "all" ? self.viewer.showAll() : self.viewer.showFiltered(status);
+                    return self.run();
+                }
+               
+                
+                const result = self.editor[key + 'Todo'](...message);
+    
+                await self.viewer[key + 'Message'](...result)
+                await delayShow(1000);   
             }
             catch (e) {
                 console.log(e.message);
@@ -37,38 +56,6 @@ App.prototype = {
     parseCommand(input) {
         return input.split('$');
     },
-
-    show(_status) {
-        _status === "all" ? this.viewer.showAll() : this.viewer.showFiltered(_status);
-        return this.run();
-
-    },
-    add(_name, _tag) {
-        const [returnedName, returnedId] = this.editor.addTodo(_name, _tag);
-
-        this.viewer.addMessage(returnedName, returnedId)
-        this.delayShow(1000);
-    },
-    update(_id, _status) {
-        const [returnedName, returnedStatus] = this.editor.updateTodo(_id, _status);
-        setTimeout(() => {
-            this.viewer.updateMessage(returnedName, returnedStatus)
-            this.delayShow(1000);
-        }, 3000)
-
-    },
-    delete(_id) {
-        const [returnedName, returnedStatus] = this.editor.deleteTodo(_id);
-
-        this.viewer.deleteMessage(returnedName, returnedStatus)
-        this.delayShow(1000);
-    },
-    delayShow(time) {
-        setTimeout(() => {
-            this.viewer.showAll();
-            this.run();
-        }, time);
-    }
 }
 
 
@@ -146,12 +133,19 @@ Viewer.prototype = {
         console.log(`${_status}리스트 : 총${showFilteredResult.length}건 : ${showFilteredResult.join(', ')}`);
 
     },
+
     addMessage(_name, _id) {
         console.log(`${_name}가 추가되었습니다. (id :${_id})`);
     },
+
     updateMessage(_name, _status) {
-        console.log(`${_name}의 상태가 ${_status}로 변경되었습니다.`);
+        return new Promise(function(resolve, reject){
+            setTimeout(() => {
+                console.log(`${_name}의 상태가 ${_status}로 변경되었습니다.`);
+                resolve();
+            },3000)})
     },
+
     deleteMessage(_name, _status) {
         console.log(`${_name} ${_status}가 목록에서 삭제 되었습니다.`);
     }
