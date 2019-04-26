@@ -20,7 +20,7 @@ schedule_list
 
 App.prototype = {
 
-     run(input) {
+     run() {
         const self = this
 
         function delayShow(){
@@ -36,8 +36,9 @@ App.prototype = {
 
         rl.question('명령을 입력하세요: ', async (input) => {
             if (input === 'q') return rl.close();
+            try{
                 [key, ...message] = self.parseCommand(input)
-                if(!this.errorChecker.$check(message))return self.run();
+                this.errorChecker.$check(message)
                 
                 if (key === "show") {
                     [status] = message
@@ -50,6 +51,11 @@ App.prototype = {
                 
                 await self.viewer[key + 'Message'](selectedObject)
                 await delayShow();    
+            }
+            catch(e){
+                console.log(e.message);
+                self.run();
+            }
 
             
         });
@@ -86,7 +92,7 @@ Editor.prototype = {
         
         schedule_list.some(todo => {
             if (todo.id === parseInt(_id)){
-                if(!(this.errorChecker.statusCheck(todo.status,_status))) return this.app.run()
+                this.errorChecker.statusCheck(todo.status,_status)
                 return todo.status = _status  
             } 
         });
@@ -154,21 +160,11 @@ function ErrorChecker(){}
 
 ErrorChecker.prototype = {
     $check(_message){
-        if(_message.length === 0){
-            console.log('$가 아닌 다른값을 입력하셨습니다.');
-            return false;
-        } else{
-            return true;
-        }
+        if(_message.length === 0) throw new Error('inputError')
     },
 
     statusCheck(_todo_status , _status){
-        if(_todo_status === _status){
-            console.log('기존의 status와 같은 status를 입력하셨습니다.')
-            return false;
-        }else{
-            return true;
-        }
+        if(_todo_status === _status) throw new Error('statusError')
     }
 
 }
