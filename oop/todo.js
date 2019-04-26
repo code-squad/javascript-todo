@@ -2,12 +2,7 @@ const fs = require('fs');
 const data = fs.readFileSync("./data.json")
 const todos = JSON.parse(data)
 
-const IdManager = function () {
-
-}
- 
-
-const idManager = new IdManager()
+const sleep = msec => new Promise(resolve => setTimeout(resolve, msec))
 
 const Todo = function (name, tag) {
   this.name = name
@@ -34,6 +29,7 @@ Todo.prototype = {
   },
   add : function(){
     todos.push(this)
+    console.log(`${this.name} 1개가 추가됐습니다. (id : ${this.id})`)
     this.save()
     return
   },
@@ -49,15 +45,17 @@ Todo.prototype = {
     this.tag = tags
     this.status = statusToChange
     this.id = id
+
     todos.splice(index, 1, this)
+    console.log(`${name}가 ${statusToChange}로 상태가 변경되었습니다.`)
     this.save()
     return
   } ,
   delete : function(id) {
     let index = this.findById(id)
     if(index==-1) return 
-
-    console.log('delete', id)
+    console.log(`${todos[index].name} ${todos[index].status}가 목록에서 삭제됩니다.`)
+    todos.splice(index, 1)
   },
   show : function(option) {
 
