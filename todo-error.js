@@ -17,8 +17,6 @@ TodoError.prototype.findSeparator = function(action, input) {
 }
 
 TodoError.prototype.findWrongStatus = function(statusOfShow, statusOfUpdate) {
-    
-
     if(statusOfUpdate !== undefined){
         if(statusOfUpdate !== 'todo' && 
            statusOfUpdate !== 'doing' &&
