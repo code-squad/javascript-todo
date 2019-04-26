@@ -206,6 +206,21 @@ TodoUI.prototype.undoable = function (splicedData) {
     this.past.push(splicedData);
 }
 
+TodoUI.prototype.undo = function () {
+    if (this.past.length === 0) {
+        console.log('undo할 값이 없습니다!');
+        inputReadline.prompt();
+        return;
+    }
+
+    const popPastValue = this.past.pop();
+    datalist.push(popPastValue);
+    this.present.push(popPastValue);
+    console.log(`${popPastValue.id}번 항목 ${popPastValue.name}가 삭제에서 ${popPastValue.status}상태로 변경되었습니다.`);
+    inputReadline.prompt();
+    return;
+}
+
 
 TodoUI.prototype.mainExecutor = function () {
     inputReadline.setPrompt('명령어를 입력하세요(종료하려면 q를 누르세요): ');
