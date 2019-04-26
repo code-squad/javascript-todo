@@ -16,13 +16,13 @@ ManagingTodo.prototype.initManagedlist = function(data) {
   });
 };
 
-ManagingTodo.prototype.add = function(name, tags, status = 'todo') {
+ManagingTodo.prototype.add = function(name, tags = '[]', status = 'todo') {
   if (!this.todoError.invalidStatus(Object.keys(this.countedStatus), status)) {
-    throw new Error(this.msgObj.INVALID_STATUS());
+    throw new Error(this.msgObj.getInvalidStatusError());
   }
 
   if (!this.todoError.isArray(tags)) {
-    throw new Error(this.msgObj.NOT_ARRAY(tags));
+    throw new Error(this.msgObj.getIsNotArrayError(tags));
   }
 
   tags = tags.replace(/[\[\]\"\'\s]/g, '').split(','); // 통과된 입력을 올바른 배열로 변환
@@ -32,7 +32,7 @@ ManagingTodo.prototype.add = function(name, tags, status = 'todo') {
   this.managedlist.push(newTodo);
   this.countedStatus[newTodo.status] += 1;
 
-  this.printMsg(this.this.msgObj.add(newTodo.name, newTodo.id), 1000);
+  this.printMsg(this.msgObj.add(newTodo.name, newTodo.id), 1000);
 };
 
 ManagingTodo.prototype.countStatus = function() {
@@ -55,7 +55,7 @@ ManagingTodo.prototype.show = function(status) {
   const searchStatusArr = ['all', ...Object.keys(this.countedStatus)];
 
   if (!this.todoError.invalidStatus(searchStatusArr, status)) {
-    throw new Error(this.msgObj.INVALID_STATUS());
+    throw new Error(this.msgObj.getInvalidStatusError());
   }
 
   if (status === 'all') {
@@ -78,7 +78,7 @@ ManagingTodo.prototype.delete = function(id) {
   this.managedlist = this.managedlist.filter(todo => {
     if (todo.id === id) {
       this.countedStatus[todo.status] -= 1;
-      outputMsg = this.this.msgObj.delete(todo.name, todo.status);
+      outputMsg = this.msgObj.delete(todo.name, todo.status);
       deletedId = todo.id;
       return false;
     }
@@ -86,7 +86,7 @@ ManagingTodo.prototype.delete = function(id) {
   });
 
   if (!this.todoError.invalidId(deletedId)) {
-    throw new Error(this.msgObj.INVALID_ID());
+    throw new Error(this.msgObj.getInvalidIdError());
   }
 
   this.printMsg(outputMsg, 1000);
@@ -101,13 +101,13 @@ ManagingTodo.prototype.update = function(id, changeStatus) {
   const changeTodoId = changeTodo === undefined ? undefined : changeTodo.id;
 
   if (!this.todoError.invalidStatus(Object.keys(this.countedStatus), changeStatus)) {
-    throw new Error(this.msgObj.INVALID_STATUS());
+    throw new Error(this.msgObj.getInvalidStatusError());
   }
   if (!this.todoError.invalidId(changeTodoId)) {
-    throw new Error(this.msgObj.INVALID_ID());
+    throw new Error(this.msgObj.getInvalidIdError());
   }
   if (!this.todoError.compareStatus(changeTodo.status, changeStatus)) {
-    throw new Error(this.msgObj.SAME_STATUS(changeTodo.status, changeStatus));
+    throw new Error(this.msgObj.getSameStatusError(changeTodo.status, changeStatus));
   }
 
   this.countedStatus[changeTodo.status] -= 1;
@@ -115,7 +115,7 @@ ManagingTodo.prototype.update = function(id, changeStatus) {
   changeTodo.status = changeStatus;
 
   setTimeout(() => {
-    this.printMsg(this.this.msgObj.update(changeTodo.name, changeStatus), 1000);
+    this.printMsg(this.msgObj.update(changeTodo.name, changeStatus), 1000);
   }, 3000);
 };
 

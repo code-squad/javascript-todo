@@ -24,14 +24,14 @@ inputPrompt.on('line', userInput => {
 
   try {
     if (!todoError.includeSeperator(userInput, '$')) {
-      throw new Error(msgObj.DONT_HAVE_SEPERATOR('$'));
+      throw new Error(msgObj.getSeparatorError('$'));
     }
 
     const userInputArr = userInput.split('$');
     const methodName = userInputArr.splice(0, 1);
 
     if (!todoError.invalidInst(managingTodo, methodName)) {
-      throw new Error(msgObj.INVALID_INST());
+      throw new Error(msgObj.getInvalisdInstError());
     }
 
     managingTodo[methodName](...userInputArr);
