@@ -7,13 +7,13 @@ const Utils = require('./utils.js');
 const Instruction = require('./instruction.js');
 const ExceptionHandling = require('./exceptionHandling.js');
 
-function Program() {
+function RunTodoApp() {
 	this.cmdArr = ['show','delete','update','add'];
 }
 
-Program.prototype = {
+RunTodoApp.prototype = {
 
-    runProgram : (readline, cmdArr) => {
+    runProgram : (readline) => {
        readline.setPrompt('명령하세요: ');
        readline.prompt();
        readline.on('line', (userInput) => {	    
@@ -49,6 +49,6 @@ Program.prototype = {
 
 
 const run = (() => {
-	const program = new Program();
-	program.runProgram(readLine, program.cmdArr);
+	const runTodoApp = new RunTodoApp();
+	runTodoApp.runProgram(readLine);
 })();
