@@ -1,16 +1,26 @@
 class Controller {
-    constructor (model, utility, printer, errorHandler, commandMannger) {
+    constructor (model, utility, printer, errorHandler, commandManager) {
         this.model          = model;
         this.utility        = utility;
         this.printer        = printer;
         this.errorHandler   = errorHandler;
-        this.commandMannger = commandMannger;
+        this.commandManager = commandManager;
     }
 
-    instruct (input, commandObj) {
+    instruct (input, showManager, addManager) {
         if(!(this.errorHandler.usageErrorCheck(input))) return;
         const inputArray = this.utility.splitInput(input);
-        this.commandMannger.executeCommand(inputArray, commandObj)
+        const command = inputArray[0];
+        //this.commandManeger.executeCommand(inputArray);
+        switch(command) {
+            case 'show' :
+                this.commandManager.executeCommand(inputArray, showManager);
+                break;
+            case 'add' :
+                this.commandManager.executeCommand(inputArray, addManager);
+                this.throwSetTimeForShowAll(showManager);
+                break;
+        }
     }
     
     // show (status) {
@@ -23,12 +33,12 @@ class Controller {
     //     this.printer.printShowStatusMessage(status, listInStatus);
     // }
     
-    add (name, tag) {
-        const objToAdd = {'name': name, 'status': 'todo', 'tags': tag.match(/[a-z0-9]+/g), 'id': this.utility.getRandomID()};
-        this.model.addTodoObject(objToAdd);
-        this.printer.printAddMessage(objToAdd);
-        this.throwSetTimeForShowAll();
-    }
+    // add (name, tag) {
+    //     const objToAdd = {'name': name, 'status': 'todo', 'tags': tag.match(/[a-z0-9]+/g), 'id': this.utility.getRandomID()};
+    //     this.model.addTodoObject(objToAdd);
+    //     this.printer.printAddMessage(objToAdd);
+    //     this.throwSetTimeForShowAll();
+    // }
     
     delete (id) {
         const objToDelete = this.model.deleteTodoObject(id);
@@ -41,8 +51,8 @@ class Controller {
         this.throwSetTimeForUpdate(objToUpdate);
     }
     
-    throwSetTimeForShowAll (delayTime = 1000) {
-        setTimeout( () => { this.show('all'); }, delayTime); 
+    throwSetTimeForShowAll (showManager, delayTime = 1000) {
+        setTimeout( () => { this.commandManager.executeCommand(['show','all'], showManager); }, delayTime); 
     }
     
     throwSetTimeForUpdate (objToUpdate, delayTime = 3000) { 
@@ -52,7 +62,6 @@ class Controller {
                 this.throwSetTimeForShowAll();
             }, delayTime);
     }
-    
 }
 
 

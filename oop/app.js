@@ -6,6 +6,8 @@ const printer       = require('./printer')
 const readLine      = require('readline')
 const CommandManager = require('./commandManager')
 const ShowManager = require('./showManager')
+const AddManager = require('./addManager')
+//const Managers = require('./managers')
 const rl = readLine.createInterface({
     input:process.stdin,
 });
@@ -19,7 +21,6 @@ const rl = readLine.createInterface({
 //         if(!showManager) const showManager = new ShowManager();
 //         // if(!showManager) const showManager = ShowManager();
 //         // if(!showManager) const showManager = ShowManager();
-//         // if(!showManager) const showManager = ShowManager();
 //         controller.instruct(input, showManager);
 //     });
 // })();
@@ -30,17 +31,14 @@ function test (input) {
     const errorHandler  = new ErrorHandler(utility, printer);
     const commandManager = new CommandManager();
     const controller    = new Controller(model, utility, printer, errorHandler, commandManager);
-    let showManager;
-        if(!showManager) showManager = new ShowManager(model, printer);
-        // if(!showManager) const showManager = ShowManager();
-        // if(!showManager) const showManager = ShowManager();
-        // if(!showManager) const showManager = ShowManager();
-        controller.instruct(input, showManager);
-
+    const showManager = new ShowManager(model, printer);
+    const addManager = new AddManager(model, printer, utility);
+    
+    controller.instruct(input, showManager, addManager);
 }
 
-test('show$all');
-test('show$done');
-test('show$todo');
-test('show$doing');
-
+// test('show$all');
+// test('show$done');
+// test('show$todo');
+// test('show$doing');
+test('add$sleep$["favorite"]')
