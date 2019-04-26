@@ -26,9 +26,8 @@ App.prototype = {
         function delayShow(){
             return new Promise(function(resolve, reject){
                 setTimeout(() => {
-                    self.viewer.showAll()
+                    self.viewer.showAll();
                     self.run();
-                    resolve();
                 }, 1000);
 
             })
@@ -56,7 +55,6 @@ App.prototype = {
                 console.log(e.message);
                 self.run();
             }
-
             
         });
     },
@@ -67,8 +65,7 @@ App.prototype = {
 }
 
 
-function Editor(_origin) {
-    this.app = _origin;
+function Editor() {
     this.errorChecker = new ErrorChecker();
  }
 
@@ -90,14 +87,13 @@ Editor.prototype = {
     updateTodo(_id, _status) {
         // if(!(ERROR.validId)) return this.app.run()
         
-        schedule_list.some(todo => {
+        return schedule_list.some(todo => {
             if (todo.id === parseInt(_id)){
                 this.errorChecker.statusCheck(todo.status,_status)
                 return todo.status = _status  
             } 
-        });
-
-        return schedule_list.find(todo => todo.id === parseInt(_id));
+        }) ? schedule_list.find(todo => todo.id === parseInt(_id)) : this.errorChecker.foundIdError();
+        
 
     },
 
@@ -105,12 +101,9 @@ Editor.prototype = {
 
         const returnedObj = schedule_list.find(todo => todo.id === parseInt(_id));
 
-        schedule_list.some((todo, index) => {
+        return schedule_list.some((todo, index) => {
             if (todo.id === parseInt(_id)) return schedule_list.splice(index, 1)
-        });
-        return returnedObj;
-
-
+        }) ? returnedObj : this.errorChecker.foundIdError();
     },
 
     getUniqueId() {
@@ -160,16 +153,19 @@ function ErrorChecker(){}
 
 ErrorChecker.prototype = {
     $check(_message){
-        if(_message.length === 0) throw new Error('inputError')
+        if(_message.length === 0) throw new Error('InputError : $ is not exist ')
     },
 
     statusCheck(_todo_status , _status){
-        if(_todo_status === _status) throw new Error('statusError')
+        if(_todo_status === _status) throw new Error('StatusError : status is same')
+    },
+
+    foundIdError(){
+        throw new Error('IdError : id is not exist')
     }
 
+
 }
-
-
 
 
 const schedule_manager = new App();
