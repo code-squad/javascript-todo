@@ -1,6 +1,4 @@
-const TodoError = function() {
-
-}
+const TodoError = function() {}
 
 // '$' 문자가 없는 경우 에러 처리
 TodoError.prototype.findSeparator = function(action, input) {
