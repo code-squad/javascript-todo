@@ -7,6 +7,8 @@ const CustomException = require('./customException.js');
 function Instruction() {
 	this.utils = new Utils();
     this.customException = new CustomException();
+    this.minIdNum = 1;
+	this.maxIdNum = 99999;
 }
 
 Instruction.prototype = {
