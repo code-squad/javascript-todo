@@ -221,6 +221,20 @@ TodoUI.prototype.undo = function () {
     return;
 }
 
+TodoUI.prototype.redo = function () {
+    if (this.present.length === 0) {
+        console.log('redo할 값이 없습니다!');
+        inputReadline.prompt();
+        return;
+    }
+    const popPresentValue = this.present.pop();
+    datalist.pop();
+    this.past.push(popPresentValue);
+    console.log(`${popPresentValue.id}번 항목 ${popPresentValue.name}가 ${popPresentValue.status}상태에서 삭제되었습니다.`);
+    inputReadline.prompt();
+    return;
+}
+
 
 TodoUI.prototype.mainExecutor = function () {
     inputReadline.setPrompt('명령어를 입력하세요(종료하려면 q를 누르세요): ');
