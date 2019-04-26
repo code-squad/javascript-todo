@@ -35,13 +35,15 @@ Todo.prototype = {
     }
     return index
   },
-  add : function(){
+  add : async function(){
     todos.push(this)
     console.log(`${this.name} 1개가 추가됐습니다. (id : ${this.id})`)
+    await sleep(1000)
     this.save()
+    this.show('all')
     return
   },
-  update : function(id, statusToChange){
+  update : async function(id, statusToChange){
     let index = this.findById(id)
     if(index==-1) return 
     let {name, tags, status} = todos[index]
@@ -55,7 +57,10 @@ Todo.prototype = {
     this.id = id
 
     todos.splice(index, 1, this)
+    await sleep(3000)
     console.log(`${name}가 ${statusToChange}로 상태가 변경되었습니다.`)
+    await sleep(1000)
+    this.show('all')
     this.save()
     return
   } ,
@@ -63,6 +68,8 @@ Todo.prototype = {
     let index = this.findById(id)
     if(index==-1) return 
     console.log(`${todos[index].name} ${todos[index].status}가 목록에서 삭제됩니다.`)
+    await(sleep)
+    this.show('all')
     todos.splice(index, 1)
     this.save()
   },
