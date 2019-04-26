@@ -19,6 +19,14 @@ Todo.prototype = {
     fs.writeFileSync("data.json" ,data)
     return
   },
+  createId: function (name) {
+    let charCode = 0
+    let timeNow = new Date().getTime()
+    for(let i = 0; i<name.length;i++){
+        charCode += name.charCodeAt(i)
+    }
+    return charCode + timeNow
+  },
   findById: function (id){
     let index = todos.findIndex(element => element.id === id*1)
     if(index === -1){
@@ -56,26 +64,25 @@ Todo.prototype = {
     if(index==-1) return 
     console.log(`${todos[index].name} ${todos[index].status}가 목록에서 삭제됩니다.`)
     todos.splice(index, 1)
+    this.save()
   },
   show : function(option) {
+    let todoSum = todos.filter(v => v.status === 'todo').length
+    let doingSum = todos.filter(v => v.status === 'doing').length
+    let doneSum = todos.length - todoSum - doingSum
+    
+    const props = {'todo' : todoSum, 'doing' : doingSum, 'done' : doneSum}
+    
+    if (option === 'all'){
+      console.log(`현재상태 : todo: ${todoSum}개, doing: ${doingSum}개, done: ${doneSum}개`)
+      return
+    }
+    result = todos.filter(v => v.status === option).map(v => v.name)
+    console.log(`${option}리스트 : 총${props[option]}건 : ${result.reduce((acc, cur)=> acc + ', ' + cur)}`)
 
+    return 
   },
-  createId: function (name) {
-      let charCode = 0
-      let timeNow = new Date().getTime()
-      for(let i = 0; i<name.length;i++){
-          charCode += name.charCodeAt(i)
-      }
-      return charCode + timeNow
-  },
+  
 }
-
-Todo.getInstruction = function (userInput) {
-  const test = userInput[0]
-  // todo[userInput[0]](...userInput)
-}
-
-
-//Todo.add(name, id, tag)
 
 module.exports.Todo = Todo;
