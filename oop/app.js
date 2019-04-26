@@ -1,23 +1,22 @@
 const IC = require("./IController");
 const Todo = require("./todo");
-const fs = require('fs');
 
-const data = fs.readFileSync("./data.json")
-const todos = JSON.parse(data)
-console.log(todos)
 
-const todoList = new Todo(todos);
 process.on("userInput", (userInput) =>{
-    console.log(userInput);
     let command = userInput[0]
     let args = userInput.slice(1)
-    todoList[command](...args)
-    console.log(todoList.toods)
+    if(command === 'add'){
+      const newTodo = new Todo.Todo(...args)  
+      newTodo.save()
+      IC.rl.prompt();
+      return
+    } else{
+      defaultTodo = new Todo.Todo('default', "[]")
+    }
+    defaultTodo[command](...args)
+
     IC.rl.prompt();
     
 })
 
-
-
-//inputControll.inputHandler("show$all");
 IC.ready();
