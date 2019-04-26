@@ -110,7 +110,12 @@ module.exports = class todo {
 
 	update(id, status) {
 		const index = this.checkValidId(id);
-		if (this.todoList[index].status === status) {
+		const regExp = /^todo$|^doing$|^done$/;
+		const matchRegExp = status.match(regExp);
+
+		if (matchRegExp === null) {
+			throw new Error('COMMAND_ERROR');
+		} else if (this.todoList[index].status === status) {
 			throw new Error('STATUS_ERROR');
 		}
 		const prevData = {};
