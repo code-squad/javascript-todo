@@ -1,5 +1,5 @@
-const data = require('./data');
-const datalist = data.todos;
+const database = require('./data');
+const datalist = database.todos;
 const readline = require('readline');
 const inputReadline = readline.createInterface({
     input: process.stdin,
@@ -92,12 +92,12 @@ TodoUI.prototype.showElementGetter = function () {
 
 
 TodoUI.prototype.showTodoList = function (status) {
-    const showElementList = this.showElementGetter()
-    return this.showStatusExecutor(status, showElementList);
+    const todoElementList = this.showElementGetter()
+    return this.showStatusExecutor(status, todoElementList);
 }
 
-TodoUI.prototype.showStatusExecutor = function (status, showElementList) {
-    const { todoList, doingList, doneList } = showElementList
+TodoUI.prototype.showStatusExecutor = function (status, todoElementList) {
+    const { todoList, doingList, doneList } = todoElementList
     switch (status) {
         case 'all':
             return `현재상태 : todo: ${todoList.length}개, doing: ${doingList.length}개, done: ${doneList.length}개 \n`
