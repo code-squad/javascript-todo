@@ -19,30 +19,88 @@ const todoForm = function (name, tag, status, id) {
     this.id = id;
 }
 
-const showPrint = function(value1, value2, value3) {
-    this.value1 = value1;
-    this.value2 = value2;
-    this.value3 = value3;
-}
-
-showPrint.prototype.printShowAll = function(){
-    console.log(`현재 상태 : todo: ${this.value1}개, doing: ${this.value2}개, done: ${this.value3}개`)
-}
-showPrint.prototype.printShowElse = function(){
-    console.log(`${this.value1}리스트 : 총 ${this.value2}건 : ${this.value3}`);
-}
-showPrint.prototype.printAdd = function(){
-    console.log(`${this.value1} 1개가 추가됐습니다. (id : ${this.value2})`);
-}
-showPrint.prototype.printUpdate = function(){
-    console.log(`${this.value1} 가 ${this.value2}상태로 변경되었습니다.`);
-}
-showPrint.prototype.printDelete = function(){
-    console.log(`${this.value1} 가 todo에서 삭제되었습니다.`)
+const findDataIdObj = (input) => {
+    let target = todoList.filter(v => v["id"] === input);
+    let targetName = target[0].name;
+    let targetIdx = todoList.indexOf(target[0]);    
+    return [targetIdx, targetName];
 }
 
 
 
+const showPrint = function() {}
+
+showPrint.prototype.printShowAll = function(todo, doing, done){
+    console.log(`현재 상태 : todo: ${todo}개, doing: ${doing}개, done: ${done}개`)
+}
+showPrint.prototype.printShowElse = function(temp_length, temp){
+    console.log(`${this.value1}리스트 : 총 ${temp_length}건 : ${temp}`);
+}
+showPrint.prototype.printAdd = function(name,id){
+    console.log(`${name} 1개가 추가됐습니다. (id : ${id})`);
+}
+showPrint.prototype.printUpdate = function(targetName, status){
+    console.log(`${targetName} 가 ${status}상태로 변경되었습니다.`);
+}
+showPrint.prototype.printDelete = function(targetName){
+    console.log(`${targetName} 가 todo에서 삭제되었습니다.`)
+}
+
+// const errorCheck = function(value1, value2) {
+//     this.value1 = value1;
+//     this.value2 = value2;
+// }
+
+// errorCheck.prototype.syntaxError = function() {
+//     let firstWord = this.value1.match(/\w+/); 
+//     let seperator = this.value1.match(/\$/g); 
+//     let zeroSeperator = (seperator===null);
+//     if(zeroSeperator === true){
+//         return false;
+//     }else{
+//         let oneSeperator = ((firstWord[0] === "delete" || firstWord[0] === "show") && (seperator.length===1));
+//         let twoSeperator = ((firstWord[0] === "add" || firstWord[0] === "update") && (seperator.length===2));
+//         return oneSeperator || twoSeperator ? true : false;
+//     }
+    
+// }
+// errorCheck.prototype.unknownIDError = function() {
+//     if(this.value1 === NaN) {
+//         return false;
+//     } 
+//     return !(todoList.filter(v => v["id"] === this.value1).length === 0) ? true : false;
+// }
+// errorCheck.prototype.duplicatedStatusError = function() {
+//     return !(todoList.filter(v => v["id"] === this.value1)[0]["status"] === this.value2) ? true : false;
+// }
+
+
+
+function syntaxError(input) {
+    let firstWord = input.match(/\w+/); 
+    let seperator = input.match(/\$/g); 
+    let zeroSeperator = (seperator===null);
+    if(zeroSeperator === true){
+        return false;
+    }else{
+        let oneSeperator = ((firstWord[0] === "delete" || firstWord[0] === "show") && (seperator.length===1));
+        let twoSeperator = ((firstWord[0] === "add" || firstWord[0] === "update") && (seperator.length===2));
+        return oneSeperator || twoSeperator ? true : false;
+    }
+    
+}
+function unknownIDError(ID) {
+    if(ID === NaN) {
+        return false;
+    } 
+    return !(todoList.filter(v => v["id"] === ID).length === 0) ? true : false;
+}
+function duplicatedStatusError(ID, status) {
+    return !(todoList.filter(v => v["id"] === ID)[0]["status"] === status) ? true : false;
+}
+
+
+const Print = new showPrint();
 
 const todoShow = (input) => {
     let status = input[0];
@@ -54,15 +112,15 @@ const todoShowAll = () => {
     let doing = todoList.filter(v => v.status === 'doing').length;
     let done = todoList.filter(v => v.status === 'done').length;
 
-    const Print = new showPrint(todo, doing, done);
-    Print.printShowAll();
+    //const Print = new showPrint(todo, doing, done);
+    Print.printShowAll(todo,doing,done);
 }
 
 const todoShowElse = (input) => {
     let temp = todoList.filter(v => v.status === input).map((obj)=>{ return ` '${obj.name}, ${obj.id}번'`})
 
-    const Print = new showPrint(temp.length, temp);
-    Print.printShowElse();
+    //const Print = new showPrint(temp.length, temp);
+    Print.printShowElse(temp.length, temp);
 }
 
 const showAllTimer = (input) => {
@@ -77,8 +135,8 @@ const todoAdd = (input) => {
     let newTodoList = new todoForm(name, tag, 'todo', id);
     todoList.push(newTodoList);
     
-    const Print = new showPrint(name,id);
-    Print.printAdd();
+    //const Print = new showPrint(name,id);
+    Print.printAdd(name,id);
     showAllTimer(1000);
 }
 
@@ -88,61 +146,33 @@ const makingID = () => {
 
 
 // delete
-const todoDelete = (input) => {
-    let id = Number(input[0]);
-    let target = todoList.filter(v => v["id"] === id);
-    let targetName = target[0].name;
-    let targetIdx = todoList.indexOf(target[0]);
+const todoDelete = (id) => {
+    let [targetIdx, targetName] = findDataIdObj(id)
     todoList.splice(targetIdx,1);
 
-    const Print = new showPrint(targetName);
-    Print.printDelete();
+    //const Print = new showPrint(targetName);
+    Print.printDelete(targetName);
     showAllTimer(1000);
 }
 
 // update
-const todoUpdate = (input) => {
-    let [id, status] = input;
-    let target = todoList.filter(v => v["id"] === id); //e2
-    let targetName = target[0].name;
-    let targetIdx = todoList.indexOf(target[0]);
+const todoUpdate = (id, status) => {
+    let [targetIdx, targetName] = findDataIdObj(id)
     todoList[targetIdx].status = status;
 
-    const Print = new showPrint(targetName, status);
-    setTimeout(()=>{Print.printUpdate()}, 1000);
+    //const Print = new showPrint(targetName, status);
+    setTimeout(()=>{Print.printUpdate(targetName, status)}, 1000);
     showAllTimer(4000);
 } 
 
-function error1(input) {
-    let firstWord = input.match(/\w+/); //["a"]
-    let seperator = input.match(/\$/g); // ["$","$""]
-    let zeroSeperator = (seperator===null);
-    if(zeroSeperator === true){
-        return false;
-    }else{
-        let oneSeperator = ((firstWord[0] === "delete" || firstWord[0] === "show") && (seperator.length===1));
-        let twoSeperator = ((firstWord[0] === "add" || firstWord[0] === "update") && (seperator.length===2));
-        return oneSeperator || twoSeperator ? true : false;
-    }
-    
-}
-
-function error2(ID) {
-    if(ID === NaN) {
-        return false;
-    } 
-    return !(todoList.filter(v => v["id"] === ID).length === 0) ? true : false;
-}
-
-function error3(ID, status) {
-    return !(todoList.filter(v => v["id"] === ID)[0]["status"] === status) ? true : false;
-}
 
 
-const arr = "delete$9547"
+
+
+const arr = "update$9547$doing"
 todoMain = (answer) => {
-    if(error1(answer) === false) {
-        console.log("제대로된 입력을 해주세요.");
+    if(syntaxError(answer) === false) {
+        console.log("문법적으로 유효하지 않은 입력값입니다.");
         return 
     }
     
@@ -154,13 +184,13 @@ todoMain = (answer) => {
     } else if(action === "delete") { 
         tempArr[0] = Number(tempArr[0])
         let ID = tempArr[0]
-        error2(ID)==false ? console.log("ID 사용이 잘못되었습니다.") : todoDelete(tempArr)
+        unknownIDError(ID)==false ? console.log("ID 사용이 잘못되었습니다.") : todoDelete(ID);
         
     } else if(action === "update") { 
         tempArr[0] = Number(tempArr[0])
         let ID = tempArr[0]
         let status = tempArr[1]
-        error2(ID)==false || error3(ID,status)==false ? console.log("ID혹은 Status가 잘못되었습니다.") : todoUpdate(tempArr)
+        unknownIDError(ID)==false || duplicatedStatusError(ID,status)==false ? console.log("ID혹은 Status가 잘못되었습니다.") : todoUpdate(ID, status)
 
     } else if(action === "show") {
         todoShow(tempArr);
