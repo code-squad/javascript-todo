@@ -2,25 +2,13 @@ const readline = require('readline');
 const errorMsg = require('./errorMsg.js');
 const todoList = require('./data.js');
 const todoProto = require('./todo-prototype.js');
+const util = require('./todo-util-method.js');
 
 let r = readline.createInterface({
     input:process.stdin,
     output:process.stdout
 });
 
-const todoForm = function (name, tag, status, id) {
-    this.name = name;
-    this.tag = [tag];
-    this.status = status;
-    this.id = id;
-}
-
-const findDataIdObj = (input) => {
-    let target = todoList.filter(v => v["id"] === input);
-    let targetName = target[0].name;
-    let targetIdx = todoList.indexOf(target[0]);    
-    return [targetIdx, targetName];
-}
 
 const Print = new todoProto.ShowPrint();
 const Error = new todoProto.ErrorCheck();
@@ -34,7 +22,7 @@ const todoShowAll = () => {
     let todo = todoList.filter(v => v.status === 'todo').length;
     let doing = todoList.filter(v => v.status === 'doing').length;
     let done = todoList.filter(v => v.status === 'done').length;
-    
+
     Print.printShowAll(todo,doing,done);
 }
 
@@ -52,7 +40,7 @@ const showAllTimer = (input) => {
 const todoAdd = (input) => {
     let [name, tag] = input;
     let id = makingID();
-    let newTodoList = new todoForm(name, tag, 'todo', id);
+    let newTodoList = new util.todoForm(name, tag, 'todo', id);
     todoList.push(newTodoList);
     
     Print.printAdd(name,id);
@@ -66,7 +54,7 @@ const makingID = () => {
 
 // delete
 const todoDelete = (id) => {
-    let [targetIdx, targetName] = findDataIdObj(id)
+    let [targetIdx, targetName] = util.findDataIdObj(id)
     todoList.splice(targetIdx,1);
 
     Print.printDelete(targetName);
@@ -75,7 +63,7 @@ const todoDelete = (id) => {
 
 // update
 const todoUpdate = (id, status) => {
-    let [targetIdx, targetName] = findDataIdObj(id)
+    let [targetIdx, targetName] = util.findDataIdObj(id)
     todoList[targetIdx].status = status;
 
     setTimeout(()=>{Print.printUpdate(targetName, status)}, 1000);
@@ -86,7 +74,7 @@ const todoUpdate = (id, status) => {
 
 
 
-const arr = "add"
+const arr = "add$asdf$asdf"
 todoMain = (answer) => {
     if(Error.syntaxError(answer) === false) {
         Print.printError(errorMsg.syntaxError);
