@@ -10,7 +10,8 @@ const inputPrompt = readline.createInterface({
   output: process.stdout
 });
 
-const managingTodo = new ManagingTodo(data, inputPrompt, msgObj);
+const todoError = new TodoError();
+const managingTodo = new ManagingTodo(data, inputPrompt, msgObj, todoError);
 
 console.log('0을 입력하면 프로그램이 종료됩니다.');
 inputPrompt.setPrompt('명령하세요 : ');
@@ -21,7 +22,6 @@ inputPrompt.on('line', userInput => {
     inputPrompt.close();
   }
 
-  const todoError = new TodoError();
   try {
     todoError.includeSeperator(userInput, '$');
     const userInputArr = userInput.split('$');

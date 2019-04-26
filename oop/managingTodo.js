@@ -1,12 +1,11 @@
 const Todo = require('./todo');
-const TodoError = require('./todoError');
 
-function ManagingTodo(data, prompt, msgObj) {
+function ManagingTodo(data, prompt, msgObj, todoError) {
   this.countedStatus = { todo: 0, doing: 0, done: 0 };
   this.managedlist = this.initManagedlist(data);
   this.msgObj = msgObj;
   this.prompt = prompt;
-  this.todoError = new TodoError();
+  this.todoError = todoError;
 }
 
 ManagingTodo.prototype.initManagedlist = function(data) {
