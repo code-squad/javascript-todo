@@ -1,10 +1,10 @@
-const todoList = module.require('./data.js');
 const errorMessage = module.require('./errorMessage.js');
 module.require('date-utils');
 
 module.exports = class todo {
-	constructor(rl) {
+	constructor(todoList, rl) {
 		this.readline = rl;
+		this.todoList = todoList;
 	}
 	show(element) {
 		const regExp = /^all$|^todo$|^doing$|^done$/;
