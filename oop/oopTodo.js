@@ -67,7 +67,7 @@ TodoUI.prototype.updateTodoExecutor = function (id, updatedStatus) {
 TodoUI.prototype.updateTodoStatus = function (id, updatedStatus) {
     const updatatingIndex = this.getIndex(id);
     if (this.checkDuplicatedStatus(updatatingIndex, updatedStatus)) {
-        this.printResult('\n');
+        console.log('\n');
         inputReadline.prompt();
         return
     };
@@ -114,9 +114,9 @@ TodoUI.prototype.showStatusExecutor = function (status, todoElementList) {
 
 
 TodoUI.prototype.showAll_printResult = function (result) {
-    this.printResult(result);
+    console.log(result);
     setTimeout(() => {
-        this.printResult((this.showTodoList('all')));
+        console.log((this.showTodoList('all')));
         inputReadline.prompt();
     }, 1000);
 }
@@ -125,11 +125,6 @@ TodoUI.prototype.splitInputVal = function (inputData) {
     const splitOnDollarSymbol = inputData.split("$");
     return splitOnDollarSymbol
 }
-
-TodoUI.prototype.printResult = function (result) {
-    console.log(result);
-}
-
 
 TodoUI.prototype.printError = function () {
     console.error('입력하신 값이 존재하지않습니다. \n');
@@ -166,7 +161,7 @@ TodoUI.prototype.checkID = function (inputID) {
 
 TodoUI.prototype.checkDuplicatedStatus = function (updatatingIndex, updatedStatus) {
     if (datalist[updatatingIndex].status === updatedStatus) {
-        this.printResult('입력한 상태와 동일한 상태입니다')
+        console.log('입력한 상태와 동일한 상태입니다')
         return true;
     }
 }
