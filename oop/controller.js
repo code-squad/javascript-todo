@@ -1,13 +1,3 @@
-// const ErrorHandler = require('./errorHandler')
-// const Printer = require('./printer')
-// const this.utility = require('./this.utility')
-// const Model = require('./model')
-
-// const errorHandler = new ErrorHandler();
-// const this.utility = new this.utility();
-// const printer = new Printer();
-// const model = new Model();
-
 function Controller(model, utility, printer, errorHandler) {
     this.model = model;
     this.utility = utility;

@@ -13,10 +13,10 @@ const rl = readLine.createInterface({
     const errorHandler = new ErrorHandler();
     const utility = new Utility();
     const printer = new Printer();
-    const model = new Model();
+    const model = new Model(utility);
+    const controller = new Controller(model, utility, printer, errorHandler);
 
     rl.on('line', (input) => {
-        const controller = new Controller(model, utility, printer, errorHandler);
         controller.instruct(input);
     });
 })();

@@ -1,9 +1,11 @@
-const Utility = require('./utility')
+//const Utility = require('./utility')
 const todoList = require('./todo.json')
 
-const utility = new Utility();
+//const utility = new Utility();
 
-function Model() {}
+function Model(utility) {
+    this.utility = utility;
+}
 
 Model.prototype.getCountEachStatus = function () {
     return todoList.reduce((countEachStatus, todoObj) => {
@@ -22,20 +24,20 @@ Model.prototype.getListInStatus = function (status) {
 
 Model.prototype.addTodoObject = function (todoObj) {
     todoList.push(todoObj);
-    utility.save(todoList);
+    this.utility.save(todoList);
 }
 
 Model.prototype.deleteTodoObject = function (id) {
-    const objToDelete = utility.getObjectById(id);
+    const objToDelete = this.utility.getObjectById(id);
     todoList.splice(todoList.indexOf(objToDelete), 1);
-    utility.save(todoList);
+    this.utility.save(todoList);
     return objToDelete;
 }
 
 Model.prototype.updateTodoObject = function (id, status) {
-    const index = utility.getIndexById(id);
+    const index = this.utility.getIndexById(id);
     todoList[index].status = status;
-    utility.save(todoList);
+    this.utility.save(todoList);
     return todoList[index];
 }
 
