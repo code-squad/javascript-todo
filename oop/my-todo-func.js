@@ -46,37 +46,9 @@ showPrint.prototype.printDelete = function(targetName){
     console.log(`${targetName} 가 todo에서 삭제되었습니다.`)
 }
 
-// const errorCheck = function(value1, value2) {
-//     this.value1 = value1;
-//     this.value2 = value2;
-// }
+const errorCheck = function() {}
 
-// errorCheck.prototype.syntaxError = function() {
-//     let firstWord = this.value1.match(/\w+/); 
-//     let seperator = this.value1.match(/\$/g); 
-//     let zeroSeperator = (seperator===null);
-//     if(zeroSeperator === true){
-//         return false;
-//     }else{
-//         let oneSeperator = ((firstWord[0] === "delete" || firstWord[0] === "show") && (seperator.length===1));
-//         let twoSeperator = ((firstWord[0] === "add" || firstWord[0] === "update") && (seperator.length===2));
-//         return oneSeperator || twoSeperator ? true : false;
-//     }
-    
-// }
-// errorCheck.prototype.unknownIDError = function() {
-//     if(this.value1 === NaN) {
-//         return false;
-//     } 
-//     return !(todoList.filter(v => v["id"] === this.value1).length === 0) ? true : false;
-// }
-// errorCheck.prototype.duplicatedStatusError = function() {
-//     return !(todoList.filter(v => v["id"] === this.value1)[0]["status"] === this.value2) ? true : false;
-// }
-
-
-
-function syntaxError(input) {
+errorCheck.prototype.syntaxError = function(input) {
     let firstWord = input.match(/\w+/); 
     let seperator = input.match(/\$/g); 
     let zeroSeperator = (seperator===null);
@@ -89,18 +61,18 @@ function syntaxError(input) {
     }
     
 }
-function unknownIDError(ID) {
+errorCheck.prototype.unknownIDError = function(ID) {
     if(ID === NaN) {
         return false;
     } 
     return !(todoList.filter(v => v["id"] === ID).length === 0) ? true : false;
 }
-function duplicatedStatusError(ID, status) {
+errorCheck.prototype.duplicatedStatusError = function(ID, status) {
     return !(todoList.filter(v => v["id"] === ID)[0]["status"] === status) ? true : false;
 }
 
-
 const Print = new showPrint();
+const Error = new errorCheck();
 
 const todoShow = (input) => {
     let status = input[0];
@@ -118,8 +90,6 @@ const todoShowAll = () => {
 
 const todoShowElse = (input) => {
     let temp = todoList.filter(v => v.status === input).map((obj)=>{ return ` '${obj.name}, ${obj.id}번'`})
-
-    //const Print = new showPrint(temp.length, temp);
     Print.printShowElse(temp.length, temp);
 }
 
@@ -135,7 +105,6 @@ const todoAdd = (input) => {
     let newTodoList = new todoForm(name, tag, 'todo', id);
     todoList.push(newTodoList);
     
-    //const Print = new showPrint(name,id);
     Print.printAdd(name,id);
     showAllTimer(1000);
 }
@@ -150,7 +119,6 @@ const todoDelete = (id) => {
     let [targetIdx, targetName] = findDataIdObj(id)
     todoList.splice(targetIdx,1);
 
-    //const Print = new showPrint(targetName);
     Print.printDelete(targetName);
     showAllTimer(1000);
 }
@@ -160,7 +128,6 @@ const todoUpdate = (id, status) => {
     let [targetIdx, targetName] = findDataIdObj(id)
     todoList[targetIdx].status = status;
 
-    //const Print = new showPrint(targetName, status);
     setTimeout(()=>{Print.printUpdate(targetName, status)}, 1000);
     showAllTimer(4000);
 } 
@@ -169,9 +136,9 @@ const todoUpdate = (id, status) => {
 
 
 
-const arr = "update$9547$doing"
+const arr = "add"
 todoMain = (answer) => {
-    if(syntaxError(answer) === false) {
+    if(Error.syntaxError(answer) === false) {
         console.log("문법적으로 유효하지 않은 입력값입니다.");
         return 
     }
@@ -184,13 +151,13 @@ todoMain = (answer) => {
     } else if(action === "delete") { 
         tempArr[0] = Number(tempArr[0])
         let ID = tempArr[0]
-        unknownIDError(ID)==false ? console.log("ID 사용이 잘못되었습니다.") : todoDelete(ID);
+        Error.unknownIDError(ID)==false ? console.log("ID 사용이 잘못되었습니다.") : todoDelete(ID);
         
     } else if(action === "update") { 
         tempArr[0] = Number(tempArr[0])
         let ID = tempArr[0]
         let status = tempArr[1]
-        unknownIDError(ID)==false || duplicatedStatusError(ID,status)==false ? console.log("ID혹은 Status가 잘못되었습니다.") : todoUpdate(ID, status)
+        Error.unknownIDError(ID)==false || Error.duplicatedStatusError(ID,status)==false ? console.log("ID혹은 Status가 잘못되었습니다.") : todoUpdate(ID, status)
 
     } else if(action === "show") {
         todoShow(tempArr);
