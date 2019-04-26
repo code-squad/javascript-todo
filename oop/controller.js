@@ -37,23 +37,23 @@ Controller.prototype.instruct = function (input) {
 Controller.prototype.show = function (status) {
     if(status === 'all') {
         const countEachStatus = this.model.getCountEachStatus();
-        this.printer.printMessageShowAll(countEachStatus);
+        this.printer.printShowAllMessage(countEachStatus);
         return;
     }
     const listInStatus = this.model.getListInStatus(status);
-    this.printer.printMessageShowStatus(status, listInStatus);
+    this.printer.printShowStatusMessage(status, listInStatus);
 }
 
 Controller.prototype.add = function (name, tag) {
     const objToAdd = {'name': name, 'status': 'todo', 'tags': tag.match(/[a-z0-9]+/g), 'id': this.utility.getRandomID()};
     this.model.addTodoObject(objToAdd);
-    this.printer.printMessageAdd(objToAdd);
+    this.printer.printAddMessage(objToAdd);
     this.throwSetTimeForShowAll();
 }
 
 Controller.prototype.delete = function (id) {
     const objToDelete = this.model.deleteTodoObject(id);
-    this.printer.printMessageDelete(objToDelete);
+    this.printer.printDeleteMessage(objToDelete);
     this.throwSetTimeForShowAll();
 }
 
@@ -69,7 +69,7 @@ Controller.prototype.throwSetTimeForShowAll = function (delayTime = 1000) {
 Controller.prototype.throwSetTimeForUpdate = function(objToUpdate, delayTime = 3000) { 
     setTimeout( 
         () => { 
-            this.printer.printMessageUpdate(objToUpdate);
+            this.printer.printUpdateMessage(objToUpdate);
             this.throwSetTimeForShowAll();
         }, delayTime);
 }

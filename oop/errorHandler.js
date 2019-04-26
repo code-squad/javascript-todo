@@ -1,11 +1,11 @@
-function ErrorHandler(printer, utility) {
-    this.printer = printer;
+function ErrorHandler(utility, printer) {
     this.utility = utility;
+    this.printer = printer;
 }
 
 ErrorHandler.prototype.usageErrorCheck = function (input) {
     if(!(input.match(/\$/))) {
-        this.printer.printUsage();
+        this.printer.printUsageErrorMessage();
         return false;
     }
     return true;
