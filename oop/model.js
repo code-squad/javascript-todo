@@ -1,7 +1,4 @@
-//const Utility = require('./utility')
 const todoList = require('./todo.json')
-
-//const utility = new Utility();
 
 function Model(utility) {
     this.utility = utility;

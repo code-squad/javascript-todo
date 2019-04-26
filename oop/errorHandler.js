@@ -1,30 +1,27 @@
-const Printer = require('./printer')
-const Utility = require('./utility')
-
-const printer = new Printer();
-const utility = new Utility();
-
-function ErrorHandler() {}
+function ErrorHandler(printer, utility) {
+    this.printer = printer;
+    this.utility = utility;
+}
 
 ErrorHandler.prototype.usageErrorCheck = function (input) {
     if(!(input.match(/\$/))) {
-        printer.printUsage();
+        this.printer.printUsage();
         return false;
     }
     return true;
 }
 
 ErrorHandler.prototype.notExistIdErrorCheck = function (idDelete) {
-    if(!(utility.getObjectById(idDelete))) {
-        printer.printNotExistErrorMessage();
+    if(!(this.utility.getObjectById(idDelete))) {
+        this.printer.printNotExistErrorMessage();
         return false;
     }
     return true;
 }
 
 ErrorHandler.prototype.sameStatusErrorCheck = function (idUpdate, statusToChange) {
-    if(utility.getObjectById(idUpdate).status === statusToChange) {
-        printer.printSameStatusErrorMessage();
+    if(this.utility.getObjectById(idUpdate).status === statusToChange) {
+        this.printer.printSameStatusErrorMessage();
         return false;
     }
     return true;
