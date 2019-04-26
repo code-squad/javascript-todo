@@ -22,6 +22,7 @@ Todo.prototype = {
   save: function (){
     let data = JSON.stringify(todos)
     fs.writeFileSync("data.json" ,data)
+    return
   },
   findById: function (id){
     let index = todos.findIndex(element => element.id === id*1)
@@ -34,21 +35,28 @@ Todo.prototype = {
   add : function(){
     todos.push(this)
     this.save()
+    return
   },
-  update : function(id, status){
+  update : function(id, statusToChange){
     let index = this.findById(id)
     if(index==-1) return 
-    let {name, tags} = todos[index]
+    let {name, tags, status} = todos[index]
+    if (statusToChange === status){
+      console.log('바꾸려는 내용이 현재 내용과 똑같습니다.')
+      return 
+    }
     this.name = name
     this.tag = tags
-    this.status = status
+    this.status = statusToChange
     this.id = id
     todos.splice(index, 1, this)
     this.save()
+    return
   } ,
   delete : function(id) {
     let index = this.findById(id)
     if(index==-1) return 
+
     console.log('delete', id)
   },
   show : function(option) {
