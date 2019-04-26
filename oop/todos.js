@@ -5,17 +5,19 @@ module.exports = class Todos {
         this.statusArr = ['todo', 'doing', 'done'];
     }
 
-    makeRanNum(digits, data) {
-        const ranNum = (digits) => {
-            const min = Math.pow(10, digits - 1);
-            const max = Math.pow(10, digits) - 1;
-            return Math.floor(Math.random() * (max - min + 1) + min);
-        }
-        const isDuplicateNum = (data, ranId) => {
-            return data.some((el) => el['id'] === ranId)
-        }
-        let ranId = ranNum(digits);
-        if (!isDuplicateNum(data, ranId)) {
+    randomNum(digits) {
+        const min = Math.pow(10, digits - 1);
+        const max = Math.pow(10, digits) - 1;
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+    isDuplicateNum(data, ranId) {
+        return data.some((el) => el['id'] === ranId)
+    }
+
+    makeSoleNum(digits, data) {
+        let ranId = this.randomNum(digits);
+        if (!this.isDuplicateNum(data, ranId)) {
             return ranId;
         } else {
             return makeRanNum(digits, data);
@@ -60,12 +62,12 @@ module.exports = class Todos {
     }
 
     add(name, tags) {
-        let generatedId = this.makeRanNum(5, this._data);
+        let generatedId = this.makeSoleNum(5, this._data);
         let newObj = {
             name,
             tags,
             status: "todo",
-            id: this.makeRanNum(3, this._data)
+            id: generatedId
         }
         this._data.push(newObj)
         return `'${name}' 1개가 추가됐습니다.(id : ${generatedId})`
