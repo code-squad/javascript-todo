@@ -46,14 +46,14 @@ TodoUI.prototype.deleteTodoExecutor = function (deleteID) {
 
 TodoUI.prototype.deleteTodoList = function (deletedID) {
     const deletedIndex = this.getIndex(deletedID);
-    datalist.splice(deletedIndex, 1);
-    this.undo(this.history(deletedIndex));
+    const [splicedData] = datalist.splice(deletedIndex, 1);
+    this.undoable(splicedData);
 
-    return this.deleteTodoResult(deletedIndex)
+    return this.deleteTodoResult(splicedData)
 };
 
-TodoUI.prototype.deleteTodoResult = function (deletedIndex) {
-    const deletionResult = `${datalist[deletedIndex].name}가 ${datalist[deletedIndex].status}에서 삭제되었습니다.`
+TodoUI.prototype.deleteTodoResult = function (splicedData) {
+    const deletionResult = `${splicedData.name}가 ${splicedData.status}에서 삭제되었습니다.`
     return this.showAll_printResult(deletionResult);
 };
 
@@ -200,6 +200,12 @@ TodoUI.prototype.checkCommands = function (userInput, inputReadline) {
     }
 
 }
+
+
+TodoUI.prototype.undoable = function (splicedData) {
+    this.past.push(splicedData);
+}
+
 
 TodoUI.prototype.mainExecutor = function () {
     inputReadline.setPrompt('명령어를 입력하세요(종료하려면 q를 누르세요): ');
