@@ -11,6 +11,8 @@ const convertedData = JSON.parse(JSON.stringify(originData)).data;
 
 const todos = new Todos(convertedData);
 const validator = new Validator(convertedData);
+const inputParser = new InputParser();
+
 
 const promptResult = (resultOfTodos, appWord) => {
     return new Promise((resolve) => {
@@ -39,18 +41,17 @@ rl.on('line', (userInput) => {
             rl.close();
             break;
         default:
-            let errorMessage = validator.excuteValidation(userInput);
+            const errorMessage = validator.excuteValidation(userInput);
             if (errorMessage) {
                 console.log(errorMessage);
                 rl.prompt();
             } else {
-                const inputParser = new InputParser(userInput);
-                const appWord = inputParser.splitedOrder[0];
-                
-                promptResult(inputParser.execute(todos), appWord)
+                const resultMessage = inputParser.executeTodos(todos, userInput);
+                const appWord = inputParser.appWord;
+                promptResult(resultMessage, appWord)
                 .then((resultOfTodos) => {
                     console.log(resultOfTodos);
-                    if (appWord != 'show') {
+                    if (appWord !== 'show') {
                         promptAll()
                         .then((resultOfAll) => {
                             console.log(resultOfAll);
