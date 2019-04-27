@@ -39,10 +39,12 @@ TodoApp.prototype = {
 
   add: function(name, tag, status){
     this._todoList.insert(new Todo(this._uniqueIdGenerator(), name, JSON.parse(tag), status));
+    this._todoList.flush();
   },
 
   delete: function(id){
     this._todoList.remove(id);
+    this._todoList.flush();
   },
 
   show: function(status){
@@ -62,6 +64,7 @@ TodoApp.prototype = {
 
   update: function(id, newStatus){
     this._todoList.update(id, newStatus);
+    this._todoList.flush();
   },
 
   findTodoByKey: function(key, value){
@@ -70,7 +73,15 @@ TodoApp.prototype = {
 
   findTodoById: function(id){
     return this.findTodoByKey("id", id);
-  }
+  },
+
+  undo: function(){
+    this._todoList.undo();
+  },
+
+  redo: function(){
+    this._todoList.redo();
+  },
 
 }
 
