@@ -19,3 +19,9 @@ update$1$todo
 delete$999
 delete$1
 show$all
+undo
+undo
+undo
+redo
+redo
+redo
