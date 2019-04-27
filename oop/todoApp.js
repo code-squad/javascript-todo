@@ -1,4 +1,5 @@
 const Todo = require('./todo');
+const TodoContainer = require('./TodoContainer');
 
 Array.prototype.groupBy = function(prop) {
   return this.reduce((groups, element) => {
@@ -22,10 +23,11 @@ var TodoApp = function(){
 
 TodoApp.prototype = {
   init: function(){
-    this._todoList = require('./todoList.js');
+    loadList = require('./todoList');
+    loadList.sort((lhs, rhs) => lhs.id < rhs.id );
+    this._lastUsedId = loadList[loadList.length - 1].id + 1;
 
-    this._todoList.sort((lhs, rhs) => lhs.id < rhs.id );
-    this._lastUsedId = this._todoList[this._todoList.length - 1].id + 1;
+    this._todoList = new TodoContainer(3, loadList);
 
     this._uniqueIdGenerator = ( () => {
       var nextId = this._lastUsedId;
@@ -36,25 +38,22 @@ TodoApp.prototype = {
   },
 
   add: function(name, tag, status){
-    this._todoList.push(new Todo(this._uniqueIdGenerator(), name, JSON.parse(tag), status));
+    this._todoList.insert(new Todo(this._uniqueIdGenerator(), name, JSON.parse(tag), status));
   },
 
   delete: function(id){
-    if(!this.findTodoById(id)){
-      throw new Error('존재하지 않는 ID입니다.');
-    }
-    this._todoList = this._todoList.filter(todo => todo.id !== id );
+    this._todoList.remove(id);
   },
 
   show: function(status){
     if(status === "all"){
-      const countGroupByStatus = this._todoList.groupBy("status").count();
+      const countGroupByStatus = this._todoList.container.groupBy("status").count();
 
       console.log(`현재 상태 : ${Object.entries(countGroupByStatus)
                                      .map(status => `${status[0]} : ${status[1]}`)
                                      .join(', ')}`);
     } else {
-      const filteredTodoNames = this._todoList.filter(todo => todo.status === status)
+      const filteredTodoNames = this._todoList.container.filter(todo => todo.status === status)
                                               .map(todo => todo.name);
 
       console.log(`${status} 리스트 : 총 ${filteredTodoNames.length}건 : ${filteredTodoNames.join(', ')}`);
@@ -62,20 +61,7 @@ TodoApp.prototype = {
   },
 
   update: function(id, newStatus){
-    id = Number.parseInt(id);
-    const idxOfTargetTodo = this._todoList.findIndex(todo => todo.id === id);
-    if(idxOfTargetTodo === -1){
-      throw new Error('존재하지 않는 ID입니다.');
-    }
-
-    const targetTodo = this._todoList[idxOfTargetTodo];
-    
-    if(targetTodo.status === newStatus){
-      throw new Error(`${id}번 todo는 이미 ${newStatus} 상태입니다.`);
-    }
-
-    targetTodo.status = newStatus;
-    this._todoList[idxOfTargetTodo] = targetTodo;
+    this._todoList.update(id, newStatus);
   },
 
   findTodoByKey: function(key, value){

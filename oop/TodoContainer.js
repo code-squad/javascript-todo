@@ -1,7 +1,7 @@
 const CUD = {
-  CREATE,
-  UPDATE,
-  DELETE,
+  CREATE: "insert",
+  UPDATE: "update",
+  DELETE: "delete",
 }
 
 class DiffState {
@@ -13,7 +13,7 @@ class DiffState {
 
 class TodoContainer {
   constructor(size, contents = []){
-    this._container = contents;
+    this.container = contents;
     this._diffContainer = [];
     this._redoContainer = [];
     this._size = size;
@@ -38,32 +38,36 @@ class TodoContainer {
   }
 
   insert(value){
-    this._container.push(value);
+    this.container.push(value);
     this._pushDiff(new DiffState(CUD.CREATE, value));
     this.flush();
   }
 
   remove(id) {
-    const indexOfTarget = this._container.findIndex(todo => todo.id === id);
+    const indexOfTarget = this.container.findIndex(todo => todo.id === id);
 
     if(indexOfTarget === -1){
       throw new Error('삭제할 대상이 없습니다.');
     }
 
-    this._pushDiff(new DiffState(CUD.DELETE, this._container[indexOfTarget]));
-    this._container.splice(indexOfTarget);
+    this._pushDiff(new DiffState(CUD.DELETE, this.container[indexOfTarget]));
+    this.container.splice(indexOfTarget);
     this.flush();
   }
 
-  update(newStatus, id){
-    const indexOfTarget = this._container.findIndex(todo => todo.id === id);
+  update(id, newStatus){
+    const indexOfTarget = this.container.findIndex(todo => todo.id === id);
 
     if(indexOfTarget === -1){
       throw new Error('변경할 대상이 없습니다.');
     }
 
-    this._pushDiff(new DiffState(CUD.UPDATE, this._container[indexOfTarget]));
-    this._container[indexOfTarget].status = newStatus;
+    if(this.container[indexOfTarget].status === newStatus){
+      throw new Error(`${id}번 todo는 이미 ${newStatus} 상태입니다.`);
+    }
+
+    this._pushDiff(new DiffState(CUD.UPDATE, this.container[indexOfTarget]));
+    this.container[indexOfTarget].status = newStatus;
     this.flush();
   }
 
@@ -76,18 +80,18 @@ class TodoContainer {
 
     switch (lastOp.op) {
       case CUD.CREATE:
-        this._container = this._container.filter(todo => todo.id !== lastOp.value.id );
+        this.container = this.container.filter(todo => todo.id !== lastOp.value.id );
         console.log(`${lastOp.value.id}번 항목 '${lastOp.value.name}'의 생성이 취소되었습니다.`);
         this._pushRedo(lastOp);
         break;
       case CUD.DELETE:
-        this._container.push(lastOp.value);
+        this.container.push(lastOp.value);
         console.log(`${lastOp.value.id}번 항목 '${lastOp.value.name}'이 다시 생성되었습니다.`);
         this._pushRedo(lastOp);
         break;
       case CUD.UPDATE:
-        const targetIdx = this._container.findIndex(todo => todo.id === lastOp.value.id );
-        this._container[targetIdx].status = lastOp.value.status;
+        const targetIdx = this.container.findIndex(todo => todo.id === lastOp.value.id );
+        this.container[targetIdx].status = lastOp.value.status;
         console.log(`${lastOp.value.id}번 항목 '${lastOp.value.name}의 상태가 ${lastOp.value.status}로 복원되었습니다.`);
         this._pushRedo(lastOp);
         break;
@@ -112,7 +116,7 @@ class TodoContainer {
         this.remove(redoOp.value.id);
         break;
       case CUD.UPDATE:
-        this.update(redoOp.value.status, redo.value.id);
+        this.update(redoOp.value.id, redo.value.status);
         break;
       default:
         break;
