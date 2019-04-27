@@ -54,7 +54,7 @@ class TodoContainer {
 
     this._pushDiff(new DiffState(CUD.DELETE, this.container[indexOfTarget]));
     this.container.splice(indexOfTarget);
-    console.log(`${todo.name}이/가 삭제되었습니다.`);
+    console.log(`${id}번 항목이 삭제되었습니다.`);
   }
 
   update(id, newStatus){
@@ -94,7 +94,7 @@ class TodoContainer {
         const tmp = this.container[targetIdx].status;
         this.container[targetIdx].status = lastOp.value;
         lastOp.value = tmp;
-        console.log(`${lastOp.todo.id}번 항목 '${lastOp.todo.name}의 상태가 ${lastOp.value}로 복원되었습니다.`);
+        console.log(`${lastOp.todo.id}번 항목 '${lastOp.todo.name}의 상태가 ${this.container[targetIdx].status}로 복원되었습니다.`);
         break;
       default:
         break;
