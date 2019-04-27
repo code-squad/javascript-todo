@@ -3,13 +3,13 @@ module.exports = class Todos {
     constructor(data) {
         this._data = data;
         this.statusArr = ['todo', 'doing', 'done'];
-    };
+    }
 
     randomNum(digits) {
         const min = Math.pow(10, digits - 1);
         const max = Math.pow(10, digits) - 1;
         return Math.floor(Math.random() * (max - min + 1) + min);
-    };
+    }
 
     searchById(id) {
         let resultIndex = null;
@@ -17,7 +17,7 @@ module.exports = class Todos {
             if (value.id == id) resultIndex = index;
         });
         return resultIndex;
-    };
+    }
 
     makeUniqueNum(digits) {
         let generatedId = -1;
@@ -27,7 +27,7 @@ module.exports = class Todos {
             indexOfId = this.searchById(generatedId);
         } while(indexOfId != null);
         return generatedId;
-    };
+    }
 
     countAllStatus() {
         let resultObject = {
@@ -37,7 +37,7 @@ module.exports = class Todos {
         };
         this._data.forEach(value => resultObject[value.status] += 1);
         return resultObject;
-    };
+    }
 
     searchByStatus(status) {
         let resultArr = [];
@@ -45,17 +45,17 @@ module.exports = class Todos {
             if (value.status === status) resultArr.push(`'${value.name}, ${value.id}번'`);
         });
         return resultArr;
-    };
+    }
 
     show(status) {
         if (status === "all") {
             const statusCountObject = this.countAllStatus();
-            return `현재상태 : todo: ${statusCountObject['todo']}개, doing: ${statusCountObject['doing']}개, done: ${statusCountObject['done']}개`;
+            return `현재상태 : todo: ${statusCountObject.todo}개, doing: ${statusCountObject.doing}개, done: ${statusCountObject.done}개`;
         } else if (this.statusArr.includes(status)) {
             const statusArr = this.searchByStatus(status);
             return `${status}리스트 :  총 ${statusArr.length}건 : ${statusArr.join(', ')}`;
-        };
-    };
+        }
+    }
 
     add(name, tags) {
         let generatedId = this.makeUniqueNum(5);
@@ -67,7 +67,7 @@ module.exports = class Todos {
         };
         this._data.push(newObj);
         return `'${name}' 1개가 추가됐습니다.(id : ${generatedId})`;
-    };
+    }
 
     delete(id) {
         const indexOfTarget = this.searchById(id);
@@ -84,6 +84,6 @@ module.exports = class Todos {
         } else {
             objOfTarget.status = status;
             return `'${objOfTarget.name}'이(가) '${status}'으로 상태가 변경됐습니다`;
-        };
-    };
-}
+        }
+    }
+};

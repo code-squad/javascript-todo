@@ -20,7 +20,7 @@ const promptResult = (resultOfTodos, appWord) => {
         setTimeout(() => {
             resolve(resultOfTodos);
         }, timeDelay);
-    })
+    });
 };
 
 const promptAll = () => {
@@ -28,7 +28,7 @@ const promptAll = () => {
         setTimeout(() => {
             resolve(todos.show('all'));
         }, 1000);
-    })
+    });
 };
 
 rl.setPrompt('명령하세요: ');
@@ -55,11 +55,11 @@ rl.on('line', (userInput) => {
                         .then((resultOfAll) => {
                             console.log(resultOfAll);
                             rl.prompt();
-                        })
+                        });
                     } else rl.prompt();
                 });
-            };
-    };
+            }
+    }
 }).on('close', () => {
     console.log("프로그램을 종료합니다.");
     process.exit();
