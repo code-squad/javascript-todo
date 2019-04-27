@@ -109,6 +109,10 @@ module.exports = class todo {
 	}
 
 	update(id, status) {
+		if (status === undefined) {
+			throw new Error('COMMAND_ERROR');
+		}
+
 		const index = this.checkValidId(id);
 		const regExp = /^todo$|^doing$|^done$/;
 		const matchRegExp = status.match(regExp);
