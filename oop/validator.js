@@ -1,61 +1,44 @@
 module.exports = class Validator {
-    constructor(data, order) {
+    constructor(data) {
         this._data = data;
-        this.dollor = order.match(/\$/g);
-        this.appWord = order.match(/[a-z]*(?=\$)/);
-        this.status = order.match(/(?<=\$)[a-z]*$/);
-        this.id = order.match(/(?<=\$)\d*/);
-        this.tag = order.match(/(?<=\[\")\w*(?=\"\])/);
-    }
+    };
+    
+    initOrder() {
+        this._seperator = this._order.match(/\$/g);
+        this._appWord = this._order.match(/[a-z]*(?=\$)/);
+        this._status = this._order.match(/(?<=\$)[a-z]*$/);
+        this._id = this._order.match(/(?<=\$)\d*/);
+        this._tag = this._order.match(/(?<=\[\")\w*(?=\"\])/);
+    };
 
-    dollors() {
-        console.log('명령어를 $로 구분해주세요.')
-        return true;
-    }
-
-    appWords(){
-        console.log('잘못된 appWords 입니다.')
-        return true;
-    }
-
-    tags(){
-        if(!this.tag){
-            console.log('가능한 tag가 아닙니다.');
-            return true
-        }
-        return false;
-    }
-
-    ids(){
-        if(!this._data.some((el) => el['id'] === Number(this.id[0]))) {
-            console.log('존재하지 않는 id입니다.');
-            return true;
-        }
-        return false;
-    }
-
-    statuses(){
+    validateSeparator() { return '명령어를 $로 구분해주세요.'; };
+    validateAppWord() { return '잘못된 appWords 입니다.'; };
+    validateTag() { if (!this._tag) return '가능한 tag가 아닙니다.'; };
+    validateId() {
+        let existId = this._data.some((element) => element['id'] === Number(this._id[0]))
+        if (!existId) return '존재하지 않는 id입니다.';
+    };
+    validateStatus() {
         const statusList = ['all', 'todo', 'doing','done'];
-        if(statusList.indexOf(this.status[0]) === -1) {
-            console.log('잘못된 status입니다.');
-            return true;
-        }
-        return false;
-    }
+        if (statusList.indexOf(this._status[0]) === -1) return '잘못된 status입니다.';
+    };
 
-    excute() {
-        if(!this.dollor){
-            return this.dollors();
-        }else if (this.appWord[0] === 'show') {
-            return this.statuses();
-        } else if (this.appWord[0] === 'add') {
-            return this.tags();
-        } else if (this.appWord[0] === 'delete') {
-            return this.ids();
-        } else if (this.appWord[0] === 'update') {
-            return this.ids() || this.statuses();
-        } else {
-            return this.appWords();
-        }
+    excuteValidation(order) {
+        this._order = order;
+        this.initOrder();
+        if (!this._seperator){ return this.validateSeparator(); }; 
+
+        switch (this._appWord[0]) {
+            case 'show':
+                return this.validateStatus();
+            case 'add':
+                return this.validateTag();
+            case 'delete':
+                return this.validateId();
+            case 'update':
+                return this.validateId() || this.validateStatus(); 
+            default :
+                return this.validateAppWord();
+        };
     }
 }
