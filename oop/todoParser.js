@@ -56,9 +56,14 @@ TodoParser.prototype.checkDeleteCommand = function(id){
     }
   };
 
+TodoParser.prototype.checkSingleCommand = function(line){
+  const singleCommands = ['undo', 'redo'];
+  return singleCommands.some(command => command === line);
+}
+
 TodoParser.prototype.parsingAfterSyntaxCheck = function(line){ 
-    const parsedLine = this.parsing(line);
-    const command = parsedLine[0].toLowerCase();
+    const parsedLine = this.checkSingleCommand(line) ? [ line ] : this.parsing(line);
+    const command = parsedLine[0];
     const args = parsedLine.splice(1);
 
     switch(command){
@@ -75,6 +80,9 @@ TodoParser.prototype.parsingAfterSyntaxCheck = function(line){
         break;
       case 'add':
         this.checkAddCommand(...args);
+        break;
+      case 'undo':
+      case 'redo':
         break;
       default:
         throw new Error('존재하지 않는 명령입니다.');
