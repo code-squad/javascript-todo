@@ -69,6 +69,10 @@ module.exports = class Log {
 	}
 
 	alterData(todoListIndex, deleteCount, data) {
-		todoList.splice(todoListIndex, deleteCount, data);
+		if (data === undefined) {
+			todoList.splice(todoListIndex, deleteCount);
+		} else {
+			todoList.splice(todoListIndex, deleteCount, data);
+		}
 	}
 };
