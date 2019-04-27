@@ -1,5 +1,4 @@
-const database = require('./data');
-const datalist = database.todos;
+const datalist = require('./data').todos;
 const readline = require('readline');
 const inputReadline = readline.createInterface({
     input: process.stdin,
@@ -7,7 +6,8 @@ const inputReadline = readline.createInterface({
 });
 
 
-const TodoUI = function () {
+const TodoUI = function (datalist) {
+    this.datalist = datalist;
     this.past = [];
     this.present = [];
     this.future = [];
@@ -22,7 +22,7 @@ TodoUI.prototype = {
     },
 
     addTodoList(todoElement, todoTag) {
-        const id = this.createNewID(datalist, 10000)
+        const id = this.createNewID(this.datalist, 10000)
 
         const newTodo = {
             'name': todoElement,
@@ -30,7 +30,7 @@ TodoUI.prototype = {
             'status': "todo",
             'id': id
         };
-        datalist.push(newTodo);
+        this.datalist.push(newTodo);
 
         return this.addTodoResult(newTodo);
     },
@@ -48,7 +48,7 @@ TodoUI.prototype = {
 
     deleteTodoList(deletedID) {
         const deletedIndex = this.getIndex(deletedID);
-        const [splicedData] = datalist.splice(deletedIndex, 1);
+        const [splicedData] = this.datalist.splice(deletedIndex, 1);
         this.undoable(splicedData);
         this.manageMaxPastList();
 
@@ -74,22 +74,22 @@ TodoUI.prototype = {
             inputReadline.prompt();
             return
         };
-        datalist[updatatingIndex].status = updatedStatus;
+        this.datalist[updatatingIndex].status = updatedStatus;
         return this.updateTodoResult(updatatingIndex, updatedStatus)
     },
 
 
     updateTodoResult(updatatingIndex, updatedStatus) {
-        const updateResult = `${datalist[updatatingIndex].name} 가 ${updatedStatus}로 상태가 변경됬습니다.`;
+        const updateResult = `${this.datalist[updatatingIndex].name} 가 ${updatedStatus}로 상태가 변경됬습니다.`;
         return setTimeout(() => {
             this.showAll_printResult(updateResult);
         }, 3000);
     },
 
     showElementGetter() {
-        const todoList = this.checkStatus(datalist, 'todo');
-        const doingList = this.checkStatus(datalist, 'doing');
-        const doneList = this.checkStatus(datalist, 'done');
+        const todoList = this.checkStatus(this.datalist, 'todo');
+        const doingList = this.checkStatus(this.datalist, 'doing');
+        const doneList = this.checkStatus(this.datalist, 'done');
         return { todoList, doingList, doneList }
     },
 
@@ -137,7 +137,7 @@ TodoUI.prototype = {
 
 
     getIndex(inputId) {
-        return datalist.map((element) => { return element["id"] }).indexOf(inputId);
+        return this.datalist.map((element) => { return element["id"] }).indexOf(inputId);
     },
 
 
@@ -156,14 +156,14 @@ TodoUI.prototype = {
 
 
     checkID(inputID) {
-        const [matchedListByID] = datalist.filter(list => {
+        const [matchedListByID] = this.datalist.filter(list => {
             return list.id == inputID
         })
         return matchedListByID;
     },
 
     checkDuplicatedStatus(updatatingIndex, updatedStatus) {
-        if (datalist[updatatingIndex].status === updatedStatus) {
+        if (this.datalist[updatatingIndex].status === updatedStatus) {
             console.log('입력한 상태와 동일한 상태입니다')
             return true;
         }
@@ -228,7 +228,7 @@ TodoUI.prototype = {
         }
 
         const popPastValue = this.past.pop();
-        datalist.push(popPastValue);
+        this.datalist.push(popPastValue);
         this.present.push(popPastValue);
         console.log(`${popPastValue.id}번 항목 ${popPastValue.name}가 삭제에서 ${popPastValue.status}상태로 변경되었습니다.`);
         inputReadline.prompt();
@@ -242,7 +242,7 @@ TodoUI.prototype = {
             return;
         }
         const popPresentValue = this.present.pop();
-        datalist.pop();
+        this.datalist.pop();
         this.past.push(popPresentValue);
         console.log(`${popPresentValue.id}번 항목 ${popPresentValue.name}가 ${popPresentValue.status}상태에서 삭제되었습니다.`);
         inputReadline.prompt();
@@ -268,5 +268,5 @@ TodoUI.prototype = {
 }
 
 
-const todoList = new TodoUI();
+const todoList = new TodoUI(datalist);
 todoList.mainExecutor();
