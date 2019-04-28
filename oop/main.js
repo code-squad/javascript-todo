@@ -11,7 +11,7 @@ rl.prompt();
 rl.on('line', line => {
   rl.pause();
   try{
-    const commandObj = todoParser.parsingAfterSyntaxCheck(line);
+    const commandObj = todoParser.parsing(line);
     todoApp[commandObj.command](...commandObj.args);
   } catch (err){
     console.error(err.message);

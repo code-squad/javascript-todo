@@ -61,8 +61,8 @@ TodoParser.prototype.checkSingleCommand = function(line){
   return singleCommands.some(command => command === line);
 }
 
-TodoParser.prototype.parsingAfterSyntaxCheck = function(line){ 
-    const parsedLine = this.checkSingleCommand(line) ? [ line ] : this.parsing(line);
+TodoParser.prototype.parsing = function(line){ 
+    const parsedLine = this.checkSingleCommand(line) ? [ line ] : Parser.prototype.parsing.call(this, line);
     const command = parsedLine[0];
     const args = parsedLine.splice(1);
 
