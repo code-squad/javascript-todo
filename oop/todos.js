@@ -138,6 +138,16 @@ module.exports = class Todos {
         }
     }
     
+    runRecord(order) {
+        switch (order) {
+            case 'start':
+                this.recordSwitch = 1;
+                break;
+            case 'stop':
+                this.recordSwitch = 0;
+                break;
+        }
+    }
 
     addDeletedObj(todosObj, data) {
         data.push(todosObj);
@@ -150,7 +160,7 @@ module.exports = class Todos {
             const todosObj = this.todosRecord[pointer];
             const appWord = userinput[0];
             const appParameterArr = userinput[1];
-            this.recordSwitch = 0;
+            this.runRecord('stop');
             this.moveRecordPointer('undo');
             switch (appWord) {
                 case 'add':
