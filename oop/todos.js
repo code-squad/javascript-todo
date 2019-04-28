@@ -13,8 +13,10 @@ module.exports = class Todos {
         switch (appWord){
             case 'undo' :
                 this.recordPointer++
+                break;
             case 'redo' :
                 this.recordPointer--;
+                break;
         }
     }
 
@@ -147,8 +149,7 @@ module.exports = class Todos {
             const appWord = userinput[0];
             const appParameterArr = userinput[1];
             this.recordSwitch = 0;
-            this.recordPointer++;
-            // this.moveRecordPointer('undo');
+            this.moveRecordPointer('undo');
             switch (appWord) {
                 case 'add':
                     this.delete(todosObj.id);
@@ -166,13 +167,12 @@ module.exports = class Todos {
 
     redo() {
         if (this.limitRecordPoint('redo')) {
-            // this.moveRecordPointer('redo');
             const pointer = this.recordPointer - 1;
             const userinput = this.userInputRecord[pointer];
             const todosObj = this.todosRecord[pointer];
             const appWord = userinput[0];
             const appParameterArr = userinput[1];
-            this.recordPointer--;
+            this.moveRecordPointer('redo');
             switch (appWord) {
                 case 'add':
                     this.addForUndoRedo(todosObj, this._data);
