@@ -143,4 +143,30 @@ module.exports = class Todos {
             }
         } else { return 'undo할 항목이 없습니다.' }
     }
+
+    redo() {
+        if (this.limitRecordPoint('redo')) {
+            // this.moveRecordPointer('redo');
+            const pointer = this.recordPointer - 1;
+            const userinput = this.userInputRecord[pointer];
+            const todosObj = this.todosRecord[pointer];
+            const appWord = userinput[0];
+            const appParameterArr = userinput[1];
+            this.recordPointer--;
+            switch (appWord) {
+                case 'add':
+                    this.addForUndoRedo(todosObj, this._data);
+                    return `'${todosObj.id}번, ${todosObj.name}' 항목이 삭제에서 todo상태로 되었습니다.`;
+                case 'delete':
+                    this.delete(todosObj.id)
+                    return `'${todosObj.id}번, ${todosObj.name}' 항목이 todo에서 삭제되었습니다.`;
+                case 'update':
+                    const originalStatus = appParameterArr[2];
+                    this.update(...appParameterArr)
+                    return `'${todosObj.id}번, ${todosObj.name}' 항목이 ${originalStatus}에서 ${todosObj.status}상태로 되었습니다.`;
+            }
+        } else {
+            return 'redo할 항목이 없습니다.'
+        }
+    }
 }
