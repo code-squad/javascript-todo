@@ -9,49 +9,6 @@ module.exports = class Todos {
         this.statusArr = ['todo', 'doing', 'done'];
     }
 
-    moveRecordPointer(appWord){
-        switch (appWord){
-            case 'undo' :
-                this.recordPointer++
-                break;
-            case 'redo' :
-                this.recordPointer--;
-                break;
-        }
-    }
-
-    limitRecordPoint(appWord) {
-        if (appWord === 'undo') {
-            return this.recordPointer < this.todosRecord.length;
-        } else {
-            return this.recordPointer <= this.todosRecord.length && this.recordPointer > 0
-        }
-    }
-
-    recordAfterRecord(todosObj, userInputArr) {
-        this.userInputRecord.unshift(userInputArr);
-        this.todosRecord.unshift(todosObj);
-        this.userInputRecord.splice(3, 1);
-        this.todosRecord.splice(3, 1);
-    }
-
-    recordAfterUndo(todosObj, userInputArr) {
-        this.userInputRecord.splice(0, this.recordPointer);
-        this.todosRecord.splice(0, this.recordPointer);
-        this.userInputRecord.unshift(userInputArr);
-        this.todosRecord.unshift(todosObj);
-        this.recordPointer = 0;
-    }
-
-    makeRecordForUndo(todosObj, appWord, ...parameter) {
-        const userInputArr = [appWord, parameter];
-        if (this.recordPointer === 0) {
-            this.recordAfterRecord(todosObj, userInputArr);
-        } else {
-            this.recordAfterUndo(todosObj, userInputArr);
-        }
-    }
-
     randomNum(digits) {
         const min = Math.pow(10, digits - 1);
         const max = Math.pow(10, digits) - 1;
@@ -112,7 +69,7 @@ module.exports = class Todos {
             status: "todo",
             id: generatedId
         };
-        if (this.recordSwitch) { this.makeRecordForUndo(newObj, 'add', name, tags); }
+        if (this.recordSwitch) { this.storeHistoryRecord(newObj, 'add', name, tags); }
         this._data.push(newObj);
         return `'${name}' 1개가 추가됐습니다.(id : ${generatedId})`;
     }
@@ -120,7 +77,7 @@ module.exports = class Todos {
     delete(id) {
         const indexOfTarget = this.searchById(id);
         const objOfTarget = this._data[indexOfTarget];
-        if (this.recordSwitch) { this.makeRecordForUndo(objOfTarget, 'delete', id); }
+        if (this.recordSwitch) { this.storeHistoryRecord(objOfTarget, 'delete', id); }
         this._data.splice(indexOfTarget, 1);
         return `'${objOfTarget.name}' '${objOfTarget.status}'가 목록에서 삭제됐습니다.`;
     }
@@ -131,18 +88,62 @@ module.exports = class Todos {
         if (objOfTarget.status === status) {
             return '바꾸려는 상태가 현재상태와 같습니다.';
         } else {
-            if (this.recordSwitch) { this.makeRecordForUndo(objOfTarget, 'update', id, status, objOfTarget.status); }
+            if (this.recordSwitch) { this.storeHistoryRecord(objOfTarget, 'update', id, status, objOfTarget.status); }
             objOfTarget.status = status;
             return `'${objOfTarget.name}'이(가) '${status}'으로 상태가 변경됐습니다`;
         }
     }
 
-    addForUndoRedo(todosObj, data) {
+    moveRecordPointer(appWord) {
+        switch (appWord) {
+            case 'undo':
+                this.recordPointer++
+                break;
+            case 'redo':
+                this.recordPointer--;
+                break;
+        }
+    }
+
+    limitRecordPointer(appWord) {
+        if (appWord === 'undo') {
+            return this.recordPointer < this.todosRecord.length;
+        } else {
+            return this.recordPointer <= this.todosRecord.length && this.recordPointer > 0
+        }
+    }
+
+    recordSequential(todosObj, userInputArr) {
+        this.userInputRecord.unshift(userInputArr);
+        this.todosRecord.unshift(todosObj);
+        this.userInputRecord.splice(3, 1);
+        this.todosRecord.splice(3, 1);
+    }
+
+    recordUnsequential(todosObj, userInputArr) {
+        this.userInputRecord.splice(0, this.recordPointer);
+        this.todosRecord.splice(0, this.recordPointer);
+        this.userInputRecord.unshift(userInputArr);
+        this.todosRecord.unshift(todosObj);
+        this.recordPointer = 0;
+    }
+
+    storeHistoryRecord(todosObj, appWord, ...parameter) {
+        const userInputArr = [appWord, parameter];
+        if (this.recordPointer === 0) {
+            this.recordSequential(todosObj, userInputArr);
+        } else {
+            this.recordUnsequential(todosObj, userInputArr);
+        }
+    }
+    
+
+    addDeletedObj(todosObj, data) {
         data.push(todosObj);
     }
 
     undo() {
-        if (this.limitRecordPoint('undo')) {
+        if (this.limitRecordPointer('undo')) {
             const pointer = this.recordPointer;
             const userinput = this.userInputRecord[pointer];
             const todosObj = this.todosRecord[pointer];
@@ -155,7 +156,7 @@ module.exports = class Todos {
                     this.delete(todosObj.id);
                     return `'${todosObj.id}번, ${todosObj.name}' 항목이 todo에서 삭제되었습니다.`;
                 case 'delete':
-                    this.addForUndoRedo(todosObj, this._data);
+                    this.addDeletedObj(todosObj, this._data);
                     return `'${todosObj.id}번, ${todosObj.name}' 항목이 삭제에서 todo상태로 되었습니다.`;
                 case 'update':
                     const originalStatus = appParameterArr[2];
@@ -166,7 +167,7 @@ module.exports = class Todos {
     }
 
     redo() {
-        if (this.limitRecordPoint('redo')) {
+        if (this.limitRecordPointer('redo')) {
             const pointer = this.recordPointer - 1;
             const userinput = this.userInputRecord[pointer];
             const todosObj = this.todosRecord[pointer];
@@ -175,7 +176,7 @@ module.exports = class Todos {
             this.moveRecordPointer('redo');
             switch (appWord) {
                 case 'add':
-                    this.addForUndoRedo(todosObj, this._data);
+                    this.addDeletedObj(todosObj, this._data);
                     return `'${todosObj.id}번, ${todosObj.name}' 항목이 삭제에서 todo상태로 되었습니다.`;
                 case 'delete':
                     this.delete(todosObj.id)
