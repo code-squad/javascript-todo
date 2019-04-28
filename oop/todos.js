@@ -9,6 +9,15 @@ module.exports = class Todos {
         this.statusArr = ['todo', 'doing', 'done'];
     }
 
+    moveRecordPointer(appWord){
+        switch (appWord){
+            case 'undo' :
+                this.recordPointer++
+            case 'redo' :
+                this.recordPointer--;
+        }
+    }
+
     limitRecordPoint(appWord) {
         if (appWord === 'undo') {
             return this.recordPointer < this.todosRecord.length;
@@ -17,17 +26,27 @@ module.exports = class Todos {
         }
     }
 
-    makeRecordForUndo(todosObj, appWord, ...parameter) {
-        const userInputArr = [appWord, parameter];
+    recordAfterRecord(todosObj, userInputArr) {
         this.userInputRecord.unshift(userInputArr);
         this.todosRecord.unshift(todosObj);
+        this.userInputRecord.splice(3, 1);
+        this.todosRecord.splice(3, 1);
+    }
+
+    recordAfterUndo(todosObj, userInputArr) {
+        this.userInputRecord.splice(0, this.recordPointer);
+        this.todosRecord.splice(0, this.recordPointer);
+        this.userInputRecord.unshift(userInputArr);
+        this.todosRecord.unshift(todosObj);
+        this.recordPointer = 0;
+    }
+
+    makeRecordForUndo(todosObj, appWord, ...parameter) {
+        const userInputArr = [appWord, parameter];
         if (this.recordPointer === 0) {
-            this.userInputRecord.splice(3, 1);
-            this.todosRecord.splice(3, 1);
+            this.recordAfterRecord(todosObj, userInputArr);
         } else {
-            this.userInputRecord.splice(0, this.recordPointer);
-            this.todosRecord.splice(0, this.recordPointer);
-            this.recordPointer = 0;
+            this.recordAfterUndo(todosObj, userInputArr);
         }
     }
 
@@ -91,6 +110,7 @@ module.exports = class Todos {
             status: "todo",
             id: generatedId
         };
+        if (this.recordSwitch) { this.makeRecordForUndo(newObj, 'add', name, tags); }
         this._data.push(newObj);
         return `'${name}' 1개가 추가됐습니다.(id : ${generatedId})`;
     }
@@ -98,7 +118,7 @@ module.exports = class Todos {
     delete(id) {
         const indexOfTarget = this.searchById(id);
         const objOfTarget = this._data[indexOfTarget];
-        if (this.recordSwitch) { this.makeRecordforUndo(objOfTarget, 'delete', id); }
+        if (this.recordSwitch) { this.makeRecordForUndo(objOfTarget, 'delete', id); }
         this._data.splice(indexOfTarget, 1);
         return `'${objOfTarget.name}' '${objOfTarget.status}'가 목록에서 삭제됐습니다.`;
     }
@@ -109,7 +129,7 @@ module.exports = class Todos {
         if (objOfTarget.status === status) {
             return '바꾸려는 상태가 현재상태와 같습니다.';
         } else {
-            if (this.recordSwitch) { this.makeRecordforUndo(objOfTarget, 'update', id, status, objOfTarget.status); }
+            if (this.recordSwitch) { this.makeRecordForUndo(objOfTarget, 'update', id, status, objOfTarget.status); }
             objOfTarget.status = status;
             return `'${objOfTarget.name}'이(가) '${status}'으로 상태가 변경됐습니다`;
         }
