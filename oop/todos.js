@@ -1,8 +1,27 @@
 //todos.js
 module.exports = class Todos {
-    constructor(data) {
+    constructor(data, userInputRecord, todosReocrd) {
         this._data = data;
+        this.userInputRecord = userInputRecord;
+        this.todosRecord = todosReocrd;
+        this.undoNum = 0;
+        this.recordPointer = 0;
         this.statusArr = ['todo', 'doing', 'done'];
+    }
+
+    makeRecordforUndo(todosObj, appWord, ...parameter) {
+        console.log(this.userInputRecord);
+        console.log(this.todosRecord)
+        const userInputArr = [appWord, parameter];
+        this.userInputRecord.unshift(userInputArr);
+        this.todosRecord.unshift(todosObj);
+        if(this.undoNum === 0) {
+            this.userInputRecord.splice(3,1);
+            this.todosRecord.splice(3,1);
+        } else {
+            this.userInputRecord.splice(0,this.undoNum);
+            this.todosRecord.splice(0,this.undoNum);
+        }
     }
 
     randomNum(digits) {
@@ -65,13 +84,15 @@ module.exports = class Todos {
             status: "todo",
             id: generatedId
         };
+        this.makeRecordforUndo(newObj, 'add', name, tags);
         this._data.push(newObj);
         return `'${name}' 1개가 추가됐습니다.(id : ${generatedId})`;
     }
 
     delete(id) {
         const indexOfTarget = this.searchById(id);
-        let objOfTarget = this._data[indexOfTarget];
+        const objOfTarget = this._data[indexOfTarget];
+        this.makeRecordforUndo(objOfTarget, 'delete', id);
         this._data.splice(indexOfTarget, 1);
         return `'${objOfTarget.name}' '${objOfTarget.status}'가 목록에서 삭제됐습니다.`;
     }
@@ -83,7 +104,27 @@ module.exports = class Todos {
             return '바꾸려는 상태가 현재상태와 같습니다.';
         } else {
             objOfTarget.status = status;
+            this.makeRecordforUndo(objOfTarget, 'update', id, status);
             return `'${objOfTarget.name}'이(가) '${status}'으로 상태가 변경됐습니다`;
         }
     }
-};
+    
+    undo(historyRecord) {
+        const splitedOrder = userInput.split("$");
+        const appWord = splitedOrder.splice(0, 1);
+        let statusToUndo = null;
+        const appWord = historyRecord.appWord;
+        const objToUndo = historyRecord.objToUndo;
+        switch (appWord) {
+            case 'add':
+                statusToUndo = 'todo';
+                this.add();
+            case 'delete':
+                statusToUndo = '삭제';
+                this.delete(this._dataObj.id);
+            case 'update':
+                statusToUndo = this._dataObj.status;
+                this.update(this._dataObj)
+        }
+    };
+}

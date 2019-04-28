@@ -9,7 +9,9 @@ const rl = readline.createInterface(process.stdin, process.stdout);
 const originData = require('./todoList.json');
 const convertedData = JSON.parse(JSON.stringify(originData)).data;
 
-const todos = new Todos(convertedData);
+const userInputRecord = new Array();
+const todosRecord = new Array();
+const todos = new Todos(convertedData, userInputRecord, todosRecord);
 const validator = new Validator(convertedData);
 const inputParser = new InputParser();
 
@@ -44,10 +46,12 @@ rl.on('line', (userInput) => {
             const errorMessage = validator.excuteValidation(userInput);
             if (errorMessage) {
                 console.log(errorMessage);
-                rl.prompt();
-            } else {
-                const resultMessage = inputParser.executeTodos(todos, userInput);
-                const appWord = inputParser.appWord;
+                return rl.prompt();
+            } 
+
+            const resultMessage = inputParser.executeTodos(todos, userInput);
+            const appWord = inputParser.appWord; 
+            if(appWord !== 'undo'){
                 promptResult(resultMessage, appWord)
                 .then((resultOfTodos) => {
                     console.log(resultOfTodos);
@@ -59,6 +63,8 @@ rl.on('line', (userInput) => {
                         });
                     } else rl.prompt();
                 });
+            }else {
+
             }
     }
 }).on('close', () => {
