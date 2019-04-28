@@ -106,10 +106,11 @@ module.exports = class Todos {
     }
 
     limitRecordPointer(appWord) {
-        if (appWord === 'undo') {
-            return this.recordPointer < this.todosRecord.length;
-        } else {
-            return this.recordPointer <= this.todosRecord.length && this.recordPointer > 0
+        switch (appWord) {
+            case 'undo':
+                return this.recordPointer < this.todosRecord.length;
+            case 'redo':
+                return this.recordPointer <= this.todosRecord.length && this.recordPointer > 0
         }
     }
 
