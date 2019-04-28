@@ -10,7 +10,6 @@ module.exports = class Todos {
     }
 
     limitRecordPoint(appWord) {
-        // console.log('point', this.recordPointer, 'length', this.todosRecord.length)
         if (appWord === 'undo') {
             return this.recordPointer < this.todosRecord.length;
         } else {
@@ -118,5 +117,30 @@ module.exports = class Todos {
 
     addForUndoRedo(todosObj, data) {
         data.push(todosObj);
+    }
+
+    undo() {
+        if (this.limitRecordPoint('undo')) {
+            const pointer = this.recordPointer;
+            const userinput = this.userInputRecord[pointer];
+            const todosObj = this.todosRecord[pointer];
+            const appWord = userinput[0];
+            const appParameterArr = userinput[1];
+            this.recordSwitch = 0;
+            this.recordPointer++;
+            // this.moveRecordPointer('undo');
+            switch (appWord) {
+                case 'add':
+                    this.delete(todosObj.id);
+                    return `'${todosObj.id}번, ${todosObj.name}' 항목이 todo에서 삭제되었습니다.`;
+                case 'delete':
+                    this.addForUndoRedo(todosObj, this._data);
+                    return `'${todosObj.id}번, ${todosObj.name}' 항목이 삭제에서 todo상태로 되었습니다.`;
+                case 'update':
+                    const originalStatus = appParameterArr[2];
+                    this.update(...appParameterArr);
+                    return `'${todosObj.id}번, ${todosObj.name}' 항목이 ${todosObj.status}에서 ${originalStatus}상태로 되었습니다.`;
+            }
+        } else { return 'undo할 항목이 없습니다.' }
     }
 }
