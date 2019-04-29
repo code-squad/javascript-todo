@@ -1,10 +1,10 @@
-const TodoUtil = function () { }
-TodoUtil.prototype = {
+class TodoUtil {
     parseCommand(command) {
         if (command === 'undo' || command === 'redo') return [command];
         if (!/\$/.test(command)) throw Error('DollarCharError');
         return command.split('$');
-    },
+    }
+
     getKeyCommand(command) {
         const keyMap = {
             'show': 'showData',
@@ -15,8 +15,9 @@ TodoUtil.prototype = {
             'redo': 'redo'
         }
         const keyCommand = command.shift();
-        return keyMap[keyCommand]
-    },
+        return keyMap[keyCommand];
+    }
+
     checkArgsNumber(keyCommand, restCommand) {
         const argsNumber = {
             showData: 1,
@@ -26,7 +27,8 @@ TodoUtil.prototype = {
             undo: 0,
             redo: 0
         }
-        if (argsNumber[keyCommand] !== restCommand.length) throw Error('ArgsNumberError')
+        if (argsNumber[keyCommand] !== restCommand.length) throw Error('ArgsNumberError');
     }
 }
+
 module.exports = TodoUtil;

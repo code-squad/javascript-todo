@@ -28,10 +28,10 @@ const app = {
     controller: controller,
     errorHandler: errorHandler,
     start() {
-        rl.setPrompt('명령하세요(종료하려면 "q"를 입력하세요) : ')
-        rl.prompt()
+        rl.setPrompt('명령하세요(종료하려면 "q"를 입력하세요) : ');
+        rl.prompt();
         rl.on('line', async (command) => {
-            if (command === 'q') rl.close()
+            if (command === 'q') rl.close();
             try {
                 command = this.util.parseCommand(command)
                 const keyCommand = this.util.getKeyCommand(command);
@@ -40,16 +40,16 @@ const app = {
                 await this.controller[keyCommand](...restCommand);
             }
             catch (e) {
-                this.errorHandler.printErrorMessage(e.message)
+                this.errorHandler.printErrorMessage(e.message);
             }
             finally {
-                rl.prompt()
+                rl.prompt();
             }
         })
         rl.on('close', () => {
-            process.exit()
+            process.exit();
         })
     }
 }
 
-app.start()
+app.start();
