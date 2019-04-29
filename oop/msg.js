@@ -23,6 +23,10 @@ const msgObject = {
     return `입력하신 ${notArray}를 배열의 형태로 입력해주세요.`;
   },
 
+  getUndoMessage(methodName) {
+    return `이전 명령(${methodName})이 취소 되었습니다.`;
+  },
+
   getInvalidIdError: `입력 하신 id가 존재하지 않습니다. 다시 입력해주세요.`,
 
   getInvalisdInstError: `입력 하신 명령어가 존재하지 않습니다. 다시 입력해주세요.`,

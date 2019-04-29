@@ -5,8 +5,8 @@ class History {
     this.tempHistory = [];
   }
 
-  append({ methodName, todo, changeStatus = '' }) {
-    this.history.push({ methodName, todo, changeStatus });
+  append({ methodName, todo, prevStatus = '' }) {
+    this.history.push({ methodName, todo, prevStatus });
 
     if (this.history.length > this.maxLength) {
       this.history.shift();

@@ -10,14 +10,6 @@ class ManagingTodo {
     this.history = history;
   }
 
-  initManagedlist(data) {
-    return data.map(todo => {
-      const newTodo = new Todo(todo);
-      this.countedStatus[newTodo.status] += 1;
-      return newTodo;
-    });
-  }
-
   add(name, tags = '[]', status = 'todo') {
     if (!this.todoError.invalidStatus(Object.keys(this.countedStatus), status)) {
       throw new Error(this.msgObj.getInvalidStatusError);
@@ -31,16 +23,103 @@ class ManagingTodo {
 
     const newTodo = new Todo({ name, tags, status });
 
-    this.history.append({ methodName: 'add', todo: newTodo });
+    this.controlTodoList({
+      methodName: 'add',
+      targetTodo: newTodo,
+      message: this.msgObj.add(newTodo.name, newTodo.id)
+    });
 
-    this.registerTodo(newTodo);
+    this.history.append({ methodName: 'add', todo: newTodo });
   }
 
-  registerTodo(todo) {
-    this.managedlist.push(todo);
-    this.countedStatus[todo.status] += 1;
+  delete(id) {
+    if (typeof id === 'string') {
+      id = parseInt(id);
+    }
 
-    this.printMsg(this.msgObj.add(todo.name, todo.id), 1000);
+    const [deletedTodo, deletedTodoId] = this.findTodoById(id);
+
+    if (!this.todoError.invalidId(deletedTodoId)) {
+      throw new Error(this.msgObj.getInvalidIdError);
+    }
+
+    this.controlTodoList({
+      methodName: 'delete',
+      targetTodo: deletedTodo,
+      message: this.msgObj.delete(deletedTodo.name, deletedTodo.status)
+    });
+
+    this.history.append({ methodName: 'delete', todo: deletedTodo });
+  }
+
+  update(id, changeStatus) {
+    if (typeof id === 'string') {
+      id = parseInt(id);
+    }
+
+    const [changeTodo, changeTodoId] = this.findTodoById(id);
+
+    if (!this.todoError.invalidStatus(Object.keys(this.countedStatus), changeStatus)) {
+      throw new Error(this.msgObj.getInvalidStatusError);
+    }
+    if (!this.todoError.invalidId(changeTodoId)) {
+      throw new Error(this.msgObj.getInvalidIdError);
+    }
+    if (!this.todoError.compareStatus(changeTodo.status, changeStatus)) {
+      throw new Error(this.msgObj.getSameStatusError(changeTodo.status, changeStatus));
+    }
+
+    const currentStatus = changeTodo.status;
+
+    this.controlTodoList({
+      methodName: 'update',
+      targetTodo: changeTodo,
+      message: this.msgObj.update(changeTodo.name, changeStatus),
+      changeStatus
+    });
+
+    this.history.append({
+      methodName: 'update',
+      todo: changeTodo,
+      prevStatus: currentStatus
+    });
+  }
+
+  controlTodoList({ methodName, targetTodo, message, changeStatus }) {
+    switch (methodName) {
+      case 'add':
+        this.managedlist.push(targetTodo);
+        this.countedStatus[targetTodo.status] += 1;
+
+        this.printMsg(message, 1000);
+        break;
+
+      case 'delete':
+        this.managedlist = this.managedlist.filter(todo => todo.id !== targetTodo.id);
+        this.countedStatus[targetTodo.status] -= 1;
+
+        this.printMsg(message, 1000);
+        break;
+
+      case 'update':
+        console.log(targetTodo);
+        this.countedStatus[targetTodo.status] -= 1;
+        this.countedStatus[changeStatus] += 1;
+        targetTodo.status = changeStatus;
+
+        setTimeout(() => {
+          this.printMsg(message, 1000);
+        }, 3000);
+        break;
+    }
+  }
+
+  initManagedlist(data) {
+    return data.map(todo => {
+      const newTodo = new Todo(todo);
+      this.countedStatus[newTodo.status] += 1;
+      return newTodo;
+    });
   }
 
   countStatus() {
@@ -72,7 +151,6 @@ class ManagingTodo {
       outputStr = this.filterbyStatus(status);
     }
     console.log(outputStr);
-    console.log(this.history);
     this.inputPrompt.prompt();
   }
 
@@ -83,61 +161,41 @@ class ManagingTodo {
     return [targetTodo, targetTodoId];
   }
 
-  delete(id) {
-    if (typeof id === 'string') {
-      id = parseInt(id);
-    }
-
-    const [deletedTodo, deletedTodoId] = this.findTodoById(id);
-
-    if (!this.todoError.invalidId(deletedTodoId)) {
-      throw new Error(this.msgObj.getInvalidIdError);
-    }
-
-    this.history.append({ methodName: 'delete', todo: deletedTodo });
-
-    this.managedlist = this.managedlist.filter(todo => todo.id !== deletedTodo.id);
-    this.countedStatus[deletedTodo.status] -= 1;
-
-    const outputMsg = this.msgObj.delete(deletedTodo.name, deletedTodo.status);
-
-    this.printMsg(outputMsg, 1000);
-  }
-
-  update(id, changeStatus) {
-    if (typeof id === 'string') {
-      id = parseInt(id);
-    }
-
-    const [changeTodo, changeTodoId] = this.findTodoById(id);
-
-    if (!this.todoError.invalidStatus(Object.keys(this.countedStatus), changeStatus)) {
-      throw new Error(this.msgObj.getInvalidStatusError);
-    }
-    if (!this.todoError.invalidId(changeTodoId)) {
-      throw new Error(this.msgObj.getInvalidIdError);
-    }
-    if (!this.todoError.compareStatus(changeTodo.status, changeStatus)) {
-      throw new Error(this.msgObj.getSameStatusError(changeTodo.status, changeStatus));
-    }
-
-    this.history.append({ methodName: 'update', todo: changeTodo, changeStatus });
-
-    this.countedStatus[changeTodo.status] -= 1;
-    this.countedStatus[changeStatus] += 1;
-
-    changeTodo.status = changeStatus;
-
-    setTimeout(() => {
-      this.printMsg(this.msgObj.update(changeTodo.name, changeStatus), 1000);
-    }, 3000);
-  }
-
   printMsg(msg, time) {
     console.log(msg);
     setTimeout(() => {
       this.show('all');
     }, time);
   }
+
+  undo() {
+    const { methodName, todo, prevStatus } = this.history.undo();
+
+    switch (methodName) {
+      case 'add':
+        this.controlTodoList({
+          methodName: 'delete',
+          targetTodo: todo,
+          message: this.msgObj.getUndoMessage(methodName)
+        });
+        break;
+      case 'delete':
+        this.controlTodoList({
+          methodName: 'add',
+          targetTodo: todo,
+          message: this.msgObj.getUndoMessage(methodName)
+        });
+        break;
+      case 'update':
+        this.controlTodoList({
+          methodName,
+          targetTodo: todo,
+          message: this.msgObj.getUndoMessage(methodName),
+          changeStatus: prevStatus
+        });
+    }
+  }
+
+  redo() {}
 }
 module.exports = ManagingTodo;
