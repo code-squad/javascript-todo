@@ -1,21 +1,6 @@
 const Todo = require('./todo');
 const TodoContainer = require('./TodoContainer');
-
-Array.prototype.groupBy = function(prop) {
-  return this.reduce((groups, element) => {
-    var value = element[prop];
-    groups[value] = groups[value] || [];
-    groups[value].push(value);
-    return groups;
-  }, {});
-};
-
-Object.prototype.count = function(){
-  return Object.keys(this).reduce((groups, prop) => {
-    groups[prop] = (this[prop] instanceof Array ? this[prop].length : 1 );
-    return groups; 
-  }, {});
-};
+const { countByProp } = require('./util');
 
 var TodoApp = function(){
   this.init();
@@ -49,7 +34,7 @@ TodoApp.prototype = {
 
   show: function(status){
     if(status === "all"){
-      const countGroupByStatus = this._todoList.container.groupBy("status").count();
+      const countGroupByStatus = countByProp(this._todoList.container, "status");
 
       console.log(`현재 상태 : ${Object.entries(countGroupByStatus)
                                      .map(status => `${status[0]} : ${status[1]}`)
