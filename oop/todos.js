@@ -5,7 +5,6 @@ module.exports = class Todos {
         this.userInputRecord = userInputRecord;
         this.todosRecord = todosReocrd;
         this.recordPointer = 0;
-        this.recordSwitch = 1;
         this.statusArr = ['todo', 'doing', 'done'];
     }
 
@@ -69,7 +68,7 @@ module.exports = class Todos {
             status: "todo",
             id: generatedId
         };
-        if (this.recordSwitch) { this.storeHistoryRecord(newObj, 'add', name, tags); }
+        if (!this.recordPointer) { this.storeHistoryRecord(newObj, 'add', name, tags); }
         this._data.push(newObj);
         return `'${name}' 1개가 추가됐습니다.(id : ${generatedId})`;
     }
@@ -77,7 +76,7 @@ module.exports = class Todos {
     delete(id) {
         const indexOfTarget = this.searchById(id);
         const objOfTarget = this._data[indexOfTarget];
-        if (this.recordSwitch) { this.storeHistoryRecord(objOfTarget, 'delete', id); }
+        if (!this.recordPointer) { this.storeHistoryRecord(objOfTarget, 'delete', id); }
         this._data.splice(indexOfTarget, 1);
         return `'${objOfTarget.name}' '${objOfTarget.status}'가 목록에서 삭제됐습니다.`;
     }
@@ -88,7 +87,7 @@ module.exports = class Todos {
         if (objOfTarget.status === status) {
             return '바꾸려는 상태가 현재상태와 같습니다.';
         } else {
-            if (this.recordSwitch) { this.storeHistoryRecord(objOfTarget, 'update', id, status, objOfTarget.status); }
+            if (!this.recordPointer) { this.storeHistoryRecord(objOfTarget, 'update', id, status, objOfTarget.status); }
             objOfTarget.status = status;
             return `'${objOfTarget.name}'이(가) '${status}'으로 상태가 변경됐습니다`;
         }
@@ -138,16 +137,6 @@ module.exports = class Todos {
         }
     }
     
-    runRecord(order) {
-        switch (order) {
-            case 'start':
-                this.recordSwitch = 1;
-                break;
-            case 'stop':
-                this.recordSwitch = 0;
-                break;
-        }
-    }
 
     addDeletedObj(todosObj, data) {
         data.push(todosObj);
@@ -160,7 +149,7 @@ module.exports = class Todos {
             const todosObj = this.todosRecord[pointer];
             const appWord = userinput[0];
             const appParameterArr = userinput[1];
-            this.runRecord('stop');
+            // this.runRecord('stop');
             this.moveRecordPointer('undo');
             switch (appWord) {
                 case 'add':
