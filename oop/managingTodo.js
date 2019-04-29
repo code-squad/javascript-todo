@@ -57,35 +57,34 @@ class ManagingTodo {
       id = parseInt(id);
     }
 
-    const [changeTodo, changeTodoId] = this.findTodoById(id);
+    const [changeTargetTodo, changeTargetTodoId] = this.findTodoById(id);
 
     if (!this.todoError.invalidStatus(Object.keys(this.countedStatus), changeStatus)) {
       throw new Error(this.msgObj.getInvalidStatusError);
     }
-    if (!this.todoError.invalidId(changeTodoId)) {
+    if (!this.todoError.invalidId(changeTargetTodoId)) {
       throw new Error(this.msgObj.getInvalidIdError);
     }
-    if (!this.todoError.compareStatus(changeTodo.status, changeStatus)) {
-      throw new Error(this.msgObj.getSameStatusError(changeTodo.status, changeStatus));
+    if (!this.todoError.compareStatus(changeTargetTodo.status, changeStatus)) {
+      throw new Error(this.msgObj.getSameStatusError(changeTargetTodo.status, changeStatus));
     }
-
-    const currentStatus = changeTodo.status;
 
     this.controlTodoList({
       methodName: 'update',
-      targetTodo: changeTodo,
-      message: this.msgObj.update(changeTodo.name, changeStatus),
-      changeStatus
+      targetTodo: Object.assign({}, changeTargetTodo),
+      message: this.msgObj.update(changeTargetTodo.name, changeStatus),
+      changeStatus,
+      isUndo: false
     });
 
     this.history.append({
       methodName: 'update',
-      todo: changeTodo,
-      prevStatus: currentStatus
+      todo: changeTargetTodo,
+      changeStatus
     });
   }
 
-  controlTodoList({ methodName, targetTodo, message, changeStatus }) {
+  controlTodoList({ methodName, targetTodo, message, changeStatus, isUndo = false }) {
     switch (methodName) {
       case 'add':
         this.managedlist.push(targetTodo);
@@ -102,7 +101,12 @@ class ManagingTodo {
         break;
 
       case 'update':
-        console.log(targetTodo);
+        if (isUndo) {
+          const tempStatus = targetTodo.status;
+          targetTodo.status = changeStatus;
+          changeStatus = tempStatus;
+        }
+
         this.countedStatus[targetTodo.status] -= 1;
         this.countedStatus[changeStatus] += 1;
         targetTodo.status = changeStatus;
@@ -169,8 +173,7 @@ class ManagingTodo {
   }
 
   undo() {
-    const { methodName, todo, prevStatus } = this.history.undo();
-
+    const { methodName, todo, changeStatus } = this.history.undo();
     switch (methodName) {
       case 'add':
         this.controlTodoList({
@@ -191,11 +194,38 @@ class ManagingTodo {
           methodName,
           targetTodo: todo,
           message: this.msgObj.getUndoMessage(methodName),
-          changeStatus: prevStatus
+          changeStatus,
+          isUndo: true
         });
     }
   }
 
-  redo() {}
+  redo() {
+    const { methodName, todo, changeStatus } = this.history.redo();
+    switch (methodName) {
+      case 'add':
+        this.controlTodoList({
+          methodName,
+          targetTodo: todo,
+          message: this.msgObj.getRedoMessage(methodName)
+        });
+        break;
+      case 'delete':
+        this.controlTodoList({
+          methodName,
+          targetTodo: todo,
+          message: this.msgObj.getRedoMessage(methodName)
+        });
+        break;
+      case 'update':
+        this.controlTodoList({
+          methodName,
+          targetTodo: todo,
+          message: this.msgObj.getRedoMessage(methodName),
+          changeStatus,
+          isUndo: false
+        });
+    }
+  }
 }
 module.exports = ManagingTodo;

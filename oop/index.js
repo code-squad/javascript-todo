@@ -12,7 +12,7 @@ const inputPrompt = readline.createInterface({
 });
 
 const todoError = new TodoError();
-const history = new History(3);
+const history = new History({ maxLength: 3, msgObj });
 const managingTodo = new ManagingTodo({ data, inputPrompt, msgObj, todoError, history });
 
 console.log('0을 입력하면 프로그램이 종료됩니다.');
