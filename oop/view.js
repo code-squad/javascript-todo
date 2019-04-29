@@ -1,11 +1,11 @@
-const Printer = {
-    printShowAllMessage(countEachStatus) {
-        console.log(`현재상태 : todo:${countEachStatus.todo}개, doing:${countEachStatus.doing}개, done:${countEachStatus.done}개`);
-    },
-    
-    printShowStatusMessage(status, listInStatus) {
-        console.log(`${status}리스트 : ${listInStatus.length}건 : ${listInStatus}`);
-    },
+const View = {
+    printShowMessage(resultData) {
+        if(resultData[0] === 'all') {
+            console.log(`현재상태 : todo:${resultData[1].todo}개, doing:${resultData[1].doing}개, done:${resultData[1].done}개`);
+        } else {
+            console.log(`${resultData[0]}리스트 : ${resultData[1].length}건 : ${resultData[1]}`);
+        }
+     },
     
     printAddMessage(objToAdd) {
         console.log(`${objToAdd.name} 1개가 추가됐습니다. (id: ${objToAdd.id})`);
@@ -32,4 +32,4 @@ const Printer = {
     },
 }
 
-module.exports = Printer;
+module.exports = View;

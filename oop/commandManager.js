@@ -3,21 +3,26 @@ class CommandManager {
     }
     executeCommand(inputArray, commandObj) {
         const command = inputArray[0];
-        //this.managers[command].execute(inputArray[1]);
+        let resultData;
         switch(command) {
             case 'show' :
                 const statusShow = inputArray[1];
-                commandObj.execute(statusShow);
-                break;
+                resultData = commandObj.execute(statusShow);
+                return resultData;
             case 'add' :
                 const name = inputArray[1];
                 const tag = inputArray[2];
-                commandObj.execute(name, tag);
-                break;
+                resultData = commandObj.execute(name, tag);
+                return resultData;
             case 'delete':
                 const id = inputArray[1];
                 commandObj.execute(id);
                 break;
+            // case 'update':
+            //     const id = inputArray[1];
+            //     const status = inputArray[2];
+            //     commandObj.execute(id, status);
+            //     break;
         }
     }
 }
