@@ -1,7 +1,7 @@
 const readline = require("readline")
 const Todos = require("./Todos.js")
-const validator= require("./validator.js")
-const ERR_MSG = require("./ErrorConstant").ERR_MSG 
+const validator = require("./validator.js")
+const ERR_MSG = require("./ErrorConstant").ERR_MSG
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -10,8 +10,7 @@ const rl = readline.createInterface({
 const todos = new Todos()
 
 const getCommand = (command) => {
-
-    if (!validator.isContained(command, "$")) {
+    if (!(command === "undo" || command === "redo") && !validator.isContained(command, "$")) {
         throw Error("NO_SHELL")
     }
     const [inst, ...rest] = command.split("$")
@@ -27,29 +26,25 @@ rl.prompt()
 rl.on("line", async (command) => {
     if (command === "quit") {
         rl.close()
-    } 
-    else {
+    } else {
         try {
             [inst, params] = getCommand(command.trim())
             const paramErrorFlag = params.some((el) => {
                 return el === undefined && el === null && !el
             })
-            if((todos[inst].length !== params.length) || paramErrorFlag) {
+            if ((todos[inst].length !== params.length) || paramErrorFlag) {
                 throw Error("PARAMETER_ERROR")
             }
 
             await todos[inst](...params)
-        } catch(e) {
-            console.log(e)
-            console.log('\x1b[31m%s\x1b[0m',"Error : " + ERR_MSG[e.message])
+        } catch (e) {
+            console.log('\x1b[31m%s\x1b[0m', "Error : " + ERR_MSG[e.message])
         }
 
         rl.prompt()
-        
-        
+
+
     }
 }).on("close", () => {
     process.exit()
 })
-
-
