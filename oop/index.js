@@ -33,7 +33,7 @@ inputPrompt.on('line', userInput => {
     const methodName = userInputArr.splice(0, 1);
 
     if (!todoError.invalidInst(managingTodo, methodName)) {
-      throw new Error(msgObj.getInvalisdInstError());
+      throw new Error(msgObj.getInvalisdInstError);
     }
 
     managingTodo[methodName](...userInputArr);

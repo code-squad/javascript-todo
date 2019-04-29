@@ -20,7 +20,7 @@ class ManagingTodo {
 
   add(name, tags = '[]', status = 'todo') {
     if (!this.todoError.invalidStatus(Object.keys(this.countedStatus), status)) {
-      throw new Error(this.msgObj.getInvalidStatusError());
+      throw new Error(this.msgObj.getInvalidStatusError);
     }
 
     if (!this.todoError.isArray(tags)) {
@@ -57,7 +57,7 @@ class ManagingTodo {
     const searchStatusArr = ['all', ...Object.keys(this.countedStatus)];
 
     if (!this.todoError.invalidStatus(searchStatusArr, status)) {
-      throw new Error(this.msgObj.getInvalidStatusError());
+      throw new Error(this.msgObj.getInvalidStatusError);
     }
 
     if (status === 'all') {
@@ -88,7 +88,7 @@ class ManagingTodo {
     });
 
     if (!this.todoError.invalidId(deletedId)) {
-      throw new Error(this.msgObj.getInvalidIdError());
+      throw new Error(this.msgObj.getInvalidIdError);
     }
 
     this.printMsg(outputMsg, 1000);
@@ -103,10 +103,10 @@ class ManagingTodo {
     const changeTodoId = changeTodo === undefined ? undefined : changeTodo.id;
 
     if (!this.todoError.invalidStatus(Object.keys(this.countedStatus), changeStatus)) {
-      throw new Error(this.msgObj.getInvalidStatusError());
+      throw new Error(this.msgObj.getInvalidStatusError);
     }
     if (!this.todoError.invalidId(changeTodoId)) {
-      throw new Error(this.msgObj.getInvalidIdError());
+      throw new Error(this.msgObj.getInvalidIdError);
     }
     if (!this.todoError.compareStatus(changeTodo.status, changeStatus)) {
       throw new Error(this.msgObj.getSameStatusError(changeTodo.status, changeStatus));
