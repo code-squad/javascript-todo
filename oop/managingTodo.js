@@ -31,12 +31,16 @@ class ManagingTodo {
 
     const newTodo = new Todo({ name, tags, status });
 
-    this.managedlist.push(newTodo);
-    this.countedStatus[newTodo.status] += 1;
-
     this.history.append({ methodName: 'add', todo: newTodo });
 
-    this.printMsg(this.msgObj.add(newTodo.name, newTodo.id), 1000);
+    this.registerTodo(newTodo);
+  }
+
+  registerTodo(todo) {
+    this.managedlist.push(todo);
+    this.countedStatus[todo.status] += 1;
+
+    this.printMsg(this.msgObj.add(todo.name, todo.id), 1000);
   }
 
   countStatus() {
@@ -72,29 +76,30 @@ class ManagingTodo {
     this.inputPrompt.prompt();
   }
 
-  delete(id) {
-    let outputMsg = '';
-    let deletedTodo;
+  findTodoById(id) {
+    const targetTodo = this.managedlist.find(todo => todo.id === id);
+    const targetTodoId = targetTodo === undefined ? undefined : targetTodo.id;
 
+    return [targetTodo, targetTodoId];
+  }
+
+  delete(id) {
     if (typeof id === 'string') {
       id = parseInt(id);
     }
 
-    this.managedlist = this.managedlist.filter(todo => {
-      if (todo.id === id) {
-        this.countedStatus[todo.status] -= 1;
-        outputMsg = this.msgObj.delete(todo.name, todo.status);
-        deletedTodo = todo;
-        return false;
-      }
-      return true;
-    });
+    const [deletedTodo, deletedTodoId] = this.findTodoById(id);
 
-    if (!this.todoError.invalidId(deletedTodo.id)) {
+    if (!this.todoError.invalidId(deletedTodoId)) {
       throw new Error(this.msgObj.getInvalidIdError);
     }
 
     this.history.append({ methodName: 'delete', todo: deletedTodo });
+
+    this.managedlist = this.managedlist.filter(todo => todo.id !== deletedTodo.id);
+    this.countedStatus[deletedTodo.status] -= 1;
+
+    const outputMsg = this.msgObj.delete(deletedTodo.name, deletedTodo.status);
 
     this.printMsg(outputMsg, 1000);
   }
@@ -104,8 +109,7 @@ class ManagingTodo {
       id = parseInt(id);
     }
 
-    const changeTodo = this.managedlist.find(todo => todo.id === id);
-    const changeTodoId = changeTodo === undefined ? undefined : changeTodo.id;
+    const [changeTodo, changeTodoId] = this.findTodoById(id);
 
     if (!this.todoError.invalidStatus(Object.keys(this.countedStatus), changeStatus)) {
       throw new Error(this.msgObj.getInvalidStatusError);
@@ -117,11 +121,12 @@ class ManagingTodo {
       throw new Error(this.msgObj.getSameStatusError(changeTodo.status, changeStatus));
     }
 
+    this.history.append({ methodName: 'update', todo: changeTodo, changeStatus });
+
     this.countedStatus[changeTodo.status] -= 1;
     this.countedStatus[changeStatus] += 1;
-    changeTodo.status = changeStatus;
 
-    this.history.append({ methodName: 'update', todo: changeTodo, changeStatus });
+    changeTodo.status = changeStatus;
 
     setTimeout(() => {
       this.printMsg(this.msgObj.update(changeTodo.name, changeStatus), 1000);
