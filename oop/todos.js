@@ -138,11 +138,10 @@ module.exports = class Todos {
 
     undo() {
         if (this.isValidPointerLocation('undo')) {
-            const pointer = this.recordPointer;
-            const userinput = this.userInputRecord[pointer];
-            const todosObj = this.todosRecord[pointer];
-            const appWord = userinput[0];
-            const appParameterArr = userinput[1];
+            const userinputArr = this.userInputRecord[this.recordPointer];
+            const todosObj = this.todosRecord[this.recordPointer];
+            const appWord = userinputArr[0];
+            const appParameterArr = userinputArr[1];
             this.moveRecordPointer('undo');
             switch (appWord) {
                 case 'add':
@@ -161,11 +160,10 @@ module.exports = class Todos {
 
     redo() {
         if (this.isValidPointerLocation('redo')) {
-            const pointer = this.recordPointer - 1;
-            const userinput = this.userInputRecord[pointer];
-            const todosObj = this.todosRecord[pointer];
-            const appWord = userinput[0];
-            const appParameterArr = userinput[1];
+            const userinputArr = this.userInputRecord[this.recordPointer - 1];
+            const todosObj = this.todosRecord[this.recordPointer - 1];
+            const appWord = userinputArr[0];
+            const appParameterArr = userinputArr[1];
             this.moveRecordPointer('redo');
             switch (appWord) {
                 case 'add':
