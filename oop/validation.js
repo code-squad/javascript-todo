@@ -7,18 +7,23 @@ class Validation {
     check (input) {
         if(!this.usageErrorCheck(input)) return false;
         const inputArray = this.utility.splitInput(input);
-        const command = inputArray[0];
-        const id = inputArray[1];
-        if(!this.notExistIdErrorCheck(id)) return false;
-        if(command === 'update') {
-            const status = inputArray[2];
-            if(!this.sameStatusErrorCheck(id, status)) return false;;
+        const [command, id, status] = inputArray;
+
+        switch (command) {
+            case 'delete' :
+                if(!this.notExistIdErrorCheck(id)) return false;
+                break;
+            case 'update' :
+                if(!this.notExistIdErrorCheck(id)) return false;
+                if(!this.sameStatusErrorCheck(id, status)) return false;;
+                break;
         }
+    
         return true;
     }
 
     usageErrorCheck (input) {
-        if(!(input.match(/\$/))) {
+        if(!(input.match(/\$|redo|undo/))) {
             this.view.printUsageErrorMessage();
             return false;
         }

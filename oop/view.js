@@ -1,3 +1,5 @@
+const utility = require('./utility');
+
 const View = {
     printShowMessage(resultData) {
         if(resultData[0] === 'all') {
@@ -30,6 +32,20 @@ const View = {
     printSameStatusErrorMessage() {
         console.log('이미 그 상태입니다.');
     },
+
+    printUndoMessage(command, undoObj) {
+        switch(command) {
+            case 'add' :
+                console.log(`${undoObj.id}번항목 ${undoObj.name}이 다시 삭제되었습니다.`);
+                break;
+            case 'delete' :
+                console.log(`${undoObj.id}번항목 ${undoObj.name}이 삭제에서 ${undoObj.status} 상태로 변경되었습니다.`);
+                break;
+            case 'update' :
+                console.log(`${undoObj[0].id}번항목 ${undoObj[0].name}이 ${undoObj[0].status} 상태에서 ${undoObj[1]} 변경되었습니다.`);
+                break;
+        }
+    }
 }
 
 module.exports = View;

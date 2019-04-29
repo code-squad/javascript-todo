@@ -9,6 +9,7 @@ const ShowManager   = require('./showManager')
 const AddManager    = require('./addManager')
 const DeleteManager = require('./deleteManager');
 const UpdateManager = require('./updateManager');
+const todoList = require('./todo.json')
 
 //const Managers = require('./managers')
 const rl = readLine.createInterface({
@@ -16,43 +17,62 @@ const rl = readLine.createInterface({
 });
 
 // (() => {
-//     const model         = new Model(utility);
-//     const errorHandler  = new ErrorHandler(utility, view);
-//     const controller    = new Controller(model, utility, view, errorHandler);
+//     const model          = new Model(utility, todoList);
+//     const validation     = new Validation(utility, view);
+//     const addManager     = new AddManager(model, utility, todoList);
+//     const showManager    = new ShowManager(model);
+//     const deleteManager  = new DeleteManager(model);
+//     const updateManager  = new UpdateManager(model);
+//     const commandManager = new CommandManager(addManager, deleteManager, updateManager);
 
-//     rl.on('line', (input) => {
-//         if(!showManager) const showManager = new ShowManager();
-//         // if(!showManager) const showManager = ShowManager();
-//         // if(!showManager) const showManager = ShowManager();
-//         controller.instruct(input, showManager);
-//     });
-// })();
+    
+//     const controller     = new Controller(model, utility, view, validation, commandManager);
+    
+//      rl.on('line', (input) => {
+//     controller.instruct(input, showManager, addManager, deleteManager, updateManager);
+//      });
+//  })();
 
 
 function test (input) {
-    const model          = new Model(utility);
-    const validation   = new Validation(utility, view);
-    
-    const commandManager = new CommandManager(validation);
+    const model          = new Model(utility, todoList);
+    const validation     = new Validation(utility, view);
     const showManager    = new ShowManager(model);
-    const addManager     = new AddManager(model, utility);
-    const deleteManager  = new DeleteManager(model);
-    const updateManager  = new UpdateManager(model);
+    const addManager     = new AddManager(model, todoList, utility);
+    const deleteManager  = new DeleteManager(model, todoList, utility);
+    const updateManager  = new UpdateManager(model, todoList, utility);
+    const commandManager = new CommandManager(addManager, deleteManager, updateManager);
+
     
     const controller     = new Controller(model, utility, view, validation, commandManager);
     
-    controller.instruct(input, showManager, addManager, deleteManager, updateManager);
+    // controller.instruct(input, showManager, addManager, deleteManager, updateManager);
+    // controller.instruct('add$sleep1$["favorite"]', showManager, addManager, deleteManager, updateManager);
+    // controller.instruct('add$sleep2$["favorite"]', showManager, addManager, deleteManager, updateManager);
+    // controller.instruct('update$9790$doing', showManager, addManager, deleteManager, updateManager);
+    controller.instruct('delete$9790', showManager, addManager, deleteManager, updateManager);
+    controller.instruct('delete$123123123123', showManager, addManager, deleteManager, updateManager);
+    controller.instruct('delete$82579384', showManager, addManager, deleteManager, updateManager);
+    // controller.instruct('add$sleep$["favorite"]', showManager, addManager, deleteManager, updateManager);
+    // controller.instruct('add$sleep2$["favorite"]', showManager, addManager, deleteManager, updateManager);
+    // controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
+    //controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
+    //controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
+    controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
+    controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
+    controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
 }
-// 
-// test('show$all');
-// test('show$done');
-// test('show$todo');
-// test('show$doing');
-//test('add$sleep$["favorite"]')
-// test('delete$1556520122671');
-//test('update$3882$done');
+test();
+// // 
+// //test('show$all');
+// // test('show$done');
+// // test('show$todo');
+// // test('show$doing');
+// // test('delete$1556520122671');
+// //test('update$3882$done');
 
-test('asdjlfkadjsflkads');
-test('delete$3882123123123');
-test('update$3882123123123$done');
-test('update$3882$done');
+// // test('asdjlfkadjsflkads');
+// // test('delete$3882123123123');
+// // test('update$3882123123123$done');
+// // test('update$3882$done');
+//test();

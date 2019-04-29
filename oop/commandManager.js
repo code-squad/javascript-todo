@@ -1,50 +1,61 @@
 class CommandManager {
-    constructor(validation) {
-        this.validation = validation;
+    constructor(addManager, deleteManager, updateManager) {
+        this.addManager = addManager;
+        this.deleteManager = deleteManager;
+        this.updateManager = updateManager;
+        this.commandStack = [];
+        this.commandPointer = 0;
     }
     executeCommand(inputArray, commandObj) {
         const command = inputArray[0];
         let status, name, tag, id;
         let resultData;
+
         switch(command) {
             case 'show' :
                 status = inputArray[1];
                 resultData = commandObj.execute(status);
                 break;
             case 'add' :
+                this.commandStack.push('add');
+                this.commandPointer++;
                 name = inputArray[1];
                 tag = inputArray[2];
                 resultData = commandObj.execute(name, tag);
                 break;
             case 'delete':
+                this.commandStack.push('delete');
+                this.commandPointer++;
                 id = inputArray[1];
-                //if (!this.validation.notExistIdErrorCheck(id)) return;
                 resultData = commandObj.execute(id);
                 break;
             case 'update':
+                this.commandStack.push('update');
+                this.commandPointer++;
                 id = inputArray[1];
                 status = inputArray[2];
-                //if (!this.validation.notExistIdErrorCheck(id)) return;
-                //if (!this.validation.sameStatusErrorCheck(id, status)) return;
                 resultData = commandObj.execute(id, status);
                 break;
         }
         return resultData;
     }
+
+    undo() {
+        this.commandPointer--;
+        const command = this.commandStack[this.commandPointer];
+        let undoObj;
+        switch(command) {
+            case 'add' :
+                undoObj = this.addManager.undo();
+                return [command, undoObj];
+            case 'delete' :
+                undoObj = this.deleteManager.undo();
+                return [command, undoObj];
+            case 'update' :
+                undoObj = this.updateManager.undo();
+                return [command, undoObj];
+        }
+    }
 }
 
 module.exports = CommandManager;
-    
-    //     case 'delete' :
-    //         const idDelete = inputArray[1];
-    //         if(!(this.errorHandler.notExistIdErrorCheck(idDelete))) return;
-    //         this.delete(idDelete);
-    //         break;
-    //     case 'update' :
-    //         const idUpdate = inputArray[1];
-    //         const statusUpdate = inputArray[2];
-    //         if(!(this.errorHandler.notExistIdErrorCheck(idUpdate))) return;
-    //         if(!(this.errorHandler.sameStatusErrorCheck(idUpdate, statusUpdate))) return;
-    //         this.update(idUpdate, statusUpdate);
-    //         break;
-    // }

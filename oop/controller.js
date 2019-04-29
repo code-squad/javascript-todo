@@ -8,7 +8,7 @@ class Controller {
     }
 
     instruct (input, showManager, addManager, deleteManager, updateManager) {
-        if(!(this.validation.check(input))) return;
+        if(!(this.validation.check(input))) return;      
         const inputArray = this.utility.splitInput(input);
         const command = inputArray[0];
         let resultData;
@@ -30,6 +30,10 @@ class Controller {
             case 'update':
                 resultData = this.commandManager.executeCommand(inputArray, updateManager);
                 this.throwSetTimeForUpdate(showManager, resultData);
+                break;
+            case 'undo' :
+                resultData = this.commandManager.undo();
+                this.view.printUndoMessage(resultData[0], resultData[1]);
                 break;
         }
     }
