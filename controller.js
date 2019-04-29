@@ -27,27 +27,33 @@ Controller.prototype = {
         if (!/^(todo|doing|done)$/.test(type)) throw Error('ShowTypeError')
         this.showEachData(type)
     },
-    addData(name, tags) {
+    async addData(name, tags) {
         const id = this.model.makeId()
         const changedData = this.model.addData(name, tags, id);
         this.view.showResult('addData', changedData);
-        this.showFinalResult()
+        await this.makeDelay(this.SHOW_DELAY)
+        this.showAll()
     },
-    deleteData(id) {
+    async deleteData(id) {
         const changedData = this.model.deleteData(id)
         this.view.showResult('deleteData', changedData);
-        this.showFinalResult()
+        await this.makeDelay(this.SHOW_DELAY)
+        this.showAll()
     },
-    updateData(id, status) {
+    async updateData(id, status) {
         if (!/^(todo|doing|done)$/.test(status)) throw Error('UpdateStatusError')
         const changedData = this.model.updateData(id, status);
-        setTimeout(() => {
-            this.view.showResult('updateData', changedData)
-            this.showFinalResult()
-        }, this.UPDATE_DELAY);
+        await this.makeDelay(this.UPDATE_DELAY)
+        this.view.showResult('updateData', changedData)
+        await this.makeDelay(this.SHOW_DELAY)
+        this.showAll()
     },
-    showFinalResult() {
-        setTimeout(() => { this.showAll() }, this.SHOW_DELAY);
+    makeDelay(msec) {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve()
+            }, msec);
+        })
     },
     undo() {
         const historyObj = this.model.undo();

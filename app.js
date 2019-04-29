@@ -30,18 +30,20 @@ const app = {
     start() {
         rl.setPrompt('명령하세요(종료하려면 "q"를 입력하세요) : ')
         rl.prompt()
-        rl.on('line', (command) => {
+        rl.on('line', async (command) => {
             if (command === 'q') rl.close()
             try {
                 command = this.util.parseCommand(command)
                 const keyCommand = this.util.getKeyCommand(command);
                 const restCommand = command;
                 this.util.checkArgsNumber(keyCommand, restCommand);
-                this.controller[keyCommand](...restCommand);
+                await this.controller[keyCommand](...restCommand);
             }
             catch (e) {
-                console.log(e)
                 this.errorHandler.printErrorMessage(e.message)
+            }
+            finally {
+                rl.prompt()
             }
         })
         rl.on('close', () => {
