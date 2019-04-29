@@ -135,7 +135,31 @@ const Instruction = class {
 		
 		this.pushObj(this.commandHistory.historyArr, historyObj);
 		this.commandHistory.pointer++;
-	}
+    }
+    
+    undo() {
+		const targetObject = this.commandHistory.historyArr[this.commandHistory.pointer];
+		const [command, preObj, checkSum] = [targetObject.cmd, targetObject.pre, true];
+		
+		let message = ``;
+		
+		if (command === 'add') {
+			this.delete(preObj.id, checkSum);
+			message += `${preObj.id}번 항목 '${preObj.name}'가 ${preObj.status} 상태에서 삭제됐습니다`;
+			
+		} else if (command === 'delete') {
+			convertedData.push(preObj);
+			message += `${preObj.id}번 항목 '${preObj.name}'가 삭제에서 ${preObj.status} 상태로 변경됐습니다`;
+			
+		} else if (command === 'update') {
+			this.update(preObj.id, preObj.status, checkSum);
+		}
+		
+		console.log(message);
+		
+		if (this.commandHistory.pointer > -1) this.commandHistory.pointer--;
+	}	
+
 };
 
 module.exports = Instruction;
