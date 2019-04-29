@@ -142,7 +142,7 @@ module.exports = class Todos {
     }
 
     undo() {
-        if (this.limitRecordPointer('undo')) {
+        if (this.isValidPointerLocation('undo')) {
             const pointer = this.recordPointer;
             const userinput = this.userInputRecord[pointer];
             const todosObj = this.todosRecord[pointer];
@@ -166,7 +166,7 @@ module.exports = class Todos {
     }
 
     redo() {
-        if (this.limitRecordPointer('redo')) {
+        if (this.isValidPointerLocation('redo')) {
             const pointer = this.recordPointer - 1;
             const userinput = this.userInputRecord[pointer];
             const todosObj = this.todosRecord[pointer];
