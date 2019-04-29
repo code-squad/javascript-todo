@@ -1,30 +1,34 @@
 class CommandManager {
-    constructor() {
+    constructor(validation) {
+        this.validation = validation;
     }
     executeCommand(inputArray, commandObj) {
         const command = inputArray[0];
+        let status, name, tag, id;
         let resultData;
         switch(command) {
             case 'show' :
-                const statusShow = inputArray[1];
-                resultData = commandObj.execute(statusShow);
+                status = inputArray[1];
+                resultData = commandObj.execute(status);
                 break;
             case 'add' :
-                const name = inputArray[1];
-                const tag = inputArray[2];
+                name = inputArray[1];
+                tag = inputArray[2];
                 resultData = commandObj.execute(name, tag);
                 break;
             case 'delete':
-                const id = inputArray[1];
+                id = inputArray[1];
+                //if (!this.validation.notExistIdErrorCheck(id)) return;
                 resultData = commandObj.execute(id);
                 break;
-            // case 'update':
-            //     const id = inputArray[1];
-            //     const status = inputArray[2];
-            //     commandObj.execute(id, status);
-            //     break;
+            case 'update':
+                id = inputArray[1];
+                status = inputArray[2];
+                //if (!this.validation.notExistIdErrorCheck(id)) return;
+                //if (!this.validation.sameStatusErrorCheck(id, status)) return;
+                resultData = commandObj.execute(id, status);
+                break;
         }
-        
         return resultData;
     }
 }

@@ -1,14 +1,14 @@
 const Controller    = require('./controller')
-const ErrorHandler  = require('./errorHandler')
+const Validation    = require('./validation')
 const Model         = require('./model')
 const utility       = require('./utility')
-const view       = require('./view')
+const view          = require('./view')
 const readLine      = require('readline')
 const CommandManager = require('./commandManager')
 const ShowManager   = require('./showManager')
 const AddManager    = require('./addManager')
 const DeleteManager = require('./deleteManager');
-//const UpdateManager = require('./updateManager');
+const UpdateManager = require('./updateManager');
 
 //const Managers = require('./managers')
 const rl = readLine.createInterface({
@@ -31,17 +31,17 @@ const rl = readLine.createInterface({
 
 function test (input) {
     const model          = new Model(utility);
-    const errorHandler   = new ErrorHandler(utility, view);
+    const validation   = new Validation(utility, view);
     
-    const commandManager = new CommandManager();
+    const commandManager = new CommandManager(validation);
     const showManager    = new ShowManager(model);
     const addManager     = new AddManager(model, utility);
     const deleteManager  = new DeleteManager(model);
-    //const updateManager  = new UpdateManager(model);
+    const updateManager  = new UpdateManager(model);
     
-    const controller     = new Controller(model, utility, view, errorHandler, commandManager);
+    const controller     = new Controller(model, utility, view, validation, commandManager);
     
-    controller.instruct(input, showManager, addManager, deleteManager);
+    controller.instruct(input, showManager, addManager, deleteManager, updateManager);
 }
 // 
 // test('show$all');
@@ -49,4 +49,10 @@ function test (input) {
 // test('show$todo');
 // test('show$doing');
 //test('add$sleep$["favorite"]')
-test('delete$1556520122671');
+// test('delete$1556520122671');
+//test('update$3882$done');
+
+test('asdjlfkadjsflkads');
+test('delete$3882123123123');
+test('update$3882123123123$done');
+test('update$3882$done');

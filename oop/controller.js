@@ -1,14 +1,14 @@
 class Controller {
-    constructor (model, utility, view, errorHandler, commandManager) {
+    constructor (model, utility, view, validation, commandManager) {
         this.model          = model;
         this.utility        = utility;
         this.view           = view;
-        this.errorHandler   = errorHandler;
+        this.validation     = validation;
         this.commandManager = commandManager;
     }
 
-    instruct (input, showManager, addManager, deleteManager) {
-        if(!(this.errorHandler.usageErrorCheck(input))) return;
+    instruct (input, showManager, addManager, deleteManager, updateManager) {
+        if(!(this.validation.check(input))) return;
         const inputArray = this.utility.splitInput(input);
         const command = inputArray[0];
         let resultData;
@@ -27,15 +27,11 @@ class Controller {
                 this.view.printDeleteMessage(resultData);
                 this.throwSetTimeForShowAll(showManager);
                 break;
-            // case 'update':
-            //     this.commandManager.executeCommand(inputArray, updateManager);
-            //     break;
+            case 'update':
+                resultData = this.commandManager.executeCommand(inputArray, updateManager);
+                this.throwSetTimeForUpdate(showManager, resultData);
+                break;
         }
-    }
-    
-    update (id, status) {
-        const objToUpdate = this.model.updateTodoObject(id, status);   
-        this.throwSetTimeForUpdate(objToUpdate);
     }
     
     throwSetTimeForShowAll (showManager, delayTime = 1000) {
@@ -43,11 +39,11 @@ class Controller {
                             this.view.printShowMessage(resultData);}, delayTime); 
     }
     
-    throwSetTimeForUpdate (objToUpdate, delayTime = 3000) { 
+    throwSetTimeForUpdate (showManager, objToUpdate, delayTime = 3000) { 
         setTimeout( 
             () => { 
                 this.view.printUpdateMessage(objToUpdate);
-                this.throwSetTimeForShowAll();
+                this.throwSetTimeForShowAll(showManager);
             }, delayTime);
     }
 }
