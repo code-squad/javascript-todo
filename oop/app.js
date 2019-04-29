@@ -1,40 +1,25 @@
+const readline = require('readline');
+const ValidCheck = module.require('./validCheck');
 const Todo = module.require('./todo.js');
 const todoList = module.require('./data.js');
-const readline = require('readline');
-const errorMessage = module.require('./errorMessage.js');
+const Log = module.require('./log.js');
 
 const rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout
 });
-const myTodo = new Todo(todoList, rl);
-
 rl.setPrompt('명령하세요 : ');
 
 rl.prompt();
 
+const myLog = new Log();
+const myTodo = new Todo(todoList, rl);
+
 rl.on('line', input => {
-	excuteTodo(input);
+	sendCommand(input);
 });
 
-const excuteTodo = input => {
-	try {
-		const inputArray = input.split('$');
-		if (inputArray.length > 3) {
-			throw new Error('COMMAND_ERROR');
-		}
-		const action = inputArray.splice(0, 1)[0];
-		const condition = inputArray;
-		const regExp = /^show$|^add$|^delete$|^update$|^undo$|^redo$/;
-		const matchRegExp = action.match(regExp);
-
-		if (matchRegExp === null) {
-			throw new Error('COMMAND_ERROR');
-		} else {
-			myTodo[action](...condition);
-		}
-	} catch (e) {
-		console.log(errorMessage[e.message]);
-		rl.prompt();
-	}
+const sendCommand = input => {
+	const myValidCheck = new ValidCheck(myTodo, myLog);
+	myValidCheck.parseCommand(input);
 };
