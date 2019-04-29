@@ -7,32 +7,23 @@ const sleep = msec => new Promise(resolve => setTimeout(resolve, msec))
 
 
 class TodoHandler  { 
-  constructor(todoChecker, resultMsg){
-    this.todoChecker = todoChecker
-    this.resultMsg = resultMsg
+  constructor(todoGetter, resultMsg){
+    this.todoGetter = todoGetter;
+    this.resultMsg = resultMsg;
     this.history = {
-      undo: {
-        commands: [],
-        todoStack: [],
-      },
-      redo: {
-        commands: [],
-        todoStack: [],
-      },
+      undo: [],
+      redo: [],
       checkStackFull: function (maxLength){
-        if(this.undo.todoStack.length === maxLength) return true
+        if(this.undo.length === maxLength) return true
         return false
       },
-      append: function (todo, command){
+      append: function (command, todo){
         if(this.checkStackFull(3)){
-          this.undo.todoStack.shift()
-          this.undo.todoStack.push(todo)
-          this.undo.commands.shift()
-          this.undo.commands.push(command)
+          this.undo.shift()
+          this.undo.push({command, todo})
           return
         }
-        this.undo.todoStack.push(todo)
-        this.undo.commands.push(command)
+        this.undo.push({command, todo})
       }
     }
   }
@@ -72,19 +63,19 @@ class TodoHandler  {
     todos.push(newTodo)
     console.log(this.resultMsg.addMsg(name, id))
     this.save()
-    this.history.append(newTodo, 'add')
+    this.history.append('add', newTodo)
     await sleep(1000)
     this.show('all')
     return
   }
   async update (id, statusToChange){
     try{
-      let todo = this.todoChecker.getTodoById(todos, id)
+      let todo = this.todoGetter.getTodoById(todos, id)
       let {name, tags, status} = todo
-      this.todoChecker.isValidStatus(statusToChange, status)
+      this.todoGetter.isValidStatus(statusToChange, status)
 
-      const index = this.todoChecker.getTodoIndex(todos, id)
-      this.history.append(todos[index], 'update')
+      const index = this.todoGetter.getTodoIndex(todos, id)
+      this.history.append('update', todos[index])
       todos.splice(index, 1, this.makeTodo(name, id, tags, statusToChange,))
       this.save()
       
@@ -100,9 +91,9 @@ class TodoHandler  {
   } 
   async delete (id) {
     try{
-      let index = this.todoChecker.getTodoIndex(todos, id)
+      let index = this.todoGetter.getTodoIndex(todos, id)
       console.log(this.resultMsg.deleteMsg(todos[index].name, todos[index].status))
-      this.history.append(todos[index], 'delete')
+      this.history.append('delete', todos[index])
       await(sleep(1000))
       todos.splice(index, 1)
       this.show('all')
@@ -124,50 +115,72 @@ class TodoHandler  {
 
   undo () {
     
-    const command = this.history.undo.commands.pop()
-    let todo = this.history.undo.todoStack.pop()
+    let {command, todo} = this.history.undo.pop()
+    
     if(todo === undefined) throw new Error(`이전에 수행한 명령이 없습니다.`) 
     
     if(command === "add"){
-      const index = this.todoChecker.getTodoIndex(todos, todo.id)
+      const index = this.todoGetter.getTodoIndex(todos, todo.id)
       todos.splice(index, 1);
-      console.log(`${todo.id}번 항목 '${todo.name}' ${command} 가 취소되었습니다.`)
+      console.log(this.resultMsg.resultOfUndoRedo({
+        id: todo.id,
+        name: todo.name,
+        command: command
+      }))
     }
     if(command === "update"){
-      const index = this.todoChecker.getTodoIndex(todos, todo.id)
+      const index = this.todoGetter.getTodoIndex(todos, todo.id)
       const modifiedTodo = todos[index]
       todos.splice(index, 1, todo);
-      console.log(`${todo.id}번 항목 '${todo.name}의 상태가 ${modifiedTodo.status}에서 ${todo.status}로 변경되었습니다.`)
+      console.log(this.resultMsg.resultOfUndoRedo({
+        id: todo.id, 
+        name: todo.name, 
+        currentStatus: modifiedTodo.status, 
+        postStatus: todo.status
+      }))
       todo = modifiedTodo
     }
     if(command === "delete"){
       todos.push(todo);
-      console.log(`${todo.id}번 항목 '${todo.name}'의 ${command} 가 취소되었습니다.`)
+      console.log(this.resultMsg.resultOfUndoRedo({
+        id: todo.id,
+        name: todo.name,
+        command: command
+      }))
     }
-    this.history.redo.todoStack.push(todo)
-    this.history.redo.commands.push(command)
-    
-    //console.log(command, todo)
+    this.history.redo.push({command, todo})
   }
   redo () {
-    const command = this.history.redo.commands.pop()
-    const todo = this.history.redo.todoStack.pop()
+    const {command, todo} = this.history.redo.pop()
     if (todo === undefined) throw new Error("이전에 undo 를 실행하지 않았습니다.")
     let index
     if(command === 'add'){
       todos.push(todo)
-      console.log(`${todo.id}번 항목 '${todo.name}'가 다시 ${command}되었습니다.`)
+      console.log(this.resultMsg.resultOfUndoRedo({
+        id: todo.id,
+        name: todo.name,
+        command: command
+      }))
     }
     if(command === 'update'){
-      index = this.todoChecker.getTodoIndex(todos, todo.id)
+      index = this.todoGetter.getTodoIndex(todos, todo.id)
       const originalTodo = todos[index]
       todos.splice(index, 1, todo)
-      console.log(`${todo.id}번 항목 '${todo.name}'의 상태가 ${originalTodo.status}에서 ${todo.status}로 변경되었습니다.`)
+      console.log(this.resultMsg.resultOfUndoRedo({
+        id: todo.id, 
+        name: todo.name, 
+        currentStatus: originalTodo.status, 
+        postStatus: todo.status
+      }))
     }
     if(command === 'delete'){
-      index = this.todoChecker.getTodoIndex(todos, todo.id)
+      index = this.todoGetter.getTodoIndex(todos, todo.id)
       todos.splice(index, 1)
-      console.log(`${todo.id}번 항목 '${todo.name}' ${command} 가 다시 ${command}되었습니다.`)
+      console.log(resultOfUndoRedo({
+        id: todo.id,
+        name: todo.name,
+        command: command
+      }))
     }
   }
 }

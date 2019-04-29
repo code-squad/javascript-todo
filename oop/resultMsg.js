@@ -29,9 +29,11 @@ class ResultMsg {
   noSeperator () {
     return `구분자가 없습니다.`
   }
-}
-ResultMsg.prototype = {
-
+  resultOfUndoRedo ({id, name, command, currentStatus, postStatus}){
+    return command ? 
+    `${id}번 항목 '${name}' ${command} 가 취소되었습니다.` :
+    `${id}번 항목 '${name}'의 상태가 ${currentStatus}에서 ${postStatus}로 변경되었습니다.`
+  }
 }
 
 module.exports = ResultMsg
