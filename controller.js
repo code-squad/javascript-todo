@@ -50,9 +50,8 @@ Controller.prototype = {
         setTimeout(() => { this.showAll() }, this.SHOW_DELAY);
     },
     undo () {
-        const previousData = this.model.undo();
-        console.log(previousData)
-        // this.view.showUndoRedoResult(previousData);
+        const historyObj = this.model.undo();
+        this.view.showUndoRedoResult(historyObj);
     }
 }
 module.exports = Controller;

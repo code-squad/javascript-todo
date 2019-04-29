@@ -17,6 +17,16 @@ View.prototype = {
             updateData: `${name}이(가) ${status}으로 상태가 변경되었습니다.`
         }
         console.log(this.fontColor, msgMap[keyCommand])
+    },
+    showUndoRedoResult(historyObj) {
+        const { keyCommand, previousData } = historyObj;
+        const { name, id, status } = previousData;
+        const msgMap = {
+            addData: `${id}번 항목${name}이(가) 삭제에서 ${status}상태로 변경되었습니다.`,
+            deleteData: `${id}번 항목${name}이(가) 삭제되었습니다.`,
+            updateData: `${id}번 항목${name}이(가) ${status}상태로 변경되었습니다.`
+        }
+        console.log(this.fontColor, msgMap[keyCommand])
     }
 }
 module.exports = View;
