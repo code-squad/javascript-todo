@@ -16,21 +16,22 @@ Model.prototype = {
             id
         }
         this.todoList.push(todoData);
-        this.saveHistory('deleteData', todoData)
+        this.saveHistory('deleteData', [id])
         return todoData;
     },
     deleteData(id) {
         const targetIndex = this.getIndex(id)
         const targetData = this.todoList[targetIndex];
+        let strTags = targetData.tags.join(',')
+        this.saveHistory('addData', [targetData.name, strTags, id, targetData.status])
         this.todoList.splice(targetIndex, 1)
-        this.saveHistory('addData', targetData)
         return targetData;
     },
     updateData(id, status) {
         const targetIndex = this.getIndex(id);
         const targetData = this.todoList[targetIndex];
         if (targetData.status === status) throw Error(id)
-        this.saveHistory('updateData', targetData)
+        this.saveHistory('updateData', [id, targetData.status])
         targetData.status = status
         return targetData;
     },
@@ -56,12 +57,7 @@ Model.prototype = {
     undo() {
         if(this.historyStack.length === 0) throw Error('EmptyStackError')
         const { keyCommand, recentData } = this.historyStack.pop();
-        let { id, name, status, tags } = recentData;
-        tags = tags.join(',')
-        let previousData = {};
-        if (keyCommand === 'addData') previousData = this.addData(name, tags, id, status)
-        if (keyCommand === 'deleteData') previousData = this.deleteData(id)
-        if (keyCommand === 'updateData') previousData = this.updateData(id, status)
+        const previousData = this[keyCommand](...recentData);
         this.historyStack.pop()
         return { keyCommand, previousData }
     }
