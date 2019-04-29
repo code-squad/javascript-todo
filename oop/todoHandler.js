@@ -134,10 +134,8 @@ class TodoHandler  {
   }
 
   undo () {
-    console.log('undo')
     const command = this.history.undo.commands.pop()
-    console.log(command)
-    const todo = this.history.undo.todoStack.pop()
+    let todo = this.history.undo.todoStack.pop()
     const index = this.todoChecker.getTodoIndex(todos, todo.id)
     const modifiedTodo = todos[index]
     if(command === "add"){
@@ -147,16 +145,38 @@ class TodoHandler  {
     if(command === "update"){
       todos.splice(index, 1, todo);
       console.log(`${todo.id}번 항목 '${todo.name}의 상태가 ${modifiedTodo.status}에서 ${todo.status}로 변경되었습니다.`)
+      todo = modifiedTodo
     }
     if(command === "delete"){
       todos.push(todo);
       console.log(`${todo.id}번 항목 '${todo.name}'의 ${command} 가 취소되었습니다.`)
     }
+    this.history.redo.todoStack.push(todo)
+    this.history.redo.commands.push(command)
     
     //console.log(command, todo)
   }
   redo () {
     console.log('redo')
+    const command = this.history.redo.commands.pop()
+    const todo = this.history.redo.todoStack.pop()
+    let index
+    console.log(command, todo)
+    if(command === 'add'){
+      todos.push(todo)
+      console.log(`${todo.id}번 항목 '${todo.name}'가 다시 ${command}되었습니다.`)
+    }
+    if(command === 'update'){
+      index = this.todoChecker.getTodoIndex(todos, todo.id)
+      const originalTodo = todos[index]
+      todos.splice(index, 1, todo)
+      console.log(`${todo.id}번 항목 '${todo.name}'의 상태가 ${originalTodo.status}에서 ${todo.status}로 변경되었습니다.`)
+    }
+    if(command === 'delete'){
+      index = this.todoChecker.getTodoIndex(todos, todo.id)
+      todos.splice(index, 1)
+      console.log(`${todo.id}번 항목 '${todo.name}' ${command} 가 다시 ${command}되었습니다.`)
+    }
   }
 }
 
