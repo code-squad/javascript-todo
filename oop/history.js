@@ -4,6 +4,7 @@ class History {
     this.history = [];
     this.tempHistory = [];
   }
+
   append({ methodName, todo, changeStatus = '' }) {
     this.history.push({ methodName, todo, changeStatus });
 
@@ -11,19 +12,26 @@ class History {
       this.history.shift();
     }
 
-    this.tempHistory = [];
-    this.show();
+    // this.tempHistory = [];
   }
-  undo() {}
-  redo() {}
+
+  undo() {
+    const undoData = this.history.pop();
+    this.tempHistory.push(undoData);
+
+    return undoData;
+  }
+
+  redo() {
+    const redoData = this.tempHistory.pop();
+    this.history.push(redoData);
+
+    return redoData;
+  }
+
   show() {
     console.dir('history', this.history);
     console.dir('temphistory', this.tempHistory);
+    console.dir('==============');
   }
 }
-
-const history = new History(3);
-history.append({ methodName: 'add', todo: 1 });
-history.append({ methodName: 'add', todo: 1 });
-history.append({ methodName: 'add', todo: 1 });
-history.append({ methodName: 'add', todo: 1 });
