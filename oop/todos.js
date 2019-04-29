@@ -143,7 +143,6 @@ module.exports = class Todos {
             const todosObj = this.todosRecord[pointer];
             const appWord = userinput[0];
             const appParameterArr = userinput[1];
-            // this.runRecord('stop');
             this.moveRecordPointer('undo');
             switch (appWord) {
                 case 'add':
