@@ -2,6 +2,7 @@ const data = require('../data');
 const ManagingTodo = require('./managingTodo');
 const msgObj = require('./msg');
 const TodoError = require('./todoError');
+const History = require('./history');
 
 const readline = require('readline');
 
@@ -11,7 +12,8 @@ const inputPrompt = readline.createInterface({
 });
 
 const todoError = new TodoError();
-const managingTodo = new ManagingTodo(data, inputPrompt, msgObj, todoError);
+const history = new History();
+const managingTodo = new ManagingTodo({ data, inputPrompt, msgObj, todoError, history });
 
 console.log('0을 입력하면 프로그램이 종료됩니다.');
 inputPrompt.setPrompt('명령하세요 : ');

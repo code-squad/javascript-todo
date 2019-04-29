@@ -1,12 +1,13 @@
 const Todo = require('./todo');
 
 class ManagingTodo {
-  constructor(data, prompt, msgObj, todoError) {
+  constructor({ data, inputPrompt, msgObj, todoError, history }) {
     this.countedStatus = { todo: 0, doing: 0, done: 0 };
     this.managedlist = this.initManagedlist(data);
     this.msgObj = msgObj;
-    this.prompt = prompt;
+    this.inputPrompt = inputPrompt;
     this.todoError = todoError;
+    this.history = history;
   }
 
   initManagedlist(data) {
@@ -65,7 +66,7 @@ class ManagingTodo {
       outputStr = this.filterbyStatus(status);
     }
     console.log(outputStr);
-    this.prompt.prompt();
+    this.inputPrompt.inputPrompt();
   }
 
   delete(id) {
