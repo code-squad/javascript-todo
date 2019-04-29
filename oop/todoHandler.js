@@ -123,8 +123,10 @@ class TodoHandler  {
   }
 
   undo () {
+    
     const command = this.history.undo.commands.pop()
     let todo = this.history.undo.todoStack.pop()
+    if(todo === undefined) throw new Error(`이전에 수행한 명령이 없습니다.`) 
     
     if(command === "add"){
       const index = this.todoChecker.getTodoIndex(todos, todo.id)
@@ -150,6 +152,7 @@ class TodoHandler  {
   redo () {
     const command = this.history.redo.commands.pop()
     const todo = this.history.redo.todoStack.pop()
+    if (todo === undefined) throw new Error("이전에 undo 를 실행하지 않았습니다.")
     let index
     if(command === 'add'){
       todos.push(todo)
