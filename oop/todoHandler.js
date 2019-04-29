@@ -12,42 +12,28 @@ class TodoHandler  {
     this.resultMsg = resultMsg
     this.history = {
       undo: {
-        commands: ['delete', 'update', 'add'],
-        todoStack: [    
-        {
-          "name": "자바스크립트 배우기",
-          "id": 1555639875203,
-          "tags": [
-              "javascript",
-              "react",
-              "nodejs"
-          ],
-          "status": "doing"
-        },
-        {
-          "name": "코틀린배우기",
-          "tags": [
-              "java",
-              "코드량 줄어듬"
-          ],
-          "status": "todo",
-          "id": 1555639759007
-        },
-        {
-          "name": "잠자기",
-          "id": 1555639627186,
-          "tags": [
-              "8시간",
-              "7시기상"
-          ],
-          "status": "done"
-         }
-        ],
+        commands: [],
+        todoStack: [],
       },
       redo: {
         commands: [],
         todoStack: [],
       },
+      checkStackFull: function (maxLength){
+        if(this.undo.todoStack.length === maxLength) return true
+        return false
+      },
+      append: function (todo, command){
+        if(this.checkStackFull(3)){
+          this.undo.todoStack.shift()
+          this.undo.todoStack.push(todo)
+          this.undo.commands.shift()
+          this.undo.commands.push(command)
+          return
+        }
+        this.undo.todoStack.push(todo)
+        this.undo.commands.push(command)
+      }
     }
   }
   save(){
@@ -67,7 +53,7 @@ class TodoHandler  {
     return {
       name: name,
       status: status,
-      id: id,
+      id: id*1,
       tags: tags
     }
   }
@@ -82,11 +68,12 @@ class TodoHandler  {
   async add (name, tags){
     tags = JSON.parse(tags)
     const id = this.createId(name)
-
-    todos.push(this.makeTodo(name, id, tags))
+    const newTodo = this.makeTodo(name, id, tags)
+    todos.push(newTodo)
     console.log(this.resultMsg.addMsg(name, id))
-    await sleep(1000)
     this.save()
+    this.history.append(newTodo, 'add')
+    await sleep(1000)
     this.show('all')
     return
   }
@@ -97,14 +84,15 @@ class TodoHandler  {
       this.todoChecker.isValidStatus(statusToChange, status)
 
       const index = this.todoChecker.getTodoIndex(todos, id)
+      this.history.append(todos[index], 'update')
       todos.splice(index, 1, this.makeTodo(name, id, tags, statusToChange,))
-
+      this.save()
+      
       await sleep(3000)
       console.log(this.resultMsg.updateMsg(name, statusToChange)) 
       await sleep(1000)
-
       this.show('all')
-      this.save()
+      
       return
     } catch(e){
       console.log(e.message)
@@ -114,7 +102,8 @@ class TodoHandler  {
     try{
       let index = this.todoChecker.getTodoIndex(todos, id)
       console.log(this.resultMsg.deleteMsg(todos[index].name, todos[index].status))
-      await(sleep)
+      this.history.append(todos[index], 'delete')
+      await(sleep(1000))
       todos.splice(index, 1)
       this.show('all')
       this.save()
@@ -136,13 +125,15 @@ class TodoHandler  {
   undo () {
     const command = this.history.undo.commands.pop()
     let todo = this.history.undo.todoStack.pop()
-    const index = this.todoChecker.getTodoIndex(todos, todo.id)
-    const modifiedTodo = todos[index]
+    
     if(command === "add"){
+      const index = this.todoChecker.getTodoIndex(todos, todo.id)
       todos.splice(index, 1);
       console.log(`${todo.id}번 항목 '${todo.name}' ${command} 가 취소되었습니다.`)
     }
     if(command === "update"){
+      const index = this.todoChecker.getTodoIndex(todos, todo.id)
+      const modifiedTodo = todos[index]
       todos.splice(index, 1, todo);
       console.log(`${todo.id}번 항목 '${todo.name}의 상태가 ${modifiedTodo.status}에서 ${todo.status}로 변경되었습니다.`)
       todo = modifiedTodo
@@ -157,11 +148,9 @@ class TodoHandler  {
     //console.log(command, todo)
   }
   redo () {
-    console.log('redo')
     const command = this.history.redo.commands.pop()
     const todo = this.history.redo.todoStack.pop()
     let index
-    console.log(command, todo)
     if(command === 'add'){
       todos.push(todo)
       console.log(`${todo.id}번 항목 '${todo.name}'가 다시 ${command}되었습니다.`)
