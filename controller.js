@@ -1,22 +1,20 @@
-const Controller = function (model,view) {
+const Controller = function (model, view) {
     this.model = model;
     this.view = view;
 }
 Controller.prototype = {
     showAll() {
         const countResult = {
-            todo: this.model.countData('todo'),
-            doing: this.model.countData('doing'),
-            done: this.model.countData('done')
+            todo: this.model.getCount('todo'),
+            doing: this.model.getCount('doing'),
+            done: this.model.getCount('done')
         }
         this.view.showAll(countResult)
-        rl.prompt()
     },
     showEachData(status) {
-        const countNumber = this.model.countData(status)
+        const countNumber = this.model.getCount(status)
         const targetData = this.model.getMatchedData(status)
         this.view.showEachData(status, countNumber, targetData)
-        rl.prompt()
     },
     showData(type) {
         if (type === 'all') {
@@ -28,27 +26,20 @@ Controller.prototype = {
     },
     addData(name, tags) {
         const id = this.model.makeId()
-        this.model.addData(name, tags, id);
-        this.view.showAddResult(name, id);
+        const changedData = this.model.addData(name, tags, id);
+        this.view.showResult('addData', changedData);
         this.showFinalResult()
     },
     deleteData(id) {
-        const idx = this.model.getIndex(id);
-        const {
-            name,
-            status
-        } = this.model.todoList[idx]
-        this.model.deleteData(id)
-        this.view.showDeleteResult(name, status)
+        const changedData = this.model.deleteData(id)
+        this.view.showResult('deleteData', changedData);
         this.showFinalResult()
     },
     updateData(id, status) {
         if (!/^(todo|doing|done)$/.test(status)) throw Error('UpdateStatusError')
-        this.model.updateData(id, status);
-        const idx = this.model.getIndex(id)
-        const name = this.model.todoList[idx].name
+        const changedData = this.model.updateData(id, status);
         setTimeout(() => {
-            this.view.showUpdateResult(name, status)
+            this.view.showResult('updateData', changedData)
             this.showFinalResult()
         }, 3000);
     },
@@ -56,3 +47,4 @@ Controller.prototype = {
         setTimeout(() => { this.showAll() }, 1000);
     }
 }
+module.exports = Controller;

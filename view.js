@@ -9,13 +9,14 @@ View.prototype = {
         const str = targetData.map(el => `'${el.name}, ${el.id}번'`).join(', ')
         console.log(this.fontColor, `${status}리스트 : 총 ${countNumber}건 : ${str}`)
     },
-    showAddResult(name, id) {
-        console.log(this.fontColor, `${name} 1개가 추가되었습니다. (id : ${id})`)
-    },
-    showDeleteResult(name, status) {
-        console.log(this.fontColor, `${name} ${status}가 목록에서 삭제되었습니다.`)
-    },
-    showUpdateResult(name, status) {
-        console.log(this.fontColor, `${name}이(가) ${status}으로 상태가 변경되었습니다.`)
+    showResult(keyCommand, changedData) {
+        const { name, id, status } = changedData;
+        const msgMap = {
+            addData: `${name} 1개가 추가되었습니다. (id : ${id})`,
+            deleteData: `${name} ${status}가 목록에서 삭제되었습니다.`,
+            updateData: `${name}이(가) ${status}으로 상태가 변경되었습니다.`
+        }
+        console.log(this.fontColor, msgMap[keyCommand])
     }
 }
+module.exports = View;

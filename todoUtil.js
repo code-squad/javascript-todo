@@ -28,3 +28,4 @@ TodoUtil.prototype = {
         if (argsNumber[keyCommand] !== restCommand.length) throw Error('MaxArgsNumberError')
     }
 }
+module.exports = TodoUtil;

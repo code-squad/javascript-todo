@@ -44,3 +44,4 @@ ErrorHandler.prototype = {
         console.log(this.fontColor, '인자 개수를 확인해주세요.')
     }
 }
+module.exports = ErrorHandler;
