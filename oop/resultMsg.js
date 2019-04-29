@@ -1,4 +1,4 @@
-class ResultMsg () {
+class ResultMsg {
   invalidId (id) {
     return `${id}에 해당하는 todo는 없습니다.`
   }

@@ -10,6 +10,16 @@ class TodoHandler  {
   constructor(todoChecker, resultMsg){
     this.todoChecker = todoChecker
     this.resultMsg = resultMsg
+    this.history = {
+      undo: {
+        commands: [],
+        todoStack: [],
+      },
+      redo: {
+        commands: [],
+        todoStack: [],
+      },
+    }
   }
   save(){
     let data = JSON.stringify(todos)
@@ -92,6 +102,13 @@ class TodoHandler  {
     result = todos.filter(v => v.status === option).map(v => v.name)
     console.log(this.resultMsg.showStatus(result, option, counted)) 
     return 
+  }
+
+  undo () {
+    console.log('undo')
+  }
+  redo () {
+    console.log('redo')
   }
 }
 

@@ -11,14 +11,16 @@ class InputController {
     })
   }
   checkSperator(input, sperator = '$'){
+    if(/undo|redo/.test(input)) return
     if(!input.includes(sperator)) throw new Error(resultMsg.noSeperator());
   }
   checkCommand (command) {
-    if(!/show|add|update|delete/.test(command)){
+    if(!/show|add|update|delete|undo|redo/.test(command)){
       throw new Error(resultMsg.invalidCommand())
     }
   }
   checkArgsCount (command, args){
+    if(/undo|redo/.test(command)) return
     if((/show|delete/.test(command) && args.length===1)){
       return
     }
@@ -29,7 +31,7 @@ class InputController {
   }
   checkInput (input){
     this.checkSperator(input) 
-    inputList = input.split('$')
+    let inputList = input.split('$')
     let command = inputList[0]
     let args = inputList.slice(1)
     this.checkCommand(command)
