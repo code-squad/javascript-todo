@@ -14,10 +14,11 @@ const fontColorBlue = '\x1b[36m%s\x1b[0m';
 const ID_LENGTH = 4;
 const UPDATE_DELAY = 3000;
 const SHOW_DELAY = 1000;
+const MAX_HISTORY_CAPACITY = 3;
 const initialData = [];
 
 const util = new TodoUtil();
-const model = new Model(initialData);
+const model = new Model(initialData, MAX_HISTORY_CAPACITY);
 const view = new View(fontColorBlue);
 const controller = new Controller(model, view, UPDATE_DELAY, SHOW_DELAY);
 const errorHandler = new ErrorHandler(controller, fontColorRed, ID_LENGTH);
@@ -39,7 +40,7 @@ const app = {
                 this.controller[keyCommand](...restCommand);
             }
             catch (e) {
-                // console.log(e, e.message)
+                console.log(e)
                 this.errorHandler.printErrorMessage(e.message)
             }
         })

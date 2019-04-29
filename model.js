@@ -1,5 +1,7 @@
-const Model = function (initialData) {
+const Model = function (initialData, MAX_HISTORY_CAPACITY) {
     this.todoList = initialData || [];
+    this.historyStack = [];
+    this.MAX_HISTORY_CAPACITY = MAX_HISTORY_CAPACITY;
 }
 Model.prototype = {
     getId(key, value) {
@@ -14,18 +16,21 @@ Model.prototype = {
             id
         }
         this.todoList.push(todoData);
+        this.saveHistory('deleteData', todoData)
         return todoData;
     },
     deleteData(id) {
         const targetIndex = this.getIndex(id)
         const targetData = this.todoList[targetIndex];
         this.todoList.splice(targetIndex, 1)
+        this.saveHistory('addData', targetData)
         return targetData;
     },
     updateData(id, status) {
         const targetIndex = this.getIndex(id);
         const targetData = this.todoList[targetIndex];
         if (targetData.status === status) throw Error(id)
+        this.saveHistory('updateData', targetData)
         targetData.status = status
         return targetData;
     },
@@ -42,6 +47,23 @@ Model.prototype = {
         const idx = this.todoList.findIndex(el => el.id === id)
         if (idx === -1) throw Error('MatchedDataError')
         return idx
+    },
+    saveHistory(keyCommand, recentData) {
+        if (this.historyStack.legnth === this.MAX_HISTORY_CAPACITY) this.historyStack.shift();
+        this.historyStack.push({ keyCommand, recentData })
+    },
+
+    undo() {
+        if(this.historyStack.length === 0) throw Error('EmptyStackError')
+        const { keyCommand, recentData } = this.historyStack.pop();
+        let { id, name, status, tags } = recentData;
+        tags = tags.join(',')
+        let previousData = {};
+        if (keyCommand === 'addData') previousData = this.addData(name, tags, id, status)
+        if (keyCommand === 'deleteData') previousData = this.deleteData(id)
+        if (keyCommand === 'updateData') previousData = this.updateData(id, status)
+        this.historyStack.pop()
+        return { keyCommand, previousData }
     }
 }
 module.exports = Model;

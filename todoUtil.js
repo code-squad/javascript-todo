@@ -1,7 +1,8 @@
 const TodoUtil = function () { }
 TodoUtil.prototype = {
     parseCommand(command) {
-        if (!/\$/.test(command)) throw Error('DollarCharError')
+        if (command === 'undo' || command === 'redo') return [command];
+        if (!/\$/.test(command)) throw Error('DollarCharError');
         return command.split('$');
     },
     getKeyCommand(command) {
@@ -10,8 +11,8 @@ TodoUtil.prototype = {
             'add': 'addData',
             'delete': 'deleteData',
             'update': 'updateData',
-            'undo': 'undoData',
-            'redo': 'redoData'
+            'undo': 'undo',
+            'redo': 'redo'
         }
         const keyCommand = command.shift();
         return keyMap[keyCommand]
@@ -22,8 +23,8 @@ TodoUtil.prototype = {
             addData: 2,
             deleteData: 1,
             updateData: 2,
-            undoData: 1,
-            redoData: 1
+            undo: 0,
+            redo: 0
         }
         if (argsNumber[keyCommand] !== restCommand.length) throw Error('ArgsNumberError')
     }
