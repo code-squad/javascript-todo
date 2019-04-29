@@ -49,18 +49,20 @@ function test (input) {
     // controller.instruct(input, showManager, addManager, deleteManager, updateManager);
     // controller.instruct('add$sleep1$["favorite"]', showManager, addManager, deleteManager, updateManager);
     // controller.instruct('add$sleep2$["favorite"]', showManager, addManager, deleteManager, updateManager);
-    // controller.instruct('update$9790$doing', showManager, addManager, deleteManager, updateManager);
-    controller.instruct('delete$9790', showManager, addManager, deleteManager, updateManager);
-    controller.instruct('delete$123123123123', showManager, addManager, deleteManager, updateManager);
-    controller.instruct('delete$82579384', showManager, addManager, deleteManager, updateManager);
-    // controller.instruct('add$sleep$["favorite"]', showManager, addManager, deleteManager, updateManager);
-    // controller.instruct('add$sleep2$["favorite"]', showManager, addManager, deleteManager, updateManager);
-    // controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
+    controller.instruct('update$1556541975744$doing', showManager, addManager, deleteManager, updateManager);
+    //controller.instruct('delete$1556541975740', showManager, addManager, deleteManager, updateManager);
+    //controller.instruct('delete$1556541975744', showManager, addManager, deleteManager, updateManager);
+    //controller.instruct('delete$82579386', showManager, addManager, deleteManager, updateManager);
+     //controller.instruct('add$sleep$["favorite"]', showManager, addManager, deleteManager, updateManager);
+     //controller.instruct('add$sleep2$["favorite"]', showManager, addManager, deleteManager, updateManager);
+     controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
     //controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
     //controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
-    controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
-    controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
-    controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
+    //controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
+    //controller.instruct('undo', showManager, addManager, deleteManager, updateManager);
+    
+    controller.instruct('redo', showManager, addManager, deleteManager, updateManager);
+
 }
 test();
 // // 

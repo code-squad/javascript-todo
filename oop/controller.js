@@ -35,6 +35,10 @@ class Controller {
                 resultData = this.commandManager.undo();
                 this.view.printUndoMessage(resultData[0], resultData[1]);
                 break;
+            case 'redo' :
+                resultData = this.commandManager.redo();
+                this.view.printRedoMessage(resultData[0], resultData[1]);
+                break;
         }
     }
     
