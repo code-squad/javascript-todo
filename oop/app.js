@@ -51,7 +51,6 @@ rl.on('line', (userInput) => {
 
             const resultMessage = inputParser.executeTodos(todos, userInput);
             const appWord = inputParser.appWord; 
-            if(appWord !== 'undo' && appWord !== 'redo'){
                 promptResult(resultMessage, appWord)
                 .then((resultOfTodos) => {
                     console.log(resultOfTodos);
@@ -63,10 +62,6 @@ rl.on('line', (userInput) => {
                         });
                     } else rl.prompt();
                 });
-            }else {
-                console.log(resultMessage);
-                rl.prompt();
-            }
     }
 }).on('close', () => {
     console.log("프로그램을 종료합니다.");
