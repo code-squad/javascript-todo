@@ -35,12 +35,6 @@ class History {
 
     return redoData;
   }
-
-  show() {
-    console.dir('history', this.history);
-    console.dir('temphistory', this.tempHistory);
-    console.dir('==============');
-  }
 }
 
 module.exports = History;
