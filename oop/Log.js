@@ -1,11 +1,11 @@
 const todoList = module.require('./data.js');
 
 module.exports = Log = function() {
-	(this.queue = []), (this.index = -1);
+	(this.queue = []), (this.index = -1), (this.undoLimit = 3);
 };
 
 Log.prototype.addLog = function(action, prevData, nextData, todoListIndex) {
-	if (this.queue.length > 4) {
+	if (this.queue.length > undoLimit + 1) {
 		this.queue.shift();
 	}
 
@@ -14,10 +14,10 @@ Log.prototype.addLog = function(action, prevData, nextData, todoListIndex) {
 	}
 
 	this.queue[++this.index] = {
-		action: action,
-		prevData: prevData,
-		nextData: nextData,
-		todoListIndex: todoListIndex
+		action,
+		prevData,
+		nextData,
+		todoListIndex
 	};
 };
 
