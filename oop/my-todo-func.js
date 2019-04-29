@@ -4,7 +4,7 @@ const errorCheck = require('./ErrorCheck.js');
 const errorMsg = require('./errorMsg.js');
 const todoPrint = require('./todoPrint.js');
 //const util = require('./todo-util-method.js');
-const todoMainMethod = function() {}
+const todoCommonMethod = function() {}
 
 const Print = new todoPrint.ShowPrint();
 const Error = new errorCheck.ErrorCheck();
@@ -17,16 +17,16 @@ let r = readline.createInterface({
 
 
 
-const todoInputMethod = Object.create(todoMainMethod.prototype)
+const todoModel = Object.create(todoCommonMethod.prototype)
 
 // show
-todoInputMethod.todoShow = function (input) {
+todoModel.show = function (input) {
     let status = input[0];
-    status === 'all' ? this.todoCount() : this.todoShowElse(status);
+    status === 'all' ? this.todoCount() : this.showElse(status);
 }
 
 // add
-todoInputMethod.todoAdd = function (input) {
+todoModel.add = function (input) {
     let [name, tag] = input;
     let id = this.makingID();
     let newTodoList = new this.todoForm(name, tag, 'todo', id);
@@ -37,7 +37,7 @@ todoInputMethod.todoAdd = function (input) {
 }
 
 // delete
-todoInputMethod.todoDelete = function (id) {
+todoModel.delete = function (id) {
     let [targetIdx, targetName] = this.findDataIdObj(id)
     todoList.splice(targetIdx,1);
 
@@ -46,7 +46,7 @@ todoInputMethod.todoDelete = function (id) {
 }
 
 // update
-todoInputMethod.todoUpdate = function (id, status) {
+todoModel.update = function (id, status) {
     let [targetIdx, targetName] = this.findDataIdObj(id)
     todoList[targetIdx].status = status;
 
@@ -55,7 +55,7 @@ todoInputMethod.todoUpdate = function (id, status) {
 } 
 
 
-todoMainMethod.prototype.todoCount = function () {
+todoCommonMethod.prototype.todoCount = function () {
     let todo = todoList.filter(v => v.status === 'todo').length;
     let doing = todoList.filter(v => v.status === 'doing').length;
     let done = todoList.filter(v => v.status === 'done').length;
@@ -63,12 +63,12 @@ todoMainMethod.prototype.todoCount = function () {
     Print.printShowAll(todo,doing,done);
 }
 
-todoMainMethod.prototype.todoShowElse = function(input) {
+todoCommonMethod.prototype.showElse = function(input) {
     let temp = todoList.filter(v => v.status === input).map((obj)=>{ return ` '${obj.name}, ${obj.id}번'`})
     Print.printShowElse(temp.length, temp);
 }
 
-todoMainMethod.prototype.todoForm = function (name, tag, status, id) {
+todoCommonMethod.prototype.todoForm = function (name, tag, status, id) {
     this.name = name;
     this.tag = [tag];
     this.status = status;
@@ -76,12 +76,12 @@ todoMainMethod.prototype.todoForm = function (name, tag, status, id) {
 }
 
 
-todoMainMethod.prototype.makingID = function(){
+todoCommonMethod.prototype.makingID = function(){
     return Math.floor(Math.random() * 10000);
 }
 
 
-todoMainMethod.prototype.findDataIdObj = function(input){
+todoCommonMethod.prototype.findDataIdObj = function(input){
     let target = todoList.filter(v => v["id"] === input);
     let targetName = target[0].name;
     let targetIdx = todoList.indexOf(target[0]);    
@@ -91,7 +91,7 @@ todoMainMethod.prototype.findDataIdObj = function(input){
 
 
 const showAllTimer = (input) => {
-    setTimeout(todoMainMethod.prototype.todoCount, input);
+    setTimeout(todoCommonMethod.prototype.todoCount, input);
 }
 
 
@@ -108,20 +108,20 @@ todoMain = (answer) => {
     let action = tempArr.shift(0);   
 
     if(action === "add") {
-        todoInputMethod.todoAdd(tempArr);
+        todoModel.add(tempArr);
     } else if(action === "delete") { 
         tempArr[0] = Number(tempArr[0])
         let ID = tempArr[0]
-        Error.unknownIDError(ID)==false ? Print.printError(errorMsg.unknownIDError) : todoInputMethod.todoDelete(ID);
+        Error.unknownIDError(ID)==false ? Print.printError(errorMsg.unknownIDError) : todoModel.delete(ID);
         
     } else if(action === "update") { 
         tempArr[0] = Number(tempArr[0])
         let ID = tempArr[0]
         let status = tempArr[1]
-        Error.unknownIDError(ID)==false || Error.duplicatedStatusError(ID,status)==false ? Print.printError(errorMsg.unknownID_duplicatedError) : todoInputMethod.todoUpdate(ID, status)
+        Error.unknownIDError(ID)==false || Error.duplicatedStatusError(ID,status)==false ? Print.printError(errorMsg.unknownID_duplicatedError) : todoModel.update(ID, status)
 
     } else if(action === "show") {
-        todoInputMethod.todoShow(tempArr);
+        todoModel.show(tempArr);
 
     } else {
         Print.printError(errorMsg.ELSE_ERROR);
