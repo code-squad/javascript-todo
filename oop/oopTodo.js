@@ -6,22 +6,23 @@ const inputReadline = readline.createInterface({
 });
 
 
-const TodoUI = function (datalist) {
+const TodoApp = function (datalist) {
     this.datalist = datalist;
+    this.command = undefined;
     this.past = [];
     this.present = [];
     this.future = [];
 };
 
 
-TodoUI.prototype = {
+TodoApp.prototype = {
 
     // addTodo
-    addTodoExecutor(todoElement, todoTag) {
-        this.addTodoList(todoElement, todoTag);
+    addTodoExecutor(command, todoElement, todoTag) {
+        this.addTodoList(command, todoElement, todoTag);
     },
 
-    addTodoList(todoElement, todoTag) {
+    addTodoList(command, todoElement, todoTag) {
         const id = this.createNewID(this.datalist, 10000)
 
         const newTodo = {
@@ -31,55 +32,61 @@ TodoUI.prototype = {
             'id': id
         };
         this.datalist.push(newTodo);
+        this.undoable(command, newTodo);
 
         return this.addTodoResult(newTodo);
     },
 
 
     addTodoResult(newAddedObject) {
+        console.log(this.datalist);
         const addlistResult = `${newAddedObject.name} 1 개가 추가됐습니다.(id : ${newAddedObject.id})`;
         return this.showAll_printResult(addlistResult);
     },
 
     // deleteTodo
-    deleteTodoExecutor(deleteID) {
-        return this.checkID(deleteID) ? this.deleteTodoList(deleteID) : this.printError()
+    deleteTodoExecutor(command,deleteID) {
+        return this.checkID(deleteID) ? this.deleteTodoList(command,deleteID) : this.printError()
     },
 
-    deleteTodoList(deletedID) {
+    deleteTodoList(command,deletedID) {
         const deletedIndex = this.getIndex(deletedID);
         const [splicedData] = this.datalist.splice(deletedIndex, 1);
-        this.undoable(splicedData);
+        this.undoable(command, splicedData);
         this.manageMaxPastList();
 
         return this.deleteTodoResult(splicedData)
     },
 
     deleteTodoResult(splicedData) {
+        console.log(this.datalist);
         const deletionResult = `${splicedData.name}가 ${splicedData.status}에서 삭제되었습니다.`
         return this.showAll_printResult(deletionResult);
     },
 
 
     // updateTodo
-    updateTodoExecutor(id, updatedStatus) {
-        return this.checkID(id) ? this.updateTodoStatus(id, updatedStatus) : this.printError()
+    updateTodoExecutor(command, id, updatedStatus) {
+        return this.checkID(id) ? this.updateTodoStatus(command, id, updatedStatus) : this.printError()
     },
 
 
-    updateTodoStatus(id, updatedStatus) {
+    updateTodoStatus(command, id, updatedStatus) {
         const updatatingIndex = this.getIndex(id);
         if (this.checkDuplicatedStatus(updatatingIndex, updatedStatus)) {
             console.log('\n');
             inputReadline.prompt();
             return
         };
+        const beforeUpdatedStatus = this.datalist[updatatingIndex].status
         this.datalist[updatatingIndex].status = updatedStatus;
+        this.undoable(command,  {updatatingIndex, beforeUpdatedStatus, updatedStatus});
         return this.updateTodoResult(updatatingIndex, updatedStatus)
     },
 
 
     updateTodoResult(updatatingIndex, updatedStatus) {
+        console.log(this.datalist);
         const updateResult = `${this.datalist[updatatingIndex].name} 가 ${updatedStatus}로 상태가 변경됬습니다.`;
         return setTimeout(() => {
             this.showAll_printResult(updateResult);
@@ -186,13 +193,13 @@ TodoUI.prototype = {
             inputReadline.prompt();
         }
         else if (command === 'add') {
-            this.addTodoExecutor(commandElement, TagORStatusOfcommandElement);
+            this.addTodoExecutor(command, commandElement, TagORStatusOfcommandElement);
         }
         else if (command === 'update') {
-            this.updateTodoExecutor(Number(commandElement), TagORStatusOfcommandElement);
+            this.updateTodoExecutor(command, Number(commandElement), TagORStatusOfcommandElement);
         }
         else if (command === 'delete') {
-            this.deleteTodoExecutor(Number(commandElement));
+            this.deleteTodoExecutor(command, Number(commandElement));
         }
         else if (command === 'undo') {
             this.undo();
@@ -206,12 +213,13 @@ TodoUI.prototype = {
     },
 
 
-    undoable(splicedData) {
+    undoable(command, splicedData) {
         this.past.push(splicedData);
+        this.command = command;
     },
 
     manageMaxPastList() {
-        if(this.past.length < 4){
+        if (this.past.length < 4) {
             return
         }
         else {
@@ -228,9 +236,27 @@ TodoUI.prototype = {
         }
 
         const popPastValue = this.past.pop();
-        this.datalist.push(popPastValue);
-        this.present.push(popPastValue);
-        console.log(`${popPastValue.id}번 항목 ${popPastValue.name}가 삭제에서 ${popPastValue.status}상태로 변경되었습니다.`);
+
+        if(this.present.length === 1){
+            this.future.push(this.present.pop());
+            this.present.push(popPastValue);
+        } else{
+            this.present.push(popPastValue);
+        }
+
+        if (this.command === 'add') {
+            this.datalist.pop();
+            console.log(`${popPastValue.id}번 항목 ${popPastValue.name}가 식제됐습니다.`);
+        }
+        else if (this.command === 'update') {
+            this.datalist[popPastValue.updatatingIndex].status = popPastValue.beforeUpdatedStatus;
+            console.log(`${popPastValue.id}번 항목 ${popPastValue.name}가 ${popPastValue.status}상태로 변경이 취소되었습니다.`);
+        }
+        else {
+            this.datalist.push(popPastValue);
+            console.log(`${popPastValue.id}번 항목 ${popPastValue.name}가 삭제에서 ${popPastValue.status}상태로 변경되었습니다.`);
+        }
+        console.log(this.datalist);
         inputReadline.prompt();
         return;
     },
@@ -242,9 +268,23 @@ TodoUI.prototype = {
             return;
         }
         const popPresentValue = this.present.pop();
-        this.datalist.pop();
+        
         this.past.push(popPresentValue);
-        console.log(`${popPresentValue.id}번 항목 ${popPresentValue.name}가 ${popPresentValue.status}상태에서 삭제되었습니다.`);
+        this.present.push(this.future.shift());
+        
+        if (this.command === 'add') {
+            this.datalist.push(popPresentValue);
+            console.log(`${popPresentValue.name} 1 개가 추가됐습니다.(id : ${popPresentValue.id})`);
+        }
+        else if (this.command === 'update') {
+            this.datalist[popPresentValue.updatatingIndex].status = popPresentValue.updatedStatus;
+            console.log(`${this.datalist[popPresentValue.updatatingIndex].name} 가 ${this.datalist[popPresentValue.updatatingIndex].status}로 상태가 변경됬습니다.`);
+        }
+        else {
+            this.datalist.pop();
+            console.log(`${popPresentValue.id}번 항목 ${popPresentValue.name}가 ${popPresentValue.status}상태에서 삭제되었습니다.`);
+        }
+        console.log(this.datalist);
         inputReadline.prompt();
         return;
     },
@@ -268,5 +308,5 @@ TodoUI.prototype = {
 }
 
 
-const todoList = new TodoUI(datalist);
+const todoList = new TodoApp(datalist);
 todoList.mainExecutor();
