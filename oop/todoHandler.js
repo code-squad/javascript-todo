@@ -12,8 +12,37 @@ class TodoHandler  {
     this.resultMsg = resultMsg
     this.history = {
       undo: {
-        commands: [],
-        todoStack: [],
+        commands: ['delete', 'update', 'add'],
+        todoStack: [    
+        {
+          "name": "자바스크립트 배우기",
+          "id": 1555639875203,
+          "tags": [
+              "javascript",
+              "react",
+              "nodejs"
+          ],
+          "status": "doing"
+        },
+        {
+          "name": "코틀린배우기",
+          "tags": [
+              "java",
+              "코드량 줄어듬"
+          ],
+          "status": "todo",
+          "id": 1555639759007
+        },
+        {
+          "name": "잠자기",
+          "id": 1555639627186,
+          "tags": [
+              "8시간",
+              "7시기상"
+          ],
+          "status": "done"
+         }
+        ],
       },
       redo: {
         commands: [],
@@ -106,6 +135,25 @@ class TodoHandler  {
 
   undo () {
     console.log('undo')
+    const command = this.history.undo.commands.pop()
+    console.log(command)
+    const todo = this.history.undo.todoStack.pop()
+    const index = this.todoChecker.getTodoIndex(todos, todo.id)
+    const modifiedTodo = todos[index]
+    if(command === "add"){
+      todos.splice(index, 1);
+      console.log(`${todo.id}번 항목 '${todo.name}' ${command} 가 취소되었습니다.`)
+    }
+    if(command === "update"){
+      todos.splice(index, 1, todo);
+      console.log(`${todo.id}번 항목 '${todo.name}의 상태가 ${modifiedTodo.status}에서 ${todo.status}로 변경되었습니다.`)
+    }
+    if(command === "delete"){
+      todos.push(todo);
+      console.log(`${todo.id}번 항목 '${todo.name}'의 ${command} 가 취소되었습니다.`)
+    }
+    
+    //console.log(command, todo)
   }
   redo () {
     console.log('redo')

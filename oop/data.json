@@ -51,7 +51,7 @@
             "java",
             "코드량 줄어듬"
         ],
-        "status": "todo",
+        "status": "doing",
         "id": 1555639759007
     },
     {
@@ -62,18 +62,5 @@
             "7시기상"
         ],
         "status": "done"
-    },
-    {
-        "name": "oop공부하기",
-        "status": "doing",
-        "id": "1556244700151"
-    },
-    {
-        "name": "class공부",
-        "status": "doing",
-        "id": "1556515382204",
-        "tags": [
-            "콘스트럭터"
-        ]
     }
 ]
