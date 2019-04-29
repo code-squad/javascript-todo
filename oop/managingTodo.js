@@ -34,6 +34,8 @@ class ManagingTodo {
     this.managedlist.push(newTodo);
     this.countedStatus[newTodo.status] += 1;
 
+    this.history.append({ methodName: 'add', todo: newTodo });
+
     this.printMsg(this.msgObj.add(newTodo.name, newTodo.id), 1000);
   }
 
@@ -66,12 +68,13 @@ class ManagingTodo {
       outputStr = this.filterbyStatus(status);
     }
     console.log(outputStr);
-    this.inputPrompt.inputPrompt();
+    console.log(this.history);
+    this.inputPrompt.prompt();
   }
 
   delete(id) {
     let outputMsg = '';
-    let deletedId;
+    let deletedTodo;
 
     if (typeof id === 'string') {
       id = parseInt(id);
@@ -81,15 +84,17 @@ class ManagingTodo {
       if (todo.id === id) {
         this.countedStatus[todo.status] -= 1;
         outputMsg = this.msgObj.delete(todo.name, todo.status);
-        deletedId = todo.id;
+        deletedTodo = todo;
         return false;
       }
       return true;
     });
 
-    if (!this.todoError.invalidId(deletedId)) {
+    if (!this.todoError.invalidId(deletedTodo.id)) {
       throw new Error(this.msgObj.getInvalidIdError);
     }
+
+    this.history.append({ methodName: 'delete', todo: deletedTodo });
 
     this.printMsg(outputMsg, 1000);
   }
@@ -115,6 +120,8 @@ class ManagingTodo {
     this.countedStatus[changeTodo.status] -= 1;
     this.countedStatus[changeStatus] += 1;
     changeTodo.status = changeStatus;
+
+    this.history.append({ methodName: 'update', todo: changeTodo, changeStatus });
 
     setTimeout(() => {
       this.printMsg(this.msgObj.update(changeTodo.name, changeStatus), 1000);

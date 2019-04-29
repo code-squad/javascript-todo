@@ -35,3 +35,5 @@ class History {
     console.dir('==============');
   }
 }
+
+module.exports = History;
