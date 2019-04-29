@@ -8,7 +8,11 @@ const Instruction = class {
 		this.utils = new Utils();
 		this.customException = new CustomException();
 		this.minIdNum = 1;
-		this.maxIdNum = 99999;
+        this.maxIdNum = 99999;
+        this.commandHistory = {
+			historyArr : [],
+			pointer : -1,
+		};
 	}
 	
 	everyStatus (convertedData) {
