@@ -2,24 +2,23 @@ const readline = require("readline")
 const ResultMsg = require('./ResultMsg')
 const resultMsg = new ResultMsg()
 
-const InputController = function(){
-  this.rl = readline.createInterface({
+class InputController {
+  constructor(){
+    this.rl = readline.createInterface({
       input : process.stdin,
       output : process.stdout,
       prompt :  "질문하세요"
-  })
-}
-
-InputController.prototype = {
-  checkSperator : function(input, sperator = '$'){
+    })
+  }
+  checkSperator(input, sperator = '$'){
     if(!input.includes(sperator)) throw new Error(resultMsg.noSeperator());
-  },
-  checkCommand : function (command) {
+  }
+  checkCommand (command) {
     if(!/show|add|update|delete/.test(command)){
       throw new Error(resultMsg.invalidCommand())
     }
-  },
-  checkArgsCount : function (command, args){
+  }
+  checkArgsCount (command, args){
     if((/show|delete/.test(command) && args.length===1)){
       return
     }
@@ -27,8 +26,8 @@ InputController.prototype = {
       return 
     }
     throw new Error(resultMsg.invalidArgsCounts())
-  },
-  checkInput : function(input){
+  }
+  checkInput (input){
     this.checkSperator(input) 
     inputList = input.split('$')
     let command = inputList[0]
@@ -38,6 +37,5 @@ InputController.prototype = {
     return {command, args}
   }
 }
-
 
 module.exports = InputController

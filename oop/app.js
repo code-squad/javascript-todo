@@ -1,12 +1,12 @@
 const InputController = require("./IController");
 const TodoHandler = require("./todoHandler");
-const TodoChecker = require('./todoChecker')
+const TodoGetter = require('./todoGetter')
 const ResultMsg = require('./resultMsg')
 
 const inputController = new InputController()
 const resultMsg = new ResultMsg()
-const todoChecker = new TodoChecker(resultMsg)
-const todoHandler = new TodoHandler(todoChecker, resultMsg)
+const todoGetter = new TodoGetter(resultMsg)
+const todoHandler = new TodoHandler(todoGetter, resultMsg)
 
 const inputHandler = function(inputdata){
   try{

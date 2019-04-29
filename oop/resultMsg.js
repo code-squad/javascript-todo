@@ -1,37 +1,37 @@
-const ResultMsg = function () {
-
-}
-ResultMsg.prototype = {
-  invalidId : function(id) {
+class ResultMsg () {
+  invalidId (id) {
     return `${id}에 해당하는 todo는 없습니다.`
-  },
-  sameStatus : function() {
+  }
+  sameStatus () {
     return `바꾸려는 내용이 현재 내용과 똑같습니다. 다시 확인하세요.`
-  },
-  updateMsg : function(name, statusToChange) {
+  }
+  updateMsg (name, statusToChange) {
     return `${name}가 ${statusToChange}로 변경되었습니다.`
-  },
-  deleteMsg : function(name, status) {
+  }
+  deleteMsg (name, status) {
     return `${name} ${status} 가 삭제됩니다.`
-  },
-  addMsg : function(name, id) {
+  }
+  addMsg (name, id) {
     return `${name} 1개가 추가되었습니다.(id: ${id})`
-  },
-  showAllMsg : function(counted) {
+  }
+  showAllMsg (counted) {
     return `현재상태 : todo: ${counted.todo}개, doing: ${counted.doing}개, done: ${counted.done}개`
-  },
-  showStatus : function(result, option, counted) {
+  }
+  showStatus (result, option, counted) {
     return `${option}리스트 : 총${counted[option]}건 : ${result.reduce((acc, cur)=> acc + ', ' + cur)}`
-  },
-  invalidCommand : function(){
+  }
+  invalidCommand (){
     return `변경가능한 status는 todo, doing, done 입니다`
-  },
-  invalidArgsCounts : function() {
+  }
+  invalidArgsCounts () {
     return `인자의 갯수가 잘못되었습니다.`
-  },
-  noSeperator : function() {
+  }
+  noSeperator () {
     return `구분자가 없습니다.`
   }
+}
+ResultMsg.prototype = {
+
 }
 
 module.exports = ResultMsg

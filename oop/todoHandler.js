@@ -6,43 +6,41 @@ const todos = JSON.parse(data)
 const sleep = msec => new Promise(resolve => setTimeout(resolve, msec))
 
 
-const TodoHandler = function (todoChecker, resultMsg) { 
-  this.todoChecker = todoChecker
-  this.resultMsg = resultMsg
-}
-
-
-TodoHandler.prototype = {
-  save: function (){
+class TodoHandler  { 
+  constructor(todoChecker, resultMsg){
+    this.todoChecker = todoChecker
+    this.resultMsg = resultMsg
+  }
+  save(){
     let data = JSON.stringify(todos)
     fs.writeFileSync("data.json" ,data)
     return
-  },
-  createId: function (name) {
+  }
+  createId (name) {
     let charCode = 0
     let timeNow = new Date().getTime()
     for(let i = 0; i<name.length;i++){
         charCode += name.charCodeAt(i)
     }
     return charCode + timeNow
-  },
-  makeTodo: function(name, id, tags, status = "todo") {
+  }
+  makeTodo (name, id, tags, status = "todo") {
     return {
       name: name,
       status: status,
       id: id,
       tags: tags
     }
-  },
-  countByStatus : function(){
+  }
+  countByStatus (){
     let todoCount = todos.filter(v => v.status === 'todo').length
     let doingCount = todos.filter(v => v.status === 'doing').length
     let doneCount = todos.length - todoCount - doingCount
     return {'todo' : todoCount, 'doing' : doingCount, 'done' : doneCount}
-  },
+  }
 
 
-  add : async function(name, tags){
+  async add (name, tags){
     tags = JSON.parse(tags)
     const id = this.createId(name)
 
@@ -52,8 +50,8 @@ TodoHandler.prototype = {
     this.save()
     this.show('all')
     return
-  },
-  update : async function(id, statusToChange){
+  }
+  async update (id, statusToChange){
     try{
       let todo = this.todoChecker.getTodoById(todos, id)
       let {name, tags, status} = todo
@@ -72,8 +70,8 @@ TodoHandler.prototype = {
     } catch(e){
       console.log(e.message)
     }
-  } ,
-  delete : async function(id) {
+  } 
+  async delete (id) {
     try{
       let index = this.todoChecker.getTodoIndex(todos, id)
       console.log(this.resultMsg.deleteMsg(todos[index].name, todos[index].status))
@@ -84,8 +82,8 @@ TodoHandler.prototype = {
     } catch (e){
       console.log(e.message)
     }
-  },
-  show : function(option) {
+  }
+  show (option) {
     const counted = this.countByStatus()
     if (option === 'all'){
       console.log(this.resultMsg.showAllMsg(counted)) 
@@ -94,7 +92,7 @@ TodoHandler.prototype = {
     result = todos.filter(v => v.status === option).map(v => v.name)
     console.log(this.resultMsg.showStatus(result, option, counted)) 
     return 
-  },
+  }
 }
 
 module.exports = TodoHandler;
