@@ -64,8 +64,7 @@ Todo.prototype.add = function(name, tag) {
 		id: id
 	};
 	this.todoList.push(newData);
-	const prevData = {};
-	Object.assign(prevData, newData);
+	const prevData = Object.assign({}, newData);
 	prevData.status = '삭제';
 	console.log(`${newData.name} 1개가 추가되었습니다. (id : ${newData.id})`);
 	todoLog.addLog('add', prevData, newData, this.todoList.length - 1);
@@ -99,8 +98,7 @@ Todo.prototype.delete = function(id) {
 	const deletingName = this.todoList[index].name;
 
 	console.log(`${deletingName}가 ${this.todoList[index].status}에서 삭제됐습니다.`);
-	const nextData = {};
-	Object.assign(nextData, this.todoList[index]);
+	const nextData = Object.assign({}, this.todoList[index]);
 	nextData.status = '삭제';
 	todoLog.addLog('delete', this.todoList[index], nextData, index);
 	this.todoList.splice(index, 1);
@@ -122,8 +120,7 @@ Todo.prototype.update = function(id, status) {
 	} else if (this.todoList[index].status === status) {
 		throw new Error('STATUS_ERROR');
 	}
-	const prevData = {};
-	Object.assign(prevData, this.todoList[index]);
+	const prevData = Object.assign({}, this.todoList[index]);
 	this.todoList[index].status = status;
 	todoLog.addLog('update', prevData, this.todoList[index], index);
 
