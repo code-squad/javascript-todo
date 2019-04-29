@@ -49,8 +49,12 @@ Controller.prototype = {
     showFinalResult() {
         setTimeout(() => { this.showAll() }, this.SHOW_DELAY);
     },
-    undo () {
+    undo() {
         const historyObj = this.model.undo();
+        this.view.showUndoRedoResult(historyObj);
+    },
+    redo() {
+        const historyObj = this.model.redo();
         this.view.showUndoRedoResult(historyObj);
     }
 }
