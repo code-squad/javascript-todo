@@ -1,6 +1,7 @@
-const ErrorHandler = function (controller, fontColor) {
+const ErrorHandler = function (controller, fontColor, ID_LENGTH) {
     this.controller = controller;
     this.fontColor = fontColor;
+    this.ID_LENGTH = ID_LENGTH;
     this.errorMsgMap = {
         DollarCharError: '올바른 명령기호($)를 사용해 주세요.',
         MatchedDataError: '일치하는 id가 없습니다.',
@@ -11,7 +12,7 @@ const ErrorHandler = function (controller, fontColor) {
 }
 ErrorHandler.prototype = {
     printErrorMessage(errorMsg) {
-        if (errorMsg.length === 4) this.printSameStatusError(errorMsg);
+        if (errorMsg.length === this.ID_LENGTH) return this.printSameStatusError(errorMsg);
         if (!this.errorMsgMap[errorMsg]) return console.log('올바른 명령어를 사용해주세요.');
         console.log(this.errorMsgMap[errorMsg]);
     },

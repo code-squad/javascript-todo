@@ -5,7 +5,7 @@ TodoUtil.prototype = {
         return command.split('$');
     },
     getKeyCommand(command) {
-        const KeyMap = {
+        const keyMap = {
             'show': 'showData',
             'add': 'addData',
             'delete': 'deleteData',
@@ -14,7 +14,7 @@ TodoUtil.prototype = {
             'redo': 'redoData'
         }
         const keyCommand = command.shift();
-        return KeyMap[keyCommand]
+        return keyMap[keyCommand]
     },
     checkArgsNumber(keyCommand, restCommand) {
         const argsNumber = {
