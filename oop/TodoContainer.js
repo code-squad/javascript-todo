@@ -53,7 +53,8 @@ class TodoContainer {
     }
 
     this._pushDiff(new DiffState(CUD.DELETE, this.container[indexOfTarget]));
-    this.container.splice(indexOfTarget);
+    this.container.splice(indexOfTarget, 1);
+
     console.log(`${id}번 항목이 삭제되었습니다.`);
   }
 
