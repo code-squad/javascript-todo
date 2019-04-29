@@ -7,7 +7,7 @@ class Controller {
         this.commandManager = commandManager;
     }
 
-    instruct (input, showManager, addManager) {
+    instruct (input, showManager, addManager, deleteManager) {
         if(!(this.errorHandler.usageErrorCheck(input))) return;
         const inputArray = this.utility.splitInput(input);
         const command = inputArray[0];
@@ -18,6 +18,10 @@ class Controller {
                 break;
             case 'add' :
                 this.commandManager.executeCommand(inputArray, addManager);
+                this.throwSetTimeForShowAll(showManager);
+                break;
+            case 'delete':
+                this.commandManager.executeCommand(inputArray, deleteManager);
                 this.throwSetTimeForShowAll(showManager);
                 break;
         }

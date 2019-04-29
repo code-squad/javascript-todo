@@ -14,6 +14,10 @@ class CommandManager {
                 const tag = inputArray[2];
                 commandObj.execute(name, tag);
                 break;
+            case 'delete':
+                const id = inputArray[1];
+                commandObj.execute(id);
+                break;
         }
     }
 }
