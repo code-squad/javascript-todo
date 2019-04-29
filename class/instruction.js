@@ -89,11 +89,7 @@ const Instruction = class {
 			return;
 		}
 		
-		let preObj = {};
-		if (arguments.length === 2) {
-			preObj = this.utils.deepCopy(targetObj);
-		}
-		
+        const preObj = this.utils.deepCopy(targetObj);
 		targetObj.status = status;
 		const nextObj = this.utils.deepCopy(targetObj);
 
@@ -158,7 +154,29 @@ const Instruction = class {
 		console.log(message);
 		
 		if (this.commandHistory.pointer > -1) this.commandHistory.pointer--;
-	}	
+    }	
+    
+    redo() {
+		if (this.commandHistory.pointer < 2) this.commandHistory.pointer++;
+		
+		const targetObject = this.commandHistory.historyArr[this.commandHistory.pointer];		
+		const [command, preObj, nextObj, checkSum] = [targetObject.cmd, targetObject.pre, targetObject.next, true];
+
+		let message = ``;
+
+		if (command === 'add') {
+			convertedData.push(preObj);
+			message += `${preObj.id}번 항목 '${preObj.name}'가 ${preObj.status}에 추가되었습니다`;
+			
+		} else if (command === 'delete') {
+			this.delete(preObj.id, checkSum);
+			message += `${preObj.id}번 항목 '${preObj.name}'가 ${preObj.status} 상태에서 삭제됐습니다`;
+			
+		} else if (command === 'update') {
+			this.update(nextObj.id, nextObj.status, checkSum);
+		}
+		console.log(message);
+	}
 
 };
 
