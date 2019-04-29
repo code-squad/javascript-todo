@@ -23,7 +23,8 @@ class Controller {
                 this.throwSetTimeForShowAll(showManager);
                 break;
             case 'delete':
-                this.commandManager.executeCommand(inputArray, deleteManager);
+                resultData = this.commandManager.executeCommand(inputArray, deleteManager);
+                this.view.printDeleteMessage(resultData);
                 this.throwSetTimeForShowAll(showManager);
                 break;
             // case 'update':

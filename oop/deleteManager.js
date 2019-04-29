@@ -5,7 +5,7 @@ class DeleteMananger {
     }
     execute(id) {
         const objToDelete = this.model.deleteTodoObject(id);
-        this.printer.printDeleteMessage(objToDelete);
+        return objToDelete;
     }
 }
 

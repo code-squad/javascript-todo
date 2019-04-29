@@ -8,15 +8,15 @@ class CommandManager {
             case 'show' :
                 const statusShow = inputArray[1];
                 resultData = commandObj.execute(statusShow);
-                return resultData;
+                break;
             case 'add' :
                 const name = inputArray[1];
                 const tag = inputArray[2];
                 resultData = commandObj.execute(name, tag);
-                return resultData;
+                break;
             case 'delete':
                 const id = inputArray[1];
-                commandObj.execute(id);
+                resultData = commandObj.execute(id);
                 break;
             // case 'update':
             //     const id = inputArray[1];
@@ -24,6 +24,8 @@ class CommandManager {
             //     commandObj.execute(id, status);
             //     break;
         }
+        
+        return resultData;
     }
 }
 

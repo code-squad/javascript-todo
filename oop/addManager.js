@@ -6,7 +6,6 @@ class AddManager {
     execute (name, tag) {
         const objToAdd = {'name': name, 'status': 'todo', 'tags': tag.match(/[a-z0-9]+/g), 'id': this.utility.getRandomID()};
         this.model.addTodoObject(objToAdd);
-        //this.printer.printAddMessage(objToAdd);
         return objToAdd;
     }
 }

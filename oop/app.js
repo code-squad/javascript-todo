@@ -36,7 +36,7 @@ function test (input) {
     const commandManager = new CommandManager();
     const showManager    = new ShowManager(model);
     const addManager     = new AddManager(model, utility);
-    const deleteManager  = new DeleteManager(model, view);
+    const deleteManager  = new DeleteManager(model);
     //const updateManager  = new UpdateManager(model);
     
     const controller     = new Controller(model, utility, view, errorHandler, commandManager);
@@ -48,5 +48,5 @@ function test (input) {
 // test('show$done');
 // test('show$todo');
 // test('show$doing');
-test('add$sleep$["favorite"]')
-//test('delete$1599');
+//test('add$sleep$["favorite"]')
+test('delete$1556520122671');
