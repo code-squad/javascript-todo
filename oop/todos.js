@@ -135,11 +135,6 @@ module.exports = class Todos {
             this.recordPointer = 0;
         }
     }
-    
-
-    addDeletedObj(todosObj, data) {
-        data.push(todosObj);
-    }
 
     undo() {
         if (this.isValidPointerLocation('undo')) {
@@ -155,7 +150,7 @@ module.exports = class Todos {
                     this.delete(todosObj.id);
                     return `'${todosObj.id}번, ${todosObj.name}' 항목이 todo에서 삭제되었습니다.`;
                 case 'delete':
-                    this.addDeletedObj(todosObj, this._data);
+                    this._data.push(todosObj);
                     return `'${todosObj.id}번, ${todosObj.name}' 항목이 삭제에서 todo상태로 되었습니다.`;
                 case 'update':
                     const originalStatus = appParameterArr[2];
@@ -175,7 +170,7 @@ module.exports = class Todos {
             this.moveRecordPointer('redo');
             switch (appWord) {
                 case 'add':
-                    this.addDeletedObj(todosObj, this._data);
+                    this._data.push(todosObj);
                     return `'${todosObj.id}번, ${todosObj.name}' 항목이 삭제에서 todo상태로 되었습니다.`;
                 case 'delete':
                     this.delete(todosObj.id)
