@@ -5,54 +5,55 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-function App() {
-    this.errorChecker = new ErrorChecker();
-    this.editor = new Editor(this.errorChecker);
-    this.viewer = new Viewer();
+// param으로 obj를 받으면 obj에 무엇이 들어있는지 알기 어려운것같은데 해결방안이 있을까요? 
+function App(obj) {
+    this.errorChecker = obj.errorChecker;
+    this.editor = obj.editor;
+    this.viewer = obj.viewer;
 }
-// function App(editor , viewer , errorChecker) {
-//     this.editor = editor;
-//     this.viewer = viewer;
-//     this.errorChecker = errorChecker;
-// }
 
 
 
 App.prototype = {
 
-    
 
     run() {
-        const self = this;
 
-        function delayShow(time) {
-            return new Promise(function (resolve, reject) {
-                setTimeout(() => {
-                    self.viewer.showAll()
-                    self.run();
-                }, time);
-            })
-        }
-
-        rl.question('명령을 입력하세요: ', async (input) => {
+        rl.question('명령을 입력하세요: ', (input) => {
             if (input === 'q') return rl.close();
             try {
-                [key, ...message] = self.parseCommand(input)
+                [key, ...message] = this.parseCommand(input)
                 this.errorChecker.$check(message)
 
                 if (key === "show") {
                     [status] = message
-                    status === "all" ? self.viewer.showAll() : self.viewer.showFiltered(status);
-                    return self.run();
+                    status === "all" ? this.viewer.showAll() : this.viewer.showFiltered(status);
+                    return this.run();
                 }
 
+                const result = this.editor[key + 'Todo'](...message);
 
-                const result = self.editor[key + 'Todo'](...message);
-                await self.viewer[key + 'Message'](...result)
-                await delayShow(1000);
+                Promise.resolve()
+                    .then(() => {
+                        if (key === 'update') {
+                            return new Promise((resolve) => {
+                                setTimeout(() => {
+                                    this.viewer[key + 'Message'](...result)
+                                    resolve()
+                                }, 3000)
+                            })
+                        }
+                        this.viewer[key + 'Message'](...result)
+                    })
+                    .then(() => {
+                        setTimeout(() => {
+                            this.viewer.showAll()
+                            this.run();
+                        }, 1000);
+                    })
             }
             catch (e) {
-                console.log(e.message);
+                this.viewer.errorMessage(e);
                 this.run();
             }
 
@@ -87,13 +88,8 @@ Editor.prototype = {
     updateTodo(_id, _status) {
 
         const selectedObject = this.findSelectedIdObj(_id);
-
-        schedule_list.some(todo => {
-            if (todo.id === parseInt(_id)) {
-                this.errorChecker.statusCheck(todo.status, _status)
-                return todo.status = _status
-            }
-        });
+        this.errorChecker.statusCheck(selectedObject.status,_status);
+        selectedObject.status = _status;
 
         return this.filterNameStatusArrayfromSelectedObject(selectedObject);
 
@@ -102,6 +98,7 @@ Editor.prototype = {
     deleteTodo(_id) {
 
         const selectedObject = this.findSelectedIdObj(_id);
+        
 
         schedule_list.some((todo, index) => {
             if (todo.id === parseInt(_id)) return schedule_list.splice(index, 1)
@@ -114,16 +111,16 @@ Editor.prototype = {
         return Date.now()
     },
 
-    filterNameStatusArrayfromSelectedObject(_obj){
-        const filteredArray = Object.entries(_obj).filter(([key, value]) =>{
-            const seletedStatus = ['name','status'];
+    filterNameStatusArrayfromSelectedObject(_obj) {
+        const filteredArray = Object.entries(_obj).filter(([key, value]) => {
+            const seletedStatus = ['name', 'status'];
             return seletedStatus.includes(key)
         })
-        .map(([key, value]) => value);
+            .map(([key, value]) => value);
         return filteredArray;
     },
 
-    findSelectedIdObj(_id){
+    findSelectedIdObj(_id) {
         const findedObj = schedule_list.find(todo => todo.id === parseInt(_id));
         if (this.errorChecker.idCheck(findedObj));
         return findedObj;
@@ -160,16 +157,15 @@ Viewer.prototype = {
     },
 
     updateMessage(_name, _status) {
-        return new Promise(function (resolve, reject) {
-            setTimeout(() => {
-                console.log(`${_name}의 상태가 ${_status}로 변경되었습니다.`);
-                resolve();
-            }, 3000)
-        })
+        console.log(`${_name}의 상태가 ${_status}로 변경되었습니다.`);
     },
 
     deleteMessage(_name, _status) {
         console.log(`${_name} ${_status}가 목록에서 삭제 되었습니다.`);
+    },
+    
+    errorMessage(errorObject){
+        console.log(errorObject.message)
     }
 }
 
@@ -191,12 +187,16 @@ ErrorChecker.prototype = {
 
 }
 
-// const schedule_errorChecker = new ErrorChecker();
-// const schedule_editor = new Editor(schedule_errorChecker);
-// const schedule_viewer = new Viewer();
-// const schedule_manager = new App(schedule_editor,schedule_viewer,schedule_errorChecker);
+const schedule_errorChecker = new ErrorChecker();
+const schedule_editor = new Editor(schedule_errorChecker);
+const schedule_viewer = new Viewer();
 
-const schedule_manager = new App();
+const schedule_manager =  new App({
+    errorChecker : schedule_errorChecker,
+    editor : schedule_editor,
+    viewer : schedule_viewer
+})
+
 schedule_manager.run()
 // schedule_manager.run('show$todo');
 // schedule_manager.run('add$운동하기$exercise');
