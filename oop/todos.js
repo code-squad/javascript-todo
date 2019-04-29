@@ -4,6 +4,7 @@ module.exports = class Todos {
         this._data = data;
         this.userInputRecord = userInputRecord;
         this.todosRecord = todosReocrd;
+        this.recordLength = 3;
         this.recordPointer = 0;
         this.statusArr = ['todo', 'doing', 'done'];
     }
@@ -104,36 +105,34 @@ module.exports = class Todos {
         }
     }
 
-    limitRecordPointer(appWord) {
+    isValidPointerLocation(appWord) {
         switch (appWord) {
             case 'undo':
                 return this.recordPointer < this.todosRecord.length;
             case 'redo':
-                return this.recordPointer <= this.todosRecord.length && this.recordPointer > 0
+                return this.recordPointer > 0
         }
     }
 
-    recordSequential(todosObj, userInputArr) {
+    addTempData(todosObj, userInputArr) {
         this.userInputRecord.unshift(userInputArr);
         this.todosRecord.unshift(todosObj);
-        this.userInputRecord.splice(3, 1);
-        this.todosRecord.splice(3, 1);
     }
 
-    recordUnsequential(todosObj, userInputArr) {
-        this.userInputRecord.splice(0, this.recordPointer);
-        this.todosRecord.splice(0, this.recordPointer);
-        this.userInputRecord.unshift(userInputArr);
-        this.todosRecord.unshift(todosObj);
-        this.recordPointer = 0;
+    deleteTempData(start, num) {
+        this.userInputRecord.splice(start, num);
+        this.todosRecord.splice(start, num);
     }
 
     storeHistoryRecord(todosObj, appWord, ...parameter) {
         const userInputArr = [appWord, parameter];
         if (this.recordPointer === 0) {
-            this.recordSequential(todosObj, userInputArr);
+            this.addTempData(todosObj, userInputArr);
+            this.deleteTempData(this.recordLength, 1);
         } else {
-            this.recordUnsequential(todosObj, userInputArr);
+            this.deleteTempData(0, this.recordPointer);
+            this.addTempData(todosObj, userInputArr);
+            this.recordPointer = 0;
         }
     }
     
