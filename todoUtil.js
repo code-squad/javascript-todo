@@ -25,7 +25,7 @@ TodoUtil.prototype = {
             undoData: 1,
             redoData: 1
         }
-        if (argsNumber[keyCommand] !== restCommand.length) throw Error('MaxArgsNumberError')
+        if (argsNumber[keyCommand] !== restCommand.length) throw Error('ArgsNumberError')
     }
 }
 module.exports = TodoUtil;
