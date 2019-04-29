@@ -13,12 +13,12 @@ class TodoHandler  {
     this.history = {
       undo: [],
       redo: [],
-      checkStackFull: function (maxLength){
-        if(this.undo.length === maxLength) return true
+      checkStackCount: function (stack, maxLength){
+        if(stack.length === maxLength) return true
         return false
       },
       append: function (command, todo){
-        if(this.checkStackFull(3)){
+        if(this.checkStackCount(this.undo, 3)){
           this.undo.shift()
           this.undo.push({command, todo})
           return
@@ -114,11 +114,9 @@ class TodoHandler  {
   }
 
   undo () {
-    
+    if(this.history.checkStackCount(this.history.undo, 0)) throw new Error(`이전에 수행한 명령이 없습니다.`) 
     let {command, todo} = this.history.undo.pop()
-    
-    if(todo === undefined) throw new Error(`이전에 수행한 명령이 없습니다.`) 
-    
+
     if(command === "add"){
       const index = this.todoGetter.getTodoIndex(todos, todo.id)
       todos.splice(index, 1);
@@ -137,7 +135,7 @@ class TodoHandler  {
         name: todo.name, 
         currentStatus: modifiedTodo.status, 
         postStatus: todo.status
-      }))
+      })) 
       todo = modifiedTodo
     }
     if(command === "delete"){
@@ -151,8 +149,9 @@ class TodoHandler  {
     this.history.redo.push({command, todo})
   }
   redo () {
+    if (this.history.checkStackCount(this.history.redo, 0)) throw new Error("이전에 undo 를 실행하지 않았습니다.")
     const {command, todo} = this.history.redo.pop()
-    if (todo === undefined) throw new Error("이전에 undo 를 실행하지 않았습니다.")
+    
     let index
     if(command === 'add'){
       todos.push(todo)
@@ -172,6 +171,7 @@ class TodoHandler  {
         currentStatus: originalTodo.status, 
         postStatus: todo.status
       }))
+      todo = originalTodo
     }
     if(command === 'delete'){
       index = this.todoGetter.getTodoIndex(todos, todo.id)
@@ -182,6 +182,7 @@ class TodoHandler  {
         command: command
       }))
     }
+    this.history.append(command, todo)
   }
 }
 
