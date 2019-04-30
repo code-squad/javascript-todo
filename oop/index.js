@@ -13,7 +13,15 @@ const inputPrompt = readline.createInterface({
 
 const todoError = new TodoError();
 const history = new History({ maxLength: 3, msgObj });
-const todoManager = new TodoManager({ data, inputPrompt, msgObj, todoError, history });
+const todoManager = new TodoManager({
+  data,
+  inputPrompt,
+  msgObj,
+  todoError,
+  history,
+  delayTime: 1000,
+  updateDelayTime: 3000
+});
 
 console.log('0을 입력하면 프로그램이 종료됩니다.');
 inputPrompt.setPrompt('명령하세요 : ');

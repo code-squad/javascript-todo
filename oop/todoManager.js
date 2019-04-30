@@ -1,13 +1,15 @@
 const Todo = require('./todo');
 
 class TodoManager {
-  constructor({ data, inputPrompt, msgObj, todoError, history }) {
+  constructor({ data, inputPrompt, msgObj, todoError, history, delayTime, updateDelayTime }) {
     this.countedStatus = { todo: 0, doing: 0, done: 0 };
     this.managedlist = this.initManagedlist(data);
     this.msgObj = msgObj;
     this.inputPrompt = inputPrompt;
     this.todoError = todoError;
     this.history = history;
+    this.delayTime = delayTime;
+    this.updateDelayTime = updateDelayTime;
   }
 
   add(name, tags = '[]', status = 'todo') {
@@ -73,8 +75,7 @@ class TodoManager {
       methodName: 'update',
       targetTodo: Object.assign({}, changeTargetTodo),
       message: this.msgObj.update(changeTargetTodo.name, changeStatus),
-      changeStatus,
-      isUndo: false
+      changeStatus
     });
 
     this.history.append({
@@ -84,22 +85,17 @@ class TodoManager {
     });
   }
 
-  manageTodoList({ methodName, targetTodo, message, changeStatus, isUndo = false }) {
+  manageTodoList({ methodName, targetTodo, message, changeStatus }) {
     if (methodName === 'update') {
-      if (isUndo) {
-        const tempStatus = targetTodo.status;
-        targetTodo.status = changeStatus;
-        changeStatus = tempStatus;
-      }
-
       this.countedStatus[targetTodo.status] -= 1;
       this.countedStatus[changeStatus] += 1;
       targetTodo.status = changeStatus;
 
       setTimeout(() => {
-        this.printMsg(message, 1000);
-      }, 3000);
-      return 1;
+        this.printMsg(message, this.delayTime);
+      }, this.updateDelayTime);
+
+      return undefined;
     }
 
     this.managedlist =
@@ -107,7 +103,7 @@ class TodoManager {
         ? this.managedlist.concat(targetTodo)
         : this.managedlist.filter(todo => todo.id !== targetTodo.id);
     this.countedStatus[targetTodo.status] += methodName === 'add' ? 1 : -1;
-    this.printMsg(message, 1000);
+    this.printMsg(message, this.delayTime);
   }
 
   initManagedlist(data) {
@@ -165,7 +161,9 @@ class TodoManager {
   }
 
   undo() {
-    const { methodName, todo, changeStatus } = this.history.undo();
+    const undoData = this.history.undo();
+    const { methodName, todo } = undoData;
+    let { changeStatus } = undoData;
 
     const undoMethodMapping = {
       add: 'delete',
@@ -173,12 +171,17 @@ class TodoManager {
       update: 'update'
     };
 
+    if (methodName === 'update') {
+      const tempStatus = todo.status;
+      todo.status = changeStatus;
+      changeStatus = tempStatus;
+    }
+
     const manageTodoParams = {
       methodName: undoMethodMapping[methodName],
       targetTodo: todo,
       changeStatus,
-      message: this.msgObj.getUndoMessage(methodName),
-      isUndo: methodName === 'update' ? true : false
+      message: this.msgObj.getUndoMessage(methodName)
     };
 
     this.manageTodoList(manageTodoParams);
