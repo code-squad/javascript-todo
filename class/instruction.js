@@ -43,7 +43,7 @@ const Instruction = class {
     }
 
     add(name, tags) {
-        const id = this.utils.getRandomId(this.maxIdNum, this.minIdNum);
+        const id = Utils.getRandomId(this.maxIdNum, this.minIdNum);
 	let obj = {
 		name, 
 		tags, 
