@@ -1,17 +1,18 @@
 const datalist = require('./data').todos;
 const readline = require('readline');
 const UndoableApp = require('./undoable');
+const ComUtil = require('./commonUtility');
 const inputReadline = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
 });
-
 
 const TodoApp = function (datalist) {
     this.datalist = datalist;
 };
 
 const undoableApp = new UndoableApp(datalist, inputReadline);
+const comUtil = new ComUtil(datalist,inputReadline);
 
 
 TodoApp.prototype = {
@@ -22,7 +23,7 @@ TodoApp.prototype = {
     },
 
     addTodo(command, todoElement, todoTag) {
-        const id = this.createNewID(this.datalist, 10000)
+        const id = comUtil.createNewID(this.datalist, 10000)
 
         const newTodo = {
             'name': todoElement,
@@ -45,11 +46,11 @@ TodoApp.prototype = {
 
     // deleteTodo
     deleteExecutor(command, deleteID) {
-        return this.checkID(deleteID) ? this.deleteTodo(command, deleteID) : this.printError()
+        return comUtil.checkID(deleteID) ? this.deleteTodo(command, deleteID) : comUtil.printError()
     },
 
     deleteTodo(command, deletedID) {
-        const currentIndex = this.getIndex(deletedID);
+        const currentIndex = comUtil.getIndex(deletedID);
         const [splicedData] = this.datalist.splice(currentIndex, 1);
         undoableApp.undoable(command, splicedData);
         undoableApp.manageMaxLengthOfPastArr(4);
@@ -65,13 +66,13 @@ TodoApp.prototype = {
 
     // updateTodo
     updateExecutor(command, id, updatedStatus) {
-        return this.checkID(id) ? this.updateTodo(command, id, updatedStatus) : this.printError()
+        return comUtil.checkID(id) ? this.updateTodo(command, id, updatedStatus) : comUtil.printError()
     },
 
 
     updateTodo(command, id, updatedStatus) {
-        const currentIndex = this.getIndex(id);
-        if (this.checkDuplicatedStatus(currentIndex, updatedStatus)) {
+        const currentIndex = comUtil.getIndex(id);
+        if (comUtil.checkDuplicatedStatus(currentIndex, updatedStatus)) {
             console.log('\n');
             inputReadline.prompt();
             return;
@@ -96,7 +97,7 @@ TodoApp.prototype = {
         const showElements = ['todo', 'doing', 'done'];
         const assignShowElements = {'todo': undefined, 'doing' : undefined, 'done' : undefined};
         for(let i = 0; i < showElements.length; i++) {
-            assignShowElements[showElements[i]] = this.checkStatus(this.datalist, showElements[i]);
+            assignShowElements[showElements[i]] = comUtil.checkStatus(this.datalist, showElements[i]);
         }
         return assignShowElements
     },
@@ -132,55 +133,10 @@ TodoApp.prototype = {
         }, 1000);
     },
 
-    splitInput(inputData) {
-        const splitOnDollarSymbol = inputData.split("$");
-        return splitOnDollarSymbol;
-    },
-
-    printError() {
-        console.error('입력하신 값이 존재하지않습니다. \n');
-        inputReadline.prompt();
-        return;
-    },
-
-
-    getIndex(inputId) {
-        return this.datalist.map((element) => { return element["id"] }).indexOf(inputId);
-    },
-
-
-    checkStatus(objData, status) {
-        return objData.filter(list => list.status === status).map(list => { return list.name });
-    },
-
-
-    createNewID(datalist, maxNumOfID) {
-        const newID = Math.floor(Math.random() * maxNumOfID) + 1;
-        const checkDuplicatedID = this.checkID(newID);
-        if (typeof checkDuplicatedID !== 'undefined') createNewID(datalist, maxNumOfID);
-
-        return newID;
-    },
-
-
-    checkID(inputID) {
-        const [matchedListByID] = this.datalist.filter(list => {
-            return list.id == inputID
-        })
-        return matchedListByID;
-    },
-
-
-    checkDuplicatedStatus(currentIndex, updatedStatus) {
-        if (this.datalist[currentIndex].status === updatedStatus) {
-            console.log('입력한 상태와 동일한 상태입니다')
-            return true;
-        }
-    },
 
     
     checkCommands(userInput) {
-        const splitUserInput = this.splitInput(userInput);
+        const splitUserInput = comUtil.splitInput(userInput);
         if (userInput.split('$').length < 1 || userInput.split('$').length > 3) {
             console.log("입력값을 확인해주세요");
             inputReadline.setPrompt('명령어를 입력하세요(종료하려면 q를 누르세요): ');
@@ -207,14 +163,14 @@ TodoApp.prototype = {
                 this.deleteExecutor(command, Number(commandElement));
                 break;
             case 'undo':
-            undoableApp.save = true;
+                undoableApp.save = true;
                 undoableApp.undo();
                 break;
             case 'redo':
                 undoableApp.redo();
                 break;
             default:
-                this.printError();
+                comUtil.printError();
        }
     },
 
