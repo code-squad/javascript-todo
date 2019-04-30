@@ -174,58 +174,35 @@ class TodoManager {
 
   undo() {
     const { methodName, todo, changeStatus } = this.history.undo();
-    switch (methodName) {
-      case 'add':
-        this.manageTodoList({
-          methodName: 'delete',
-          targetTodo: todo,
-          message: this.msgObj.getUndoMessage(methodName)
-        });
-        break;
-      case 'delete':
-        this.manageTodoList({
-          methodName: 'add',
-          targetTodo: todo,
-          message: this.msgObj.getUndoMessage(methodName)
-        });
-        break;
-      case 'update':
-        this.manageTodoList({
-          methodName,
-          targetTodo: todo,
-          message: this.msgObj.getUndoMessage(methodName),
-          changeStatus,
-          isUndo: true
-        });
-    }
+
+    const undoMethodMapping = {
+      add: 'delete',
+      delete: 'add',
+      update: 'update'
+    };
+
+    const manageTodoParams = {
+      methodName: undoMethodMapping[methodName],
+      targetTodo: todo,
+      changeStatus,
+      message: this.msgObj.getUndoMessage(methodName),
+      isUndo: methodName === 'update' ? true : false
+    };
+
+    this.manageTodoList(manageTodoParams);
   }
 
   redo() {
     const { methodName, todo, changeStatus } = this.history.redo();
-    switch (methodName) {
-      case 'add':
-        this.manageTodoList({
-          methodName,
-          targetTodo: todo,
-          message: this.msgObj.getRedoMessage(methodName)
-        });
-        break;
-      case 'delete':
-        this.manageTodoList({
-          methodName,
-          targetTodo: todo,
-          message: this.msgObj.getRedoMessage(methodName)
-        });
-        break;
-      case 'update':
-        this.manageTodoList({
-          methodName,
-          targetTodo: todo,
-          message: this.msgObj.getRedoMessage(methodName),
-          changeStatus,
-          isUndo: false
-        });
-    }
+
+    const manageTodoParams = {
+      methodName,
+      targetTodo: todo,
+      changeStatus,
+      message: this.msgObj.getUndoMessage(methodName)
+    };
+
+    this.manageTodoList(manageTodoParams);
   }
 }
 module.exports = TodoManager;
