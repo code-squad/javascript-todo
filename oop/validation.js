@@ -25,7 +25,7 @@ class Validation {
                 }
                 break;
             case 'redo' :
-                if (this.commandManager.undoStackPointer === -1) {
+                if (this.commandManager.undoPointer === -1) {
                     this.view.printRedoErrorMessage();
                     return false;
                 }

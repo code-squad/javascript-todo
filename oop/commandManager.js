@@ -3,28 +3,28 @@ class CommandManager {
         this.addCommand = addCommand;
         this.deleteCommand = deleteCommand;
         this.updateCommand = updateCommand;
-        this.commandStack = [];
+        this.commandQueue = [];
         this.commandPointer = -1;
-        this.undoStack = [];
-        this.undoStackPointer = -1;
+        this.undoQueue = [];
+        this.undoPointer = -1;
     }
 
     manageQueue(command) {
-        if (this.commandStack.length >= 3) {
-            this.commandStack.shift();
+        if (this.commandQueue.length >= 3) {
+            this.commandQueue.shift();
             this.commandPointer--;
             switch(command) {
                 case 'add': 
-                    this.addCommand.historyStack.shift();
-                    this.addCommand.historyStackPointer--; 
+                    this.addCommand.historyQueue.shift();
+                    this.addCommand.historyPointer--; 
                     break;
                 case 'delete':
-                    this.deleteCommand.historyStackPointer--; 
-                    this.deleteCommand.historyStack.shift();
+                    this.deleteCommand.historyQueue.shift();
+                    this.deleteCommand.historyPointer--; 
                     break;
                 case 'update':
-                    this.updateCommand.historyStackPointer--; 
-                    this.updateCommand.historyStack.shift();
+                    this.updateCommand.historyQueue.shift();
+                    this.updateCommand.historyPointer--; 
                     break;
             }
         }
@@ -35,9 +35,9 @@ class CommandManager {
         let status, name, tag, id;
         let resultData;
 
-        if (this.undoStack.length !== 0) {
-            this.undoStack = [];
-            this.undoStackPointer = -1;
+        if (this.undoQueue.length !== 0) {
+            this.undoQueue = [];
+            this.undoPointer = -1;
         }
 
         if (command !== 'show') 
@@ -49,20 +49,20 @@ class CommandManager {
                 resultData = commandObj.execute(status);
                 break;
             case 'add' :
-                this.commandStack.push('add');
+                this.commandQueue.push('add');
                 this.commandPointer++;
                 name = inputArray[1];
                 tag = inputArray[2];
                 resultData = commandObj.execute(name, tag);
                 break;
             case 'delete':
-                this.commandStack.push('delete');
+                this.commandQueue.push('delete');
                 this.commandPointer++;
                 id = inputArray[1];
                 resultData = commandObj.execute(id);
                 break;
             case 'update':
-                this.commandStack.push('update');
+                this.commandQueue.push('update');
                 this.commandPointer++;
                 id = inputArray[1];
                 status = inputArray[2];
@@ -73,30 +73,30 @@ class CommandManager {
     }
 
     undo() {
-        const command = this.commandStack[this.commandPointer--];
-        this.commandStack.pop();
+        const command = this.commandQueue[this.commandPointer--];
+        this.commandQueue.pop();
         let undoObj;
         switch(command) {
             case 'add' :
-                this.undoStack.push('add');
-                this.undoStackPointer++;
+                this.undoQueue.push('add');
+                this.undoPointer++;
                 undoObj = this.addCommand.undo();
                 return [command, undoObj];
             case 'delete' :
-                this.undoStack.push('delete');
-                this.undoStackPointer++;
+                this.undoQueue.push('delete');
+                this.undoPointer++;
                 undoObj = this.deleteCommand.undo();
                 return [command, undoObj];
             case 'update' :
-                this.undoStack.push('update');
-                this.undoStackPointer++;
+                this.undoQueue.push('update');
+                this.undoPointer++;
                 undoObj = this.updateCommand.undo();
                 return [command, undoObj];
         }
     }
 
     redo() {
-        const command = this.undoStack[this.undoStackPointer--];
+        const command = this.undoQueue[this.undoPointer--];
         let redoObj;
         switch(command) {
             case 'add' :
