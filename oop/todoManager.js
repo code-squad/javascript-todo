@@ -85,37 +85,29 @@ class TodoManager {
   }
 
   manageTodoList({ methodName, targetTodo, message, changeStatus, isUndo = false }) {
-    switch (methodName) {
-      case 'add':
-        this.managedlist.push(targetTodo);
-        this.countedStatus[targetTodo.status] += 1;
-
-        this.printMsg(message, 1000);
-        break;
-
-      case 'delete':
-        this.managedlist = this.managedlist.filter(todo => todo.id !== targetTodo.id);
-        this.countedStatus[targetTodo.status] -= 1;
-
-        this.printMsg(message, 1000);
-        break;
-
-      case 'update':
-        if (isUndo) {
-          const tempStatus = targetTodo.status;
-          targetTodo.status = changeStatus;
-          changeStatus = tempStatus;
-        }
-
-        this.countedStatus[targetTodo.status] -= 1;
-        this.countedStatus[changeStatus] += 1;
+    if (methodName === 'update') {
+      if (isUndo) {
+        const tempStatus = targetTodo.status;
         targetTodo.status = changeStatus;
+        changeStatus = tempStatus;
+      }
 
-        setTimeout(() => {
-          this.printMsg(message, 1000);
-        }, 3000);
-        break;
+      this.countedStatus[targetTodo.status] -= 1;
+      this.countedStatus[changeStatus] += 1;
+      targetTodo.status = changeStatus;
+
+      setTimeout(() => {
+        this.printMsg(message, 1000);
+      }, 3000);
+      return 1;
     }
+
+    this.managedlist =
+      methodName === 'add'
+        ? this.managedlist.concat(targetTodo)
+        : this.managedlist.filter(todo => todo.id !== targetTodo.id);
+    this.countedStatus[targetTodo.status] += methodName === 'add' ? 1 : -1;
+    this.printMsg(message, 1000);
   }
 
   initManagedlist(data) {
