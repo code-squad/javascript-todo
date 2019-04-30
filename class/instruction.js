@@ -136,53 +136,53 @@ const Instruction = class {
 	this.commandHistory.pointer++;
 	}
 	
-		makeLogObj(commandHistory) {
+	makeLogObj(commandHistory) {
+	    const targetObject = commandHistory.historyArr[this.commandHistory.pointer];
+	    return {command : targetObject.cmd, preObj : targetObject.pre, nextObj : targetObject.next, checkSum : true, message : ``};
+	}
+
+		
+	makeLogObj(commandHistory) {
 		const targetObject = commandHistory.historyArr[this.commandHistory.pointer];
 		return {command : targetObject.cmd, preObj : targetObject.pre, nextObj : targetObject.next, checkSum : true, message : ``};
 	}
 
     undo() {
-	const targetObject = this.commandHistory.historyArr[this.commandHistory.pointer];
-	const [command, preObj, checkSum] = [targetObject.command, targetObject.pre, true];
 
-	let message = ``;
+		const log = this.makeLogObj(this.commandHistory);
 
-	if (command === 'add') {
-	    this.delete(preObj.id, checkSum);
-	    message += `${preObj.id}번 항목 '${preObj.name}'가 ${preObj.status} 상태에서 삭제됐습니다`;
-
-	} else if (command === 'delete') {
-	    convertedData.push(preObj);
-	    message += `${preObj.id}번 항목 '${preObj.name}'가 삭제에서 ${preObj.status} 상태로 변경됐습니다`;
-
-	} else if (command === 'update') {
-	    this.update(preObj.id, preObj.status, checkSum);
-	}
-
-	console.log(message);
-
-	if (this.commandHistory.pointer > -1) this.commandHistory.pointer--;
+		if (log.command === 'add') {
+			this.delete(log.preObj.id, log.checkSum);
+			log.message += `${log.preObj.id}번 항목 '${log.preObj.name}'가 ${log.preObj.status} 상태에서 삭제됐습니다`;
+			
+		} else if (log.command === 'delete') {
+			convertedData.push(log.preObj);
+			log.message += `${log.preObj.id}번 항목 '${log.preObj.name}'가 삭제에서 ${log.preObj.status} 상태로 변경됐습니다`;
+			
+		} else if (log.command === 'update') {
+			this.update(log.preObj.id, log.preObj.status, log.checkSum);
+		}
+		
+		console.log(log.message);
+        if (this.commandHistory.pointer > -1) this.commandHistory.pointer--;
     }	
 
     redo() {
 	if (this.commandHistory.pointer < 2) this.commandHistory.pointer++;
 
-	const targetObject = this.commandHistory.historyArr[this.commandHistory.pointer];		
-	const [command, preObj, nextObj, checkSum] = [targetObject.command, targetObject.pre, targetObject.next, true];
+	const log = this.makeLogObj(this.commandHistory);
 
-	let message = ``;
+	if (log.command === 'add') {
+	    convertedData.push(log.preObj);
+	    message += `${log.preObj.id}번 항목 '${log.preObj.name}'가 ${log.preObj.status}에 추가되었습니다`;
 
-	if (command === 'add') {
-	    convertedData.push(preObj);
-	    message += `${preObj.id}번 항목 '${preObj.name}'가 ${preObj.status}에 추가되었습니다`;
-
-	} else if (command === 'delete') {
-	    this.delete(preObj.id, checkSum);
-	    message += `${preObj.id}번 항목 '${preObj.name}'가 ${preObj.status} 상태에서 삭제됐습니다`;
-	} else if (command === 'update') {
-	    this.update(nextObj.id, nextObj.status, checkSum);
+	} else if (log.command === 'delete') {
+	    this.delete(log.preObj.id, log.checkSum);
+	    message += `${log.preObj.id}번 항목 '${log.preObj.name}'가 ${log.preObj.status} 상태에서 삭제됐습니다`;
+	} else if (log.command === 'update') {
+	    this.update(log.nextObj.id, log.nextObj.status, log.checkSum);
 	}
-	console.log(message);
+	console.log(log.message);
     }
 };
 
