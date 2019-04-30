@@ -13,16 +13,19 @@ const CommandParser = class {
     }
 	
     executeCommand(command) {	    
-	try {	
-	    if (command.length === 1) {
-            this.instruction[command[0]]();
-	    } else if (command.length === 2) {
-		    this.instruction[command[0]](command[1]);
-	    } else if (command.length === 3) {
-		    this.instruction[command[0]](command[1], command[2]);
-        } else {
-		    CustomException.CommandMissingException();
-	    }		
+	try {
+
+		let [primaryCommand, firstSubCommand, secondSubCommand] = [command[0], command[1], command[2]];
+		
+		if (command.length === 1) {
+			this.instruction[primaryCommand]();
+		} else if (command.length === 2) {
+			this.instruction[primaryCommand](firstSubCommand);
+		} else if (command.length === 3) {
+			this.instruction[primaryCommand](firstSubCommand, secondSubCommand);
+		} else {
+			CustomException.CommandMissingException();
+		}
 			
 	} catch (e) {
 	    console.error(e.message);
@@ -31,9 +34,8 @@ const CommandParser = class {
     }
 
     isValidCommand(command, arr) {
-        let result = false;
-        if (arr.includes(command)) result = true;
-        return result;
+        if (arr.includes(command)) return true;
+        return false;
     }
 };
 
