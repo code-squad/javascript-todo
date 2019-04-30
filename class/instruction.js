@@ -17,10 +17,10 @@ const Instruction = class {
 
     everyStatus (convertedData) {
 	let [numOfTodos, numOfDoings, numOfDones] = [0,0,0];		
-	convertedData.forEach((value) => {
-	    if (value.status === 'todo') numOfTodos++;
-	    else if (value.status === 'doing') numOfDoings++;
-	    else if (value.status === 'done') numOfDones++;				
+	convertedData.forEach(({status}) => {
+	    if (status === 'todo') numOfTodos++;
+	    else if (status === 'doing') numOfDoings++;
+	    else if (status === 'done') numOfDones++;				
 	});
 	
 	console.log(`현재상태 : todo: ${numOfTodos}개, doing: ${numOfDoings}개, done: ${numOfDones}개`);
