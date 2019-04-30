@@ -45,8 +45,9 @@ TodoApp.prototype = {
   },
 
   exec: function({command, args}){
+    const manipulationCommand = ['add', 'delete', 'update'];
     this[command](...args);
-    if(command !== 'redo' && command !== 'undo'){
+    if(manipulationCommand.some(mCommand => command === mCommand)){
       this._redoFlush();
     }
   },
