@@ -1,6 +1,6 @@
 const Todo = require('./todo');
 
-class ManagingTodo {
+class TodoManager {
   constructor({ data, inputPrompt, msgObj, todoError, history }) {
     this.countedStatus = { todo: 0, doing: 0, done: 0 };
     this.managedlist = this.initManagedlist(data);
@@ -23,7 +23,7 @@ class ManagingTodo {
 
     const newTodo = new Todo({ name, tags, status });
 
-    this.controlTodoList({
+    this.manageTodoList({
       methodName: 'add',
       targetTodo: newTodo,
       message: this.msgObj.add(newTodo.name, newTodo.id)
@@ -43,7 +43,7 @@ class ManagingTodo {
       throw new Error(this.msgObj.getInvalidIdError);
     }
 
-    this.controlTodoList({
+    this.manageTodoList({
       methodName: 'delete',
       targetTodo: deletedTodo,
       message: this.msgObj.delete(deletedTodo.name, deletedTodo.status)
@@ -69,7 +69,7 @@ class ManagingTodo {
       throw new Error(this.msgObj.getSameStatusError(changeTargetTodo.status, changeStatus));
     }
 
-    this.controlTodoList({
+    this.manageTodoList({
       methodName: 'update',
       targetTodo: Object.assign({}, changeTargetTodo),
       message: this.msgObj.update(changeTargetTodo.name, changeStatus),
@@ -84,7 +84,7 @@ class ManagingTodo {
     });
   }
 
-  controlTodoList({ methodName, targetTodo, message, changeStatus, isUndo = false }) {
+  manageTodoList({ methodName, targetTodo, message, changeStatus, isUndo = false }) {
     switch (methodName) {
       case 'add':
         this.managedlist.push(targetTodo);
@@ -176,21 +176,21 @@ class ManagingTodo {
     const { methodName, todo, changeStatus } = this.history.undo();
     switch (methodName) {
       case 'add':
-        this.controlTodoList({
+        this.manageTodoList({
           methodName: 'delete',
           targetTodo: todo,
           message: this.msgObj.getUndoMessage(methodName)
         });
         break;
       case 'delete':
-        this.controlTodoList({
+        this.manageTodoList({
           methodName: 'add',
           targetTodo: todo,
           message: this.msgObj.getUndoMessage(methodName)
         });
         break;
       case 'update':
-        this.controlTodoList({
+        this.manageTodoList({
           methodName,
           targetTodo: todo,
           message: this.msgObj.getUndoMessage(methodName),
@@ -204,21 +204,21 @@ class ManagingTodo {
     const { methodName, todo, changeStatus } = this.history.redo();
     switch (methodName) {
       case 'add':
-        this.controlTodoList({
+        this.manageTodoList({
           methodName,
           targetTodo: todo,
           message: this.msgObj.getRedoMessage(methodName)
         });
         break;
       case 'delete':
-        this.controlTodoList({
+        this.manageTodoList({
           methodName,
           targetTodo: todo,
           message: this.msgObj.getRedoMessage(methodName)
         });
         break;
       case 'update':
-        this.controlTodoList({
+        this.manageTodoList({
           methodName,
           targetTodo: todo,
           message: this.msgObj.getRedoMessage(methodName),
@@ -228,4 +228,4 @@ class ManagingTodo {
     }
   }
 }
-module.exports = ManagingTodo;
+module.exports = TodoManager;
