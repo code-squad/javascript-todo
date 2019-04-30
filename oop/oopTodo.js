@@ -35,6 +35,7 @@ TodoApp.prototype = {
         };
         this.datalist.push(newTodo);
         this.undoable(command, newTodo);
+        this.manageMaxLengthOfPastArr(4);
 
         return this.addCompleted(newTodo);
     },
@@ -54,7 +55,7 @@ TodoApp.prototype = {
         const currentIndex = this.getIndex(deletedID);
         const [splicedData] = this.datalist.splice(currentIndex, 1);
         this.undoable(command, splicedData);
-        this.manageMaxLengthOfPastArr();
+        this.manageMaxLengthOfPastArr(4);
 
         return this.deleteCompleted(splicedData)
     },
@@ -81,6 +82,8 @@ TodoApp.prototype = {
         const beforeUpdatedStatus = this.datalist[currentIndex].status
         this.datalist[currentIndex].status = updatedStatus;
         this.undoable(command, { currentIndex, beforeUpdatedStatus, updatedStatus });
+        this.manageMaxLengthOfPastArr(4);
+    
         return this.updateCompleted(currentIndex, updatedStatus)
     },
 
@@ -225,8 +228,8 @@ TodoApp.prototype = {
         this.command = command;
     },
 
-    manageMaxLengthOfPastArr() {
-        if (this.past.length < 4) {
+    manageMaxLengthOfPastArr(maxPastArrayLength) {
+        if (this.past.length < maxPastArrayLength) {
             return
         }
         else {
