@@ -29,10 +29,11 @@ class ResultMsg {
   noSeperator () {
     return `구분자가 없습니다.`
   }
-  resultOfUndoRedo ({id, name, command, undoOrRedo,currentStatus, postStatus}){
-    return command ? 
-    `${id}번 항목 '${name}' ${command} 가 ${undoOrRedo} 되었습니다.` :
-    `${id}번 항목 '${name}'의 상태가 ${currentStatus}에서 ${postStatus}로 변경되었습니다.`
+  resultOfUndoRedo ({id, name, command, undoOrRedo, currentStatus, postStatus}){
+    return currentStatus ? 
+    `${id}번 항목 '${name}'의 상태가 ${currentStatus}에서 ${postStatus}로 변경되었습니다.` :
+    `${id}번 항목 '${name}' ${command} 가 ${undoOrRedo} 되었습니다.` 
+    
   }
 }
 

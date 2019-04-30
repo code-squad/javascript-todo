@@ -125,38 +125,26 @@ class TodoHandler  {
   todoRedoExec (undoOrRedo) {
     if (this.history.checkStackCount(this.history[undoOrRedo], 0)) throw new Error("이전에 undo 를 실행하지 않았습니다.")
     let {command, todo} = this.history[undoOrRedo].pop()
+    let resultContent = {id: todo.id, name: todo.name, command: command, undoOrRedo: undoOrRedo}
 
     if(command === "add" && undoOrRedo === 'undo' || command === "delete" && undoOrRedo === 'redo'){
       const index = this.todoGetter.getTodoIndex(todos, todo.id)
       todos.splice(index, countSelected);
-      console.log(this.resultMsg.resultOfUndoRedo({
-        id: todo.id,
-        name: todo.name,
-        command: command,
-        undoOrRedo: undoOrRedo
-      }))
     }
     if(command === "update"){
       const index = this.todoGetter.getTodoIndex(todos, todo.id)
       const todoFromData = todos[index]
       todos.splice(index, countSelected, todo);
-      console.log(this.resultMsg.resultOfUndoRedo({
-        id: todo.id, 
-        name: todo.name, 
-        currentStatus: todoFromData.status, 
-        postStatus: todo.status
-      })) 
+
+      resultContent.currentStatus = todoFromData.status
+      resultContent.postStatus = todo.status
+      
       todo = todoFromData
     }
     if(command === "delete" && undoOrRedo === 'undo' || command === "add" && undoOrRedo === 'redo'){
       todos.push(todo);
-      console.log(this.resultMsg.resultOfUndoRedo({
-        id: todo.id,
-        name: todo.name,
-        command: command,
-        undoOrRedo: undoOrRedo
-      }))
     }
+    console.log(this.resultMsg.resultOfUndoRedo(resultContent))
     return {command, todo}
   }
 }
