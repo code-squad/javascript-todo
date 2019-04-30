@@ -14,28 +14,28 @@ const utils = new Utils();
 const instruction = new Instruction();
 
 const run = (() => {
-	readline.setPrompt('명령하세요: ');
+    readline.setPrompt('명령하세요: ');
     readline.prompt();
-    readline.on('line', (userInput) => {	    
+    readline.on('line', (userInput) => {
+    
+    try {
+        customException.missingSeperatorException(userInput);
+	const cmdList = commandParser.getCmdList(userInput);
 
-	try {
-		customException.missingSeperatorException(userInput);
-		const cmdList = commandParser.getCmdList(userInput);
+	customException.CommandMissingException(cmdList[0], cmdArr);
+	commandParser.executeCmd(cmdList);
 
-		customException.CommandMissingException(cmdList[0], cmdArr);
-		commandParser.executeCmd(cmdList);
+	utils.delay(0)
+	.then(() => {if (cmdList[0] === 'update') return utils.delay(3500);})
+	.then(() => {return utils.delay(1000);})
+	.then(() => {if (cmdList[0] !== 'show') instruction.show('all');})
+	.catch(function(e) {console.log(e);})
+	.then(() => {readline.prompt();});
 
-		utils.delay(0)
-		.then(() => {if (cmdList[0] === 'update') return utils.delay(3500);})
-		.then(() => {return utils.delay(1000);})
-		.then(() => {if (cmdList[0] !== 'show') instruction.show('all');})
-		.catch(function(e) {console.log(e);})
-		.then(() => {readline.prompt();});
-
-	} catch(e) {
-		console.error(e.message);
-		readline.prompt();
-	}
+    } catch(e) {
+	console.error(e.message);
+	readline.prompt();
+    }
 
 }).on('close', () => {
    console.log("프로그램을 종료합니다.");
