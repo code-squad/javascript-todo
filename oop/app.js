@@ -46,7 +46,7 @@ rl.on('line', (userInput) => {
             const errorMessage = validator.excuteValidation(userInput);
             if (errorMessage) {
                 console.log(errorMessage);
-                return rl.prompt();
+                return rl.prompt()
             } 
 
             const resultMessage = inputParser.executeTodos(todos, userInput);
@@ -60,7 +60,7 @@ rl.on('line', (userInput) => {
                             console.log(resultOfAll);
                             rl.prompt();
                         });
-                    } else rl.prompt();
+                    } else rl.prompt()
                 });
     }
 }).on('close', () => {
