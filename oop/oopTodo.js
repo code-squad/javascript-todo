@@ -194,33 +194,33 @@ TodoApp.prototype = {
         }
 
         const [command, commandElement, TagORStatusOfcommandElement] = splitUserInput;
-
-        if (command === 'show') {
-            console.log(this.carryShowElements(commandElement));
-            inputReadline.prompt();
-        }
-        else if (command === 'add') {
-            this.saveCommandAfterUndo(command);
-            this.addExecutor(command, commandElement, TagORStatusOfcommandElement);
-        }
-        else if (command === 'update') {
-            this.saveCommandAfterUndo(command);
-            this.updateExecutor(command, Number(commandElement), TagORStatusOfcommandElement);
-        }
-        else if (command === 'delete') {
-            this.saveCommandAfterUndo(command);
-            this.deleteExecutor(command, Number(commandElement));
-        }
-        else if (command === 'undo') {
-            this.save = true;
-            this.undo();
-        }
-        else if (command === 'redo') {
-            this.redo();
-        }
-        else {
-            this.printError();
-        }
+        switch(command) {
+            case 'show':
+                console.log(this.carryShowElements(commandElement));
+                inputReadline.prompt();
+                break;
+            case 'add':
+                this.saveCommandAfterUndo(command);
+                this.addExecutor(command, commandElement, TagORStatusOfcommandElement);
+                break;
+            case 'update':
+                this.saveCommandAfterUndo(command);
+                this.updateExecutor(command, Number(commandElement), TagORStatusOfcommandElement);
+                break;
+            case 'delete':
+                this.saveCommandAfterUndo(command);
+                this.deleteExecutor(command, Number(commandElement));
+                break;
+            case 'undo':
+                this.save = true;
+                this.undo();
+                break;
+            case 'redo':
+                this.redo();
+                break;
+            default:
+                this.printError();
+       }
     },
 
     undoable(command, splicedData) {
