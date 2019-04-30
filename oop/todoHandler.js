@@ -4,8 +4,9 @@ const data = fs.readFileSync("./data.json")
 const todos = JSON.parse(data)
 
 const sleep = msec => new Promise(resolve => setTimeout(resolve, msec))
-
-
+const waitForShow = 1000    // msec
+const waitForUpdate = 3000  // msec 
+const countSelected = 1   //
 class TodoHandler  { 
   constructor(todoGetter, resultMsg){
     this.todoGetter = todoGetter;
@@ -64,7 +65,7 @@ class TodoHandler  {
     console.log(this.resultMsg.addMsg(name, id))
     this.save()
     this.history.append('add', newTodo)
-    await sleep(1000)
+    await sleep(waitForShow)
     this.show('all')
     return
   }
@@ -76,12 +77,12 @@ class TodoHandler  {
 
       const index = this.todoGetter.getTodoIndex(todos, id)
       this.history.append('update', todos[index])
-      todos.splice(index, 1, this.makeTodo(name, id, tags, statusToChange,))
+      todos.splice(index, countSelected, this.makeTodo(name, id, tags, statusToChange,))
       this.save()
       
-      await sleep(3000)
+      await sleep(waitForUpdate)
       console.log(this.resultMsg.updateMsg(name, statusToChange)) 
-      await sleep(1000)
+      await sleep(waitForShow)
       this.show('all')
       
       return
@@ -94,8 +95,8 @@ class TodoHandler  {
       let index = this.todoGetter.getTodoIndex(todos, id)
       console.log(this.resultMsg.deleteMsg(todos[index].name, todos[index].status))
       this.history.append('delete', todos[index])
-      await(sleep(1000))
-      todos.splice(index, 1)
+      await(sleep(waitForShow))
+      todos.splice(index, countSelected)
       this.show('all')
       this.save()
     } catch (e){
@@ -127,7 +128,7 @@ class TodoHandler  {
 
     if(command === "add" && undoOrRedo === 'undo' || command === "delete" && undoOrRedo === 'redo'){
       const index = this.todoGetter.getTodoIndex(todos, todo.id)
-      todos.splice(index, 1);
+      todos.splice(index, countSelected);
       console.log(this.resultMsg.resultOfUndoRedo({
         id: todo.id,
         name: todo.name,
@@ -138,7 +139,7 @@ class TodoHandler  {
     if(command === "update"){
       const index = this.todoGetter.getTodoIndex(todos, todo.id)
       const todoFromData = todos[index]
-      todos.splice(index, 1, todo);
+      todos.splice(index, countSelected, todo);
       console.log(this.resultMsg.resultOfUndoRedo({
         id: todo.id, 
         name: todo.name, 
