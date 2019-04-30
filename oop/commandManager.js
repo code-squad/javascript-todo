@@ -1,8 +1,8 @@
 class CommandManager {
-    constructor(addManager, deleteManager, updateManager) {
-        this.addManager = addManager;
-        this.deleteManager = deleteManager;
-        this.updateManager = updateManager;
+    constructor(addCommand, deleteCommand, updateCommand) {
+        this.addCommand = addCommand;
+        this.deleteCommand = deleteCommand;
+        this.updateCommand = updateCommand;
         this.commandStack = [];
         this.commandPointer = -1;
         this.undoStack = [];
@@ -56,17 +56,17 @@ class CommandManager {
             case 'add' :
                 this.undoStack.push('add');
                 this.undoStackPointer++;
-                undoObj = this.addManager.undo();
+                undoObj = this.addCommand.undo();
                 return [command, undoObj];
             case 'delete' :
                 this.undoStack.push('delete');
                 this.undoStackPointer++;
-                undoObj = this.deleteManager.undo();
+                undoObj = this.deleteCommand.undo();
                 return [command, undoObj];
             case 'update' :
                 this.undoStack.push('update');
                 this.undoStackPointer++;
-                undoObj = this.updateManager.undo();
+                undoObj = this.updateCommand.undo();
                 return [command, undoObj];
         }
     }
@@ -76,13 +76,13 @@ class CommandManager {
         let redoObj;
         switch(command) {
             case 'add' :
-                redoObj = this.addManager.redo();
+                redoObj = this.addCommand.redo();
                 return [command, redoObj];
             case 'delete' :
-                redoObj = this.deleteManager.redo();
+                redoObj = this.deleteCommand.redo();
                 return [command, redoObj];
             case 'update' :
-                redoObj = this.updateManager.redo();
+                redoObj = this.updateCommand.redo();
                 return [command, redoObj];
         }
     }

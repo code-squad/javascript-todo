@@ -7,29 +7,29 @@ class Controller {
         this.commandManager = commandManager;
     }
 
-    instruct (input, showManager, addManager, deleteManager, updateManager) {
+    instruct (input, showCommand, addCommand, deleteCommand, updateCommand) {
         if(!(this.validation.check(input))) return;      
         const inputArray = this.utility.splitInput(input);
         const command = inputArray[0];
         let resultData;
         switch(command) {
             case 'show' :
-                resultData = this.commandManager.executeCommand(inputArray, showManager);
+                resultData = this.commandManager.executeCommand(inputArray, showCommand);
                 this.view.printShowMessage(resultData);
                 break;
             case 'add' :
-                resultData = this.commandManager.executeCommand(inputArray, addManager);
+                resultData = this.commandManager.executeCommand(inputArray, addCommand);
                 this.view.printAddMessage(resultData);
-                this.throwSetTimeForShowAll(showManager);
+                this.throwSetTimeForShowAll(showCommand);
                 break;
             case 'delete':
-                resultData = this.commandManager.executeCommand(inputArray, deleteManager);
+                resultData = this.commandManager.executeCommand(inputArray, deleteCommand);
                 this.view.printDeleteMessage(resultData);
-                this.throwSetTimeForShowAll(showManager);
+                this.throwSetTimeForShowAll(showCommand);
                 break;
             case 'update':
-                resultData = this.commandManager.executeCommand(inputArray, updateManager);
-                this.throwSetTimeForUpdate(showManager, resultData);
+                resultData = this.commandManager.executeCommand(inputArray, updateCommand);
+                this.throwSetTimeForUpdate(showCommand, resultData);
                 break;
             case 'undo' :
                 resultData = this.commandManager.undo();
@@ -42,16 +42,16 @@ class Controller {
         }
     }
     
-    throwSetTimeForShowAll (showManager, delayTime = 1000) {
-        setTimeout( () => { const resultData = this.commandManager.executeCommand(['show','all'], showManager); 
+    throwSetTimeForShowAll (showCommand, delayTime = 1000) {
+        setTimeout( () => { const resultData = this.commandManager.executeCommand(['show','all'], showCommand); 
                             this.view.printShowMessage(resultData);}, delayTime); 
     }
     
-    throwSetTimeForUpdate (showManager, objToUpdate, delayTime = 3000) { 
+    throwSetTimeForUpdate (showCommand, objToUpdate, delayTime = 3000) { 
         setTimeout( 
             () => { 
                 this.view.printUpdateMessage(objToUpdate);
-                this.throwSetTimeForShowAll(showManager);
+                this.throwSetTimeForShowAll(showCommand);
             }, delayTime);
     }
 }

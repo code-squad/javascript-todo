@@ -1,8 +1,6 @@
-class ShowManager {
-    constructor(model) {
-        this.model = model;
-    }
+const Command = require('./command');
 
+class ShowCommand extends Command {
     execute (status) {
         if(status === 'all') {
             const countEachStatus = this.model.getCountEachStatus();
@@ -13,4 +11,4 @@ class ShowManager {
     }
 }
 
-module.exports = ShowManager;
+module.exports = ShowCommand;

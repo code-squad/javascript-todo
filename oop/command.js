@@ -1,21 +1,15 @@
-class AddManager {
+class Command {
     constructor(model, todoList, utility) {
         this.model = model;
-        this.utility = utility
+        this.todoList = todoList;
+        this.utility = utility;
         this.historyStack = [];
         this.historyStackPointer = -1;
         this.undoStack = [];
         this.undoStackPointer = -1;
-        this.todoList = todoList;
     }
-    execute (name, tag) {
-        const previousTodoList = JSON.parse(JSON.stringify(this.todoList));
-        const objToAdd = {'name': name, 'status': 'todo', 'tags': tag.match(/[a-z0-9]+/g), 'id': this.utility.getRandomID()};
-        this.historyStack.push([previousTodoList, objToAdd]);
-        this.historyStackPointer++;
-        this.model.addTodoObject(objToAdd);
-        return objToAdd;
-    }
+
+    excute() {}
 
     undo() {
         const [previousTodoList, undoObj] = this.historyStack[this.historyStackPointer--];
@@ -34,4 +28,4 @@ class AddManager {
     }
 }
 
-module.exports = AddManager;
+module.exports = Command;

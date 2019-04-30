@@ -1,21 +1,12 @@
-class UpdateManager {
-    constructor(model, todoList, utility) {
-        this.model = model;
-        this.todoList = todoList;
-        this.utility = utility;
-        this.historyStack = [];
-        this.historyStackPointer = -1;
-        this.undoStack = [];
-        this.undoStackPointer = -1;
-    }
+const Command = require('./command');
 
+class UpdateCommand extends Command {
     execute (id, status) {
         const previousTodoList = JSON.parse(JSON.stringify(this.todoList));
         const prevStatus = this.utility.getObjectById(id)['status'];
         const objToUpdate = this.model.updateTodoObject(id, status);
         this.historyStack.push([previousTodoList, objToUpdate, prevStatus]);
         this.historyStackPointer++;
-
         return objToUpdate;
     }
 
@@ -24,8 +15,7 @@ class UpdateManager {
         this.historyStack.pop();
         const currentTodoList = JSON.parse(JSON.stringify(this.todoList));
         this.undoStack.push([currentTodoList, undoObj, prevStatus]);
-        this.undoStackPointer++;
-     
+        this.undoStackPointer++;    
         this.utility.save(previousTodoList);
         return [undoObj, prevStatus];
     }
@@ -37,4 +27,4 @@ class UpdateManager {
     }
 }
 
-module.exports = UpdateManager;
+module.exports = UpdateCommand;

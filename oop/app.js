@@ -5,10 +5,10 @@ const utility       = require('./utility')
 const view          = require('./view')
 const readLine      = require('readline')
 const CommandManager = require('./commandManager')
-const ShowManager   = require('./showManager')
-const AddManager    = require('./addManager')
-const DeleteManager = require('./deleteManager');
-const UpdateManager = require('./updateManager');
+const ShowCommand   = require('./showCommand')
+const AddCommand    = require('./addCommand')
+const DeleteCommand = require('./deleteCommand');
+const UpdateCommand = require('./updateCommand');
 const todoList = require('./todo.json')
 
 const rl = readLine.createInterface({
@@ -17,15 +17,37 @@ const rl = readLine.createInterface({
 
 (() => {
     const model          = new Model(utility, todoList);
-    const showManager    = new ShowManager(model);
-    const addManager     = new AddManager(model, todoList, utility);
-    const deleteManager  = new DeleteManager(model, todoList, utility);
-    const updateManager  = new UpdateManager(model, todoList, utility);
-    const commandManager = new CommandManager(addManager, deleteManager, updateManager);
+    const showCommand    = new ShowCommand(model);
+    const addCommand     = new AddCommand(model, todoList, utility);
+    const deleteCommand  = new DeleteCommand(model, todoList, utility);
+    const updateCommand  = new UpdateCommand(model, todoList, utility);
+    const commandManager = new CommandManager(addCommand, deleteCommand, updateCommand);
     const validation     = new Validation(utility, view, commandManager);
     const controller     = new Controller(model, utility, view, validation, commandManager);
     
      rl.on('line', (input) => {
-        controller.instruct(input, showManager, addManager, deleteManager, updateManager);
+        controller.instruct(input, showCommand, addCommand, deleteCommand, updateCommand);
      });
  })();
+
+//  function test() {
+//     const model          = new Model(utility, todoList);
+//     const showCommand    = new ShowCommand(model);
+//     const addCommand     = new AddCommand(model, todoList, utility);
+//     const deleteCommand  = new DeleteCommand(model, todoList, utility);
+//     const updateCommand  = new UpdateCommand(model, todoList, utility);
+//     const commandManager = new CommandManager(addCommand, deleteCommand, updateCommand);
+//     const validation     = new Validation(utility, view, commandManager);
+//     const controller     = new Controller(model, utility, view, validation, commandManager);
+
+//     // controller.instruct('show$all', showCommand, addCommand, deleteCommand, updateCommand);
+//     // controller.instruct('show$todo', showCommand, addCommand, deleteCommand, updateCommand);
+//     // controller.instruct('show$doing', showCommand, addCommand, deleteCommand, updateCommand);
+//     // controller.instruct('show$done', showCommand, addCommand, deleteCommand, updateCommand);
+
+//     // controller.instruct('add$sleep$["favotrite"]', showCommand, addCommand, deleteCommand, updateCommand);
+//     // controller.instruct('update$1556592561792$done', showCommand, addCommand, deleteCommand, updateCommand);
+//     // controller.instruct('delete$1556592561792', showCommand, addCommand, deleteCommand, updateCommand);
+//  }
+
+//  test();
