@@ -12,7 +12,7 @@ rl.on('line', line => {
   rl.pause();
   try{
     const commandObj = todoParser.parsing(line);
-    todoApp[commandObj.command](...commandObj.args);
+    todoApp.exec(commandObj);
   } catch (err){
     console.error(err.message);
   } finally{
