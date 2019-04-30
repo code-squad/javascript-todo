@@ -1,7 +1,7 @@
 const originData = require('./todosdata.json');
 const convertedData = JSON.parse(JSON.stringify(originData)).data;
 const Utils = require('./utils.js');
-const customException = require('./customException.js');
+const CustomException = require('./customException.js');
 
 const Instruction = class {
     constructor() {
@@ -81,8 +81,8 @@ const Instruction = class {
     update(id, status) {		
 	const targetObj = this.utils.getArrByCondition(convertedData, (val) => { return id == val.id;})[0];
 	try {
-	    if (!targetObj) customException.notExistIdException();
-	    if (targetObj.status === status) customException.sameStatusException();
+	    if (!targetObj) CustomException.notExistIdException();
+	    if (targetObj.status === status) CustomException.sameStatusException();
 	} catch (e) {
 	    console.error(e.message);
 	    return;

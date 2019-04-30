@@ -6,7 +6,7 @@ const readline = require('readline').createInterface( {
 const CommandParser = require('./commandParser.js');
 const Utils = require('./utils.js');
 const Instruction = require('./instruction.js');
-const customException = require('./customException.js');
+const CustomException = require('./customException.js');
 
 const cmdArr = ['show','delete','update','add','undo','redo'];
 const commandParser = new CommandParser();
@@ -19,10 +19,10 @@ const run = (() => {
     readline.on('line', (userInput) => {
     
     try {
-        customException.missingSeperatorException(userInput);
+    CustomException.missingSeperatorException(userInput);
 	const cmdList = commandParser.getCmdList(userInput);
 
-	customException.CommandMissingException(cmdList[0], cmdArr);
+	CustomException.CommandMissingException(cmdList[0], cmdArr);
 	commandParser.executeCmd(cmdList);
 
 	utils.delay(0)
