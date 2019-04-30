@@ -7,12 +7,12 @@ const CommandParser = class {
 	    this.instruction = new Instruction();
     }
 	
-    getCmdList(input) {
+    getCommandList(input) {
         const regexp = /[^\$]+|undo|redo/g;
         return input.match(regexp);
     }
 	
-    executeCmd(command) {	    
+    executeCommand(command) {	    
 	try {	
 	    if (command.length === 1) {
             this.instruction[command[0]]();

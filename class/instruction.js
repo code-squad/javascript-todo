@@ -119,13 +119,13 @@ const Instruction = class {
 	let historyObj = {};
 	if (command === 'update') { 
 	    historyObj = {
-		cmd: command,
+		command,
 		pre: obj[0],
 		next: obj[1]
 	    };
 	} else if (command === 'add' || command === 'delete') {  
 	    historyObj = {
-		cmd: command,
+		command,
 		pre: obj[0]
 	    };
 	}
@@ -135,7 +135,7 @@ const Instruction = class {
 
     undo() {
 	const targetObject = this.commandHistory.historyArr[this.commandHistory.pointer];
-	const [command, preObj, checkSum] = [targetObject.cmd, targetObject.pre, true];
+	const [command, preObj, checkSum] = [targetObject.command, targetObject.pre, true];
 
 	let message = ``;
 
@@ -160,7 +160,7 @@ const Instruction = class {
 	if (this.commandHistory.pointer < 2) this.commandHistory.pointer++;
 
 	const targetObject = this.commandHistory.historyArr[this.commandHistory.pointer];		
-	const [command, preObj, nextObj, checkSum] = [targetObject.cmd, targetObject.pre, targetObject.next, true];
+	const [command, preObj, nextObj, checkSum] = [targetObject.command, targetObject.pre, targetObject.next, true];
 
 	let message = ``;
 
