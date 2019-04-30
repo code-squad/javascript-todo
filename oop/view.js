@@ -33,6 +33,14 @@ const View = {
         console.log('이미 그 상태입니다.');
     },
 
+    printUndoErrorMessage() {
+        console.log('Undo 할 수 없습니다. Undo 할게 없어요');
+    },
+
+    printRedoErrorMessage() {
+        console.log('Redo 할 수 없습니다. Redo 할게 없어요');
+    },
+
     printUndoMessage(command, undoObj) {
         switch(command) {
             case 'add' :

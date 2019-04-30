@@ -4,15 +4,20 @@ class CommandManager {
         this.deleteManager = deleteManager;
         this.updateManager = updateManager;
         this.commandStack = [];
-        this.commandPointer = 0;
+        this.commandPointer = -1;
         this.undoStack = [];
-        this.undoStackPointer = 0;
+        this.undoStackPointer = -1;
     }
 
     executeCommand(inputArray, commandObj) {
         const command = inputArray[0];
         let status, name, tag, id;
         let resultData;
+
+        if (this.undoStack.length !== 0) {
+            this.undoStack = [];
+            this.undoStackPointer = -1;
+        }
 
         switch(command) {
             case 'show' :
@@ -44,7 +49,8 @@ class CommandManager {
     }
 
     undo() {
-        const command = this.commandStack[--this.commandPointer];
+        const command = this.commandStack[this.commandPointer--];
+        this.commandStack.pop();
         let undoObj;
         switch(command) {
             case 'add' :
@@ -66,7 +72,7 @@ class CommandManager {
     }
 
     redo() {
-        const command = this.undoStack[--this.undoStackPointer];
+        const command = this.undoStack[this.undoStackPointer--];
         let redoObj;
         switch(command) {
             case 'add' :

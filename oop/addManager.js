@@ -3,9 +3,9 @@ class AddManager {
         this.model = model;
         this.utility = utility
         this.historyStack = [];
-        this.historyStackPointer = 0;
+        this.historyStackPointer = -1;
         this.undoStack = [];
-        this.undoStackPointer = 0;
+        this.undoStackPointer = -1;
         this.todoList = todoList;
     }
     execute (name, tag) {
@@ -18,7 +18,8 @@ class AddManager {
     }
 
     undo() {
-        const [previousTodoList, undoObj] = this.historyStack[--this.historyStackPointer];
+        const [previousTodoList, undoObj] = this.historyStack[this.historyStackPointer--];
+        this.historyStack.pop();
         const currentTodoList = JSON.parse(JSON.stringify(this.todoList));
         this.undoStack.push([currentTodoList, undoObj]);
         this.undoStackPointer++;
@@ -27,7 +28,7 @@ class AddManager {
     }
 
     redo() {
-        const [currentTodoList, redoObj] = this.undoStack[--this.undoStackPointer];
+        const [currentTodoList, redoObj] = this.undoStack[this.undoStackPointer--];
         this.utility.save(currentTodoList);
         return redoObj;
     }

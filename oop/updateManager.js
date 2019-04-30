@@ -4,9 +4,9 @@ class UpdateManager {
         this.todoList = todoList;
         this.utility = utility;
         this.historyStack = [];
-        this.historyStackPointer = 0;
+        this.historyStackPointer = -1;
         this.undoStack = [];
-        this.undoStackPointer = 0;
+        this.undoStackPointer = -1;
     }
 
     execute (id, status) {
@@ -20,7 +20,8 @@ class UpdateManager {
     }
 
     undo() {
-        const [previousTodoList, undoObj, prevStatus] = this.historyStack[--this.historyStackPointer];
+        const [previousTodoList, undoObj, prevStatus] = this.historyStack[this.historyStackPointer--];
+        this.historyStack.pop();
         const currentTodoList = JSON.parse(JSON.stringify(this.todoList));
         this.undoStack.push([currentTodoList, undoObj, prevStatus]);
         this.undoStackPointer++;
@@ -30,7 +31,7 @@ class UpdateManager {
     }
 
     redo() {
-        const [currentTodoList, redoObj, currentStatus] = this.undoStack[--this.undoStackPointer];
+        const [currentTodoList, redoObj, currentStatus] = this.undoStack[this.undoStackPointer--];
         this.utility.save(currentTodoList);
         return [redoObj, currentStatus];
     }

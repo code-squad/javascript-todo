@@ -1,7 +1,8 @@
 class Validation {
-    constructor (utility, view) {
+    constructor (utility, view, commandManager) {
         this.utility = utility;
         this.view = view;
+        this.commandManager = commandManager;
     }
 
     check (input) {
@@ -15,7 +16,19 @@ class Validation {
                 break;
             case 'update' :
                 if(!this.notExistIdErrorCheck(id)) return false;
-                if(!this.sameStatusErrorCheck(id, status)) return false;;
+                if(!this.sameStatusErrorCheck(id, status)) return false;
+                break;
+            case 'undo' :
+                if (this.commandManager.commandPointer === -1) {
+                    this.view.printUndoErrorMessage();
+                    return false;
+                }
+                break;
+            case 'redo' :
+                if (this.commandManager.undoStackPointer === -1) {
+                    this.view.printRedoErrorMessage();
+                    return false;
+                }
                 break;
         }
     
