@@ -1,71 +1,30 @@
 const validator = require('./validator.js')
-const todoList = []
-
-const historyQueue = {
-    data: [],
-    maxLength: 4,
-    pointer: 0,
-    recordTodo: function() {
-        this.data[this.pointer]={
-            todoList: JSON.parse(JSON.stringify([...todoList])),
-        }
-        if(this.pointer === 3) {
-            this.data.shift()
-        } else {
-            this.pointer++
-        }
-        this.data.length = this.pointer
-    },
-    undo: function(){
-        if (this.pointer <= 0) {
-            throw Error("NO_MORE_UNDO")
-        }
-        if(this.pointer === this.data.length){
-            this.data[this.pointer]={
-                todoList: JSON.parse(JSON.stringify([...todoList])),
-            }
-        }
-        this.pointer--
-        return this.data[this.pointer]
-    },
-    redo: function(){
-        if(this.pointer >= this.maxLength || this.pointer + 1 >= this.data.length) {
-            throw Error("NO_MORE_REDO")
-        }
-        this.pointer++
-        return this.data[this.pointer]
-    }
-}
-
-let incrementId = 0
+const history = require('./history.js')
 
 const todoUtils = {
-    sleep: function (msec) {
-        return new Promise(resolve => setTimeout(resolve, msec))
+    sleep: function (delayTime) {
+        return new Promise(resolve => setTimeout(resolve, delayTime))
     },
-    generateId: function () {
-        return incrementId++
+    generateId: function (id) {
+        return ++id
     },
-    getListByStatus: function (status) {
+    getListByStatus: function (todoList, status) {
         return todoList.filter(el => el.status === status)
     },
-    getCountByStatus: function (status) {
-        return todoList.filter(el => el.status === status).length
-    },
-    getAllStr: function () {
+    getAllStr: function (todoList) {
         let str = "현재 상태 : "
         const counts = {
-            "todo": this.getCountByStatus("todo"),
-            "doing": this.getCountByStatus("doing"),
-            "done": this.getCountByStatus("done")
+            "todo": this.getListByStatus(todoList, "todo").length,
+            "doing": this.getListByStatus(todoList, "doing").length,
+            "done": this.getListByStatus(todoList, "done").length
         }
         str += Object.entries(counts).map(([k, v]) => `${k}: ${v}개`).join(", ")
         return str
     },
-    getStatusStr: function (status) {
+    getStatusStr: function (todoList, status) {
         let str = ""
-        let count = this.getCountByStatus(status)
-        let list = this.getListByStatus(status)
+        let list = this.getListByStatus(todoList, status)
+        let count = list.length
         str += `${status}리스트 : 총${count}건 : `
         str += list.map(el => `'${el.name}, ${el.id}번'`).join(", ")
         return str
@@ -73,52 +32,60 @@ const todoUtils = {
 }
 
 class Todos {
+    constructor() {
+        this.todoList = [],
+        this.incrementId = 0,
+        this.resultDelay = 1000,
+        this.updateDelay = 3000
+    }
+
     async add(name, tag) {
         if (validator.checkTagShape(tag)) {
             throw Error("TAG_SHAPE_ERROR")
         }
+        this.incrementId = todoUtils.generateId(this.incrementId) 
         const todo = {
-            id: todoUtils.generateId(),
+            id: this.incrementId,
             name,
             status: "todo",
             tag: tag.replace(/\[|\]|\"|\'|\s/g, "").split(",")
         }
         let message = `${todo.name} 1개가 추가됐습니다.(id : ${todo.id})`
-        historyQueue.recordTodo(message)
-        todoList.push(todo)
+        history.recordTodo(this.todoList)
+        this.todoList.push(todo)
         console.log(message)
-        await todoUtils.sleep(1000)
+        await todoUtils.sleep(this.resultDelay)
         this.show("all")
     }
 
     async delete(id) {
-        let index = validator.isExisted(todoList, Number(id))
+        let index = validator.isExisted(this.todoList, Number(id))
         if (index === -1) throw Error("NOT_EXIST_ID")
         let {
             name,
             status
-        } = todoList[index]
+        } = this.todoList[index]
         let message = `${name} ${status}가 목록에서 삭제됐습니다`
-        historyQueue.recordTodo(message)
-        todoList.splice(index, 1)
+        history.recordTodo(this.todoList)
+        this.todoList.splice(index, 1)
         console.log(message)
-        await todoUtils.sleep(1000)
+        await todoUtils.sleep(this.resultDelay)
         this.show("all")
     }
 
     async update(id, status) {
-        let index = validator.isExisted(todoList, Number(id))
+        let index = validator.isExisted(this.todoList, Number(id))
         if (index === -1) throw Error("NOT_EXIST_ID")
-        
+
         else if (!validator.isCorrectStatus(status)) throw Error("INCORRECT_STATUS")
-        else if (validator.isSameStatus(todoList[index], status)) throw Error("SAME_STATUS")
-        
-        historyQueue.recordTodo()
-        todoList[index].status = status
-        let message = `${todoList[index].name}가 ${todoList[index].status}으로 상태가 변경됐습니다`
-        await todoUtils.sleep(3000)
+        else if (validator.isSameStatus(this.todoList[index], status)) throw Error("SAME_STATUS")
+
+        history.recordTodo(this.todoList)
+        this.todoList[index].status = status
+        let message = `${this.todoList[index].name}가 ${this.todoList[index].status}으로 상태가 변경됐습니다`
+        await todoUtils.sleep(this.updateDelay)
         console.log(message)
-        await todoUtils.sleep(1000)
+        await todoUtils.sleep(this.resultDelay)
         this.show("all")
     }
 
@@ -129,26 +96,28 @@ class Todos {
             "doing": "getStatusStr",
             "done": "getStatusStr"
         }
-        console.log(todoUtils[option[status]](status))
+        console.log(todoUtils[option[status]](this.todoList, status))
     }
 
     undo() {
-        const {todoList: list} = historyQueue.undo();
-        todoList.length = 0
+        const {
+            todoList: list
+        } = history.undo(this.todoList);
+        this.todoList.length = 0
         JSON.parse(JSON.stringify([...list])).forEach(el => {
-            todoList.push(el)
+            this.todoList.push(el)
         })
     }
 
     redo() {
-        const {todoList: list} = historyQueue.redo()
-        todoList.length = 0
+        const {
+            todoList: list
+        } = history.redo()
+        this.todoList.length = 0
         JSON.parse(JSON.stringify([...list])).forEach(el => {
-            todoList.push(el)
+            this.todoList.push(el)
         })
     }
 }
-
-//? history record 할떄 status가 참조하는것 같음
 
 module.exports = Todos

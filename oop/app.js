@@ -1,7 +1,7 @@
 const readline = require("readline")
 const Todos = require("./Todos.js")
 const validator = require("./validator.js")
-const ERR_MSG = require("./ErrorConstant").ERR_MSG
+const ERR_MSG = require("./ErrorConstant")
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout

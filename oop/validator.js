@@ -23,9 +23,6 @@ const validator = {
     },
     checkTagShape: (tag) => {
         let result = regexObj.tag.test(tag)
-        console.log(tag)
-        console.log(result)
-        console.log(!result)
         return !result
     }
 }
