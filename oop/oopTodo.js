@@ -1,5 +1,6 @@
 const datalist = require('./data').todos;
 const readline = require('readline');
+const UndoableApp = require('./undoable');
 const inputReadline = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -8,13 +9,9 @@ const inputReadline = readline.createInterface({
 
 const TodoApp = function (datalist) {
     this.datalist = datalist;
-    this.command = undefined;
-    this.save = false;
-    this.past = [];
-    this.present = [];
-    this.future = [];
-    this.storeCommand = [];
 };
+
+const undoableApp = new UndoableApp(datalist, inputReadline);
 
 
 TodoApp.prototype = {
@@ -34,8 +31,8 @@ TodoApp.prototype = {
             'id': id
         };
         this.datalist.push(newTodo);
-        this.undoable(command, newTodo);
-        this.manageMaxLengthOfPastArr(4);
+        undoableApp.undoable(command, newTodo);
+        undoableApp.manageMaxLengthOfPastArr(4);
 
         return this.addCompleted(newTodo);
     },
@@ -54,8 +51,8 @@ TodoApp.prototype = {
     deleteTodo(command, deletedID) {
         const currentIndex = this.getIndex(deletedID);
         const [splicedData] = this.datalist.splice(currentIndex, 1);
-        this.undoable(command, splicedData);
-        this.manageMaxLengthOfPastArr(4);
+        undoableApp.undoable(command, splicedData);
+        undoableApp.manageMaxLengthOfPastArr(4);
 
         return this.deleteCompleted(splicedData)
     },
@@ -81,8 +78,8 @@ TodoApp.prototype = {
         };
         const beforeUpdatedStatus = this.datalist[currentIndex].status
         this.datalist[currentIndex].status = updatedStatus;
-        this.undoable(command, { currentIndex, beforeUpdatedStatus, updatedStatus });
-        this.manageMaxLengthOfPastArr(4);
+        undoableApp.undoable(command, { currentIndex, beforeUpdatedStatus, updatedStatus });
+        undoableApp.manageMaxLengthOfPastArr(4);
     
         return this.updateCompleted(currentIndex, updatedStatus)
     },
@@ -96,10 +93,12 @@ TodoApp.prototype = {
     },
 
     collectShowElements() {
-        const todoList = this.checkStatus(this.datalist, 'todo');
-        const doingList = this.checkStatus(this.datalist, 'doing');
-        const doneList = this.checkStatus(this.datalist, 'done');
-        return { todoList, doingList, doneList }
+        const showElements = ['todo', 'doing', 'done'];
+        const assignShowElements = {'todo': undefined, 'doing' : undefined, 'done' : undefined};
+        for(let i = 0; i < showElements.length; i++) {
+            assignShowElements[showElements[i]] = this.checkStatus(this.datalist, showElements[i]);
+        }
+        return assignShowElements
     },
 
 
@@ -109,16 +108,16 @@ TodoApp.prototype = {
     },
 
     showTodo(status, todoElementList) {
-        const { todoList, doingList, doneList } = todoElementList
+        const { todo, doing, done } = todoElementList
         switch (status) {
             case 'all':
-                return `현재상태 : todo: ${todoList.length}개, doing: ${doingList.length}개, done: ${doneList.length}개 \n`
+                return `현재상태 : todo: ${todo.length}개, doing: ${doing.length}개, done: ${done.length}개 \n`
             case 'todo':
-                return `todo리스트 : 총 ${todoList.length} 건 : ${todoList} \n`
+                return `todo리스트 : 총 ${todo.length} 건 : ${todo} \n`
             case 'doing':
-                return `doing리스트 : 총 ${doingList.length} 건 : ${doingList} \n`;
+                return `doing리스트 : 총 ${doing.length} 건 : ${doing} \n`;
             case 'done':
-                return `done리스트 : 총 ${doneList.length} 건 : ${doneList} \n`
+                return `done리스트 : 총 ${done.length} 건 : ${done} \n`
             default:
                 return '명령어를 올바로 입력해주세요. \n';
         }
@@ -171,6 +170,7 @@ TodoApp.prototype = {
         return matchedListByID;
     },
 
+
     checkDuplicatedStatus(currentIndex, updatedStatus) {
         if (this.datalist[currentIndex].status === updatedStatus) {
             console.log('입력한 상태와 동일한 상태입니다')
@@ -178,12 +178,7 @@ TodoApp.prototype = {
         }
     },
 
-    saveCommandAfterUndo(command) {
-        if (this.save) {
-            this.storeCommand.push(command);
-        }
-    },
-
+    
     checkCommands(userInput) {
         const splitUserInput = this.splitInput(userInput);
         if (userInput.split('$').length < 1 || userInput.split('$').length > 3) {
@@ -200,121 +195,28 @@ TodoApp.prototype = {
                 inputReadline.prompt();
                 break;
             case 'add':
-                this.saveCommandAfterUndo(command);
+                undoableApp.saveCommandAfterUndo(command);
                 this.addExecutor(command, commandElement, TagORStatusOfcommandElement);
                 break;
             case 'update':
-                this.saveCommandAfterUndo(command);
+                undoableApp.saveCommandAfterUndo(command);
                 this.updateExecutor(command, Number(commandElement), TagORStatusOfcommandElement);
                 break;
             case 'delete':
-                this.saveCommandAfterUndo(command);
+                undoableApp.saveCommandAfterUndo(command);
                 this.deleteExecutor(command, Number(commandElement));
                 break;
             case 'undo':
-                this.save = true;
-                this.undo();
+            undoableApp.save = true;
+                undoableApp.undo();
                 break;
             case 'redo':
-                this.redo();
+                undoableApp.redo();
                 break;
             default:
                 this.printError();
        }
     },
-
-    undoable(command, splicedData) {
-        this.past.push(splicedData);
-        this.command = command;
-    },
-
-    manageMaxLengthOfPastArr(maxPastArrayLength) {
-        if (this.past.length < maxPastArrayLength) {
-            return
-        }
-        else {
-            this.past.shift();
-            this.manageMaxLengthOfPastArr();
-        }
-    },
-
-    initSaveCommandAfterUndo() {
-        if (this.storeCommand.length != 0) {
-            this.past = [];
-            this.present = [];
-            this.future = [];
-            this.storeCommand = [];
-            this.save = false;
-        }
-    },
-
-    undo() {
-
-        if (this.past.length === 0) {
-            console.log('\n undo할 값이 없습니다!');
-            inputReadline.prompt();
-            return;
-        }
-
-        const popPastValue = this.past.pop();
-
-        if (this.present.length === 1) {
-            this.future.push(this.present.pop());
-            this.present.push(popPastValue);
-        } else {
-            this.present.push(popPastValue);
-        }
-
-        if (this.command === 'add') {
-            this.datalist.pop();
-            console.log(`\n ${popPastValue.id}번 항목 ${popPastValue.name}가 식제됐습니다.`);
-        }
-        else if (this.command === 'update') {
-            this.datalist[popPastValue.currentIndex].status = popPastValue.beforeUpdatedStatus;
-            console.log(`\n ${datalist[popPastValue.currentIndex].id}번 항목 ${datalist[popPastValue.currentIndex].name}가 ${datalist[popPastValue.currentIndex].status}상태로 변경이 취소되었습니다.`);
-        }
-        else {
-            this.datalist.push(popPastValue);
-            console.log(`\n ${popPastValue.id}번 항목 ${popPastValue.name}가 삭제에서 ${popPastValue.status}상태로 변경되었습니다.`);
-        }
-
-        this.initSaveCommandAfterUndo();
-        inputReadline.prompt();
-
-        return;
-    },
-
-    redo() {
-        if (this.save || this.present[0] === undefined) {
-            console.log('\n redo할 값이 없습니다!');
-            inputReadline.prompt();
-            return;
-        }
-        
-        this.initSaveCommandAfterUndo();
-
-        const popPresentValue = this.present.pop();
-
-        this.past.push(popPresentValue);
-        this.present.push(this.future.pop());
-
-        if (this.command === 'add') {
-            this.datalist.push(popPresentValue);
-            console.log(`\n ${popPresentValue.name} 1 개가 추가됐습니다.(id : ${popPresentValue.id})`);
-        }
-        else if (this.command === 'update') {
-            this.datalist[popPresentValue.currentIndex].status = popPresentValue.updatedStatus;
-            console.log(`\n ${this.datalist[popPresentValue.currentIndex].name} 가 ${this.datalist[popPresentValue.currentIndex].status}로 상태가 변경됬습니다.`);
-        }
-        else {
-            this.datalist.pop();
-            console.log(`\n ${popPresentValue.id}번 항목 ${popPresentValue.name}가 ${popPresentValue.status}상태에서 삭제되었습니다.`);
-        }
-
-        inputReadline.prompt();
-        return;
-    },
-
 
     mainExecutor() {
         inputReadline.setPrompt('명령어를 입력하세요(종료하려면 q를 누르세요): ');
