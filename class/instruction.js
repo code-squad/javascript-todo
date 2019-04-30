@@ -139,12 +139,6 @@ const Instruction = class {
 	    return {command : targetObject.cmd, preObj : targetObject.pre, nextObj : targetObject.next, checkSum : true, message : ``};
 	}
 
-		
-	makeLogObj(commandHistory) {
-		const targetObject = commandHistory.historyArr[this.commandHistory.pointer];
-		return {command : targetObject.cmd, preObj : targetObject.pre, nextObj : targetObject.next, checkSum : true, message : ``};
-	}
-
     undo() {
 
 		const log = this.makeLogObj(this.commandHistory);
@@ -166,6 +160,7 @@ const Instruction = class {
     }	
 
     redo() {
+
 	if (this.commandHistory.pointer < 2) this.commandHistory.pointer++;
 
 	const log = this.makeLogObj(this.commandHistory);
@@ -173,7 +168,6 @@ const Instruction = class {
 	if (log.command === 'add') {
 	    convertedData.push(log.preObj);
 	    message += `${log.preObj.id}번 항목 '${log.preObj.name}'가 ${log.preObj.status}에 추가되었습니다`;
-
 	} else if (log.command === 'delete') {
 	    this.delete(log.preObj.id, log.checkSum);
 	    message += `${log.preObj.id}번 항목 '${log.preObj.name}'가 ${log.preObj.status} 상태에서 삭제됐습니다`;
