@@ -5,7 +5,6 @@ const CustomException = require('./customException.js');
 
 const Instruction = class {
     constructor() {
-        this.utils = new Utils();
 	this.minIdNum = 1;
 	this.maxIdNum = 99999;
 
@@ -27,7 +26,7 @@ const Instruction = class {
     }
 
     singleStatus (convertedData, status) {
-	const tasks = this.utils.getArrByCondition(convertedData, (val) => { return (status === val.status);});
+	const tasks = Utils.getArrByCondition(convertedData, (val) => { return (status === val.status);});
 	let message = `${status}리스트 총 ${tasks.length}건 : `;
 	tasks.forEach( obj => {
 	    message += `'${obj.name}, ${obj.id}번,' `;
@@ -36,7 +35,6 @@ const Instruction = class {
     }
 
     show(status) {
-	const statusArr = ['all', 'todo', 'doing', 'done'];
 	if (status === 'all') {
 	    this.everyStatus(convertedData);
 	} else {
@@ -63,7 +61,7 @@ const Instruction = class {
     delete(id) {
 		try {
 		
-		const targetObj = this.utils.getArrByCondition(convertedData, (val) => { return id == val.id;})[0];
+		const targetObj = Utils.getArrByCondition(convertedData, (val) => { return id == val.id;})[0];
 	    if (!targetObj) customException.notExistIdException();
 		
 		convertedData.splice(convertedData.indexOf(targetObj), 1);
@@ -82,7 +80,7 @@ const Instruction = class {
     }
 
     update(id, status) {		
-	const targetObj = this.utils.getArrByCondition(convertedData, (val) => { return id == val.id;})[0];
+	const targetObj = Utils.getArrByCondition(convertedData, (val) => { return id == val.id;})[0];
 	try {
 	    if (!targetObj) CustomException.notExistIdException();
 	    if (targetObj.status === status) CustomException.sameStatusException();
@@ -93,11 +91,11 @@ const Instruction = class {
 
 	let preObj = {};
 	if (arguments.length === 2) {
-	    preObj = this.utils.deepCopy(targetObj);
+	    preObj = Utils.deepCopy(targetObj);
 	}
 
 	targetObj.status = status;
-	const nextObj = this.utils.deepCopy(targetObj);
+	const nextObj = Utils.deepCopy(targetObj);
 
 	if (arguments.length === 2) {
 	    this.createHistoryObj('update', preObj, nextObj);

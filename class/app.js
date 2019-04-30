@@ -10,7 +10,6 @@ const CustomException = require('./customException.js');
 
 const commandArr = ['show','delete','update','add','undo','redo'];
 const commandParser = new CommandParser();
-const utils = new Utils();
 const instruction = new Instruction();
 
 const run = (() => {
@@ -25,9 +24,9 @@ const run = (() => {
 	CustomException.CommandMissingException(commandList[0], commandArr);
 	commandParser.executeCommand(commandList);
 
-	utils.delay(0)
-	.then(() => {if (commandList[0] === 'update') return utils.delay(3500);})
-	.then(() => {return utils.delay(1000);})
+	Utils.delay(0)
+	.then(() => {if (commandList[0] === 'update') return Utils.delay(3500);})
+	.then(() => {return Utils.delay(1000);})
 	.then(() => {if (commandList[0] !== 'show') instruction.show('all');})
 	.catch(function(e) {console.log(e);})
 	.then(() => {readline.prompt();});
