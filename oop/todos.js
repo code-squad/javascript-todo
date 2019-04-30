@@ -69,38 +69,41 @@ Todos.prototype.add = function (name, tags) {
         status: "todo",
         id: generatedId
     };
-    if (this.recordSwitch) { this.storeHistoryRecord(newObj, 'add', name, tags); }
+    this.storeHistoryRecord(newObj, 'add', name, tags);
     this._data.push(newObj);
-    return `'${name}' 1개가 추가됐습니다.(id : ${generatedId})`;
-}
+    return `'${name}' 1개가 추가됐습니다.(id : ${generatedId})`
+};
 
 Todos.prototype.delete = function (id) {
     const indexOfTarget = this.searchById(id);
     const objOfTarget = this._data[indexOfTarget];
     if (this.recordSwitch) { this.storeHistoryRecord(objOfTarget, 'delete', id); }
     this._data.splice(indexOfTarget, 1);
-    return `'${objOfTarget.name}' '${objOfTarget.status}'가 목록에서 삭제됐습니다.`;
-}
+    return `'${objOfTarget.name}' '${objOfTarget.status}'가 목록에서 삭제됐습니다.`
+};
 
 Todos.prototype.update = function (id, status) {
     const indexOfTarget = this.searchById(id);
     let objOfTarget = this._data[indexOfTarget];
     if (objOfTarget.status === status) {
-        return '바꾸려는 상태가 현재상태와 같습니다.';
+        return '바꾸려는 상태가 현재상태와 같습니다.'
     } else {
         if (this.recordSwitch) { this.storeHistoryRecord(objOfTarget, 'update', id, status, objOfTarget.status); }
         objOfTarget.status = status;
-        return `'${objOfTarget.name}'이(가) '${status}'으로 상태가 변경됐습니다`;
+        return `'${objOfTarget.name}'이(가) '${status}'으로 상태가 변경됐습니다`
     }
-}
+};
 
-Todos.prototype.runRecord = function(order) {
-    if(order === 'start') {
-        this.recordSwitch = 1;
-    }else {
-        this.recordSwitch = 0;
+Todos.prototype.runRecord = function (order) {
+    switch (order) {
+        case 'start':
+            this.recordSwitch = 1;
+            break;
+        case 'stop':
+            this.recordSwitch = 0;
+            break;
     }
-}
+};
 
 Todos.prototype.moveRecordPointer = function (appWord) {
     switch (appWord) {
