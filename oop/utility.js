@@ -1,5 +1,26 @@
-function Utility() {}
+const todoList = require('./todo.json')
+const fs = require('fs')
 
-Utility.prototype.getRandomID = function () { return Date.now(); }    
+const Utility = {
+    splitInput(input) {
+        return input.split('$');
+    },
+
+    getRandomID() {
+        return Date.now();
+    },
+
+    save(todoList) {
+        fs.writeFileSync('todo.json', JSON.stringify(todoList))
+    },
+
+    getObjectById(id) {
+        return todoList.find((todoObj) => { return todoObj.id === parseInt(id) });
+    },
+
+    getIndexById(id) {
+        return todoList.findIndex((todoObj) => { return todoObj.id === parseInt(id) });
+    },
+}
 
 module.exports = Utility;

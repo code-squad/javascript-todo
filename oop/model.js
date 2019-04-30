@@ -1,44 +1,42 @@
-const FileSyncer = require('./FileSyncer')
-const todoList = require('./todo.json')
-const Finder = require('./finder')
+class Model {
+    constructor (utility, todoList) {
+        this.utility = utility;
+        this.todoList = todoList;
+    }
 
-const fileSyncer = new FileSyncer();
-const finder = new Finder();
-
-function Model() {}
-
-Model.prototype.getCountEachStatus = function () {
-    return todoList.reduce((countEachStatus, todoObj) => {
-        countEachStatus[todoObj.status]++;
-        return countEachStatus;
-    }, {'todo' : 0, 'doing': 0, 'done': 0});
-}
-
-Model.prototype.getListInStatus = function (status) {
-    return todoList.filter((todoObj) => { return todoObj.status === status; })
-                    .reduce((listInStatus, todoObj) => {
-                        listInStatus.push(`'${todoObj.name}, ${todoObj.id}번'`);
-                        return listInStatus;
-                    }, []);
-}
-
-Model.prototype.addTodoObject = function (todoObj) {
-    todoList.push(todoObj);
-    fileSyncer.save(todoList);
-}
-
-Model.prototype.deleteTodoObject = function (id) {
-    const objToDelete = finder.getObjectById(id);
-    todoList.splice(todoList.indexOf(objToDelete), 1);
-    fileSyncer.save(todoList);
-    return objToDelete;
-}
-
-Model.prototype.updateTodoObject = function (id, status) {
-    const index = finder.getIndexById(id);
-    todoList[index].status = status;
-    fileSyncer.save(todoList);
-    return todoList[index];
+    getCountEachStatus () {
+        return this.todoList.reduce((countEachStatus, todoObj) => {
+            countEachStatus[todoObj.status]++;
+            return countEachStatus;
+        }, {'todo' : 0, 'doing': 0, 'done': 0});
+    }
+    
+    getListInStatus (status) {
+        return this.todoList.filter((todoObj) => { return todoObj.status === status; })
+                        .reduce((listInStatus, todoObj) => {
+                            listInStatus.push(`'${todoObj.name}, ${todoObj.id}번'`);
+                            return listInStatus;
+                        }, []);
+    }
+    
+    addTodoObject (todoObj) {
+        this.todoList.push(todoObj);
+        this.utility.save(this.todoList);
+    }
+    
+    deleteTodoObject (id) {
+        const objToDelete = this.utility.getObjectById(id);
+        this.todoList.splice(this.todoList.indexOf(objToDelete), 1);
+        this.utility.save(this.todoList);
+        return objToDelete;
+    }
+    
+    updateTodoObject (id, status) {
+        const index = this.utility.getIndexById(id);
+        this.todoList[index].status = status;
+        this.utility.save(this.todoList);
+        return this.todoList[index];
+    }
 }
 
 module.exports = Model;
