@@ -25,9 +25,8 @@ const CustomException  = {
     },
     
     isValidCommand : function(command, arr) {
-        let result = false;
-        if (arr.includes(command)) result = true;
-        return result;
+        if (arr.includes(command)) return true;
+        return false;
     }
 };
 
