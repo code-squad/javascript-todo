@@ -39,7 +39,7 @@ const Instruction = class {
 	const statusArr = ['all', 'todo', 'doing', 'done'];
 	if (status === 'all') {
 	    this.everyStatus(convertedData);
-	} else if (statusArr.includes(status)) {
+	} else {
 	    this.singleStatus(convertedData, status);
 	}
     }
