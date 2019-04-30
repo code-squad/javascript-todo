@@ -12,8 +12,8 @@ function Todos(data, userInputRecord, todosReocrd) {
 Todos.prototype.randomNum = function (digits) {
     const min = Math.pow(10, digits - 1);
     const max = Math.pow(10, digits) - 1;
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
+    return Math.floor(Math.random() * (max - min + 1) + min)
+};
 
 Todos.prototype.makeUniqueNum = function (digits) {
     let generatedId = -1;
@@ -22,8 +22,8 @@ Todos.prototype.makeUniqueNum = function (digits) {
         generatedId = this.randomNum(digits);
         indexOfId = this.searchById(generatedId);
     } while (indexOfId != null);
-    return generatedId;
-}
+    return generatedId
+};
 
 Todos.prototype.countAllStatus = function () {
     let resultObject = {
@@ -32,34 +32,34 @@ Todos.prototype.countAllStatus = function () {
         done: 0
     };
     this._data.forEach(value => resultObject[value.status] += 1);
-    return resultObject;
-}
+    return resultObject
+};
 
 Todos.prototype.searchById = function (id) {
     let resultIndex = null;
     this._data.forEach((value, index) => {
         if (value.id == id) resultIndex = index;
     });
-    return resultIndex;
-}
+    return resultIndex
+};
 
 Todos.prototype.searchByStatus = function (status) {
     let resultArr = [];
     this._data.forEach(value => {
         if (value.status === status) resultArr.push(`'${value.name}, ${value.id}번'`);
     });
-    return resultArr;
-}
+    return resultArr
+};
 
 Todos.prototype.show = function (status) {
     if (status === "all") {
         const statusCountObject = this.countAllStatus();
-        return `현재상태 : todo: ${statusCountObject.todo}개, doing: ${statusCountObject.doing}개, done: ${statusCountObject.done}개`;
+        return `현재상태 : todo: ${statusCountObject.todo}개, doing: ${statusCountObject.doing}개, done: ${statusCountObject.done}개`
     } else if (this.statusArr.includes(status)) {
         const statusArr = this.searchByStatus(status);
-        return `${status}리스트 :  총 ${statusArr.length}건 : ${statusArr.join(', ')}`;
+        return `${status}리스트 :  총 ${statusArr.length}건 : ${statusArr.join(', ')}`
     }
-}
+};
 
 Todos.prototype.add = function (name, tags) {
     let generatedId = this.makeUniqueNum(5);
@@ -114,7 +114,7 @@ Todos.prototype.moveRecordPointer = function (appWord) {
             this.recordPointer--;
             break;
     }
-}
+};
 
 Todos.prototype.isValidPointerLocation = function (appWord) {
     switch (appWord) {
@@ -123,17 +123,17 @@ Todos.prototype.isValidPointerLocation = function (appWord) {
         case 'redo':
             return this.recordPointer > 0
     }
-}
+};
 
 Todos.prototype.addTempData = function (todosObj, userInputArr) {
     this.userInputRecord.unshift(userInputArr);
     this.todosRecord.unshift(todosObj);
-}
+};
 
 Todos.prototype.deleteTempData = function (start, num) {
     this.userInputRecord.splice(start, num);
     this.todosRecord.splice(start, num);
-}
+};
 
 Todos.prototype.storeHistoryRecord = function (todosObj, appWord, ...parameter) {
     const userInputArr = [appWord, parameter];
@@ -145,7 +145,7 @@ Todos.prototype.storeHistoryRecord = function (todosObj, appWord, ...parameter) 
         this.addTempData(todosObj, userInputArr);
         this.recordPointer = 0;
     }
-}
+};
 
 Todos.prototype.undo = function () {
     if (this.isValidPointerLocation('undo')) {
@@ -158,17 +158,17 @@ Todos.prototype.undo = function () {
         switch (appWord) {
             case 'add':
                 this.delete(todosObj.id);
-                return `'${todosObj.id}번, ${todosObj.name}' 항목이 todo에서 삭제되었습니다.`;
+                return `'${todosObj.id}번, ${todosObj.name}' 항목이 todo에서 삭제되었습니다.`
             case 'delete':
                 this._data.push(todosObj);
-                return `'${todosObj.id}번, ${todosObj.name}' 항목이 삭제에서 todo상태로 되었습니다.`;
+                return `'${todosObj.id}번, ${todosObj.name}' 항목이 삭제에서 todo상태로 되었습니다.`
             case 'update':
                 const originalStatus = appParameterArr[2];
                 this.update(...appParameterArr);
-                return `'${todosObj.id}번, ${todosObj.name}' 항목이 ${todosObj.status}에서 ${originalStatus}상태로 되었습니다.`;
+                return `'${todosObj.id}번, ${todosObj.name}' 항목이 ${todosObj.status}에서 ${originalStatus}상태로 되었습니다.`
         }
     } else { return 'undo할 항목이 없습니다.' }
-}
+};
 
 Todos.prototype.redo = function () {
     if (this.isValidPointerLocation('redo')) {
@@ -180,18 +180,18 @@ Todos.prototype.redo = function () {
         switch (appWord) {
             case 'add':
                 this._data.push(todosObj);
-                return `'${todosObj.id}번, ${todosObj.name}' 항목이 삭제에서 todo상태로 되었습니다.`;
+                return `'${todosObj.id}번, ${todosObj.name}' 항목이 삭제에서 todo상태로 되었습니다.`
             case 'delete':
                 this.delete(todosObj.id)
-                return `'${todosObj.id}번, ${todosObj.name}' 항목이 todo에서 삭제되었습니다.`;
+                return `'${todosObj.id}번, ${todosObj.name}' 항목이 todo에서 삭제되었습니다.`
             case 'update':
                 const originalStatus = appParameterArr[2];
                 this.update(...appParameterArr)
-                return `'${todosObj.id}번, ${todosObj.name}' 항목이 ${originalStatus}에서 ${todosObj.status}상태로 되었습니다.`;
+                return `'${todosObj.id}번, ${todosObj.name}' 항목이 ${originalStatus}에서 ${todosObj.status}상태로 되었습니다.`
         }
     } else {
         return 'redo할 항목이 없습니다.'
     }
-}
+};
 
 module.exports = Todos;
