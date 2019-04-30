@@ -61,21 +61,24 @@ const Instruction = class {
     }
 
     delete(id) {
-	const targetObj = this.utils.getArrByCondition(convertedData, (val) => { return id == val.id;})[0];
-	try {
+		try {
+		
+		const targetObj = this.utils.getArrByCondition(convertedData, (val) => { return id == val.id;})[0];
 	    if (!targetObj) customException.notExistIdException();
-	} catch (e) {
-	    console.error(e.message);
-	    return;
-	}
-	
-	convertedData.splice(convertedData.indexOf(targetObj), 1);
-
-	if (arguments.length == 1) {
-	    this.createHistoryObj('delete', obj);
-	}
-	let message = `${targetObj.name}이 ${targetObj.status}에서 삭제되었습니다.`;
-	console.log(message);
+		
+		convertedData.splice(convertedData.indexOf(targetObj), 1);
+		
+		if (arguments.length == 1) {
+			this.createHistoryObj('delete', obj);
+		}
+		
+		let message = `${targetObj.name}이 ${targetObj.status}에서 삭제되었습니다.`;
+		console.log(message);
+		
+	    } catch (e) {
+	        console.error(e.message);
+	        return;
+	    }
     }
 
     update(id, status) {		
@@ -131,7 +134,12 @@ const Instruction = class {
 	}
 	this.pushObj(this.commandHistory.historyArr, historyObj);
 	this.commandHistory.pointer++;
-    }
+	}
+	
+		makeLogObj(commandHistory) {
+		const targetObject = commandHistory.historyArr[this.commandHistory.pointer];
+		return {command : targetObject.cmd, preObj : targetObject.pre, nextObj : targetObject.next, checkSum : true, message : ``};
+	}
 
     undo() {
 	const targetObject = this.commandHistory.historyArr[this.commandHistory.pointer];
