@@ -1,5 +1,4 @@
 //app.js
-
 const Todos = require('./todos');
 const InputParser = require('./inputParser');
 const Validator = require('./validator');
@@ -10,59 +9,59 @@ const rl = readline.createInterface(process.stdin, process.stdout);
 const originData = require('./todoList.json');
 const convertedData = JSON.parse(JSON.stringify(originData)).data;
 
-todos = new Todos(convertedData);
+const userInputRecord = new Array();
+const todosRecord = new Array();
+const todos = new Todos(convertedData, userInputRecord, todosRecord);
+const validator = new Validator(convertedData);
+const inputParser = new InputParser();
 
-const showResult = (todosReturn, appWord) => {
+
+const promptResult = (resultOfTodos, appWord) => {
     return new Promise((resolve) => {
         let timeDelay = 0;
         if (appWord === 'update')
             timeDelay = 3000;
         setTimeout(() => {
-            resolve(todosReturn);
+            resolve(resultOfTodos);
         }, timeDelay);
-    })
+    });
 };
-const showAll = () => {
+
+const promptAll = () => {
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve(todos.show('all'));
         }, 1000);
-    })
+    });
 };
-const promptRepeater = (fun) => {
-    if (fun) {
-        rl.prompt();
-        return true;
-    }
-};
-
 
 rl.setPrompt('명령하세요: ');
 rl.prompt();
-
 rl.on('line', (userInput) => {
     switch (userInput.toLowerCase().trim()) {
-        case 'q':
+        case 'exit':
             rl.close();
             break;
         default:
-            const validator = new Validator(convertedData, userInput);
-            if (promptRepeater(validator.excute())) return;
+            const errorMessage = validator.excuteValidation(userInput);
+            if (errorMessage) {
+                console.log(errorMessage);
+                return rl.prompt()
+            } 
 
-            const inputParser = new InputParser(userInput);
-            const appWord = inputParser.splitedOrder[0];
-
-            showResult(inputParser.excute(todos), appWord)
-                .then((textResult) => {
-                    console.log(textResult);
-                    if (appWord != 'show') {
-                        showAll()
-                            .then((textAll) => {
-                                console.log(textAll);
-                                rl.prompt();
-                            })
-                    } else rl.prompt();
-                })
+            const resultMessage = inputParser.executeTodos(todos, userInput);
+            const appWord = inputParser.appWord; 
+                promptResult(resultMessage, appWord)
+                .then((resultOfTodos) => {
+                    console.log(resultOfTodos);
+                    if (appWord !== 'show') {
+                        promptAll()
+                        .then((resultOfAll) => {
+                            console.log(resultOfAll);
+                            rl.prompt();
+                        });
+                    } else rl.prompt()
+                });
     }
 }).on('close', () => {
     console.log("프로그램을 종료합니다.");

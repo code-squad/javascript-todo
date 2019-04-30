@@ -1,12 +1,11 @@
 module.exports = class InputParser {
-    constructor(order) {
-        this.splitedOrder = order.split('$');
+    constructor() {
     }
-    excute(todos) {
-        if (this.splitedOrder[0] === 'show' || this.splitedOrder[0] === 'delete') {
-            return todos[this.splitedOrder[0]](this.splitedOrder[1]);
-        } else {
-            return todos[this.splitedOrder[0]](this.splitedOrder[1], this.splitedOrder[2]);
-        }
+
+    executeTodos(todos, userInput) {
+        this.splitedInput = userInput.split('$');
+        this.appWord = this.splitedInput.splice(0, 1)[0];
+        if(this.appWord !== 'undo' && this.appWord !== 'redo') {todos.runRecord('start');}
+        return todos[this.appWord](...this.splitedInput);
     }
 }
