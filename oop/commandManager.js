@@ -9,6 +9,27 @@ class CommandManager {
         this.undoStackPointer = -1;
     }
 
+    manageQueue(command) {
+        if (this.commandStack.length >= 3) {
+            this.commandStack.shift();
+            this.commandPointer--;
+            switch(command) {
+                case 'add': 
+                    this.addCommand.historyStack.shift();
+                    this.addCommand.historyStackPointer--; 
+                    break;
+                case 'delete':
+                    this.deleteCommand.historyStackPointer--; 
+                    this.deleteCommand.historyStack.shift();
+                    break;
+                case 'update':
+                    this.updateCommand.historyStackPointer--; 
+                    this.updateCommand.historyStack.shift();
+                    break;
+            }
+        }
+    }
+
     executeCommand(inputArray, commandObj) {
         const command = inputArray[0];
         let status, name, tag, id;
@@ -18,6 +39,9 @@ class CommandManager {
             this.undoStack = [];
             this.undoStackPointer = -1;
         }
+
+        if (command !== 'show') 
+            this.manageQueue(command);
 
         switch(command) {
             case 'show' :
