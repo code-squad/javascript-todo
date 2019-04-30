@@ -60,11 +60,33 @@ const todoCommonMethod = class {
 const undoHistory = [];
 const redoHistory = [];
 
-const redo = function(input){
-    if(input){
-
+const Redo = class {
+    dataInput(input) {
+        redoHistory.push(input);
     }
+    makeUpdateHistory(status) {
+        undoHistory[undoHistory.length-1]['prev_status'] = status;
+    }
+    redoModel(model) {
+        let target = redoHistory[redoHistory.length-1];
+        let [name, tag, status, id, prev_status] = [target['name'], target['tag'], target['status'], target['id'], target['prev_status']];
+    
+        if(model === 'add') {
+            todoModel.add(id);
+            undoHistory.pop();
+    
+        } else if (model === 'update') {
+            todoModel.update(id, prev_status);
+            undoHistory.pop();
+    
+        } else if (model === 'delete') {
+            todoModel.delete(id, name, tag, status);
+            undoHistory.pop();
+    
+        }
+    }       
 }
+const redo = new Redo();
 
 const Undo = class {
     makeAddHistory(model, name, id, status, tag ){
@@ -78,7 +100,7 @@ const Undo = class {
         }
     
     }
-    makeElseHistory(model, idx) {
+    makeDeleteHistory(model, idx) {
         let todoListData = todoList[idx]
         let [name, tag, status, id] = [todoListData['name'], todoListData['tag'], todoListData['status'], todoListData['id']];
         let historyForm = new HistoryForm(model, name, id, status, tag );
@@ -91,6 +113,19 @@ const Undo = class {
         }
     }
     
+    makeUpdateHistory(model, idx) {
+        let todoListData = todoList[idx]
+        let [name, tag, status, id] = [todoListData['name'], todoListData['tag'], todoListData['status'], todoListData['id']];
+        let historyForm = new HistoryForm(model, name, id, status, tag );
+        
+        if(undoHistory.length < 3) {
+            undoHistory.push(historyForm);
+        } else {
+            undoHistory.shift();
+            undoHistory.push(historyForm);
+        }
+    }
+
     undoModel(model) {
         let target = undoHistory[undoHistory.length-1];
         let [name, tag, status, id] = [target['name'], target['tag'], target['status'], target['id']];
@@ -148,7 +183,7 @@ const TodoModel = class extends todoCommonMethod{
     }
     delete(id) {
         let [targetIdx, targetName] = this.findDataIdObj(id)
-        undo.makeElseHistory('delete', targetIdx);
+        undo.makeDeleteHistory('delete', targetIdx);
         todoList.splice(targetIdx,1);
     
         Print.printDelete(targetName);
@@ -156,9 +191,11 @@ const TodoModel = class extends todoCommonMethod{
     }
     update(id, status) {
         let [targetIdx, targetName] = this.findDataIdObj(id)
-        undo.makeElseHistory('update', targetIdx);
+        undo.makeUpdateHistory('update', targetIdx);
         todoList[targetIdx].status = status;
-    
+        redo.makeUpdateHistory(status);
+
+
         setTimeout(()=>{Print.printUpdate(targetName, status)}, 1000);
         showAllTimer(4000);
     } 
@@ -204,7 +241,8 @@ todoMain = (answer) => {
         undoHistory.pop();
         
     } else if(action === 'redo') {
-        redo(redoHistory[redoHistory.length-1]);
+        redo.redoModel(redoHistory[redoHistory.length-1]['model']);
+        redoHistory.pop();
 
     } else {
         Print.printError(errorMsg.ELSE_ERROR);
