@@ -1,42 +1,47 @@
-const TodoError = function(msg) {
-  this.msg = msg;
-};
-
-TodoError.prototype.includeSeperator = function(str, seperator) {
-  if (str.match(/\$/) === null) {
-    throw new Error(this.msg.DONT_HAVE_SEPERATOR(seperator));
+class TodoError {
+  includeSeperator(str, seperator) {
+    const regex = new RegExp('\\' + seperator);
+    if (str.match(regex) === null) {
+      return false;
+    }
+    return true;
   }
-};
 
-TodoError.prototype.compareStatus = function(originStr, changingStr) {
-  if (originStr === changingStr) {
-    throw new Error(this.msg.SAME_STATUS(originStr, changingStr));
+  compareStatus(originStr, changingStr) {
+    if (originStr === changingStr) {
+      return false;
+    }
+    return true;
   }
-};
 
-TodoError.prototype.invalidId = function(id) {
-  if (id === undefined) {
-    throw new Error(this.msg.INVALID_ID());
+  invalidId(id) {
+    if (id === undefined) {
+      return false;
+    }
+    return true;
   }
-};
 
-TodoError.prototype.invalidInst = function(obj, inst) {
-  if (obj[inst] === undefined) {
-    throw new Error(this.msg.INVALID_INST());
+  invalidInst(obj, inst) {
+    if (obj[inst] === undefined) {
+      return false;
+    }
+    return true;
   }
-};
 
-TodoError.prototype.invalidStatus = function(conditionArr, condition) {
-  if (conditionArr.includes(condition) === false) {
-    throw new Error(this.msg.INVALID_STATUS());
+  invalidStatus(conditionArr, condition) {
+    if (!conditionArr.includes(condition)) {
+      return false;
+    }
+    return true;
   }
-};
 
-TodoError.prototype.isArray = function(inputStr) {
-  const regex = /\[[\"\'\,\s\w\d]+\]/; // [로 시작하고 ]로 끝나면 통과
-  if (inputStr.match(regex) === null) {
-    throw new Error(this.msg.NOT_ARRAY(inputStr));
+  isArray(inputStr) {
+    const regex = /\[[\"\'\,\s\w\d]+\]/; // [로 시작하고 ]로 끝나면 통과
+    if (inputStr.match(regex) === null) {
+      return false;
+    }
+    return true;
   }
-};
+}
 
 module.exports = TodoError;

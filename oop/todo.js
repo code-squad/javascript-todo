@@ -1,15 +1,16 @@
-function Todo(obj) {
-  this.name = obj.name;
-  this.tags = obj.tags;
-  this.status = obj.status;
-  this.id = Todo.prototype.generateId();
+class Todo {
+  constructor(obj) {
+    this.name = obj.name;
+    this.tags = obj.tags;
+    this.status = obj.status;
+    this.id = Todo.generateId();
+  }
+
+  static generateId() {
+    Todo.id += 1;
+    return Todo.id;
+  }
 }
-
-Todo.prototype.id = 0;
-
-Todo.prototype.generateId = function() {
-  this.id += 1;
-  return this.id;
-};
+Todo.id = 0;
 
 module.exports = Todo;
