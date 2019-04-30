@@ -3,13 +3,19 @@ const todoList = require('./data.js');
 const errorCheck = require('./ErrorCheck.js');
 const errorMsg = require('./errorMsg.js');
 const todoPrint = require('./todoPrint.js');
+
 const Error = new errorCheck.ErrorCheck();
 const Print = new todoPrint.ShowPrint();
+
+const undoHistory = [];
+const redoHistory = [];
+
 
 let r = readline.createInterface({
     input:process.stdin,
     output:process.stdout
 });
+
 
 const todoForm = function (name, tag, status, id) {
     this.name = name;
@@ -18,7 +24,7 @@ const todoForm = function (name, tag, status, id) {
     this.id = id;
 }
 
-const HistoryForm = function (model, name, id, status, tag, prevCommend){
+const HistoryForm = function (model, name, id, status, tag){
         this.model = model;
         this.name = name;
         this.id = id;
@@ -28,6 +34,7 @@ const HistoryForm = function (model, name, id, status, tag, prevCommend){
 
 const showAllTimer = (input) => {
     setTimeout(todoCommonMethod.prototype.todoCount, input);
+    setTimeout(()=>{r.prompt()} , input+1000) 
 }
 
 const todoCommonMethod = class {
@@ -56,10 +63,6 @@ const todoCommonMethod = class {
     }
 }
 
-
-const undoHistory = [];
-const redoHistory = [];
-
 const Redo = class {
     dataInput(input) {
         redoHistory.push(input);
@@ -71,74 +74,64 @@ const Redo = class {
         let target = redoHistory[redoHistory.length-1];
         let [name, tag, status, id, prev_status] = [target['name'], target['tag'], target['status'], target['id'], target['prev_status']];
     
-        if(model === 'add') {
-            todoModel.add(id);
-            undoHistory.pop();
-    
-        } else if (model === 'update') {
-            todoModel.update(id, prev_status);
-            undoHistory.pop();
-    
-        } else if (model === 'delete') {
-            todoModel.delete(id, name, tag, status);
-            undoHistory.pop();
-    
+        switch (model) {
+            case 'add' :
+                let newTodoList = new todoForm(name, tag[0], status, id);
+                todoList.push(newTodoList)
+                undoHistory.pop();
+                break;
+            case 'update' :
+                todoModel.update(id, prev_status);
+                undoHistory.pop();
+                break;
+            case 'delete' :
+                todoModel.delete(id, name, tag, status);
+                undoHistory.pop();
+                break;
         }
     }       
 }
 const redo = new Redo();
 
 const Undo = class {
+    historyLengthCheck(form){
+        if(undoHistory.length < 3) {
+            undoHistory.push(form);
+        } else {
+            undoHistory.shift();
+            undoHistory.push(form);
+        }
+    }
+
     makeAddHistory(model, name, id, status, tag ){
         let historyForm = new HistoryForm(model, name, id, status, tag);
-    
-        if(undoHistory.length < 3) {
-            undoHistory.push(historyForm);
-        } else {
-            undoHistory.shift();
-            undoHistory.push(historyForm);
-        }
-    
+        this.historyLengthCheck(historyForm)
     }
-    makeDeleteHistory(model, idx) {
+
+    makeElseHistory(model, idx) {
         let todoListData = todoList[idx]
         let [name, tag, status, id] = [todoListData['name'], todoListData['tag'], todoListData['status'], todoListData['id']];
         let historyForm = new HistoryForm(model, name, id, status, tag );
     
-        if(undoHistory.length < 3) {
-            undoHistory.push(historyForm);
-        } else {
-            undoHistory.shift();
-            undoHistory.push(historyForm);
-        }
-    }
-    
-    makeUpdateHistory(model, idx) {
-        let todoListData = todoList[idx]
-        let [name, tag, status, id] = [todoListData['name'], todoListData['tag'], todoListData['status'], todoListData['id']];
-        let historyForm = new HistoryForm(model, name, id, status, tag );
-        
-        if(undoHistory.length < 3) {
-            undoHistory.push(historyForm);
-        } else {
-            undoHistory.shift();
-            undoHistory.push(historyForm);
-        }
+        this.historyLengthCheck(historyForm)
     }
 
     undoModel(model) {
         let target = undoHistory[undoHistory.length-1];
         let [name, tag, status, id] = [target['name'], target['tag'], target['status'], target['id']];
-    
-        if(model === 'add') {
+        
+        switch(model){
+        case 'add' :
             this.undoAdd(id);
+            break;
     
-        } else if (model === 'update') {
+        case 'update' :
             this.undoUpdate(id, status);
+            break;
     
-        } else if (model === 'delete') {
+        case 'delete' :
             this.undoDelete(id, name, tag, status)
-    
+            break;
         }
     }   
     
@@ -153,19 +146,13 @@ const Undo = class {
     undoDelete(id, name, tag, status) {
         let newTodoList = new todoForm(name, tag[0], status, id);
         todoList.push(newTodoList)
-        //undoHistory.pop();    
     }
 }
 
 const undo = new Undo()
 
 
-
-
-
-
 const TodoModel = class extends todoCommonMethod{
-//class todoModel extends todoCommonMethod{
     show(input) {
         let status = input[0];
         status === 'all' ? this.todoCount() : this.showElse(status);
@@ -183,7 +170,7 @@ const TodoModel = class extends todoCommonMethod{
     }
     delete(id) {
         let [targetIdx, targetName] = this.findDataIdObj(id)
-        undo.makeDeleteHistory('delete', targetIdx);
+        undo.makeElseHistory('delete', targetIdx);
         todoList.splice(targetIdx,1);
     
         Print.printDelete(targetName);
@@ -191,7 +178,7 @@ const TodoModel = class extends todoCommonMethod{
     }
     update(id, status) {
         let [targetIdx, targetName] = this.findDataIdObj(id)
-        undo.makeUpdateHistory('update', targetIdx);
+        undo.makeElseHistory('update', targetIdx);
         todoList[targetIdx].status = status;
         redo.makeUpdateHistory(status);
 
@@ -206,10 +193,7 @@ const TodoModel = class extends todoCommonMethod{
 const todoModel = new TodoModel();
 
 
-
-//var arr = "update$9547$doing"
-// input & ErrorCheck
-todoMain = (answer) => {
+const todoMain = (answer) => {
     if(Error.syntaxError(answer) === false) {
         Print.printError(errorMsg.syntaxError);
         return true;
@@ -219,7 +203,7 @@ todoMain = (answer) => {
     let action = tempArr.shift(0);   
 
     if(action === "add") {
-        todoModel.add(tempArr, );
+        todoModel.add(tempArr);
 
     } else if(action === "delete") { 
         tempArr[0] = Number(tempArr[0])
@@ -248,17 +232,7 @@ todoMain = (answer) => {
         Print.printError(errorMsg.ELSE_ERROR);
     }
 
-    console.log(todoList);
-    console.log(undoHistory);
-    console.log(redoHistory);
-
-    const reOrder = () => {
-        r.prompt()    
-     }
-    action === 'update' ? setTimeout(reOrder, 5000) : setTimeout(reOrder, 2000);
 }
-
-//todoMain(arr);
 
 
  r.setPrompt('명령하세요 : ');
