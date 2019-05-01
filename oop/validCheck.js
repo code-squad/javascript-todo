@@ -24,9 +24,11 @@ module.exports = class ValidCheck {
 	}
 
 	excuteTodo(action, ...condition) {
-		// const result = ;
+		if (action === 'show') {
+			this.todo[action](...condition);
+			return;
+		}
 		this.log.addLog(this.todo[action](...condition));
-		// this.todo.readline.prompt();
 	}
 
 	excuteLog(action) {
