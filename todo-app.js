@@ -5,20 +5,17 @@ const inputReadline = readline.createInterface({
     output:process.stdout
 });
 
-const TodoList = require('./todo-proto.js');
+const TodoList = require('./todo-main.js');
 
 const todoTest = new TodoList();
 
-inputReadline.setPrompt('명령하세요');
-inputReadline.prompt();
 inputReadline.on('line', (line) => {
     
     if(line === 'exit') {
         r.close();
     }
 
-    todoTest.checkInput(line, inputReadline);
-    // r.prompt();
+    todoTest.checkInput(line);
 })
 inputReadline.on('close', function(){
     process.exit();
