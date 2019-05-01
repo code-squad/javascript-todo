@@ -5,22 +5,16 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-// param으로 obj를 받으면 obj에 무엇이 들어있는지 알기 어려운것같은데 해결방안이 있을까요? 
-function App(obj) {
-    const {errorChecker,editor,viewer} = obj
-    this.errorChecker = errorChecker;
-    this.editor = editor
-    this.viewer = viewer;
-    this.delayTime = 1000;
-    this.updateDelayTime = 3000;
-    this.result;
-}
-
-
-
-App.prototype = {
-
-
+class App {
+    constructor(obj){
+        const {errorChecker,editor,viewer} = obj
+        this.errorChecker = errorChecker;
+        this.editor = editor
+        this.viewer = viewer;
+        this.delayTime = 1000;
+        this.updateDelayTime = 3000;
+        this.result;
+    }
     run() {
 
         rl.question('명령을 입력하세요: ', (input) => {
@@ -68,34 +62,29 @@ App.prototype = {
             }
 
         });
-    },
+    }
 
     delayShow(time){
         setTimeout(() => {
             this.viewer.showAll()
             this.run();
         }, time);
-    },
+    }
 
     parseCommand(input) {
         return input.split('$');
-    },
+    }
 }
 
 
-function Editor(errorChecker) {
+class Editor {
+    constructor(errorChecker){
     this.errorChecker = errorChecker;
     this.undoStack = [];
     this.redoStack = [];
-}
+    }
 
-Editor.prototype = {
-    TodoObject: function (_name, _tag, _newId) {
-        this.name = _name
-        this.tag = _tag
-        this.status = 'todo'
-        this.id = _newId
-    },
+
     undoTodo(){
         this.errorChecker.stackNull(this.undoStack.length)
 
@@ -115,7 +104,8 @@ Editor.prototype = {
         
         return lastEdit;
 
-    },
+    }
+
     redoTodo(){
         this.errorChecker.stackNull(this.redoStack.length)
 
@@ -132,14 +122,21 @@ Editor.prototype = {
         }
         this.undoStack.push(lastUndo);
         return lastUndo
-    },
+    }
 
     addTodo(_name, _tag, _id) {
         const _newId = _id || this.getUniqueId()
-        const newTodoObject = new this.TodoObject(_name, _tag, _newId);
+        
+        // class 안에 생성자 함수 못만드는것같아서 add내부에 싱글턴 생성 
+        const newTodoObject = {
+            name  :_name,
+            tag  :_tag,
+            status : 'todo',
+            id :  _newId
+        };
         schedule_list.push(newTodoObject);
         return { ...newTodoObject};
-    },
+    }
 
     updateTodo(_id, _status) {
 
@@ -151,7 +148,7 @@ Editor.prototype = {
 
         return {...selectedObject,preStatus};
 
-    },
+    }
 
     deleteTodo(_id) {
 
@@ -162,11 +159,11 @@ Editor.prototype = {
 
         return {...selectedObject};
 
-    },
+    }
 
     getUniqueId() {
         return Date.now()
-    },
+    }
 
     filterNameStatusArrayfromSelectedObject(_obj) {
         const filteredArray = Object.entries(_obj).filter(([key, value]) => {
@@ -175,26 +172,23 @@ Editor.prototype = {
         })
             .map(([key, value]) => value);
         return filteredArray;
-    },
+    }
 
     findSelectedIdObj(_id) {
         const findedObj = schedule_list.find(todo => todo.id === parseInt(_id));
         if (this.errorChecker.idCheck(findedObj));
         return findedObj;
-    },
+    }
 
     findSelectedIdObjIndex(_id){
         return schedule_list.findIndex(todo => todo.id === parseInt(_id));
     }
 
-
 }
 
 
 
-function Viewer() { }
-
-Viewer.prototype = {
+class Viewer {
     showAll() {
         const statusBox = schedule_list.reduce((accum, curr) => {
             accum[curr.status] = ++accum[curr.status] || 1;
@@ -204,14 +198,14 @@ Viewer.prototype = {
 
         const showAllResult = Object.entries(statusBox).map(([key, value]) => `${key}는 ${value}개`).join(", ");
         console.log(`현재상태 : ${showAllResult}`);
-    },
+    }
 
     showFiltered(_status) {
         const showFilteredResult = schedule_list.filter(todo => todo.status === _status)
             .map(todo => `'${todo.name}, ${todo.id}번'`);
         console.log(`${_status}리스트 : 총${showFilteredResult.length}건 : ${showFilteredResult.join(', ')}`);
 
-    },
+    }
     undoMessage(_obj){
         const {key , result} = _obj
         const {id,name,status,preStatus} = result
@@ -222,7 +216,7 @@ Viewer.prototype = {
         }
         console.log(undoNote[key])
         
-    },
+    }
     redoMessage(_obj){
         const {key , result} = _obj
         const {id,name,status,preStatus} = result
@@ -232,48 +226,45 @@ Viewer.prototype = {
             delete:`undo취소! id: ${id} ${name}가 ${status}에서 재 삭제되었습니다.`
         }
         console.log(redoNote[key])
-    },
+    }
 
     addMessage(_obj) {
         const {name, id} = _obj
         console.log(`${name}가 추가되었습니다. (id :${id})`);
-    },
+    }
 
     updateMessage(_obj) {
         const {name, status} = _obj
         console.log(`${name}의 상태가 ${status}로 변경되었습니다.`);
-    },
+    }
 
     deleteMessage(_obj) {
         const {name, status} = _obj
         console.log(`${name} ${status}가 목록에서 삭제 되었습니다.`);
-    },
+    }
     
     errorMessage(errorObject){
         console.log(errorObject.message)
     }
+
 }
 
-function ErrorChecker() { }
-
-ErrorChecker.prototype = {
+class ErrorChecker{
     $check(_message) {
         if (_message.length === 0) throw new Error('InputError : $ is not exist ')
-    },
+    }
 
     statusCheck(_todo_status, _status) {
         if (_todo_status === _status) throw new Error('StatusError : status is same')
-    },
+    }
 
     idCheck(_obj) {
         if (_obj === undefined) throw new Error('IdError : id is not valid')
-    },
+    }
 
     stackNull(_length){
         if(_length === 0) throw new Error('stackError : Stack is empty')
     }
-
-
 }
 
 const schedule_errorChecker = new ErrorChecker();
