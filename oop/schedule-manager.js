@@ -90,30 +90,40 @@ Editor.prototype = {
         this.id = _newId
     },
     undoTodo(){
-        // console.log(this.undoStack)
+        this.errorChecker.undoNull(this.undoStack.length)
+
         const lastEdit = this.undoStack.pop();
         if(lastEdit.key === 'add'){
             this.deleteTodo(lastEdit.result.id);
         }
+        if(lastEdit.key === 'delete'){
+            this.addTodo(lastEdit.result.name, lastEdit.result.tag, lastEdit.result.id);
+        }
+        if(lastEdit.key === 'update'){
+            this.updateTodo(lastEdit.result.id, lastEdit.result.preStatus);
+        }
+
         
         return lastEdit;
 
     },
 
-    addTodo(_name, _tag) {
-        const _newId = this.getUniqueId()
+    addTodo(_name, _tag, _id) {
+        const _newId = _id || this.getUniqueId()
         const newTodoObject = new this.TodoObject(_name, _tag, _newId);
         schedule_list.push(newTodoObject);
         return { ...newTodoObject};
     },
 
-    updateTodo(id, _status) {
+    updateTodo(_id, _status) {
 
         const selectedObject = this.findSelectedIdObj(_id);
+        const preStatus = selectedObject.status 
         this.errorChecker.statusCheck(selectedObject.status,_status);
+        // find로 찾은 객체가 원본 배열의 객체를 바꾸어버리는 문제 발견 
         selectedObject.status = _status;
 
-        return {...selectedObject};
+        return {...selectedObject,preStatus};
 
     },
 
@@ -178,11 +188,11 @@ Viewer.prototype = {
     },
     undoMessage(_obj){
         const {key , result} = _obj
-        const {id,name,status} = result
+        const {id,name,status,preStatus} = result
         const undoNote = {
-            add:`${id} ${name}가 삭제에서 ${status}로 변경되었습니다.`,
-            update:`updateMEssage`,
-            delete:`deleteMessage`
+            add:`명령취소! ${id} ${name}가 ${status}에서 삭제되었습니다.`,
+            update:`명령취소! ${id} ${name}의 ${status}를 ${preStatus}로 되돌렸습니다.`,
+            delete:`명령취소! ${id} ${name}가 삭제에서 ${status}로 생성되었습니다.`
         }
         console.log(undoNote[key])
         
@@ -221,6 +231,10 @@ ErrorChecker.prototype = {
 
     idCheck(_obj) {
         if (_obj === undefined) throw new Error('IdError : id is not valid')
+    },
+
+    undoNull(_length){
+        if(_length === 0) throw new Error('undoStack in empty')
     }
 
 
