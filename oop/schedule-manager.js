@@ -13,14 +13,37 @@ class App {
         this.viewer = viewer;
         this.delayTime = 1000;
         this.updateDelayTime = 3000;
-        this.result;
+        // this.result; 현재결과를 저장하면 좋긴하겠지만 비구조화 할당불편함
     }
+
+    convertParamObj([key, ...message]) {
+        // 리팩토링하고 싶지만 message[0]이건 각 명령이 너무 달라서 못바꾸고
+        // 각 key마다 생성되는 객체의 구조는 같아서 생성자함수 만들고, 덮어쓰는 방법으로는 해결할 수 있을듯 
+        const keyCommand = {
+            add: {
+                name: message[0],
+                tag: message[1]
+            },
+            update: {
+                id: message[0],
+                status: message[1]
+            },
+            delete: {
+                id: message[0]
+            }
+        }
+   
+        return keyCommand[key]
+
+    }
+
     run() {
 
         rl.question('명령을 입력하세요: ', (input) => {
             if (input === 'q') return rl.close();
             try {
                 const [key, ...message] = this.parseCommand(input)
+                const paramObj = this.convertParamObj(this.parseCommand(input));
                 if (key !== 'redo' && key !== 'undo') this.errorChecker.$check(message)
 
                 if (key === "show") {
@@ -29,17 +52,17 @@ class App {
                     return this.run();
                 }
 
-                this.result = this.editor[key + 'Todo'](...message);
-                    
+                const currentResult = this.editor[key + 'Todo'](paramObj);
+
 
                 if (key !== 'undo' && key !== 'redo') {
                     this.editor.redoStack = [];
-                    this.editor.undoStack.push({ key, message, result: this.result });
+                    this.editor.undoStack.push({ key, currentResult });
                 }
                 // console.log(this.editor.undoStack);
-                // console.log('---------------------');                
+                // console.log('---------------------');
                 // console.log(this.editor.redoStack);
-                // console.log('---------------------');                
+                // console.log('---------------------');
                 // console.log(schedule_list);
 
                 Promise.resolve(this.updateDelayTime)
@@ -47,12 +70,12 @@ class App {
                         if (key === 'update') {
                             return new Promise((resolve) => {
                                 setTimeout(() => {
-                                    this.viewer[key + 'Message'](this.result)
+                                    this.viewer[key + 'Message'](currentResult)
                                     resolve(this.delayTime)
                                 }, this.updateDelayTime)
                             })
                         }
-                        this.viewer[key + 'Message'](this.result)
+                        this.viewer[key + 'Message'](currentResult)
                         return new Promise((resolve) => resolve(this.delayTime))
                     })
                     .then((time) => this.delayShow(time))
@@ -98,16 +121,14 @@ class Editor {
         const lastEdit = this.undoStack.pop();
         this.redoStack.push(lastEdit);
 
-
-        const undoNoteParam = {
-            add: [lastEdit.result.id],
-            update : [lastEdit.result.id, lastEdit.result.preStatus],
-            delete : [lastEdit.result.name, lastEdit.result.tag, lastEdit.result.id]
+        if (lastEdit.key === 'update'){
+            this.updateTodo({
+                id: lastEdit.currentResult.id,
+                status: lastEdit.currentResult.preStatus
+            });
         }
-        this.Note[lastEdit.key].call(this, ...undoNoteParam[lastEdit.key]);
-        
 
-
+        else{this.Note[lastEdit.key].call(this, lastEdit.currentResult)}
         return lastEdit;
 
     }
@@ -116,47 +137,43 @@ class Editor {
         this.errorChecker.stackNull(this.redoStack.length)
 
         const lastUndo = this.redoStack.pop();
-        const redoNoteParam = {
-            add: [lastUndo.result.name, lastUndo.result.tag, lastUndo.result.id],
-            update : [lastUndo.result.id, lastUndo.result.status],
-            delete : [lastUndo.result.id]
-        }
-        this[lastUndo.key+"Todo"](...redoNoteParam[lastUndo.key])
-
+        this[lastUndo.key + "Todo"](lastUndo.currentResult)
         this.undoStack.push(lastUndo);
         return lastUndo
     }
 
-    addTodo(_name, _tag, _id) {
-        const _newId = _id || this.getUniqueId()
+    addTodo(_obj) {
+        const { name, tag, id } = _obj;
+        const newId = id || this.getUniqueId()
 
         // class 안에 생성자 함수 못만드는것같아서 add내부에 싱글턴 생성 
         const newTodoObject = {
-            name: _name,
-            tag: _tag,
+            name: name,
+            tag: tag,
             status: 'todo',
-            id: _newId
+            id: newId
         };
         schedule_list.push(newTodoObject);
         return { ...newTodoObject };
     }
 
-    updateTodo(_id, _status) {
+    updateTodo(_obj) {
+        const { id, status } = _obj;
 
-        const selectedObject = this.findSelectedIdObj(_id);
+        const selectedObject = this.findSelectedIdObj(id);
         const preStatus = selectedObject.status
-        this.errorChecker.statusCheck(selectedObject.status, _status);
+        this.errorChecker.statusCheck(selectedObject.status, status);
         // find로 찾은 객체가 원본 배열의 객체를 바꾸어버리는 문제 발견 
-        selectedObject.status = _status;
+        selectedObject.status = status;
 
         return { ...selectedObject, preStatus };
 
     }
 
-    deleteTodo(_id) {
-        console.log(this);
-        const selectedObject = this.findSelectedIdObj(_id);
-        const selectedObjectIndex = this.findSelectedIdObjIndex(_id);
+    deleteTodo(_obj) {
+        const { id } = _obj;
+        const selectedObject = this.findSelectedIdObj(id);
+        const selectedObjectIndex = this.findSelectedIdObjIndex(id);
         schedule_list.splice(selectedObjectIndex, 1);
 
         return { ...selectedObject };
@@ -167,14 +184,6 @@ class Editor {
         return Date.now()
     }
 
-    filterNameStatusArrayfromSelectedObject(_obj) {
-        const filteredArray = Object.entries(_obj).filter(([key, value]) => {
-            const seletedStatus = ['name', 'status'];
-            return seletedStatus.includes(key)
-        })
-            .map(([key, value]) => value);
-        return filteredArray;
-    }
 
     findSelectedIdObj(_id) {
         const findedObj = schedule_list.find(todo => todo.id === parseInt(_id));
@@ -209,8 +218,8 @@ class Viewer {
 
     }
     undoMessage(_obj) {
-        const { key, result } = _obj
-        const { id, name, status, preStatus } = result
+        const { key, currentResult } = _obj
+        const { id, name, status, preStatus } = currentResult
         const undoNote = {
             add: `명령취소! id: ${id} ${name}가 ${status}에서 삭제되었습니다.`,
             update: `명령취소! id: ${id} ${name}의 ${status}를 ${preStatus}로 되돌렸습니다.`,
@@ -220,8 +229,8 @@ class Viewer {
 
     }
     redoMessage(_obj) {
-        const { key, result } = _obj
-        const { id, name, status, preStatus } = result
+        const { key, currentResult } = _obj
+        const { id, name, status, preStatus } = currentResult
         const redoNote = {
             add: `undo취소! id: ${id} ${name}가 삭제에서 ${status}로 재 생성되었습니다.`,
             update: `undo취소! id: ${id} ${name}의 ${preStatus}를 ${status}로 되돌렸습니다.`,
