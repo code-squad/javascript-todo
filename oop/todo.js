@@ -89,16 +89,15 @@ Todo.prototype.getStatus = function(index) {
 };
 
 Todo.prototype.delete = function(index) {
-	const deletingName = this.todoList[index].name;
-
-	console.log(`${deletingName}가 ${this.todoList[index].status}에서 삭제됐습니다.`);
+	const deletingData = this.todoList[index];
+	console.log(`${deletingData.name}가 ${deletingData.status}에서 삭제됐습니다.`);
 	const nextData = Object.assign({}, this.todoList[index]);
 	nextData.status = '삭제';
 	this.todoList.splice(index, 1);
 	setTimeout(() => {
 		this.printAll();
 	}, commonDelaySecond);
-	return { action: 'delete', prevData: this.todoList[index], nextData, todoListIndex: index };
+	return { action: 'delete', prevData: deletingData, nextData, todoListIndex: index };
 };
 
 Todo.prototype.update = function(index, status) {
