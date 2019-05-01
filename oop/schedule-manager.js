@@ -6,8 +6,8 @@ const rl = readline.createInterface({
 });
 
 class App {
-    constructor(obj){
-        const {errorChecker,editor,viewer} = obj
+    constructor(obj) {
+        const { errorChecker, editor, viewer } = obj
         this.errorChecker = errorChecker;
         this.editor = editor
         this.viewer = viewer;
@@ -21,7 +21,7 @@ class App {
             if (input === 'q') return rl.close();
             try {
                 const [key, ...message] = this.parseCommand(input)
-                if(key !== 'redo' && key!== 'undo') this.errorChecker.$check(message)
+                if (key !== 'redo' && key !== 'undo') this.errorChecker.$check(message)
 
                 if (key === "show") {
                     const [status] = message
@@ -29,18 +29,19 @@ class App {
                     return this.run();
                 }
 
-                this.result = this.editor[key + 'Todo'](...message)
-                // console.log(this.result);
-                ;
-                
-                if(key !== 'undo' && key !=='redo'){
-                    this.editor.redoStack =[];
-                    this.editor.undoStack.push({key,message,result:this.result});
+                this.result = this.editor[key + 'Todo'](...message);
+                    
+
+                if (key !== 'undo' && key !== 'redo') {
+                    this.editor.redoStack = [];
+                    this.editor.undoStack.push({ key, message, result: this.result });
                 }
                 // console.log(this.editor.undoStack);
                 // console.log('---------------------');                
-                // console.log(this.editor.redoStack);                
-                
+                // console.log(this.editor.redoStack);
+                // console.log('---------------------');                
+                // console.log(schedule_list);
+
                 Promise.resolve(this.updateDelayTime)
                     .then(() => {
                         if (key === 'update') {
@@ -52,9 +53,9 @@ class App {
                             })
                         }
                         this.viewer[key + 'Message'](this.result)
-                        return new Promise((resolve)=>resolve(this.delayTime))
+                        return new Promise((resolve) => resolve(this.delayTime))
                     })
-                    .then((time)=>this.delayShow(time))
+                    .then((time) => this.delayShow(time))
             }
             catch (e) {
                 this.viewer.errorMessage(e);
@@ -64,7 +65,7 @@ class App {
         });
     }
 
-    delayShow(time){
+    delayShow(time) {
         setTimeout(() => {
             this.viewer.showAll()
             this.run();
@@ -78,86 +79,87 @@ class App {
 
 
 class Editor {
-    constructor(errorChecker){
-    this.errorChecker = errorChecker;
-    this.undoStack = [];
-    this.redoStack = [];
+    constructor(errorChecker) {
+        this.errorChecker = errorChecker;
+        this.undoStack = [];
+        this.redoStack = [];
+        this.Note = {
+            add : this.deleteTodo,
+            update: this.updateTodo,
+            delete: this.addTodo
+        }
+
+
     }
 
 
-    undoTodo(){
+    undoTodo() {
         this.errorChecker.stackNull(this.undoStack.length)
-
         const lastEdit = this.undoStack.pop();
         this.redoStack.push(lastEdit);
 
-        if(lastEdit.key === 'add'){
-            this.deleteTodo(lastEdit.result.id);
-        }
-        if(lastEdit.key === 'delete'){
-            this.addTodo(lastEdit.result.name, lastEdit.result.tag, lastEdit.result.id);
-        }
-        if(lastEdit.key === 'update'){
-            this.updateTodo(lastEdit.result.id, lastEdit.result.preStatus);
-        }
 
+        const undoNoteParam = {
+            add: [lastEdit.result.id],
+            update : [lastEdit.result.id, lastEdit.result.preStatus],
+            delete : [lastEdit.result.name, lastEdit.result.tag, lastEdit.result.id]
+        }
+        this.Note[lastEdit.key].call(this, ...undoNoteParam[lastEdit.key]);
         
+
+
         return lastEdit;
 
     }
 
-    redoTodo(){
+    redoTodo() {
         this.errorChecker.stackNull(this.redoStack.length)
 
         const lastUndo = this.redoStack.pop();
+        const redoNoteParam = {
+            add: [lastUndo.result.name, lastUndo.result.tag, lastUndo.result.id],
+            update : [lastUndo.result.id, lastUndo.result.status],
+            delete : [lastUndo.result.id]
+        }
+        this[lastUndo.key+"Todo"](...redoNoteParam[lastUndo.key])
 
-        if(lastUndo.key === 'add'){
-             this.addTodo(lastUndo.result.name, lastUndo.result.tag, lastUndo.result.id);
-        }
-        if(lastUndo.key === 'delete'){
-             this.deleteTodo(lastUndo.result.id);
-        }
-        if(lastUndo.key === 'update'){
-             this.updateTodo(lastUndo.result.id, lastUndo.result.status);
-        }
         this.undoStack.push(lastUndo);
         return lastUndo
     }
 
     addTodo(_name, _tag, _id) {
         const _newId = _id || this.getUniqueId()
-        
+
         // class 안에 생성자 함수 못만드는것같아서 add내부에 싱글턴 생성 
         const newTodoObject = {
-            name  :_name,
-            tag  :_tag,
-            status : 'todo',
-            id :  _newId
+            name: _name,
+            tag: _tag,
+            status: 'todo',
+            id: _newId
         };
         schedule_list.push(newTodoObject);
-        return { ...newTodoObject};
+        return { ...newTodoObject };
     }
 
     updateTodo(_id, _status) {
 
         const selectedObject = this.findSelectedIdObj(_id);
-        const preStatus = selectedObject.status 
-        this.errorChecker.statusCheck(selectedObject.status,_status);
+        const preStatus = selectedObject.status
+        this.errorChecker.statusCheck(selectedObject.status, _status);
         // find로 찾은 객체가 원본 배열의 객체를 바꾸어버리는 문제 발견 
         selectedObject.status = _status;
 
-        return {...selectedObject,preStatus};
+        return { ...selectedObject, preStatus };
 
     }
 
     deleteTodo(_id) {
-
+        console.log(this);
         const selectedObject = this.findSelectedIdObj(_id);
         const selectedObjectIndex = this.findSelectedIdObjIndex(_id);
+        schedule_list.splice(selectedObjectIndex, 1);
 
-        schedule_list.splice(selectedObjectIndex,1);
-
-        return {...selectedObject};
+        return { ...selectedObject };
 
     }
 
@@ -180,7 +182,7 @@ class Editor {
         return findedObj;
     }
 
-    findSelectedIdObjIndex(_id){
+    findSelectedIdObjIndex(_id) {
         return schedule_list.findIndex(todo => todo.id === parseInt(_id));
     }
 
@@ -206,50 +208,50 @@ class Viewer {
         console.log(`${_status}리스트 : 총${showFilteredResult.length}건 : ${showFilteredResult.join(', ')}`);
 
     }
-    undoMessage(_obj){
-        const {key , result} = _obj
-        const {id,name,status,preStatus} = result
+    undoMessage(_obj) {
+        const { key, result } = _obj
+        const { id, name, status, preStatus } = result
         const undoNote = {
-            add:`명령취소! id: ${id} ${name}가 ${status}에서 삭제되었습니다.`,
-            update:`명령취소! id: ${id} ${name}의 ${status}를 ${preStatus}로 되돌렸습니다.`,
-            delete:`명령취소! id: ${id} ${name}가 삭제에서 ${status}로 생성되었습니다.`
+            add: `명령취소! id: ${id} ${name}가 ${status}에서 삭제되었습니다.`,
+            update: `명령취소! id: ${id} ${name}의 ${status}를 ${preStatus}로 되돌렸습니다.`,
+            delete: `명령취소! id: ${id} ${name}가 삭제에서 ${status}로 생성되었습니다.`
         }
         console.log(undoNote[key])
-        
+
     }
-    redoMessage(_obj){
-        const {key , result} = _obj
-        const {id,name,status,preStatus} = result
+    redoMessage(_obj) {
+        const { key, result } = _obj
+        const { id, name, status, preStatus } = result
         const redoNote = {
-            add:`undo취소! id: ${id} ${name}가 삭제에서 ${status}로 재 생성되었습니다.`,
-            update:`undo취소! id: ${id} ${name}의 ${preStatus}를 ${status}로 되돌렸습니다.`,
-            delete:`undo취소! id: ${id} ${name}가 ${status}에서 재 삭제되었습니다.`
+            add: `undo취소! id: ${id} ${name}가 삭제에서 ${status}로 재 생성되었습니다.`,
+            update: `undo취소! id: ${id} ${name}의 ${preStatus}를 ${status}로 되돌렸습니다.`,
+            delete: `undo취소! id: ${id} ${name}가 ${status}에서 재 삭제되었습니다.`
         }
         console.log(redoNote[key])
     }
 
     addMessage(_obj) {
-        const {name, id} = _obj
+        const { name, id } = _obj
         console.log(`${name}가 추가되었습니다. (id :${id})`);
     }
 
     updateMessage(_obj) {
-        const {name, status} = _obj
+        const { name, status } = _obj
         console.log(`${name}의 상태가 ${status}로 변경되었습니다.`);
     }
 
     deleteMessage(_obj) {
-        const {name, status} = _obj
+        const { name, status } = _obj
         console.log(`${name} ${status}가 목록에서 삭제 되었습니다.`);
     }
-    
-    errorMessage(errorObject){
+
+    errorMessage(errorObject) {
         console.log(errorObject.message)
     }
 
 }
 
-class ErrorChecker{
+class ErrorChecker {
     $check(_message) {
         if (_message.length === 0) throw new Error('InputError : $ is not exist ')
     }
@@ -262,8 +264,8 @@ class ErrorChecker{
         if (_obj === undefined) throw new Error('IdError : id is not valid')
     }
 
-    stackNull(_length){
-        if(_length === 0) throw new Error('stackError : Stack is empty')
+    stackNull(_length) {
+        if (_length === 0) throw new Error('stackError : Stack is empty')
     }
 }
 
@@ -271,10 +273,10 @@ const schedule_errorChecker = new ErrorChecker();
 const schedule_editor = new Editor(schedule_errorChecker);
 const schedule_viewer = new Viewer();
 
-const schedule_manager =  new App({
-    errorChecker : schedule_errorChecker,
-    editor : schedule_editor,
-    viewer : schedule_viewer
+const schedule_manager = new App({
+    errorChecker: schedule_errorChecker,
+    editor: schedule_editor,
+    viewer: schedule_viewer
 })
 
 schedule_manager.run()
