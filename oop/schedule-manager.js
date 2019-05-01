@@ -7,9 +7,13 @@ const rl = readline.createInterface({
 
 // param으로 obj를 받으면 obj에 무엇이 들어있는지 알기 어려운것같은데 해결방안이 있을까요? 
 function App(obj) {
-    this.errorChecker = obj.errorChecker;
-    this.editor = obj.editor;
-    this.viewer = obj.viewer;
+    const {errorChecker,editor,viewer} = obj
+    this.errorChecker = errorChecker;
+    this.editor = editor
+    this.viewer = viewer;
+    this.delayTime = 1000;
+    this.updateDelayTime = 3000;
+    this.result = [];
 }
 
 
@@ -22,35 +26,35 @@ App.prototype = {
         rl.question('명령을 입력하세요: ', (input) => {
             if (input === 'q') return rl.close();
             try {
-                [key, ...message] = this.parseCommand(input)
+                const [key, ...message] = this.parseCommand(input)
                 this.errorChecker.$check(message)
 
                 if (key === "show") {
-                    [status] = message
+                    const [status] = message
                     status === "all" ? this.viewer.showAll() : this.viewer.showFiltered(status);
                     return this.run();
                 }
 
-                const result = this.editor[key + 'Todo'](...message);
+                this.result = this.editor[key + 'Todo'](...message)
+                // console.log(this.result);
+                ;
+                if(key !== "undo") this.editor.undoStack.push({key,message,result:this.result});
 
-                Promise.resolve()
+
+                Promise.resolve(this.updateDelayTime)
                     .then(() => {
                         if (key === 'update') {
                             return new Promise((resolve) => {
                                 setTimeout(() => {
-                                    this.viewer[key + 'Message'](...result)
-                                    resolve()
-                                }, 3000)
+                                    this.viewer[key + 'Message'](this.result)
+                                    resolve(this.delayTime)
+                                }, this.updateDelayTime)
                             })
                         }
-                        this.viewer[key + 'Message'](...result)
+                        this.viewer[key + 'Message'](this.result)
+                        return new Promise((resolve)=>resolve(this.delayTime))
                     })
-                    .then(() => {
-                        setTimeout(() => {
-                            this.viewer.showAll()
-                            this.run();
-                        }, 1000);
-                    })
+                    .then((time)=>this.delayShow(time))
             }
             catch (e) {
                 this.viewer.errorMessage(e);
@@ -58,6 +62,13 @@ App.prototype = {
             }
 
         });
+    },
+
+    delayShow(time){
+        setTimeout(() => {
+            this.viewer.showAll()
+            this.run();
+        }, time);
     },
 
     parseCommand(input) {
@@ -68,6 +79,7 @@ App.prototype = {
 
 function Editor(errorChecker) {
     this.errorChecker = errorChecker;
+    this.undoStack = [];
 }
 
 Editor.prototype = {
@@ -77,33 +89,42 @@ Editor.prototype = {
         this.status = 'todo'
         this.id = _newId
     },
+    undoTodo(){
+        // console.log(this.undoStack)
+        const lastEdit = this.undoStack.pop();
+        if(lastEdit.key === 'add'){
+            this.deleteTodo(lastEdit.result.id);
+        }
+        
+        return lastEdit;
+
+    },
 
     addTodo(_name, _tag) {
         const _newId = this.getUniqueId()
         const newTodoObject = new this.TodoObject(_name, _tag, _newId);
         schedule_list.push(newTodoObject);
-        return [newTodoObject.name, newTodoObject.id];
+        return { ...newTodoObject};
     },
 
-    updateTodo(_id, _status) {
+    updateTodo(id, _status) {
 
         const selectedObject = this.findSelectedIdObj(_id);
         this.errorChecker.statusCheck(selectedObject.status,_status);
         selectedObject.status = _status;
 
-        return this.filterNameStatusArrayfromSelectedObject(selectedObject);
+        return {...selectedObject};
 
     },
 
     deleteTodo(_id) {
 
         const selectedObject = this.findSelectedIdObj(_id);
-        
+        const selectedObjectIndex = this.findSelectedIdObjIndex(_id);
 
-        schedule_list.some((todo, index) => {
-            if (todo.id === parseInt(_id)) return schedule_list.splice(index, 1)
-        })
-        return this.filterNameStatusArrayfromSelectedObject(selectedObject);
+        schedule_list.splice(selectedObjectIndex,1);
+
+        return {...selectedObject};
 
     },
 
@@ -124,6 +145,10 @@ Editor.prototype = {
         const findedObj = schedule_list.find(todo => todo.id === parseInt(_id));
         if (this.errorChecker.idCheck(findedObj));
         return findedObj;
+    },
+
+    findSelectedIdObjIndex(_id){
+        return schedule_list.findIndex(todo => todo.id === parseInt(_id));
     }
 
 
@@ -151,17 +176,31 @@ Viewer.prototype = {
         console.log(`${_status}리스트 : 총${showFilteredResult.length}건 : ${showFilteredResult.join(', ')}`);
 
     },
-
-    addMessage(_name, _id) {
-        console.log(`${_name}가 추가되었습니다. (id :${_id})`);
+    undoMessage(_obj){
+        const {key , result} = _obj
+        const {id,name,status} = result
+        const undoNote = {
+            add:`${id} ${name}가 삭제에서 ${status}로 변경되었습니다.`,
+            update:`updateMEssage`,
+            delete:`deleteMessage`
+        }
+        console.log(undoNote[key])
+        
     },
 
-    updateMessage(_name, _status) {
-        console.log(`${_name}의 상태가 ${_status}로 변경되었습니다.`);
+    addMessage(_obj) {
+        const {name, id} = _obj
+        console.log(`${name}가 추가되었습니다. (id :${id})`);
     },
 
-    deleteMessage(_name, _status) {
-        console.log(`${_name} ${_status}가 목록에서 삭제 되었습니다.`);
+    updateMessage(_obj) {
+        const {name, status} = _obj
+        console.log(`${name}의 상태가 ${status}로 변경되었습니다.`);
+    },
+
+    deleteMessage(_obj) {
+        const {name, status} = _obj
+        console.log(`${name} ${status}가 목록에서 삭제 되었습니다.`);
     },
     
     errorMessage(errorObject){
