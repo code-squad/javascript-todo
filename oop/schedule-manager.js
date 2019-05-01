@@ -13,7 +13,7 @@ function App(obj) {
     this.viewer = viewer;
     this.delayTime = 1000;
     this.updateDelayTime = 3000;
-    this.result = [];
+    this.result;
 }
 
 
@@ -27,7 +27,7 @@ App.prototype = {
             if (input === 'q') return rl.close();
             try {
                 const [key, ...message] = this.parseCommand(input)
-                this.errorChecker.$check(message)
+                if(key !== 'redo' && key!== 'undo') this.errorChecker.$check(message)
 
                 if (key === "show") {
                     const [status] = message
@@ -38,9 +38,15 @@ App.prototype = {
                 this.result = this.editor[key + 'Todo'](...message)
                 // console.log(this.result);
                 ;
-                if(key !== "undo") this.editor.undoStack.push({key,message,result:this.result});
-
-
+                
+                if(key !== 'undo' && key !=='redo'){
+                    this.editor.redoStack =[];
+                    this.editor.undoStack.push({key,message,result:this.result});
+                }
+                // console.log(this.editor.undoStack);
+                // console.log('---------------------');                
+                // console.log(this.editor.redoStack);                
+                
                 Promise.resolve(this.updateDelayTime)
                     .then(() => {
                         if (key === 'update') {
@@ -80,6 +86,7 @@ App.prototype = {
 function Editor(errorChecker) {
     this.errorChecker = errorChecker;
     this.undoStack = [];
+    this.redoStack = [];
 }
 
 Editor.prototype = {
@@ -90,9 +97,11 @@ Editor.prototype = {
         this.id = _newId
     },
     undoTodo(){
-        this.errorChecker.undoNull(this.undoStack.length)
+        this.errorChecker.stackNull(this.undoStack.length)
 
         const lastEdit = this.undoStack.pop();
+        this.redoStack.push(lastEdit);
+
         if(lastEdit.key === 'add'){
             this.deleteTodo(lastEdit.result.id);
         }
@@ -106,6 +115,23 @@ Editor.prototype = {
         
         return lastEdit;
 
+    },
+    redoTodo(){
+        this.errorChecker.stackNull(this.redoStack.length)
+
+        const lastUndo = this.redoStack.pop();
+
+        if(lastUndo.key === 'add'){
+             this.addTodo(lastUndo.result.name, lastUndo.result.tag, lastUndo.result.id);
+        }
+        if(lastUndo.key === 'delete'){
+             this.deleteTodo(lastUndo.result.id);
+        }
+        if(lastUndo.key === 'update'){
+             this.updateTodo(lastUndo.result.id, lastUndo.result.status);
+        }
+        this.undoStack.push(lastUndo);
+        return lastUndo
     },
 
     addTodo(_name, _tag, _id) {
@@ -190,12 +216,22 @@ Viewer.prototype = {
         const {key , result} = _obj
         const {id,name,status,preStatus} = result
         const undoNote = {
-            add:`명령취소! ${id} ${name}가 ${status}에서 삭제되었습니다.`,
-            update:`명령취소! ${id} ${name}의 ${status}를 ${preStatus}로 되돌렸습니다.`,
-            delete:`명령취소! ${id} ${name}가 삭제에서 ${status}로 생성되었습니다.`
+            add:`명령취소! id: ${id} ${name}가 ${status}에서 삭제되었습니다.`,
+            update:`명령취소! id: ${id} ${name}의 ${status}를 ${preStatus}로 되돌렸습니다.`,
+            delete:`명령취소! id: ${id} ${name}가 삭제에서 ${status}로 생성되었습니다.`
         }
         console.log(undoNote[key])
         
+    },
+    redoMessage(_obj){
+        const {key , result} = _obj
+        const {id,name,status,preStatus} = result
+        const redoNote = {
+            add:`undo취소! id: ${id} ${name}가 삭제에서 ${status}로 재 생성되었습니다.`,
+            update:`undo취소! id: ${id} ${name}의 ${preStatus}를 ${status}로 되돌렸습니다.`,
+            delete:`undo취소! id: ${id} ${name}가 ${status}에서 재 삭제되었습니다.`
+        }
+        console.log(redoNote[key])
     },
 
     addMessage(_obj) {
@@ -233,8 +269,8 @@ ErrorChecker.prototype = {
         if (_obj === undefined) throw new Error('IdError : id is not valid')
     },
 
-    undoNull(_length){
-        if(_length === 0) throw new Error('undoStack in empty')
+    stackNull(_length){
+        if(_length === 0) throw new Error('stackError : Stack is empty')
     }
 
 
