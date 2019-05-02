@@ -168,9 +168,11 @@ const Instruction = class {
 	if (log.command === 'add') {
 	    convertedData.push(log.preObj);
 	    message += `${log.preObj.id}번 항목 '${log.preObj.name}'가 ${log.preObj.status}에 추가되었습니다`;
+	
 	} else if (log.command === 'delete') {
 	    this.delete(log.preObj.id, log.checkSum);
 	    message += `${log.preObj.id}번 항목 '${log.preObj.name}'가 ${log.preObj.status} 상태에서 삭제됐습니다`;
+	
 	} else if (log.command === 'update') {
 	    this.update(log.nextObj.id, log.nextObj.status, log.checkSum);
 	}
